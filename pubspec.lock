@@ -92,6 +92,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.3.6"
+  deeply:
+    dependency: transitive
+    description:
+      name: deeply
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.1"
+  execution_queue:
+    dependency: transitive
+    description:
+      name: execution_queue
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.2"
   fluri:
     dependency: transitive
     description:
@@ -197,6 +211,13 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
+  objectdb:
+    dependency: "direct main"
+    description:
+      name: objectdb
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.7+1"
   package_config:
     dependency: transitive
     description:
