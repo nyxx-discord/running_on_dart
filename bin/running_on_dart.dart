@@ -27,6 +27,7 @@ void main(List<String> arguments) {
     ..registerCommand("join", joinChannelCommand, beforeHandler: checkForLusha)
     ..registerCommand("exec", execCommand, beforeHandler: checkForLusha)
     ..registerCommand("docs get", docsCommand)
+    ..registerCommand("docs search", docsSearchCommand)
     ..registerCommand("info", infoCommand)
     ..registerCommand("ping", pingCommand)
     ..registerCommand("help", helpCommand);
@@ -38,6 +39,7 @@ Future<void> helpCommand(CommandContext ctx, String content) async {
       "**${prefix}leave ** - leaves channel. \n"
       "**${prefix}exec** *<string_to_execute>* - executes Dart code. \n"
       "**${prefix}docs get** *<ClassName[#memberName]>* - Sends url to nyxx docs for specified entry. \n"
+      "**${prefix}docs search** *<query>* - Searches docs for *query* \n"
       "**${prefix}info ** - sends basic info about bot. \n"
       "**${prefix}ping ** - sends current bot latency. \n"
       "**${prefix}help ** - this command. \n";
@@ -93,6 +95,16 @@ Future<void> docsCommand(CommandContext ctx, String content) async {
 
   final embed = EmbedBuilder()
     ..description = "[${content.split(" ").last}]($docsUrl)";
+
+  await ctx.reply(embed: embed);
+}
+
+Future<void> docsSearchCommand(CommandContext ctx, String content) async {
+  final buffer = StringBuffer();
+  (await docs.searchDocs(content.split(" ").last)).forEach((key, value) => buffer.write("[$key]($value)\n"));
+
+  final embed = EmbedBuilder()
+    ..description = buffer.toString();
 
   await ctx.reply(embed: embed);
 }
