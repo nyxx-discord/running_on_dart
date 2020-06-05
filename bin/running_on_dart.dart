@@ -27,7 +27,19 @@ void main(List<String> arguments) {
     ..registerCommand("join", joinChannelCommand, beforeHandler: checkForLusha)
     ..registerCommand("exec", execCommand, beforeHandler: checkForLusha)
     ..registerCommand("docs get", docsCommand)
-    ..registerCommand("info", infoCommand);
+    ..registerCommand("info", infoCommand)
+    ..registerCommand("ping", pingCommand);
+}
+
+Future<void> pingCommand(CommandContext ctx, String content) async {
+  final gatewayDelayInMilis = ctx.client.shardManager.shards.firstWhere((element) => element.id == ctx.shardId).gatewayLatency.inMilliseconds;
+  final stopwatch = Stopwatch()..start();
+
+  final messageContent = "‎\n"
+      "**Gateway latency:** $gatewayDelayInMilis ms \n"
+      "**Message roundup time:** ";
+  final message = await ctx.reply(content: "$messageContent *Pending*");
+  await message.edit(content: "$messageContent ${stopwatch.elapsedMilliseconds} ms");
 }
 
 Future<void> leaveChannelCommand(CommandContext ctx, String content) async {
