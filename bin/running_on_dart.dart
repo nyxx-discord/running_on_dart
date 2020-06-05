@@ -8,7 +8,7 @@ import "dart:io";
 import "dart:math";
 
 import "package:logging/logging.dart";
-import 'package:time_ago_provider/time_ago_provider.dart' as timeAgo;
+import "package:time_ago_provider/time_ago_provider.dart" as time_ago;
 
 import "package:nyxx/nyxx.dart";
 import "package:nyxx.commander/commander.dart";
@@ -99,7 +99,7 @@ Future<void> infoCommand(CommandContext ctx, String content) async {
     ..color = color
     ..addField(
         name: "Uptime",
-        content: timeAgo.format(ctx.client.startTime, locale: "en_short"),
+        content: time_ago.format(ctx.client.startTime, locale: "en_short"),
         inline: true)
     ..addField(
         name: "DartVM memory usage",
