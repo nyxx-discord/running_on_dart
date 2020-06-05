@@ -28,7 +28,21 @@ void main(List<String> arguments) {
     ..registerCommand("exec", execCommand, beforeHandler: checkForLusha)
     ..registerCommand("docs get", docsCommand)
     ..registerCommand("info", infoCommand)
-    ..registerCommand("ping", pingCommand);
+    ..registerCommand("ping", pingCommand)
+    ..registerCommand("help", helpCommand);
+}
+
+Future<void> helpCommand(CommandContext ctx, String content) async {
+  final helpString = "‎\n"
+      "**${prefix}join** *<channel_id>* - join specified channel. \n"
+      "**${prefix}leave ** - leaves channel. \n"
+      "**${prefix}exec** *<string_to_execute>* - executes Dart code. \n"
+      "**${prefix}docs get** *<ClassName[#memberName]>* - Sends url to nyxx docs for specified entry. \n"
+      "**${prefix}info ** - sends basic info about bot. \n"
+      "**${prefix}ping ** - sends current bot latency. \n"
+      "**${prefix}help ** - this command. \n";
+
+  await ctx.reply(content: helpString);
 }
 
 Future<void> pingCommand(CommandContext ctx, String content) async {
