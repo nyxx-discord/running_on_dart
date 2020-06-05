@@ -1,0 +1,29 @@
+<component name="libraryTable">
+  <library name="Dart SDK">
+    <CLASSES>
+      <root url="file://$USER_HOME$/Downloads/dart-sdk-dev-latest/lib/async" />
+      <root url="file://$USER_HOME$/Downloads/dart-sdk-dev-latest/lib/cli" />
+      <root url="file://$USER_HOME$/Downloads/dart-sdk-dev-latest/lib/collection" />
+      <root url="file://$USER_HOME$/Downloads/dart-sdk-dev-latest/lib/convert" />
+      <root url="file://$USER_HOME$/Downloads/dart-sdk-dev-latest/lib/core" />
+      <root url="file://$USER_HOME$/Downloads/dart-sdk-dev-latest/lib/developer" />
+      <root url="file://$USER_HOME$/Downloads/dart-sdk-dev-latest/lib/ffi" />
+      <root url="file://$USER_HOME$/Downloads/dart-sdk-dev-latest/lib/html" />
+      <root url="file://$USER_HOME$/Downloads/dart-sdk-dev-latest/lib/indexed_db" />
+      <root url="file://$USER_HOME$/Downloads/dart-sdk-dev-latest/lib/io" />
+      <root url="file://$USER_HOME$/Downloads/dart-sdk-dev-latest/lib/isolate" />
+      <root url="file://$USER_HOME$/Downloads/dart-sdk-dev-latest/lib/js" />
+      <root url="file://$USER_HOME$/Downloads/dart-sdk-dev-latest/lib/js_util" />
+      <root url="file://$USER_HOME$/Downloads/dart-sdk-dev-latest/lib/math" />
+      <root url="file://$USER_HOME$/Downloads/dart-sdk-dev-latest/lib/mirrors" />
+      <root url="file://$USER_HOME$/Downloads/dart-sdk-dev-latest/lib/svg" />
+      <root url="file://$USER_HOME$/Downloads/dart-sdk-dev-latest/lib/typed_data" />
+      <root url="file://$USER_HOME$/Downloads/dart-sdk-dev-latest/lib/wasm" />
+      <root url="file://$USER_HOME$/Downloads/dart-sdk-dev-latest/lib/web_audio" />
+      <root url="file://$USER_HOME$/Downloads/dart-sdk-dev-latest/lib/web_gl" />
+      <root url="file://$USER_HOME$/Downloads/dart-sdk-dev-latest/lib/web_sql" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
