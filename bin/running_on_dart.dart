@@ -57,7 +57,11 @@ Future<void> helpCommand(CommandContext ctx, String content) async {
       "**${prefix}docs search** *<query>* - Searches docs for *query* \n"
       "**${prefix}info ** - sends basic info about bot. \n"
       "**${prefix}ping ** - sends current bot latency. \n"
-      "**${prefix}help ** - this command. \n";
+      "**${prefix}help ** - this command. \n"
+      "**${prefix}tag <name>** - Displays tag with given name. \n"
+      "**${prefix}tag new <name> <content> ** - creates new tag. Arguments can be separated with quotes. \n"
+      "**${prefix}tag delete <name> ** - remove tage with given name. \n"
+      "**${prefix}tag update <name> <content> ** - Updates tag by replacing it with new content. \n";
 
   await ctx.reply(content: helpString);
 }
