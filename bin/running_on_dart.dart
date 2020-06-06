@@ -14,7 +14,6 @@ import "package:time_ago_provider/time_ago_provider.dart" as time_ago;
 
 import "docs.dart" as docs;
 import "exec.dart" as exec;
-import "tags.dart" as tags;
 import "utils.dart" as utils;
 
 final Logger logger = Logger("Bot");
@@ -22,7 +21,8 @@ final prefix = Platform.environment["ROD_PREFIX"];
 
 main(List<String> arguments) async {
   setupDefaultLogging();
-  final bot = Nyxx(Platform.environment["DISCORD_TOKEN"]!, options: ClientOptions(guildSubscriptions: false));
+  final bot = Nyxx(Platform.environment["DISCORD_TOKEN"]!,
+      options: ClientOptions(guildSubscriptions: false));
   Commander(bot, prefix: prefix)
     ..registerCommand("leave", leaveChannelCommand, beforeHandler: checkForAdmin)
     ..registerCommand("join", joinChannelCommand, beforeHandler: checkForAdmin)
@@ -31,21 +31,7 @@ main(List<String> arguments) async {
     ..registerCommand("docs search", docsSearchCommand)
     ..registerCommand("info", infoCommand)
     ..registerCommand("ping", pingCommand)
-    ..registerCommand("help", helpCommand)
-    ..registerCommand("tag", tagCommand)
-    ..registerCommand("tag new", tagNewCommand)
-    ..registerCommand("tag delete", tagDeleteCommand)
-    ..registerCommand("tag update", tagUpdateCommand);
-
-  await tags.openDatabase();
-
-  ProcessSignal.sigint.watch().listen((event) async {
-    await tags.closeDatabse();
-  });
-
-  ProcessSignal.sigterm.watch().listen((event) async {
-    await tags.closeDatabse();
-  });
+    ..registerCommand("help", helpCommand);
 }
 
 Future<void> helpCommand(CommandContext ctx, String content) async {
@@ -57,52 +43,9 @@ Future<void> helpCommand(CommandContext ctx, String content) async {
       "**${prefix}docs search** *<query>* - Searches docs for *query* \n"
       "**${prefix}info ** - sends basic info about bot. \n"
       "**${prefix}ping ** - sends current bot latency. \n"
-      "**${prefix}help ** - this command. \n"
-      "**${prefix}tag <name>** - Displays tag with given name. \n"
-      "**${prefix}tag new <name> <content> ** - creates new tag. Arguments can be separated with quotes. \n"
-      "**${prefix}tag delete <name> ** - remove tage with given name. \n"
-      "**${prefix}tag update <name> <content> ** - Updates tag by replacing it with new content. \n";
+      "**${prefix}help ** - this command. \n";
 
   await ctx.reply(content: helpString);
-}
-
-Future<void> tagDeleteCommand(CommandContext ctx, String content) async {
-  await tags.deleteTag(ctx.getArguments().last);
-
-  await ctx.reply(content: "Tag has been deleted");
-}
-
-Future<void> tagUpdateCommand(CommandContext ctx, String content) async {
-  final arguments = ctx.getArguments();
-
-  final tagName = arguments.first;
-  final tagContent = arguments.last;
-
-  await tags.updateTag(tagName, tagContent);
-
-  await ctx.reply(content: "Tag `$tagName` has been updated!");
-}
-
-Future<void> tagCommand(CommandContext ctx, String content) async {
-  final tagName = ctx.getArguments().join(" ");
-  final tagContent = await tags.getTag(tagName);
-
-  if(tagContent == null) {
-    return ctx.reply(content: "No such tag");
-  }
-
-  await ctx.reply(content: tagContent);
-}
-
-Future<void> tagNewCommand(CommandContext ctx, String content) async {
-  final arguments = ctx.getArguments();
-
-  final tagName = arguments.first;
-  final tagContent = arguments.last;
-
-  await tags.insertTag(tagName, tagContent);
-
-  await ctx.reply(content: "Tag `$tagName` created!");
 }
 
 Future<void> pingCommand(CommandContext ctx, String content) async {
@@ -211,6 +154,47 @@ Future<void> infoCommand(CommandContext ctx, String content) async {
 
   await ctx.reply(embed: embed);
 }
+
+/*
+Future<void> tagDeleteCommand(CommandContext ctx, String content) async {
+  await tags.deleteTag(ctx.getArguments().last);
+
+  await ctx.reply(content: "Tag has been deleted");
+}
+
+Future<void> tagUpdateCommand(CommandContext ctx, String content) async {
+  final arguments = ctx.getArguments();
+
+  final tagName = arguments.first;
+  final tagContent = arguments.last;
+
+  await tags.updateTag(tagName, tagContent);
+
+  await ctx.reply(content: "Tag `$tagName` has been updated!");
+}
+
+Future<void> tagCommand(CommandContext ctx, String content) async {
+  final tagName = ctx.getArguments().join(" ");
+  final tagContent = await tags.getTag(tagName);
+
+  if(tagContent == null) {
+    return ctx.reply(content: "No such tag");
+  }
+
+  await ctx.reply(content: tagContent);
+}
+
+Future<void> tagNewCommand(CommandContext ctx, String content) async {
+  final arguments = ctx.getArguments();
+
+  final tagName = arguments.first;
+  final tagContent = arguments.last;
+
+  await tags.insertTag(tagName, tagContent);
+
+  await ctx.reply(content: "Tag `$tagName` created!");
+}
+*/
 
 Future<bool> checkForLusha(CommandContext context, String message) async =>
     context.author!.id == 302359032612651009;
