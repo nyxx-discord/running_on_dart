@@ -21,31 +21,43 @@ final prefix = Platform.environment["ROD_PREFIX"];
 
 main(List<String> arguments) async {
   setupDefaultLogging();
-  final bot = Nyxx(Platform.environment["DISCORD_TOKEN"]!,
-      options: ClientOptions(guildSubscriptions: false));
+  final bot = Nyxx(Platform.environment["DISCORD_TOKEN"]!, options: ClientOptions(guildSubscriptions: false));
   Commander(bot, prefix: prefix)
-    ..registerCommand("leave", leaveChannelCommand, beforeHandler: checkForAdmin)
-    ..registerCommand("join", joinChannelCommand, beforeHandler: checkForAdmin)
-    ..registerCommand("exec", execCommand, beforeHandler: checkForLusha)
-    ..registerCommand("docs get", docsCommand)
-    ..registerCommand("docs search", docsSearchCommand)
+    ..registerCommandEntity(CommandGroup(beforeHandler: checkForAdmin)
+      ..registerSubCommand("leave", leaveChannelCommand)
+      ..registerSubCommand("join", joinChannelCommand)
+      ..registerSubCommand("exec", execCommand, beforeHandler: checkForLusha))
+    ..registerCommandEntity(CommandGroup(name: "docs")
+      ..registerSubCommand("get", docsCommand)
+      ..registerSubCommand("search", docsSearchCommand))
     ..registerCommand("info", infoCommand)
     ..registerCommand("ping", pingCommand)
-    ..registerCommand("help", helpCommand);
+    ..registerCommand("help", helpCommand)
+    ..registerCommand("description", descriptionCommand);
 }
 
 Future<void> helpCommand(CommandContext ctx, String content) async {
   final helpString = "‎\n"
       "**${prefix}join** *<channel_id>* - join specified channel. \n"
       "**${prefix}leave ** - leaves channel. \n"
-      "**${prefix}exec** *<string_to_execute>* - executes Dart code. \n"
-      "**${prefix}docs get** *<ClassName[#memberName]>* - Sends url to nyxx docs for specified entry. \n"
-      "**${prefix}docs search** *<query>* - Searches docs for *query* \n"
+      "**${prefix}exec ** *<string_to_execute>* - executes Dart code. \n"
+      "**${prefix}docs get ** *<ClassName[#memberName]>* - Sends url to nyxx docs for specified entry. \n"
+      "**${prefix}docs search ** *<query>* - Searches docs for *query* \n"
       "**${prefix}info ** - sends basic info about bot. \n"
       "**${prefix}ping ** - sends current bot latency. \n"
-      "**${prefix}help ** - this command. \n";
+      "**${prefix}help ** - this command. \n"
+      "**${prefix}description ** - sends current channel description. \n";
 
   await ctx.reply(content: helpString);
+}
+
+Future<void> descriptionCommand(CommandContext ctx, String content) async {
+  if(ctx.channel is CachelessTextChannel) {
+    await ctx.reply(content: (ctx.channel as CachelessTextChannel).topic);
+    return;
+  }
+
+  await ctx.reply(content: "Invalid channel!");
 }
 
 Future<void> pingCommand(CommandContext ctx, String content) async {
@@ -101,8 +113,15 @@ Future<void> docsCommand(CommandContext ctx, String content) async {
 }
 
 Future<void> docsSearchCommand(CommandContext ctx, String content) async {
+  final query = content.split(" ").last;
+
   final buffer = StringBuffer();
-  (await docs.searchDocs(content.split(" ").last)).forEach((key, value) => buffer.write("[$key]($value)\n"));
+  (await docs.searchDocs(query)).forEach((key, value) => buffer.write("[$key]($value)\n"));
+
+  if(buffer.isEmpty) {
+    await ctx.reply(content: "Nothing found matching: `$query`");
+    return;
+  }
 
   final embed = EmbedBuilder()
     ..description = buffer.toString();
@@ -196,13 +215,13 @@ Future<void> tagNewCommand(CommandContext ctx, String content) async {
 }
 */
 
-Future<bool> checkForLusha(CommandContext context, String message) async =>
+Future<bool> checkForLusha(CommandContext context) async =>
     context.author!.id == 302359032612651009;
 
-Future<bool> checkForAdmin(CommandContext context, String message) async {
+Future<bool> checkForAdmin(CommandContext context) async {
   if(Platform.environment["ROD_ADMIN_ID"] != null) {
     return context.author!.id == Platform.environment["ROD_ADMIN_ID"];
   }
 
-  return checkForLusha(context, message);
+  return checkForLusha(context);
 }
