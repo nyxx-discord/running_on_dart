@@ -2,6 +2,7 @@
 Configuration via environment variables:
   ROD_PREFIX - prefix that bot will use for commands
   DISCORD_TOKEN - bot token to login
+  ROD_ADMIN_ID - id of admin
 */
 
 import "dart:io";
@@ -23,11 +24,11 @@ main(List<String> arguments) async {
   setupDefaultLogging();
   final bot = Nyxx(Platform.environment["DISCORD_TOKEN"]!, options: ClientOptions(guildSubscriptions: false));
   Commander(bot, prefix: prefix)
-    ..registerCommandEntity(CommandGroup(beforeHandler: checkForAdmin)
+    ..registerCommandGroup(CommandGroup(beforeHandler: checkForAdmin)
       ..registerSubCommand("leave", leaveChannelCommand)
       ..registerSubCommand("join", joinChannelCommand)
       ..registerSubCommand("exec", execCommand, beforeHandler: checkForLusha))
-    ..registerCommandEntity(CommandGroup(name: "docs")
+    ..registerCommandGroup(CommandGroup(name: "docs")
       ..registerSubCommand("get", docsCommand)
       ..registerSubCommand("search", docsSearchCommand))
     ..registerCommand("info", infoCommand)
@@ -163,7 +164,8 @@ Future<void> infoCommand(CommandContext ctx, String content) async {
         content: ctx.client.guilds.values
             .map((g) => g.voiceStates.count)
             .reduce((f, s) => f + s),
-        inline: true);
+        inline: true)
+    ..addField(name: "Shard count", content: ctx.client.shards);
     /*..addField(
         name: "Events seen", content: ctx.client.shard.eventsSeen, inline: true)
     ..addField(
