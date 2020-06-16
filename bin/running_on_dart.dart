@@ -34,7 +34,8 @@ main(List<String> arguments) async {
     ..registerCommand("info", infoCommand)
     ..registerCommand("ping", pingCommand)
     ..registerCommand("help", helpCommand)
-    ..registerCommand("description", descriptionCommand);
+    ..registerCommand("description", descriptionCommand)
+    ..registerCommand("avatar", userAvatarCommand);
 }
 
 Future<void> helpCommand(CommandContext ctx, String content) async {
@@ -50,6 +51,16 @@ Future<void> helpCommand(CommandContext ctx, String content) async {
       "**${prefix}description ** - sends current channel description. \n";
 
   await ctx.reply(content: helpString);
+}
+
+Future<void> userAvatarCommand(CommandContext ctx, String content) async {
+  if(ctx.message.mentions.isEmpty) {
+    return;
+  }
+
+  final userAvatarUrl = ctx.message.mentions.first.avatarURL();
+
+  await ctx.reply(content: userAvatarUrl);
 }
 
 Future<void> descriptionCommand(CommandContext ctx, String content) async {
@@ -165,13 +176,8 @@ Future<void> infoCommand(CommandContext ctx, String content) async {
             .map((g) => g.voiceStates.count)
             .reduce((f, s) => f + s),
         inline: true)
-    ..addField(name: "Shard count", content: ctx.client.shards);
-    /*..addField(
-        name: "Events seen", content: ctx.client.shard.eventsSeen, inline: true)
-    ..addField(
-        name: "Messages seen",
-        content: ctx.client.shard.messagesReceived,
-        inline: true);*/
+    ..addField(name: "Shard count", content: ctx.client.shards, inline: true)
+    ..addField(name: "Cached messages", content: ctx.client.channels.find((item) => item is MessageChannel).cast<MessageChannel>().map((e) => e.messages.count).fold(0, (first, second) => (first as int) + second), inline: true);
 
   await ctx.reply(embed: embed);
 }
