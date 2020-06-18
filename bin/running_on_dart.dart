@@ -48,19 +48,27 @@ Future<void> helpCommand(CommandContext ctx, String content) async {
       "**${prefix}info ** - sends basic info about bot. \n"
       "**${prefix}ping ** - sends current bot latency. \n"
       "**${prefix}help ** - this command. \n"
-      "**${prefix}description ** - sends current channel description. \n";
+      "**${prefix}description ** - sends current channel description. \n"
+      "**${prefix}avatar ** - Replies with mentioned user avatar. \n";
 
   await ctx.reply(content: helpString);
 }
 
 Future<void> userAvatarCommand(CommandContext ctx, String content) async {
+  String? avatarUrl;
+
   if(ctx.message.mentions.isEmpty) {
+    avatarUrl = ctx.author?.avatarURL(size: 1024);
+  } else {
+    avatarUrl = ctx.message.mentions.first.avatarURL(size: 1024);
+  }
+
+  if(avatarUrl == null) {
+    await ctx.reply(content: "Cannot obtain avatar url.");
     return;
   }
 
-  final userAvatarUrl = ctx.message.mentions.first.avatarURL();
-
-  await ctx.reply(content: userAvatarUrl);
+  await ctx.reply(content: avatarUrl);
 }
 
 Future<void> descriptionCommand(CommandContext ctx, String content) async {
