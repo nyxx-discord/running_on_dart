@@ -24,13 +24,16 @@ main(List<String> arguments) async {
   setupDefaultLogging();
   final bot = Nyxx(Platform.environment["DISCORD_TOKEN"]!, options: ClientOptions(guildSubscriptions: false));
   Commander(bot, prefix: prefix)
+    // Admin stuff
     ..registerCommandGroup(CommandGroup(beforeHandler: checkForAdmin)
       ..registerSubCommand("leave", leaveChannelCommand)
       ..registerSubCommand("join", joinChannelCommand)
       ..registerSubCommand("exec", execCommand, beforeHandler: checkForLusha))
+    // Docs commands
     ..registerCommandGroup(CommandGroup(name: "docs")
       ..registerSubCommand("get", docsCommand)
       ..registerSubCommand("search", docsSearchCommand))
+    // Minor commands
     ..registerCommand("info", infoCommand)
     ..registerCommand("ping", pingCommand)
     ..registerCommand("help", helpCommand)
