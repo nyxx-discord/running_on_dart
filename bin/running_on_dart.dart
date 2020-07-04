@@ -15,20 +15,26 @@ import "package:time_ago_provider/time_ago_provider.dart" as time_ago;
 
 import "docs.dart" as docs;
 import "exec.dart" as exec;
+import "hot_reload/hot_reload.dart" as eval_handler;
 import "utils.dart" as utils;
 
 final Logger logger = Logger("Bot");
 final prefix = Platform.environment["ROD_PREFIX"];
 
 main(List<String> arguments) async {
+  if(Platform.environment["HOT_RELOAD"] == "1") {
+    await eval_handler.initReloader();
+  }
+
   setupDefaultLogging();
-  final bot = Nyxx(Platform.environment["DISCORD_TOKEN"]!, options: ClientOptions(guildSubscriptions: false));
+  final bot = Nyxx(Platform.environment["DISCORD_TOKEN"]!, options: ClientOptions(guildSubscriptions: false, shardCount: 2));
   Commander(bot, prefix: prefix)
     // Admin stuff
     ..registerCommandGroup(CommandGroup(beforeHandler: checkForAdmin)
       ..registerSubCommand("leave", leaveChannelCommand)
       ..registerSubCommand("join", joinChannelCommand)
-      ..registerSubCommand("exec", execCommand, beforeHandler: checkForLusha))
+      ..registerSubCommand("exec", execCommand, beforeHandler: checkForLusha)
+      ..registerSubCommand("eval", evalCommand, beforeHandler: checkForLusha))
     // Docs commands
     ..registerCommandGroup(CommandGroup(name: "docs")
       ..registerSubCommand("get", docsCommand)
@@ -57,6 +63,26 @@ Future<void> helpCommand(CommandContext ctx, String content) async {
   await ctx.reply(content: helpString);
 }
 
+Future<void> evalCommand(CommandContext ctx, String content) async {
+  if(Platform.environment["HOT_RELOAD"] != "1") {
+    return;
+  }
+
+  final stopwatch = Stopwatch()..start();
+
+  final text = ctx.message.content.replaceFirst("${prefix}eval", "");
+  final output = await eval_handler.hotReloadCode(text, ctx);
+
+  final footer = EmbedFooterBuilder()..text = "Exec time: ${stopwatch.elapsedMilliseconds} ms";
+  final embed = EmbedBuilder()
+    ..title = "Output"
+    ..description = output.toString()
+    ..addField(name: "Output type", content: output.runtimeType.toString())
+    ..footer = footer;
+
+  await ctx.reply(embed: embed);
+}
+
 Future<void> userAvatarCommand(CommandContext ctx, String content) async {
   String? avatarUrl;
 
@@ -75,8 +101,8 @@ Future<void> userAvatarCommand(CommandContext ctx, String content) async {
 }
 
 Future<void> descriptionCommand(CommandContext ctx, String content) async {
-  if(ctx.channel is CachelessTextChannel) {
-    await ctx.reply(content: (ctx.channel as CachelessTextChannel).topic);
+  if(ctx.channel is GuildTextChannel) {
+    await ctx.reply(content: (ctx.channel as GuildTextChannel).topic);
     return;
   }
 

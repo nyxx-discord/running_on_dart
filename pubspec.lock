@@ -148,6 +148,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.16.1"
+  jaguar_hotreload:
+    dependency: "direct main"
+    description:
+      name: jaguar_hotreload
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.2"
   js:
     dependency: transitive
     description:
@@ -346,6 +353,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.6"
+  vm_service_lib:
+    dependency: transitive
+    description:
+      name: vm_service_lib
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.3.10+2"
   w_common:
     dependency: transitive
     description:

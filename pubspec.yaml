@@ -19,6 +19,7 @@ dependencies:
   objectdb: "^1.0.7+1"
   nyxx: "^1.0.0"
   nyxx.commander: "^1.0.0"
+  jaguar_hotreload: "any"
 
 dependency_overrides:
   nyxx:
