@@ -27,7 +27,7 @@ main(List<String> arguments) async {
   }
 
   setupDefaultLogging();
-  final bot = Nyxx(Platform.environment["DISCORD_TOKEN"]!, options: ClientOptions(guildSubscriptions: false, shardCount: 2));
+  final bot = Nyxx(Platform.environment["DISCORD_TOKEN"]!, options: ClientOptions(guildSubscriptions: false));
   Commander(bot, prefix: prefix)
     // Admin stuff
     ..registerCommandGroup(CommandGroup(beforeHandler: checkForAdmin)
@@ -110,14 +110,22 @@ Future<void> descriptionCommand(CommandContext ctx, String content) async {
 }
 
 Future<void> pingCommand(CommandContext ctx, String content) async {
+  final random = Random();
+  final color = DiscordColor.fromRgb(random.nextInt(255), random.nextInt(255), random.nextInt(255));
   final gatewayDelayInMilis = ctx.client.shardManager.shards.firstWhere((element) => element.id == ctx.shardId).gatewayLatency.inMilliseconds;
   final stopwatch = Stopwatch()..start();
 
-  final messageContent = "‎\n"
-      "**Gateway latency:** $gatewayDelayInMilis ms \n"
-      "**Message roundup time:** ";
-  final message = await ctx.reply(content: "$messageContent *Pending*");
-  await message.edit(content: "$messageContent ${stopwatch.elapsedMilliseconds} ms");
+  final embed = EmbedBuilder()
+    ..color = color
+    ..addField(name: "Gateway latency", content: "$gatewayDelayInMilis ms", inline: true)
+    ..addField(name: "Message roundup time", content: "Pending...", inline: true);
+
+  final message = await ctx.reply(embed: embed);
+
+  embed
+    ..replaceField(name: "Message roundup time", content: "${stopwatch.elapsedMilliseconds} ms", inline: true);
+
+  await message.edit(embed: embed);
 }
 
 Future<void> leaveChannelCommand(CommandContext ctx, String content) async {
