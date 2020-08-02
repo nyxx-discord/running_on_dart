@@ -5,9 +5,11 @@ Configuration via environment variables:
   ROD_ADMIN_ID - id of admin
 */
 
+import "dart:convert";
 import "dart:io";
 import "dart:math";
 
+import "package:http/http.dart" as http;
 import "package:logging/logging.dart";
 import "package:nyxx/nyxx.dart";
 import "package:nyxx.commander/commander.dart";
@@ -21,12 +23,13 @@ import "utils.dart" as utils;
 final Logger logger = Logger("Bot");
 final prefix = Platform.environment["ROD_PREFIX"];
 
-main(List<String> arguments) async {
+void main(List<String> arguments) async {
   if(Platform.environment["HOT_RELOAD"] == "1") {
     await eval_handler.initReloader();
   }
 
-  setupDefaultLogging();
+  print(pid);
+
   final bot = Nyxx(Platform.environment["DISCORD_TOKEN"]!, options: ClientOptions(guildSubscriptions: false));
   Commander(bot, prefix: prefix)
     // Admin stuff
@@ -44,7 +47,11 @@ main(List<String> arguments) async {
     ..registerCommand("ping", pingCommand)
     ..registerCommand("help", helpCommand)
     ..registerCommand("description", descriptionCommand)
-    ..registerCommand("avatar", userAvatarCommand);
+    ..registerCommand("avatar", userAvatarCommand)
+    // Qr code stuff
+    ..registerCommandGroup(CommandGroup(name: "qr")
+      ..registerSubCommand("gen", genQrCodeCommand)
+      ..registerSubCommand("read", readQrCodeCommand));
 }
 
 Future<void> helpCommand(CommandContext ctx, String content) async {
@@ -58,9 +65,51 @@ Future<void> helpCommand(CommandContext ctx, String content) async {
       "**${prefix}ping ** - sends current bot latency. \n"
       "**${prefix}help ** - this command. \n"
       "**${prefix}description ** - sends current channel description. \n"
-      "**${prefix}avatar ** - Replies with mentioned user avatar. \n";
+      "**${prefix}avatar ** - Replies with mentioned user avatar. \n"
+      "**${prefix}qr gen ** *<data>* - Generates ar code with provided data. \n"
+      "**${prefix}qr read ** - Reads qr code from uploaded image.";
 
   await ctx.reply(content: helpString);
+}
+
+Future<void> readQrCodeCommand(CommandContext ctx, String content) async {
+  if(ctx.message.attachments.isEmpty) {
+    await ctx.reply(content: "Invalid usage. Upload image alongside with command!");
+    return;
+  }
+
+  final url = Uri.https("api.qrserver.com", "v1/read-qr-code/", {
+    "fileurl" : ctx.message.attachments.first.url
+  });
+
+  final result = jsonDecode(await http.read(url));
+
+  if(result.first["symbol"].first["error"] != null) {
+    await ctx.reply(content: "Error: `${result.first["symbol"]["error"]}`");
+    return;
+  }
+
+  await ctx.reply(embed:
+    EmbedBuilder()
+      ..description = result.first["symbol"].first["data"].toString()
+  );
+}
+
+Future<void> genQrCodeCommand(CommandContext ctx, String content) async {
+  final args = ctx.getArguments().toList().join(" ");
+
+  if(args.isEmpty) {
+    await ctx.reply(content: "Specify text for qr code.");
+    return;
+  }
+  
+  final queryParams = <String, String> {
+    "data": args
+  };
+  
+  final url = Uri.https("api.qrserver.com", "v1/create-qr-code/", queryParams);
+
+  await ctx.reply(content: url.toString());
 }
 
 Future<void> evalCommand(CommandContext ctx, String content) async {
