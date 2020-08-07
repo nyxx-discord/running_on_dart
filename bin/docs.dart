@@ -1,11 +1,13 @@
 //import 'dart:io';
 
+import 'dart:io";
+
 import "package:html/parser.dart" as html_parser;
 import "package:http/http.dart" as http;
 
-const baseUrl = "https://pub.dev/documentation/nyxx/latest/nyxx/";
-
-//const fileUrl = "/mnt/data3/PROJECTS/nyxx/nyxx/doc/api/nyxx/";
+String get baseUrl =>
+    Platform.environment["ROD_NYXX_DOCS_PATH"]
+        ?? "https://pub.dev/documentation/nyxx/latest/nyxx/";
 
 Future<String> getUrlToProperty(String className, String? fieldName) async {
   final url = "$baseUrl$className-class.html";
