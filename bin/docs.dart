@@ -6,14 +6,14 @@ import "package:html/dom.dart" show Document;
 import "package:html/parser.dart" as html_parser;
 import "package:http/http.dart" as http;
 
-bool get _localFileSystem => Platform.environment["ROD_NYXX_DOCS_PATH"] != null;
+bool get _isLocalFileSystem => Platform.environment["ROD_NYXX_DOCS_PATH"] != null;
 
 String get baseUrl =>
     Platform.environment["ROD_NYXX_DOCS_PATH"]
         ?? "https://pub.dev/documentation/nyxx/latest/nyxx/";
 
 Future<Document> _readDocumentFromUrl(String url) async {
-  final fileContentsFuture = _localFileSystem ? File(url).readAsString() : http.read(url);
+  final fileContentsFuture = _isLocalFileSystem ? File(url).readAsString() : http.read(url);
   return html_parser.parse(await fileContentsFuture);
 }
 
