@@ -1,11 +1,11 @@
 import "dart:developer" as dev;
-import "dart:io";
+import "dart:io" show File, FileMode;
 
-import "package:jaguar_hotreload/jaguar_hotreload.dart";
-import "package:nyxx.commander/commander.dart";
+import "package:jaguar_hotreload/jaguar_hotreload.dart" show HotReloader;
+import "package:nyxx.commander/commander.dart" show CommandContext;
 import "package:path/path.dart" as path;
 
-import "reloaded.dart";
+import "reloaded.dart" show execute;
 
 late HotReloader _reloader;
 

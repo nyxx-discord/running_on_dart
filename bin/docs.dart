@@ -8,7 +8,7 @@ import "package:http/http.dart" as http;
 
 bool get _isLocalFileSystem => Platform.environment["ROD_NYXX_DOCS_PATH"] != null;
 
-String get baseUrl =>
+String get basePath =>
     Platform.environment["ROD_NYXX_DOCS_PATH"]
         ?? "https://pub.dev/documentation/nyxx/latest/nyxx/";
 
@@ -18,7 +18,7 @@ Future<Document> _readDocumentFromUrl(String url) async {
 }
 
 Future<String> getUrlToProperty(String className, String? fieldName) async {
-  final url = "$baseUrl$className-class.html";
+  final url = "$basePath$className-class.html";
 
   if (fieldName == null) {
     return url;
@@ -29,17 +29,17 @@ Future<String> getUrlToProperty(String className, String? fieldName) async {
   final features = document.querySelectorAll("span.name > a");
   final foundRelativeUrl = features.firstWhere((element) => element.innerHtml == fieldName).attributes["href"];
 
-  return Uri.parse(baseUrl + foundRelativeUrl!).toString();
+  return Uri.parse(basePath + foundRelativeUrl!).toString();
 }
 
 Future<Map<String, String>> searchDocs(String query) async {
-  final url = "${baseUrl}nyxx-library.html";
+  final url = "${basePath}nyxx-library.html";
 
   final document = await _readDocumentFromUrl(url);
   final elements = document.querySelectorAll("span.name > a").where((element) => element.innerHtml.toLowerCase().contains(query.toLowerCase())).take(8);
 
   return <String, String>{
     for(final element in elements)
-      element.innerHtml: Uri.parse(baseUrl + element.attributes["href"]!).toString()
+      element.innerHtml: Uri.parse(basePath + element.attributes["href"]!).toString()
   };
 }

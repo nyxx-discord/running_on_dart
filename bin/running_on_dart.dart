@@ -3,16 +3,19 @@ Configuration via environment variables:
   ROD_PREFIX - prefix that bot will use for commands
   DISCORD_TOKEN - bot token to login
   ROD_ADMIN_ID - id of admin
+
+  ----------------------------
+  ROD_NYXX_DOCS_PATH - path to nyxx docs
 */
 
-import "dart:convert";
-import "dart:io";
-import "dart:math";
+import "dart:convert" show jsonDecode;
+import "dart:io" show Platform, ProcessInfo, pid;
+import "dart:math" show Random;
 
 import "package:http/http.dart" as http;
-import "package:logging/logging.dart";
-import "package:nyxx/nyxx.dart";
-import "package:nyxx.commander/commander.dart";
+import "package:logging/logging.dart" show Logger;
+import "package:nyxx/nyxx.dart" show CachelessGuildChannel, ClientOptions, DiscordColor, EmbedBuilder, EmbedFooterBuilder, GuildTextChannel, MessageChannel, Nyxx, Snowflake;
+import "package:nyxx.commander/commander.dart" show CommandContext, CommandGroup, Commander;
 import "package:time_ago_provider/time_ago_provider.dart" as time_ago;
 
 import "docs.dart" as docs;
