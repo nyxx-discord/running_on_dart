@@ -182,7 +182,7 @@ Future<void> leaveChannelCommand(CommandContext ctx, String content) async {
   final shard = ctx.client.shardManager.shards.firstWhere((element) => element.guilds.contains(guildId));
 
   shard.changeVoiceState(guildId, null);
-  await ctx.reply(content: "Channel left!");
+  await ctx.reply(content: "Left channel!");
 }
 
 Future<void> joinChannelCommand(CommandContext ctx, String content) async {
@@ -190,7 +190,7 @@ Future<void> joinChannelCommand(CommandContext ctx, String content) async {
   final shard = ctx.client.shardManager.shards.firstWhere((element) => element.guilds.contains(guildId));
 
   shard.changeVoiceState(guildId, Snowflake(content.split(" ").last));
-  await ctx.reply(content: "Channel joined!");
+  await ctx.reply(content: "Joined to channel!");
 }
 
 Future<void> execCommand(CommandContext ctx, String content) async {
