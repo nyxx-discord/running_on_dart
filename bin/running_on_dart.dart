@@ -1,11 +1,8 @@
 /*
 Configuration via environment variables:
   ROD_PREFIX - prefix that bot will use for commands
-  DISCORD_TOKEN - bot token to login
+  ROD_TOKEN - bot token to login
   ROD_ADMIN_ID - id of admin
-
-  ----------------------------
-  ROD_NYXX_DOCS_PATH - path to nyxx docs
 */
 
 import "dart:convert" show jsonDecode;
@@ -33,14 +30,14 @@ void main(List<String> arguments) async {
 
   print(pid);
 
-  final bot = Nyxx(Platform.environment["DISCORD_TOKEN"]!, options: ClientOptions(guildSubscriptions: false));
+  final bot = Nyxx(Platform.environment["ROD_TOKEN"]!, options: ClientOptions(guildSubscriptions: false));
   Commander(bot, prefix: prefix)
     // Admin stuff
     ..registerCommandGroup(CommandGroup(beforeHandler: checkForAdmin)
       ..registerSubCommand("leave", leaveChannelCommand)
       ..registerSubCommand("join", joinChannelCommand)
-      ..registerSubCommand("exec", execCommand, beforeHandler: checkForLusha)
-      ..registerSubCommand("eval", evalCommand, beforeHandler: checkForLusha))
+      ..registerSubCommand("exec", execCommand)
+      ..registerSubCommand("eval", evalCommand))
     // Docs commands
     ..registerCommandGroup(CommandGroup(name: "docs")
       ..registerSubCommand("get", docsCommand)
@@ -330,13 +327,10 @@ Future<void> tagNewCommand(CommandContext ctx, String content) async {
 }
 */
 
-Future<bool> checkForLusha(CommandContext context) async =>
-    context.author!.id == 302359032612651009;
-
 Future<bool> checkForAdmin(CommandContext context) async {
   if(Platform.environment["ROD_ADMIN_ID"] != null) {
     return context.author!.id == Platform.environment["ROD_ADMIN_ID"];
   }
 
-  return checkForLusha(context);
+  return false;
 }
