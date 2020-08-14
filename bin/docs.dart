@@ -1,45 +1,50 @@
-//import 'dart:io';
+import "dart:convert" show jsonDecode;
+import "dart:io" show File;
 
-import "dart:io" show File, Platform;
+List<dynamic> _indexJson = jsonDecode(File("docs/index.json").readAsStringSync()) as List<dynamic>;
+String get basePath => "https://nyxx.l7ssha.xyz/";
 
-import "package:html/dom.dart" show Document;
-import "package:html/parser.dart" as html_parser;
-import "package:http/http.dart" as http;
+class DocDefinition {
+  late final String name;
 
-bool get _isLocalFileSystem => Platform.environment["ROD_NYXX_DOCS_PATH"] != null;
+  late final String absoluteUrl;
 
-String get basePath =>
-    Platform.environment["ROD_NYXX_DOCS_PATH"]
-        ?? "https://pub.dev/documentation/nyxx/latest/nyxx/";
+  late final String type;
 
-Future<Document> _readDocumentFromUrl(String url) async {
-  final fileContentsFuture = _isLocalFileSystem ? File(url).readAsString() : http.read(url);
-  return html_parser.parse(await fileContentsFuture);
+  DocDefinition(Map<String, dynamic> element) {
+    if (element["enclosedBy"] != null && element["enclosedBy"]["type"] == "class") {
+      this.name = "${element['enclosedBy']['name']}#${element['name']}";
+    } else {
+      this.name = element["name"] as String;
+    }
+
+    this.type = element["type"] as String;
+
+    final libPath = element["href"].split("/").first;
+    this.absoluteUrl ="$basePath$libPath/${element['href']}";
+  }
 }
 
-Future<String> getUrlToProperty(String className, String? fieldName) async {
-  final url = "$basePath$className-class.html";
+Future<DocDefinition?> getDocDefinition(String className, [String? fieldName]) async {
+  Map<String, dynamic>? searchResult;
 
   if (fieldName == null) {
-    return url;
+    searchResult = _indexJson.firstWhere((element) => (element["name"] as String).endsWith(className)) as Map<String, dynamic>?;
+  } else {
+    searchResult = _indexJson.firstWhere((element) => (element["qualifiedName"] as String).endsWith("$className.$fieldName")) as Map<String, dynamic>?;
   }
 
-  final document = await _readDocumentFromUrl(url);
+  if(searchResult == null) {
+    return null;
+  }
 
-  final features = document.querySelectorAll("span.name > a");
-  final foundRelativeUrl = features.firstWhere((element) => element.innerHtml == fieldName).attributes["href"];
-
-  return Uri.parse(basePath + foundRelativeUrl!).toString();
+  return DocDefinition(searchResult);
 }
 
-Future<Map<String, String>> searchDocs(String query) async {
-  final url = "${basePath}nyxx-library.html";
+Iterable<DocDefinition> searchDocs(String query) sync* {
+  final searchResults = _indexJson.where((element) => (element["name"] as String).toLowerCase().contains(query.toLowerCase())).take(10);
 
-  final document = await _readDocumentFromUrl(url);
-  final elements = document.querySelectorAll("span.name > a").where((element) => element.innerHtml.toLowerCase().contains(query.toLowerCase())).take(8);
-
-  return <String, String>{
-    for(final element in elements)
-      element.innerHtml: Uri.parse(basePath + element.attributes["href"]!).toString()
-  };
+  for (final element in searchResults){
+    yield DocDefinition(element as Map<String, dynamic>);
+  }
 }

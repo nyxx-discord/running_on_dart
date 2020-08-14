@@ -212,24 +212,34 @@ Future<void> execCommand(CommandContext ctx, String content) async {
 }
 
 Future<void> docsCommand(CommandContext ctx, String content) async {
-  final searchString = content.split(" ").last.split("#");
-  final docsUrl = await docs.getUrlToProperty(searchString.first, searchString.length > 1 ? searchString.last : null);
+  final searchString = content.split(" ").last.split("#|.");
+  final docsDef = await docs.getDocDefinition(searchString.first, searchString.length > 1 ? searchString.last : null);
+
+  if (docsDef == null) {
+    await ctx.reply(content: "Cannot find docs for that what you typed");
+    return;
+  }
 
   final embed = EmbedBuilder()
-    ..description = "[${content.split(" ").last}]($docsUrl)";
+    ..addField(name: "Type", content: docsDef.type, inline: true)
+    ..addField(name: "Name", content: docsDef.name, inline: true)
+    ..description = "[${content.split(" ").last}](${docsDef.absoluteUrl})";
 
   await ctx.reply(embed: embed);
 }
 
 Future<void> docsSearchCommand(CommandContext ctx, String content) async {
   final query = content.split(" ").last;
+  final results = docs.searchDocs(query);
 
-  final buffer = StringBuffer();
-  (await docs.searchDocs(query)).forEach((key, value) => buffer.write("[$key]($value)\n"));
-
-  if(buffer.isEmpty) {
+  if(results.isEmpty) {
     await ctx.reply(content: "Nothing found matching: `$query`");
     return;
+  }
+
+  final buffer = StringBuffer();
+  for (final def in results) {
+    buffer.write("[${def.name}](${def.absoluteUrl})\n");
   }
 
   final embed = EmbedBuilder()
