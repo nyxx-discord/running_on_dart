@@ -28,8 +28,6 @@ void main(List<String> arguments) async {
     await eval_handler.initReloader();
   }
 
-  print(pid);
-
   final bot = Nyxx(Platform.environment["ROD_TOKEN"]!, options: ClientOptions(guildSubscriptions: false));
   Commander(bot, prefix: prefix)
     // Admin stuff
