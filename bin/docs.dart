@@ -5,10 +5,13 @@ List<dynamic> _indexJson = jsonDecode(File("docs/index.json").readAsStringSync()
 String get basePath => "https://nyxx.l7ssha.xyz/";
 
 class DocDefinition {
+  /// Name of documentation element
   late final String name;
 
+  /// Absolute url to documentation element
   late final String absoluteUrl;
 
+  /// Type of documentation element
   late final String type;
 
   DocDefinition(Map<String, dynamic> element) {

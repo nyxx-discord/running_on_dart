@@ -12,12 +12,12 @@ Future<String> eval(String code) async {
   }
 
   final fileCode = """
-    dynamic exeCode() {
+    FutureOr<dynamic> exeCode() {
       $code
     }
     
     main() {
-      print(exeCode());
+      print(await exeCode());
     }
   """;
 

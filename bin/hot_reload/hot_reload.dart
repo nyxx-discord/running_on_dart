@@ -21,7 +21,7 @@ Future<void> initReloader() async {
 
   print("Hot reloading enabled");
   _reloader = HotReloader(vmServiceUrl: uri.toString());
-  _reloader.addPath("/mnt/data3/PROJECTS/running_on_dart/bin/hot_reload/");
+  _reloader.addPath("bin/hot_reload/");
   await _reloader.go();
 }
 
@@ -43,7 +43,7 @@ Future<dynamic> hotReloadCode(String code, CommandContext context) async {
     }
   """;
 
-  await File("/mnt/data3/PROJECTS/running_on_dart/bin/hot_reload/reloaded.dart").writeAsString(fileCode, mode: FileMode.writeOnly);
+  await File("bin/hot_reload/reloaded.dart").writeAsString(fileCode, mode: FileMode.writeOnly);
   await _reloader.reload();
 
   return execute(context);
