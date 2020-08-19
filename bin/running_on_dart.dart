@@ -6,7 +6,7 @@ Configuration via environment variables:
 */
 
 import "dart:convert" show jsonDecode;
-import "dart:io" show Platform, ProcessInfo, pid;
+import "dart:io" show Platform, ProcessInfo;
 import "dart:math" show Random;
 
 import "package:http/http.dart" as http;
