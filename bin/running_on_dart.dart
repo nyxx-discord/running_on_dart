@@ -211,7 +211,7 @@ Future<void> docsCommand(CommandContext ctx, String content) async {
   final docsDef = await docs.getDocDefinition(searchString.first, searchString.length > 1 ? searchString.last : null);
 
   if (docsDef == null) {
-    await ctx.reply(content: "Cannot find docs for that what you typed");
+    await ctx.reply(content: "Cannot find docs for what you typed");
     return;
   }
 
