@@ -1,7 +1,7 @@
 import "dart:convert" show jsonDecode;
 import "dart:io" show File;
 
-List<dynamic> _indexJson = jsonDecode(File("docs/index.json").readAsStringSync()) as List<dynamic>;
+List<dynamic> _indexJson = jsonDecode(File("docfiles/nyxxdocs.json").readAsStringSync()) as List<dynamic>;
 String get basePath => "https://nyxx.l7ssha.xyz/";
 
 class DocDefinition {

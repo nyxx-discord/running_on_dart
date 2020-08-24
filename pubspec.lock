@@ -214,16 +214,16 @@ packages:
   nyxx:
     dependency: "direct main"
     description:
-      path: "../nyxx/nyxx"
-      relative: true
-    source: path
+      name: nyxx
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "1.0.0"
-  "nyxx.commander":
+  nyxx_commander:
     dependency: "direct main"
     description:
-      path: "../nyxx/nyxx.commander"
-      relative: true
-    source: path
+      name: nyxx_commander
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "1.0.0"
   objectdb:
     dependency: "direct main"

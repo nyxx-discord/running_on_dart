@@ -14,5 +14,5 @@ void main() {
         ...extensionsDocs
   ]);
 
-  File("docs/index.json")..writeAsStringSync(newFileStuff, mode: FileMode.writeOnly);
+  File("docs/nyxxdocs.json")..writeAsStringSync(newFileStuff, mode: FileMode.writeOnly);
 }

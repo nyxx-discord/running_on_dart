@@ -12,7 +12,7 @@ import "dart:math" show Random;
 import "package:http/http.dart" as http;
 import "package:logging/logging.dart" show Logger;
 import "package:nyxx/nyxx.dart" show CachelessGuildChannel, ClientOptions, DiscordColor, EmbedBuilder, EmbedFooterBuilder, GuildTextChannel, MessageChannel, Nyxx, Snowflake;
-import "package:nyxx.commander/commander.dart" show CommandContext, CommandGroup, Commander;
+import "package:nyxx_commander/commander.dart" show CommandContext, CommandGroup, Commander;
 import "package:time_ago_provider/time_ago_provider.dart" as time_ago;
 
 import "docs.dart" as docs;
