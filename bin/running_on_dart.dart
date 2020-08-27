@@ -51,21 +51,25 @@ void main(List<String> arguments) async {
 }
 
 Future<void> helpCommand(CommandContext ctx, String content) async {
+  // Assign method to variable for shorter name
+  const helpGen = utils.helpCommandGen;
+
+  // Write zero-width character to skip first line where nick is
   final buffer = StringBuffer("‎\n");
 
-  buffer.write(utils.helpCommandGen("join", "join specified channel", additionalInfo: "<channel_id>"));
-  buffer.write(utils.helpCommandGen("leave", "leaves channel"));
-  buffer.write(utils.helpCommandGen("exec", "executes Dart code", additionalInfo: "<string_to_execute>"));
-  buffer.write(utils.helpCommandGen("docs get", "Sends url to nyxx docs for specified entry", additionalInfo: "<ClassName[#memberName]>"));
-  buffer.write(utils.helpCommandGen("docs search", "Searches docs for *query*", additionalInfo: "<query>"));
-  buffer.write(utils.helpCommandGen("info", "sends basic info about bot"));
-  buffer.write(utils.helpCommandGen("ping", "sends current bot latency"));
-  buffer.write(utils.helpCommandGen("help", "this command"));
-  buffer.write(utils.helpCommandGen("description", "sends current channel description"));
-  buffer.write(utils.helpCommandGen("avatar", "Replies with mentioned user avatar"));
-  buffer.write(utils.helpCommandGen("qr gen ", "Generates qr code with provided data", additionalInfo: "<data>"));
-  buffer.write(utils.helpCommandGen("qr read", "Reads qr code from uploaded image in same message as command"));
-  buffer.write(utils.helpCommandGen("shutdown", "Shuts down bot"));
+  buffer.write(helpGen("join", "join specified channel", additionalInfo: "<channel_id>"));
+  buffer.write(helpGen("leave", "leaves channel"));
+  buffer.write(helpGen("exec", "executes Dart code", additionalInfo: "<string_to_execute>"));
+  buffer.write(helpGen("docs get", "Sends url to nyxx docs for specified entry", additionalInfo: "<ClassName[#memberName]>"));
+  buffer.write(helpGen("docs search", "Searches docs for *query*", additionalInfo: "<query>"));
+  buffer.write(helpGen("info", "sends basic info about bot"));
+  buffer.write(helpGen("ping", "sends current bot latency"));
+  buffer.write(helpGen("help", "this command"));
+  buffer.write(helpGen("description", "sends current channel description"));
+  buffer.write(helpGen("avatar", "Replies with mentioned user avatar"));
+  buffer.write(helpGen("qr gen ", "Generates qr code with provided data", additionalInfo: "<data>"));
+  buffer.write(helpGen("qr read", "Reads qr code from uploaded image in same message as command"));
+  buffer.write(helpGen("shutdown", "Shuts down bot"));
 
   await ctx.reply(content: buffer.toString());
 }
