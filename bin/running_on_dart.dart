@@ -1,16 +1,16 @@
 /*
-Configuration via environment variables:
+Configuration via utils.environment variables:
   ROD_PREFIX - prefix that bot will use for commands
   ROD_TOKEN - bot token to login
   ROD_ADMIN_ID - id of admin
+  ROD_HOT_RELOAD - set to "1" to enable hot reload module
 */
 
 import "dart:convert" show jsonDecode;
-import "dart:io" show Platform, ProcessInfo;
+import "dart:io" show Process, ProcessInfo, pid;
 import "dart:math" show Random;
 
 import "package:http/http.dart" as http;
-import "package:logging/logging.dart" show Logger;
 import "package:nyxx/nyxx.dart" show CachelessGuildChannel, ClientOptions, DiscordColor, EmbedBuilder, EmbedFooterBuilder, GuildTextChannel, MessageChannel, Nyxx, Snowflake;
 import "package:nyxx_commander/commander.dart" show CommandContext, CommandGroup, Commander;
 import "package:time_ago_provider/time_ago_provider.dart" as time_ago;
@@ -20,22 +20,20 @@ import "exec.dart" as exec;
 import "hot_reload/hot_reload.dart" as eval_handler;
 import "utils.dart" as utils;
 
-final Logger logger = Logger("Bot");
-final prefix = Platform.environment["ROD_PREFIX"];
-
 void main(List<String> arguments) async {
-  if(Platform.environment["HOT_RELOAD"] == "1") {
+  if(utils.envHotReload == "1") {
     await eval_handler.initReloader();
   }
 
-  final bot = Nyxx(Platform.environment["ROD_TOKEN"]!, options: ClientOptions(guildSubscriptions: false));
-  Commander(bot, prefix: prefix)
+  final bot = Nyxx(utils.envToken!, options: ClientOptions(guildSubscriptions: false));
+  Commander(bot, prefix: utils.envPrefix)
     // Admin stuff
     ..registerCommandGroup(CommandGroup(beforeHandler: checkForAdmin)
       ..registerSubCommand("leave", leaveChannelCommand)
       ..registerSubCommand("join", joinChannelCommand)
       ..registerSubCommand("exec", execCommand)
-      ..registerSubCommand("eval", evalCommand))
+      ..registerSubCommand("eval", evalCommand)
+      ..registerSubCommand("shutdown", shutdownCommand))
     // Docs commands
     ..registerCommandGroup(CommandGroup(name: "docs")
       ..registerSubCommand("get", docsCommand)
@@ -53,21 +51,27 @@ void main(List<String> arguments) async {
 }
 
 Future<void> helpCommand(CommandContext ctx, String content) async {
-  final helpString = "‎\n"
-      "**${prefix}join** *<channel_id>* - join specified channel. \n"
-      "**${prefix}leave ** - leaves channel. \n"
-      "**${prefix}exec ** *<string_to_execute>* - executes Dart code. \n"
-      "**${prefix}docs get ** *<ClassName[#memberName]>* - Sends url to nyxx docs for specified entry. \n"
-      "**${prefix}docs search ** *<query>* - Searches docs for *query* \n"
-      "**${prefix}info ** - sends basic info about bot. \n"
-      "**${prefix}ping ** - sends current bot latency. \n"
-      "**${prefix}help ** - this command. \n"
-      "**${prefix}description ** - sends current channel description. \n"
-      "**${prefix}avatar ** - Replies with mentioned user avatar. \n"
-      "**${prefix}qr gen ** *<data>* - Generates ar code with provided data. \n"
-      "**${prefix}qr read ** - Reads qr code from uploaded image.";
+  final buffer = StringBuffer("‎\n");
 
-  await ctx.reply(content: helpString);
+  buffer.write(utils.helpCommandGen("join", "join specified channel", additionalInfo: "<channel_id>"));
+  buffer.write(utils.helpCommandGen("leave", "leaves channel"));
+  buffer.write(utils.helpCommandGen("exec", "executes Dart code", additionalInfo: "<string_to_execute>"));
+  buffer.write(utils.helpCommandGen("docs get", "Sends url to nyxx docs for specified entry", additionalInfo: "<ClassName[#memberName]>"));
+  buffer.write(utils.helpCommandGen("docs search", "Searches docs for *query*", additionalInfo: "<query>"));
+  buffer.write(utils.helpCommandGen("info", "sends basic info about bot"));
+  buffer.write(utils.helpCommandGen("ping", "sends current bot latency"));
+  buffer.write(utils.helpCommandGen("help", "this command"));
+  buffer.write(utils.helpCommandGen("description", "sends current channel description"));
+  buffer.write(utils.helpCommandGen("avatar", "Replies with mentioned user avatar"));
+  buffer.write(utils.helpCommandGen("qr gen ", "Generates qr code with provided data", additionalInfo: "<data>"));
+  buffer.write(utils.helpCommandGen("qr read", "Reads qr code from uploaded image in same message as command"));
+  buffer.write(utils.helpCommandGen("shutdown", "Shuts down bot"));
+
+  await ctx.reply(content: buffer.toString());
+}
+
+Future<void> shutdownCommand(CommandContext ctx, String content) async {
+  Process.killPid(pid);
 }
 
 Future<void> readQrCodeCommand(CommandContext ctx, String content) async {
@@ -111,13 +115,13 @@ Future<void> genQrCodeCommand(CommandContext ctx, String content) async {
 }
 
 Future<void> evalCommand(CommandContext ctx, String content) async {
-  if(Platform.environment["HOT_RELOAD"] != "1") {
+  if(utils.envHotReload != "1") {
     return;
   }
 
   final stopwatch = Stopwatch()..start();
 
-  final text = ctx.message.content.replaceFirst("${prefix}eval", "");
+  final text = ctx.message.content.replaceFirst("${utils.envPrefix}eval", "");
   final output = await eval_handler.hotReloadCode(text, ctx);
 
   final footer = EmbedFooterBuilder()..text = "Exec time: ${stopwatch.elapsedMilliseconds} ms";
@@ -194,7 +198,7 @@ Future<void> joinChannelCommand(CommandContext ctx, String content) async {
 Future<void> execCommand(CommandContext ctx, String content) async {
   final stopwatch = Stopwatch()..start();
 
-  final text = ctx.message.content.replaceFirst("${prefix}exec", "");
+  final text = ctx.message.content.replaceFirst("${utils.envPrefix}exec", "");
   final output = await exec.eval(text);
 
   final footer = EmbedFooterBuilder()..text = "Exec time: ${stopwatch.elapsedMilliseconds} ms";
@@ -326,8 +330,8 @@ Future<void> tagNewCommand(CommandContext ctx, String content) async {
 */
 
 Future<bool> checkForAdmin(CommandContext context) async {
-  if(Platform.environment["ROD_ADMIN_ID"] != null) {
-    return context.author!.id == Platform.environment["ROD_ADMIN_ID"];
+  if(utils.envAdminId != null) {
+    return context.author!.id == utils.envAdminId;
   }
 
   return false;
