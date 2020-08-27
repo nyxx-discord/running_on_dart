@@ -3,11 +3,8 @@ services:
   running_on_dart:
     build: ./
     container_name: running_on_dart
-    environment:
-      ROD_TOKEN: ${ROD_TOKEN}
-      ROD_ADMIN_ID: ${ROD_ADMIN_ID}
-      ROD_PREFIX: ${ROD_PREFIX}
-      ROD_HOT_RELOAD: ${ROD_HOT_RELOAD}
+    env_file:
+     - ./.env
 # Im not using tags module right now so there is no purpose on attaching volume that
 #    volumes:
 #    - type: bind
