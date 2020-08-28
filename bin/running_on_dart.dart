@@ -33,7 +33,8 @@ void main(List<String> arguments) async {
       ..registerSubCommand("join", joinChannelCommand)
       ..registerSubCommand("exec", execCommand)
       ..registerSubCommand("eval", evalCommand)
-      ..registerSubCommand("shutdown", shutdownCommand))
+      ..registerSubCommand("shutdown", shutdownCommand)
+      ..registerSubCommand("selfNick", selfNickCommand))
     // Docs commands
     ..registerCommandGroup(CommandGroup(name: "docs")
       ..registerSubCommand("get", docsCommand)
@@ -69,9 +70,19 @@ Future<void> helpCommand(CommandContext ctx, String content) async {
   buffer.write(helpGen("avatar", "Replies with mentioned user avatar"));
   buffer.write(helpGen("qr gen ", "Generates qr code with provided data", additionalInfo: "<data>"));
   buffer.write(helpGen("qr read", "Reads qr code from uploaded image in same message as command"));
+  buffer.write(helpGen("selfNick", "Sets nick of bot"));
   buffer.write(helpGen("shutdown", "Shuts down bot"));
 
   await ctx.reply(content: buffer.toString());
+}
+
+Future<void> selfNickCommand(CommandContext ctx, String content) async {
+  if (ctx.guild == null) {
+    await ctx.reply(content: "Cannot change nick in DMs");
+    return;
+  }
+
+  await ctx.guild?.changeSelfNick(ctx.getArguments().first);
 }
 
 Future<void> shutdownCommand(CommandContext ctx, String content) async {
