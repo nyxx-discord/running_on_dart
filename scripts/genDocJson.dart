@@ -1,5 +1,5 @@
-import "dart:convert";
-import "dart:io";
+import "dart:convert" show jsonDecode, jsonEncode;
+import "dart:io" show File, FileMode;
 
 void main() {
   final nyxxDocs = jsonDecode(File("../nyxx/nyxx/doc/api/index.json").readAsStringSync()) as List<dynamic>;

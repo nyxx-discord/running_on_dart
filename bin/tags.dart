@@ -1,6 +1,5 @@
-import "dart:io";
-
-import "package:objectdb/objectdb.dart";
+import "dart:io" show Directory;
+import "package:objectdb/objectdb.dart" show ObjectDB;
 
 late ObjectDB db;
 

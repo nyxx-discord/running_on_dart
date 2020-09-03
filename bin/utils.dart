@@ -1,4 +1,4 @@
-import "dart:io";
+import "dart:io" show Platform;
 
 String? get envPrefix => Platform.environment["ROD_PREFIX"];
 String? get envHotReload => Platform.environment["ROD_HOT_RELOAD"];
