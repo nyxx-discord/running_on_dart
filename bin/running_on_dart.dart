@@ -37,7 +37,8 @@ void main(List<String> arguments) async {
       ..registerSubCommand("selfNick", selfNickCommand))
     // Docs commands
     ..registerCommandGroup(CommandGroup(name: "docs")
-      ..registerSubCommand("get", docsCommand)
+      ..registerDefaultCommand(docsCommand)
+      ..registerSubCommand("get", docsGetCommand)
       ..registerSubCommand("search", docsSearchCommand))
     // Minor commands
     ..registerCommand("info", infoCommand)
@@ -61,6 +62,7 @@ Future<void> helpCommand(CommandContext ctx, String content) async {
   buffer.write(helpGen("join", "join specified channel", additionalInfo: "<channel_id>"));
   buffer.write(helpGen("leave", "leaves channel"));
   buffer.write(helpGen("exec", "executes Dart code", additionalInfo: "<string_to_execute>"));
+  buffer.write(helpGen("docs", "Sends link to nyxx docs"));
   buffer.write(helpGen("docs get", "Sends url to nyxx docs for specified entry", additionalInfo: "<ClassName[#memberName]>"));
   buffer.write(helpGen("docs search", "Searches docs for *query*", additionalInfo: "<query>"));
   buffer.write(helpGen("info", "sends basic info about bot"));
@@ -226,6 +228,10 @@ Future<void> execCommand(CommandContext ctx, String content) async {
 }
 
 Future<void> docsCommand(CommandContext ctx, String content) async {
+  await ctx.reply(content: docs.basePath);
+}
+
+Future<void> docsGetCommand(CommandContext ctx, String content) async {
   final searchString = content.split(" ").last.split("#|.");
   final docsDef = await docs.getDocDefinition(searchString.first, searchString.length > 1 ? searchString.last : null);
 
