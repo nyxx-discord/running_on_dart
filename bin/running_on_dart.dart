@@ -13,18 +13,12 @@ import "dart:math" show Random;
 import "package:http/http.dart" as http;
 import "package:nyxx/nyxx.dart" show CachelessGuildChannel, ClientOptions, DiscordColor, EmbedBuilder, EmbedFooterBuilder, GuildTextChannel, MessageChannel, Nyxx, Snowflake;
 import "package:nyxx_commander/commander.dart" show CommandContext, CommandGroup, Commander;
-import "package:time_ago_provider/time_ago_provider.dart" as time_ago;
 
 import "docs.dart" as docs;
 import "exec.dart" as exec;
-import "hot_reload/hot_reload.dart" as eval_handler;
 import "utils.dart" as utils;
 
 void main(List<String> arguments) async {
-  if(utils.envHotReload == "1") {
-    await eval_handler.initReloader();
-  }
-
   final bot = Nyxx(utils.envToken!, options: ClientOptions(guildSubscriptions: false));
   Commander(bot, prefix: utils.envPrefix)
     // Admin stuff
@@ -32,7 +26,6 @@ void main(List<String> arguments) async {
       ..registerSubCommand("leave", leaveChannelCommand)
       ..registerSubCommand("join", joinChannelCommand)
       ..registerSubCommand("exec", execCommand)
-      ..registerSubCommand("eval", evalCommand)
       ..registerSubCommand("shutdown", shutdownCommand)
       ..registerSubCommand("selfNick", selfNickCommand))
     // Docs commands
@@ -129,26 +122,6 @@ Future<void> genQrCodeCommand(CommandContext ctx, String content) async {
   final url = Uri.https("api.qrserver.com", "v1/create-qr-code/", queryParams);
 
   await ctx.reply(content: url.toString());
-}
-
-Future<void> evalCommand(CommandContext ctx, String content) async {
-  if(utils.envHotReload != "1") {
-    return;
-  }
-
-  final stopwatch = Stopwatch()..start();
-
-  final text = ctx.message.content.replaceFirst("${utils.envPrefix}eval", "");
-  final output = await eval_handler.hotReloadCode(text, ctx);
-
-  final footer = EmbedFooterBuilder()..text = "Exec time: ${stopwatch.elapsedMilliseconds} ms";
-  final embed = EmbedBuilder()
-    ..title = "Output"
-    ..description = output.toString()
-    ..addField(name: "Output type", content: output.runtimeType.toString())
-    ..footer = footer;
-
-  await ctx.reply(embed: embed);
 }
 
 Future<void> userAvatarCommand(CommandContext ctx, String content) async {
@@ -284,7 +257,7 @@ Future<void> infoCommand(CommandContext ctx, String content) async {
     ..color = color
     ..addField(
         name: "Uptime",
-        content: time_ago.format(ctx.client.startTime, locale: "en_short"),
+        content: ctx.client.uptime.inMinutes,
         inline: true)
     ..addField(
         name: "DartVM memory usage",
