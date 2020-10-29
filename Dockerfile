@@ -3,7 +3,7 @@ FROM google/dart:2.11.0-189.0.dev
 WORKDIR /app
 
 RUN git clone https://github.com/l7ssha/nyxx.git
-RUN cd nyxx; git checkout 1.1
+RUN cd nyxx; git fetch; git checkout 1.1-replies
 
 WORKDIR /app/bot
 

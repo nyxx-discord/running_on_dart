@@ -83,7 +83,7 @@ packages:
       name: path
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.8.0-nullsafety.1"
+    version: "1.8.0-nullsafety.2"
   pedantic:
     dependency: transitive
     description:
@@ -120,4 +120,4 @@ packages:
     source: hosted
     version: "1.3.0-nullsafety.3"
 sdks:
-  dart: ">=2.10.0-110.0.dev <=2.11.0-176.0.dev"
+  dart: ">=2.10.0-110.0.dev <=2.11.0-218.0.dev"

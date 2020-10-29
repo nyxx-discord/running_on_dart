@@ -10,7 +10,7 @@ String get dartVersion {
   return platformVersion.split("(").first;
 }
 
-String helpCommandGen(String commandName, String description, { String? additionalInfo }) {
+String helpCommandGen(String commandName, String description, {String? additionalInfo}) {
   final buffer = StringBuffer();
 
   buffer.write("**$envPrefix$commandName**");

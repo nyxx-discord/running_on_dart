@@ -11,7 +11,7 @@ import "dart:io" show Process, ProcessInfo, pid;
 import "dart:math" show Random;
 
 import "package:http/http.dart" as http;
-import "package:nyxx/nyxx.dart" show CachelessGuildChannel, ClientOptions, DiscordColor, EmbedBuilder, EmbedFooterBuilder, GuildTextChannel, MessageChannel, Nyxx, Snowflake;
+import "package:nyxx/nyxx.dart" show ClientOptions, DiscordColor, EmbedBuilder, EmbedFooterBuilder, GatewayIntents, Nyxx, Snowflake, TextChannel, TextGuildChannel;
 import "package:nyxx_commander/commander.dart" show CommandContext, CommandGroup, Commander;
 
 import "docs.dart" as docs;
@@ -19,7 +19,11 @@ import "exec.dart" as exec;
 import "utils.dart" as utils;
 
 void main(List<String> arguments) async {
-  final bot = Nyxx(utils.envToken!, options: ClientOptions(guildSubscriptions: false));
+  final bot = Nyxx(utils.envToken!, options: ClientOptions(guildSubscriptions: false, gatewayIntents: GatewayIntents()
+    ..directMessages = true
+    ..guildMessages = true
+    ..guilds = true
+  ));
   Commander(bot, prefix: utils.envPrefix)
     // Admin stuff
     ..registerCommandGroup(CommandGroup(beforeHandler: checkForAdmin)
@@ -68,12 +72,12 @@ Future<void> helpCommand(CommandContext ctx, String content) async {
   buffer.write(helpGen("selfNick", "Sets nick of bot"));
   buffer.write(helpGen("shutdown", "Shuts down bot"));
 
-  await ctx.reply(content: buffer.toString());
+  await ctx.sendMessage(content: buffer.toString());
 }
 
 Future<void> selfNickCommand(CommandContext ctx, String content) async {
   if (ctx.guild == null) {
-    await ctx.reply(content: "Cannot change nick in DMs");
+    await ctx.sendMessage(content: "Cannot change nick in DMs");
     return;
   }
 
@@ -86,7 +90,7 @@ Future<void> shutdownCommand(CommandContext ctx, String content) async {
 
 Future<void> readQrCodeCommand(CommandContext ctx, String content) async {
   if(ctx.message.attachments.isEmpty) {
-    await ctx.reply(content: "Invalid usage. Upload image alongside with command!");
+    await ctx.sendMessage(content: "Invalid usage. Upload image alongside with command!");
     return;
   }
 
@@ -97,11 +101,11 @@ Future<void> readQrCodeCommand(CommandContext ctx, String content) async {
   final result = jsonDecode(await http.read(url));
 
   if(result.first["symbol"].first["error"] != null) {
-    await ctx.reply(content: "Error: `${result.first["symbol"]["error"]}`");
+    await ctx.sendMessage(content: "Error: `${result.first["symbol"]["error"]}`");
     return;
   }
 
-  await ctx.reply(embed:
+  await ctx.sendMessage(embed:
     EmbedBuilder()
       ..description = result.first["symbol"].first["data"].toString()
   );
@@ -111,7 +115,7 @@ Future<void> genQrCodeCommand(CommandContext ctx, String content) async {
   final args = ctx.getArguments().toList().join(" ");
 
   if(args.isEmpty) {
-    await ctx.reply(content: "Specify text for qr code.");
+    await ctx.sendMessage(content: "Specify text for qr code.");
     return;
   }
   
@@ -121,33 +125,37 @@ Future<void> genQrCodeCommand(CommandContext ctx, String content) async {
   
   final url = Uri.https("api.qrserver.com", "v1/create-qr-code/", queryParams);
 
-  await ctx.reply(content: url.toString());
+  await ctx.sendMessage(content: url.toString());
 }
 
 Future<void> userAvatarCommand(CommandContext ctx, String content) async {
   String? avatarUrl;
 
   if(ctx.message.mentions.isEmpty) {
-    avatarUrl = ctx.author?.avatarURL(size: 1024);
+    avatarUrl = ctx.author.avatarURL(size: 1024);
   } else {
-    avatarUrl = ctx.message.mentions.first.avatarURL(size: 1024);
+    try {
+      avatarUrl = (await ctx.message.mentions.first.getOrDownload()).avatarURL(size: 1024);
+    } on Exception {
+      avatarUrl = null;
+    }
   }
 
   if(avatarUrl == null) {
-    await ctx.reply(content: "Cannot obtain avatar url.");
+    await ctx.sendMessage(content: "Cannot obtain avatar url.");
     return;
   }
 
-  await ctx.reply(content: avatarUrl);
+  await ctx.sendMessage(content: avatarUrl);
 }
 
 Future<void> descriptionCommand(CommandContext ctx, String content) async {
-  if(ctx.channel is GuildTextChannel) {
-    await ctx.reply(content: (ctx.channel as GuildTextChannel).topic);
+  if(ctx.channel is TextGuildChannel) {
+    await ctx.sendMessage(content: (ctx.channel as TextGuildChannel).topic);
     return;
   }
 
-  await ctx.reply(content: "Invalid channel!");
+  await ctx.sendMessage(content: "Invalid channel!");
 }
 
 Future<void> pingCommand(CommandContext ctx, String content) async {
@@ -161,7 +169,7 @@ Future<void> pingCommand(CommandContext ctx, String content) async {
     ..addField(name: "Gateway latency", content: "$gatewayDelayInMilis ms", inline: true)
     ..addField(name: "Message roundup time", content: "Pending...", inline: true);
 
-  final message = await ctx.reply(embed: embed);
+  final message = await ctx.sendMessage(embed: embed);
 
   embed
     ..replaceField(name: "Message roundup time", content: "${stopwatch.elapsedMilliseconds} ms", inline: true);
@@ -170,19 +178,17 @@ Future<void> pingCommand(CommandContext ctx, String content) async {
 }
 
 Future<void> leaveChannelCommand(CommandContext ctx, String content) async {
-  final guildId = (ctx.message.channel as CachelessGuildChannel).guildId;
-  final shard = ctx.client.shardManager.shards.firstWhere((element) => element.guilds.contains(guildId));
+  final shard = ctx.client.shardManager.shards.firstWhere((element) => element.guilds.contains(ctx.guild!.id));
 
-  shard.changeVoiceState(guildId, null);
-  await ctx.reply(content: "Left channel!");
+  shard.changeVoiceState(ctx.guild!.id, null);
+  await ctx.sendMessage(content: "Left channel!");
 }
 
 Future<void> joinChannelCommand(CommandContext ctx, String content) async {
-  final guildId = (ctx.message.channel as CachelessGuildChannel).guildId;
-  final shard = ctx.client.shardManager.shards.firstWhere((element) => element.guilds.contains(guildId));
+  final shard = ctx.client.shardManager.shards.firstWhere((element) => element.guilds.contains(ctx.guild!.id));
 
-  shard.changeVoiceState(guildId, Snowflake(content.split(" ").last));
-  await ctx.reply(content: "Joined to channel!");
+  shard.changeVoiceState(ctx.guild!.id, Snowflake(content.split(" ").last));
+  await ctx.sendMessage(content: "Joined to channel!");
 }
 
 Future<void> execCommand(CommandContext ctx, String content) async {
@@ -197,11 +203,11 @@ Future<void> execCommand(CommandContext ctx, String content) async {
     ..description = output
     ..footer = footer;
 
-  await ctx.reply(embed: embed);
+  await ctx.sendMessage(embed: embed);
 }
 
 Future<void> docsCommand(CommandContext ctx, String content) async {
-  await ctx.reply(content: docs.basePath);
+  await ctx.sendMessage(content: docs.basePath);
 }
 
 Future<void> docsGetCommand(CommandContext ctx, String content) async {
@@ -209,7 +215,7 @@ Future<void> docsGetCommand(CommandContext ctx, String content) async {
   final docsDef = await docs.getDocDefinition(searchString.first, searchString.length > 1 ? searchString.last : null);
 
   if (docsDef == null) {
-    await ctx.reply(content: "Cannot find docs for what you typed");
+    await ctx.sendMessage(content: "Cannot find docs for what you typed");
     return;
   }
 
@@ -218,7 +224,7 @@ Future<void> docsGetCommand(CommandContext ctx, String content) async {
     ..addField(name: "Name", content: docsDef.name, inline: true)
     ..description = "[${content.split(" ").last}](${docsDef.absoluteUrl})";
 
-  await ctx.reply(embed: embed);
+  await ctx.sendMessage(embed: embed);
 }
 
 Future<void> docsSearchCommand(CommandContext ctx, String content) async {
@@ -226,7 +232,7 @@ Future<void> docsSearchCommand(CommandContext ctx, String content) async {
   final results = docs.searchDocs(query);
 
   if(results.isEmpty) {
-    await ctx.reply(content: "Nothing found matching: `$query`");
+    await ctx.sendMessage(content: "Nothing found matching: `$query`");
     return;
   }
 
@@ -238,7 +244,7 @@ Future<void> docsSearchCommand(CommandContext ctx, String content) async {
   final embed = EmbedBuilder()
     ..description = buffer.toString();
 
-  await ctx.reply(embed: embed);
+  await ctx.sendMessage(embed: embed);
 }
 
 Future<void> infoCommand(CommandContext ctx, String content) async {
@@ -277,16 +283,16 @@ Future<void> infoCommand(CommandContext ctx, String content) async {
             .reduce((f, s) => f + s),
         inline: true)
     ..addField(name: "Shard count", content: ctx.client.shards, inline: true)
-    ..addField(name: "Cached messages", content: ctx.client.channels.find((item) => item is MessageChannel).cast<MessageChannel>().map((e) => e.messages.count).fold(0, (first, second) => (first as int) + second), inline: true);
+    ..addField(name: "Cached messages", content: ctx.client.channels.find((item) => item is TextChannel).cast<TextChannel>().map((e) => e.messageCache.count).fold(0, (first, second) => (first as int) + second), inline: true);
 
-  await ctx.reply(embed: embed);
+  await ctx.sendMessage(embed: embed);
 }
 
 /*
 Future<void> tagDeleteCommand(CommandContext ctx, String content) async {
   await tags.deleteTag(ctx.getArguments().last);
 
-  await ctx.reply(content: "Tag has been deleted");
+  await ctx.sendMessage(content: "Tag has been deleted");
 }
 
 Future<void> tagUpdateCommand(CommandContext ctx, String content) async {
@@ -297,7 +303,7 @@ Future<void> tagUpdateCommand(CommandContext ctx, String content) async {
 
   await tags.updateTag(tagName, tagContent);
 
-  await ctx.reply(content: "Tag `$tagName` has been updated!");
+  await ctx.sendMessage(content: "Tag `$tagName` has been updated!");
 }
 
 Future<void> tagCommand(CommandContext ctx, String content) async {
@@ -305,10 +311,10 @@ Future<void> tagCommand(CommandContext ctx, String content) async {
   final tagContent = await tags.getTag(tagName);
 
   if(tagContent == null) {
-    return ctx.reply(content: "No such tag");
+    return ctx.sendMessage(content: "No such tag");
   }
 
-  await ctx.reply(content: tagContent);
+  await ctx.sendMessage(content: tagContent);
 }
 
 Future<void> tagNewCommand(CommandContext ctx, String content) async {
@@ -319,13 +325,13 @@ Future<void> tagNewCommand(CommandContext ctx, String content) async {
 
   await tags.insertTag(tagName, tagContent);
 
-  await ctx.reply(content: "Tag `$tagName` created!");
+  await ctx.sendMessage(content: "Tag `$tagName` created!");
 }
 */
 
 Future<bool> checkForAdmin(CommandContext context) async {
   if(utils.envAdminId != null) {
-    return context.author!.id == utils.envAdminId;
+    return context.author.id == utils.envAdminId;
   }
 
   return false;
