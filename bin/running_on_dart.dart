@@ -19,11 +19,7 @@ import "exec.dart" as exec;
 import "utils.dart" as utils;
 
 void main(List<String> arguments) async {
-  final bot = Nyxx(utils.envToken!, options: ClientOptions(guildSubscriptions: false, gatewayIntents: GatewayIntents()
-    ..directMessages = true
-    ..guildMessages = true
-    ..guilds = true
-  ));
+  final bot = Nyxx(utils.envToken!, GatewayIntents.allUnprivileged, options: ClientOptions(guildSubscriptions: false));
   Commander(bot, prefix: utils.envPrefix)
     // Admin stuff
     ..registerCommandGroup(CommandGroup(beforeHandler: checkForAdmin)
