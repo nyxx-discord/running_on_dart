@@ -15,7 +15,7 @@ String getFileContent(String code) =>
         $code
       }
       
-      main() {
+      main() async {
         print(await exeCode());
       }
     """;
