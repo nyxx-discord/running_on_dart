@@ -69,21 +69,21 @@ packages:
       path: "../nyxx/nyxx"
       relative: true
     source: path
-    version: "1.1.0"
+    version: "1.1.0-dev.1"
   nyxx_commander:
     dependency: "direct main"
     description:
       path: "../nyxx/nyxx.commander"
       relative: true
     source: path
-    version: "1.1.0"
+    version: "1.1.0-dev.1"
   path:
     dependency: transitive
     description:
       name: path
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.8.0-nullsafety.2"
+    version: "1.8.0-nullsafety.3"
   pedantic:
     dependency: transitive
     description:
@@ -112,6 +112,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.2.0-nullsafety.3"
+  time_ago_provider:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: e7e35ea187641d7e33f0e8e3ee57c97d5ab1cf4c
+      url: "git://github.com/l7ssha/time_ago_provider.git"
+    source: git
+    version: "3.0.0-dev.1"
   typed_data:
     dependency: transitive
     description:
@@ -120,4 +129,4 @@ packages:
     source: hosted
     version: "1.3.0-nullsafety.5"
 sdks:
-  dart: ">=2.12.0-0.0 <=2.12.0-29.0.dev"
+  dart: ">=2.12.0-51.0.dev <3.0.0"

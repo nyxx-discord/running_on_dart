@@ -7,12 +7,13 @@ Configuration via utils.environment variables:
 */
 
 import "dart:convert" show jsonDecode;
-import "dart:io" show Process, ProcessInfo, pid;
+import "dart:io" show Process, pid;
 import "dart:math" show Random;
 
 import "package:http/http.dart" as http;
-import "package:nyxx/nyxx.dart" show ClientOptions, DiscordColor, EmbedBuilder, EmbedFooterBuilder, GatewayIntents, Nyxx, Snowflake, TextChannel, TextGuildChannel;
+import "package:nyxx/nyxx.dart" show ClientOptions, Constants, DiscordColor, EmbedBuilder, EmbedFooterBuilder, GatewayIntents, Nyxx, Snowflake, TextChannel, TextGuildChannel;
 import "package:nyxx_commander/commander.dart" show CommandContext, CommandGroup, Commander;
+import "package:time_ago_provider/time_ago_provider.dart" show formatFull;
 
 import "docs.dart" as docs;
 import "exec.dart" as exec;
@@ -22,7 +23,7 @@ void main(List<String> arguments) async {
   final bot = Nyxx(utils.envToken!, GatewayIntents.allUnprivileged, options: ClientOptions(guildSubscriptions: false));
   Commander(bot, prefix: utils.envPrefix)
     // Admin stuff
-    ..registerCommandGroup(CommandGroup(beforeHandler: checkForAdmin)
+    ..registerCommandGroup(CommandGroup(beforeHandler: utils.checkForAdmin)
       ..registerSubCommand("leave", leaveChannelCommand)
       ..registerSubCommand("join", joinChannelCommand)
       ..registerSubCommand("exec", execCommand)
@@ -158,11 +159,17 @@ Future<void> pingCommand(CommandContext ctx, String content) async {
   final random = Random();
   final color = DiscordColor.fromRgb(random.nextInt(255), random.nextInt(255), random.nextInt(255));
   final gatewayDelayInMilis = ctx.client.shardManager.shards.firstWhere((element) => element.id == ctx.shardId).gatewayLatency.inMilliseconds;
+
+  final apiStopwatch = Stopwatch()..start();
+  await http.head(Uri(scheme: "https", host: Constants.host, path: Constants.baseUri));
+  final apiPing = apiStopwatch.elapsedMilliseconds;
+
   final stopwatch = Stopwatch()..start();
 
   final embed = EmbedBuilder()
     ..color = color
     ..addField(name: "Gateway latency", content: "$gatewayDelayInMilis ms", inline: true)
+    ..addField(name: "REST latency", content: "$apiPing ms", inline: true)
     ..addField(name: "Message roundup time", content: "Pending...", inline: true);
 
   final message = await ctx.sendMessage(embed: embed);
@@ -254,81 +261,30 @@ Future<void> infoCommand(CommandContext ctx, String content) async {
       author.url = "https://github.com/l7ssha/nyxx";
     })
     ..addFooter((footer) {
-      footer.text = "Nyxx 1.0.0 | Shard [${ctx.shardId + 1}] of [${ctx.client.shards}] | ${utils.dartVersion}";
+      footer.text = "Nyxx ${Constants.version} | Shard [${ctx.shardId + 1}] of [${ctx.client.shards}] | ${utils.dartVersion}";
     })
     ..color = color
+    ..addField(name: "Cached guild", content: ctx.client.guilds.count, inline: true)
+    ..addField(name: "Cached users", content: ctx.client.users.count, inline: true)
     ..addField(
-        name: "Uptime",
-        content: ctx.client.uptime.inMinutes,
-        inline: true)
-    ..addField(
-        name: "DartVM memory usage",
-        content: "${(ProcessInfo.currentRss / 1024 / 1024).toStringAsFixed(2)} MB",
-        inline: true)
-    ..addField(name: "Created at", content: ctx.client.app.createdAt, inline: true)
-    ..addField(name: "Guild count", content: ctx.client.guilds.count, inline: true)
-    ..addField(name: "Users count", content: ctx.client.users.count, inline: true)
-    ..addField(
-        name: "Channels count",
+        name: "Cached channels",
         content: ctx.client.channels.count,
         inline: true)
     ..addField(
-        name: "Users in voice",
+        name: "Cached voice states",
         content: ctx.client.guilds.values
             .map((g) => g.voiceStates.count)
             .reduce((f, s) => f + s),
         inline: true)
     ..addField(name: "Shard count", content: ctx.client.shards, inline: true)
-    ..addField(name: "Cached messages", content: ctx.client.channels.find((item) => item is TextChannel).cast<TextChannel>().map((e) => e.messageCache.count).fold(0, (first, second) => (first as int) + second), inline: true);
+    ..addField(name: "Cached messages", content: ctx.client.channels.find((item) => item is TextChannel).cast<TextChannel>().map((e) => e.messageCache.count).fold(0, (first, second) => (first as int) + second), inline: true)
+    ..addField(
+        name: "Uptime",
+        content: formatFull(ctx.client.startTime))
+    ..addField(
+        name: "Memory usage (current/RSS)",
+        content: utils.getMemoryUsageString())
+    ..addField(name: "Created at", content: formatFull(ctx.client.app.createdAt));
 
   await ctx.sendMessage(embed: embed);
-}
-
-/*
-Future<void> tagDeleteCommand(CommandContext ctx, String content) async {
-  await tags.deleteTag(ctx.getArguments().last);
-
-  await ctx.sendMessage(content: "Tag has been deleted");
-}
-
-Future<void> tagUpdateCommand(CommandContext ctx, String content) async {
-  final arguments = ctx.getArguments();
-
-  final tagName = arguments.first;
-  final tagContent = arguments.last;
-
-  await tags.updateTag(tagName, tagContent);
-
-  await ctx.sendMessage(content: "Tag `$tagName` has been updated!");
-}
-
-Future<void> tagCommand(CommandContext ctx, String content) async {
-  final tagName = ctx.getArguments().join(" ");
-  final tagContent = await tags.getTag(tagName);
-
-  if(tagContent == null) {
-    return ctx.sendMessage(content: "No such tag");
-  }
-
-  await ctx.sendMessage(content: tagContent);
-}
-
-Future<void> tagNewCommand(CommandContext ctx, String content) async {
-  final arguments = ctx.getArguments();
-
-  final tagName = arguments.first;
-  final tagContent = arguments.last;
-
-  await tags.insertTag(tagName, tagContent);
-
-  await ctx.sendMessage(content: "Tag `$tagName` created!");
-}
-*/
-
-Future<bool> checkForAdmin(CommandContext context) async {
-  if(utils.envAdminId != null) {
-    return context.author.id == utils.envAdminId;
-  }
-
-  return false;
 }

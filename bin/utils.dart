@@ -1,4 +1,6 @@
-import "dart:io" show Platform;
+import "dart:io" show Platform, ProcessInfo;
+
+import "package:nyxx_commander/commander.dart";
 
 String? get envPrefix => Platform.environment["ROD_PREFIX"];
 String? get envHotReload => Platform.environment["ROD_HOT_RELOAD"];
@@ -22,4 +24,18 @@ String helpCommandGen(String commandName, String description, {String? additiona
   buffer.write(" - $description.\n");
 
   return buffer.toString();
+}
+
+String getMemoryUsageString() {
+  final current = (ProcessInfo.currentRss / 1024 / 1024).toStringAsFixed(2);
+  final rss = (ProcessInfo.maxRss / 1024 / 1024).toStringAsFixed(2);
+  return "$current/${rss}MB";
+}
+
+Future<bool> checkForAdmin(CommandContext context) async {
+  if(envAdminId != null) {
+    return context.author.id == envAdminId;
+  }
+
+  return false;
 }
