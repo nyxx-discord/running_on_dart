@@ -43,7 +43,7 @@ Future<bool> checkForAdmin(CommandContext context) async {
   return false;
 }
 
-Future<int> getApproxMemberCount(CommandContext ctx) async {
+int getApproxMemberCount(CommandContext ctx) {
   if (DateTime.now().difference(_approxMemberCountLastAccess).inMinutes > 5 || _approxMemberCount == -1) {
     // ignore: unawaited_futures
     Stream.fromFutures(
