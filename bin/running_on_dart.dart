@@ -254,6 +254,11 @@ Future<void> infoCommand(CommandContext ctx, String content) async {
   final color = DiscordColor.fromRgb(
       Random().nextInt(255), Random().nextInt(255), Random().nextInt(255));
 
+  final approxMemberCount = await Stream.fromFutures(
+      ctx.client.guilds.values
+          .map((e) async => (await e.fetchGuildPreview()).approxMemberCount))
+          .reduce((previous, element) => previous + element);
+
   final embed = EmbedBuilder()
     ..addAuthor((author) {
       author.name = ctx.client.self.tag;
@@ -264,7 +269,7 @@ Future<void> infoCommand(CommandContext ctx, String content) async {
       footer.text = "Nyxx ${Constants.version} | Shard [${ctx.shardId + 1}] of [${ctx.client.shards}] | ${utils.dartVersion}";
     })
     ..color = color
-    ..addField(name: "Cached guild", content: ctx.client.guilds.count, inline: true)
+    ..addField(name: "Cached guilds", content: ctx.client.guilds.count, inline: true)
     ..addField(name: "Cached users", content: ctx.client.users.count, inline: true)
     ..addField(
         name: "Cached channels",
@@ -279,11 +284,14 @@ Future<void> infoCommand(CommandContext ctx, String content) async {
     ..addField(name: "Shard count", content: ctx.client.shards, inline: true)
     ..addField(name: "Cached messages", content: ctx.client.channels.find((item) => item is TextChannel).cast<TextChannel>().map((e) => e.messageCache.count).fold(0, (first, second) => (first as int) + second), inline: true)
     ..addField(
+        name: "Memory usage (current/RSS)",
+        content: utils.getMemoryUsageString(),
+        inline: true
+    )
+    ..addField(name: "Approx member count", content: approxMemberCount, inline: true)
+    ..addField(
         name: "Uptime",
         content: formatFull(ctx.client.startTime))
-    ..addField(
-        name: "Memory usage (current/RSS)",
-        content: utils.getMemoryUsageString())
     ..addField(name: "Created at", content: formatFull(ctx.client.app.createdAt));
 
   await ctx.sendMessage(embed: embed);
