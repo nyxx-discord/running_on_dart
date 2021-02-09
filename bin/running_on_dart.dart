@@ -254,11 +254,6 @@ Future<void> infoCommand(CommandContext ctx, String content) async {
   final color = DiscordColor.fromRgb(
       Random().nextInt(255), Random().nextInt(255), Random().nextInt(255));
 
-  final approxMemberCount = await Stream.fromFutures(
-      ctx.client.guilds.values
-          .map((e) async => (await e.fetchGuildPreview()).approxMemberCount))
-          .reduce((previous, element) => previous + element);
-
   final embed = EmbedBuilder()
     ..addAuthor((author) {
       author.name = ctx.client.self.tag;
@@ -288,7 +283,7 @@ Future<void> infoCommand(CommandContext ctx, String content) async {
         content: utils.getMemoryUsageString(),
         inline: true
     )
-    ..addField(name: "Approx member count", content: approxMemberCount, inline: true)
+    ..addField(name: "Approx member count", content: utils.getApproxMemberCount(ctx), inline: true)
     ..addField(
         name: "Uptime",
         content: formatFull(ctx.client.startTime))
