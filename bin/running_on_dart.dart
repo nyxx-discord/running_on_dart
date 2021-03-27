@@ -3,7 +3,6 @@ Configuration via utils.environment variables:
   ROD_PREFIX - prefix that bot will use for commands
   ROD_TOKEN - bot token to login
   ROD_ADMIN_ID - id of admin
-  ROD_HOT_RELOAD - set to "1" to enable hot reload module
 */
 
 import "dart:convert" show jsonDecode;
@@ -115,11 +114,11 @@ Future<void> genQrCodeCommand(CommandContext ctx, String content) async {
     await ctx.sendMessage(content: "Specify text for qr code.");
     return;
   }
-  
+
   final queryParams = <String, String> {
     "data": args
   };
-  
+
   final url = Uri.https("api.qrserver.com", "v1/create-qr-code/", queryParams);
 
   await ctx.sendMessage(content: url.toString());
@@ -158,7 +157,7 @@ Future<void> descriptionCommand(CommandContext ctx, String content) async {
 Future<void> pingCommand(CommandContext ctx, String content) async {
   final random = Random();
   final color = DiscordColor.fromRgb(random.nextInt(255), random.nextInt(255), random.nextInt(255));
-  final gatewayDelayInMilis = ctx.client.shardManager.shards.firstWhere((element) => element.id == ctx.shardId).gatewayLatency.inMilliseconds;
+  final gatewayDelayInMillis = ctx.client.shardManager.shards.firstWhere((element) => element.id == ctx.shardId).gatewayLatency.inMilliseconds;
 
   final apiStopwatch = Stopwatch()..start();
   await http.head(Uri(scheme: "https", host: Constants.host, path: Constants.baseUri));
@@ -168,7 +167,7 @@ Future<void> pingCommand(CommandContext ctx, String content) async {
 
   final embed = EmbedBuilder()
     ..color = color
-    ..addField(name: "Gateway latency", content: "$gatewayDelayInMilis ms", inline: true)
+    ..addField(name: "Gateway latency", content: "$gatewayDelayInMillis ms", inline: true)
     ..addField(name: "REST latency", content: "$apiPing ms", inline: true)
     ..addField(name: "Message roundup time", content: "Pending...", inline: true);
 

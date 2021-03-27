@@ -11,26 +11,9 @@ environment:
   sdk: '>=2.12.0-51.0.dev <3.0.0'
 
 dependencies:
-  logging: "^0.11.4"
-  html: "^0.14.0+3"
-  http: "^0.12.1"
+  logging: "^1.0.0"
   time_ago_provider:
     git:
       url: git://github.com/l7ssha/time_ago_provider.git
-  nyxx: "^1.0.0"
-  nyxx_commander: "^1.0.0"
-
-dependency_overrides:
-  nyxx:
-    path: "../nyxx/nyxx"
-  nyxx_commander:
-    path: "../nyxx/nyxx.commander"
-  http:
-    git:
-      url: git://github.com/dart-lang/http.git
-  logging:
-    git:
-      url: git://github.com/dart-lang/logging.git
-  http_parser:
-    git:
-      url: git://github.com/dart-lang/http_parser.git
+  nyxx: "^1.1.0-dev.5"
+  nyxx_commander: "^1.1.0-dev.5"
