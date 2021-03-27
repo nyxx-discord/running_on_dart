@@ -14,6 +14,6 @@ dependencies:
   logging: "^1.0.0"
   time_ago_provider:
     git:
-      url: git://github.com/l7ssha/time_ago_provider.git
+      url: git://github.com/BaderEddineOuaich/time_ago_provider.git
   nyxx: "^1.1.0-dev.5"
   nyxx_commander: "^1.1.0-dev.5"
