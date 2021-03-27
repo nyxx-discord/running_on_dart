@@ -282,7 +282,7 @@ Future<void> infoCommand(CommandContext ctx, String content) async {
         content: utils.getMemoryUsageString(),
         inline: true
     )
-    ..addField(name: "Approx member count", content: utils.getApproxMemberCount(ctx), inline: true)
+    ..addField(name: "Member count (online/total)", content: utils.getApproxMemberCount(ctx), inline: true)
     ..addField(
         name: "Uptime",
         content: formatFull(ctx.client.startTime))

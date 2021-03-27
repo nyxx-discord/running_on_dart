@@ -1,5 +1,6 @@
 import "dart:io" show Platform, ProcessInfo;
 
+import 'package:nyxx/nyxx.dart';
 import "package:nyxx_commander/commander.dart";
 
 String? get envPrefix => Platform.environment["ROD_PREFIX"];
@@ -9,6 +10,7 @@ String? get envAdminId => Platform.environment["ROD_ADMIN_ID"];
 
 DateTime _approxMemberCountLastAccess = DateTime.utc(2005);
 int _approxMemberCount = -1;
+int _approxMemberOnline = -1;
 
 String get dartVersion {
   final platformVersion = Platform.version;
@@ -43,14 +45,15 @@ Future<bool> checkForAdmin(CommandContext context) async {
   return false;
 }
 
-int getApproxMemberCount(CommandContext ctx) {
+String getApproxMemberCount(CommandContext ctx) {
   if (DateTime.now().difference(_approxMemberCountLastAccess).inMinutes > 5 || _approxMemberCount == -1) {
-    // ignore: unawaited_futures
-    Stream.fromFutures(
-        ctx.client.guilds.values
-            .map((e) async => (await e.fetchGuildPreview()).approxMemberCount))
-        .reduce((previous, element) => previous + element).then((value) => _approxMemberCount = value);
+    Future.forEach(ctx.client.guilds.values, (element) async {
+      final guildPreview = await (element as Guild).fetchGuildPreview();
+
+      _approxMemberCount += guildPreview.approxMemberCount;
+      _approxMemberOnline += guildPreview.approxOnlineMembers;
+    });
   }
 
-  return _approxMemberCount;
+  return "$_approxMemberOnline/$_approxMemberCount";
 }
