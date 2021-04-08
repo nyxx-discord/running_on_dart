@@ -6,7 +6,7 @@ RUN git clone https://github.com/l7ssha/nyxx.git
 
 WORKDIR /app/nyxx
 RUN git fetch
-RUN git checkout 1.1
+RUN git checkout dev
 
 WORKDIR /app/nyxx/nyxx
 RUN dartdoc
