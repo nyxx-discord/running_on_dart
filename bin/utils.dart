@@ -47,11 +47,19 @@ Future<bool> checkForAdmin(CommandContext context) async {
 
 String getApproxMemberCount(CommandContext ctx) {
   if (DateTime.now().difference(_approxMemberCountLastAccess).inMinutes > 5 || _approxMemberCount == -1) {
-    Future.forEach(ctx.client.guilds.values, (element) async {
-      final guildPreview = await (element as Guild).fetchGuildPreview();
+    Future(() async {
+      var amc = 0;
+      var amo = 0;
 
-      _approxMemberCount += guildPreview.approxMemberCount;
-      _approxMemberOnline += guildPreview.approxOnlineMembers;
+      for (final element in ctx.client.guilds.values) {
+        final guildPreview = await element.fetchGuildPreview();
+
+        amc += guildPreview.approxMemberCount;
+        amo += guildPreview.approxOnlineMembers;
+      }
+
+      _approxMemberCount = amc;
+      _approxMemberOnline = amo;
     });
   }
 

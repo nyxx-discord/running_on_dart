@@ -49,14 +49,14 @@ packages:
       name: nyxx
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.0-dev.6"
+    version: "2.0.0-rc.2"
   nyxx_commander:
     dependency: "direct main"
     description:
       name: nyxx_commander
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.0-dev.6"
+    version: "2.0.0-rc.1"
   path:
     dependency: transitive
     description:

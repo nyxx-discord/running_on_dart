@@ -8,12 +8,12 @@ documentation: https://github.com/l7ssha/nyxx/running_on_dart
 issue_tracker: https://github.com/l7ssha/nyxx/running_on_dart
 
 environment:
-  sdk: '>=2.12.0-51.0.dev <3.0.0'
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
   logging: "^1.0.0"
   time_ago_provider:
     git:
       url: git://github.com/BaderEddineOuaich/time_ago_provider.git
-  nyxx: "^1.1.0-dev.5"
-  nyxx_commander: "^1.1.0-dev.5"
+  nyxx: "^2.0.0-rc.2"
+  nyxx_commander: "^2.0.0-rc.1"
