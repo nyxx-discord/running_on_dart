@@ -12,8 +12,5 @@ environment:
 
 dependencies:
   logging: "^1.0.0"
-  time_ago_provider:
-    git:
-      url: git://github.com/BaderEddineOuaich/time_ago_provider.git
-  nyxx: "^2.0.0-rc.2"
   nyxx_commander: "^2.0.0-rc.1"
+  time_ago_provider: "^4.0.0"

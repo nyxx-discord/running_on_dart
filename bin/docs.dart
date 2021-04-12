@@ -1,8 +1,9 @@
-import "dart:convert" show jsonDecode;
-import "dart:io" show File;
+import "dart:convert" show Utf8Decoder, jsonDecode;
+import "dart:io" show File, HttpClient;
 
 List<dynamic> _indexJson = jsonDecode(File("docfiles/nyxxdocs.json").readAsStringSync()) as List<dynamic>;
 String get basePath => "https://nyxx.l7ssha.xyz/";
+Uri get docUpdatePath => Uri.parse("https://api.github.com/repos/l7ssha/nyxx/actions/runs?status=success&per_page=1&page=1");
 
 class DocDefinition {
   /// Name of documentation element
@@ -50,4 +51,17 @@ Iterable<DocDefinition> searchDocs(String query) sync* {
   for (final element in searchResults){
     yield DocDefinition(element as Map<String, dynamic>);
   }
+}
+
+Future<DateTime> fetchLastDocUpdate() async {
+  final request = await HttpClient()
+      .getUrl(docUpdatePath);
+
+  final response = await request.close();
+  final body = await response.transform(const Utf8Decoder()).join();
+  final jsonBody = jsonDecode(body);
+
+  return DateTime.parse(
+    jsonBody["workflow_runs"][0]["updated_at"] as String
+  );
 }

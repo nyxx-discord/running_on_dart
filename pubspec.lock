@@ -97,7 +97,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "1e61ddedbfa44fa704c70cde8a9d301e33866deb"
+      resolved-ref: "4c89285348ea781c5d7616fa6cccbc0a73f3b7cf"
       url: "git://github.com/BaderEddineOuaich/time_ago_provider.git"
     source: git
     version: "4.0.0"

@@ -286,7 +286,7 @@ Future<void> infoCommand(CommandContext ctx, String content) async {
     ..addField(
         name: "Uptime",
         content: formatFull(ctx.client.startTime))
-    ..addField(name: "Created at", content: formatFull(ctx.client.app.createdAt));
+    ..addField(name: "Last doc update", content: formatFull(await docs.fetchLastDocUpdate()));
 
   await ctx.sendMessage(embed: embed);
 }
