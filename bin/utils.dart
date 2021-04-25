@@ -1,5 +1,6 @@
 import "dart:io" show Platform, ProcessInfo;
 
+import 'package:nyxx/nyxx.dart';
 import "package:nyxx_commander/commander.dart";
 
 String? get envPrefix => Platform.environment["ROD_PREFIX"];
@@ -44,13 +45,13 @@ Future<bool> checkForAdmin(CommandContext context) async {
   return false;
 }
 
-String getApproxMemberCount(CommandContext ctx) {
+String getApproxMemberCount(Nyxx client) {
   if (DateTime.now().difference(_approxMemberCountLastAccess).inMinutes > 5 || _approxMemberCount == -1) {
     Future(() async {
       var amc = 0;
       var amo = 0;
 
-      for (final element in ctx.client.guilds.values) {
+      for (final element in client.guilds.values) {
         final guildPreview = await element.fetchGuildPreview();
 
         amc += guildPreview.approxMemberCount;

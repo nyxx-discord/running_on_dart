@@ -12,15 +12,18 @@ import "dart:math" show Random;
 import "package:http/http.dart" as http;
 import "package:nyxx/nyxx.dart" show ClientOptions, Constants, DiscordColor, EmbedBuilder, EmbedFooterBuilder, GatewayIntents, Nyxx, Snowflake, TextChannel, TextGuildChannel;
 import "package:nyxx_commander/commander.dart" show CommandContext, CommandGroup, Commander;
+import "package:nyxx_interactions/interactions.dart";
 import "package:time_ago_provider/time_ago_provider.dart" show formatFull;
 
 import "docs.dart" as docs;
 import "exec.dart" as exec;
 import "utils.dart" as utils;
 
+late Nyxx botInstance;
+
 void main(List<String> arguments) async {
-  final bot = Nyxx(utils.envToken!, GatewayIntents.allUnprivileged, options: ClientOptions(guildSubscriptions: false));
-  Commander(bot, prefix: utils.envPrefix)
+  botInstance = Nyxx(utils.envToken!, GatewayIntents.allUnprivileged, options: ClientOptions(guildSubscriptions: false));
+  Commander(botInstance, prefix: utils.envPrefix)
     // Admin stuff
     ..registerCommandGroup(CommandGroup(beforeHandler: utils.checkForAdmin)
       ..registerSubCommand("leave", leaveChannelCommand)
@@ -43,6 +46,11 @@ void main(List<String> arguments) async {
     ..registerCommandGroup(CommandGroup(name: "qr")
       ..registerSubCommand("gen", genQrCodeCommand)
       ..registerSubCommand("read", readQrCodeCommand));
+
+  Interactions(botInstance)
+    ..registerSlashCommand(SlashCommandBuilder("info", "Info about bot state ", [])
+      ..registerHandler(infoSlashCommand))
+    ..syncOnReady();
 }
 
 Future<void> helpCommand(CommandContext ctx, String content) async {
@@ -249,44 +257,70 @@ Future<void> docsSearchCommand(CommandContext ctx, String content) async {
   await ctx.sendMessage(embed: embed);
 }
 
-Future<void> infoCommand(CommandContext ctx, String content) async {
+Future<EmbedBuilder> infoGenericCommand(Nyxx client, [int shardId = 0]) async {
   final color = DiscordColor.fromRgb(
       Random().nextInt(255), Random().nextInt(255), Random().nextInt(255));
 
-  final embed = EmbedBuilder()
+  return EmbedBuilder()
     ..addAuthor((author) {
-      author.name = ctx.client.self.tag;
-      author.iconUrl = ctx.client.self.avatarURL();
+      author.name = client.self.tag;
+      author.iconUrl = client.self.avatarURL();
       author.url = "https://github.com/l7ssha/nyxx";
     })
     ..addFooter((footer) {
-      footer.text = "Nyxx ${Constants.version} | Shard [${ctx.shardId + 1}] of [${ctx.client.shards}] | ${utils.dartVersion}";
+      footer.text = "Nyxx ${Constants.version} | Shard [${shardId + 1}] of [${client.shards}] | Dart SDK ${utils.dartVersion}";
     })
     ..color = color
-    ..addField(name: "Cached guilds", content: ctx.client.guilds.count, inline: true)
-    ..addField(name: "Cached users", content: ctx.client.users.count, inline: true)
+    ..addField(name: "Cached guilds", content: client.guilds.count, inline: true)
+    ..addField(name: "Cached users", content: client.users.count, inline: true)
     ..addField(
         name: "Cached channels",
-        content: ctx.client.channels.count,
-        inline: true)
+        content: client.channels.count,
+        inline: true
+    )
     ..addField(
         name: "Cached voice states",
-        content: ctx.client.guilds.values
+        content: client.guilds.values
             .map((g) => g.voiceStates.count)
             .reduce((f, s) => f + s),
-        inline: true)
-    ..addField(name: "Shard count", content: ctx.client.shards, inline: true)
-    ..addField(name: "Cached messages", content: ctx.client.channels.find((item) => item is TextChannel).cast<TextChannel>().map((e) => e.messageCache.count).fold(0, (first, second) => (first as int) + second), inline: true)
+        inline: true
+    )
+    ..addField(
+        name: "Shard count",
+        content: client.shards,
+        inline: true
+    )
+    ..addField(
+        name: "Cached messages",
+        content: client.channels.find((item) => item is TextChannel).cast<TextChannel>().map((e) => e.messageCache.count).fold(0, (first, second) => (first as int) + second),
+        inline: true
+    )
     ..addField(
         name: "Memory usage (current/RSS)",
         content: utils.getMemoryUsageString(),
         inline: true
     )
-    ..addField(name: "Member count (online/total)", content: utils.getApproxMemberCount(ctx), inline: true)
+    ..addField(
+        name: "Member count (online/total)",
+        content: utils.getApproxMemberCount(client),
+        inline: true
+    )
     ..addField(
         name: "Uptime",
-        content: formatFull(ctx.client.startTime))
-    ..addField(name: "Last doc update", content: formatFull(await docs.fetchLastDocUpdate()));
+        content: formatFull(client.startTime)
+    )
+    ..addField(
+        name: "Last doc update",
+        content: formatFull(await docs.fetchLastDocUpdate())
+  );
+}
 
-  await ctx.sendMessage(embed: embed);
+Future<void> infoSlashCommand(InteractionEvent event) async {
+  await event.acknowledge();
+
+  await event.respond(embed: await infoGenericCommand(botInstance));
+}
+
+Future<void> infoCommand(CommandContext ctx, String content) async {
+  await ctx.reply(embed: await infoGenericCommand(ctx.client, ctx.shardId));
 }
