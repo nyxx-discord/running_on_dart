@@ -11,10 +11,13 @@ RUN git checkout dev
 WORKDIR /app/nyxx/nyxx
 RUN dartdoc
 
-WORKDIR /app/nyxx/nyxx.commander
+WORKDIR /app/nyxx/nyxx_commander
 RUN dartdoc
 
-WORKDIR /app/nyxx/nyxx.extensions
+WORKDIR /app/nyxx/nyxx_extensions
+RUN dartdoc
+
+WORKDIR /app/nyxx/nyxx_interactions
 RUN dartdoc
 
 WORKDIR /app/bot
