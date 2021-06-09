@@ -10,7 +10,7 @@ import "dart:io" show Process, pid;
 import "dart:math" show Random;
 
 import "package:http/http.dart" as http;
-import "package:nyxx/nyxx.dart" show ClientOptions, Constants, DiscordColor, EmbedBuilder, EmbedFooterBuilder, GatewayIntents, MessageBuilder, Nyxx, Snowflake, TextChannel, TextGuildChannel;
+import "package:nyxx/nyxx.dart" show CacheOptions, CachePolicyLocation, ClientOptions, Constants, DiscordColor, EmbedBuilder, EmbedFooterBuilder, GatewayIntents, MessageBuilder, Nyxx, Snowflake, TextChannel, TextGuildChannel;
 import "package:nyxx_commander/commander.dart" show CommandContext, CommandGroup, Commander;
 import "package:nyxx_interactions/interactions.dart";
 import "package:time_ago_provider/time_ago_provider.dart" show formatFull;
@@ -22,7 +22,11 @@ import "utils/utils.dart" as utils;
 late Nyxx botInstance;
 
 void main(List<String> arguments) async {
-  botInstance = Nyxx(utils.envToken!, GatewayIntents.allUnprivileged, options: ClientOptions(guildSubscriptions: false));
+  final cacheOptions = CacheOptions()
+    ..memberCachePolicyLocation = CachePolicyLocation.none()
+    ..userCachePolicyLocation = CachePolicyLocation.none();
+
+  botInstance = Nyxx(utils.envToken!, GatewayIntents.allUnprivileged, options: ClientOptions(guildSubscriptions: false), cacheOptions: cacheOptions);
   Commander(botInstance, prefix: utils.envPrefix)
     // Admin stuff
     ..registerCommandGroup(CommandGroup(beforeHandler: utils.checkForAdmin)
