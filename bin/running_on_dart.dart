@@ -15,9 +15,9 @@ import "package:nyxx_commander/commander.dart" show CommandContext, CommandGroup
 import "package:nyxx_interactions/interactions.dart";
 import "package:time_ago_provider/time_ago_provider.dart" show formatFull;
 
-import "docs.dart" as docs;
-import "exec.dart" as exec;
-import "utils.dart" as utils;
+import "modules/docs.dart" as docs;
+import "modules/exec.dart" as exec;
+import "utils/utils.dart" as utils;
 
 late Nyxx botInstance;
 
