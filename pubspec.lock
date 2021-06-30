@@ -53,24 +53,24 @@ packages:
   nyxx:
     dependency: "direct main"
     description:
-      path: "../nyxx/nyxx"
-      relative: true
-    source: path
-    version: "2.0.0-rc.8"
+      name: nyxx
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0-rc.7"
   nyxx_commander:
     dependency: "direct main"
     description:
       name: nyxx_commander
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0-rc.9"
+    version: "2.0.0-rc.10"
   nyxx_interactions:
     dependency: "direct main"
     description:
       name: nyxx_interactions
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0-rc.7"
+    version: "2.0.0-rc.8"
   path:
     dependency: transitive
     description:
@@ -84,7 +84,14 @@ packages:
       name: pedantic
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.11.0"
+    version: "1.11.1"
+  sembast:
+    dependency: "direct main"
+    description:
+      name: sembast
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.1.0+2"
   source_span:
     dependency: transitive
     description:
@@ -99,6 +106,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.0"
+  synchronized:
+    dependency: transitive
+    description:
+      name: synchronized
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.0"
   term_glyph:
     dependency: transitive
     description:

@@ -14,3 +14,4 @@ doc/api/
 db/
 .env
 *.exe
+*.db

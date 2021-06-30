@@ -5,8 +5,3 @@ services:
     container_name: running_on_dart
     env_file:
      - ./.env
-# Im not using tags module right now so there is no purpose on attaching volume that
-#    volumes:
-#    - type: bind
-#      source: ./db
-#      target: /app/bot/db

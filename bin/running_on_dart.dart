@@ -10,23 +10,31 @@ import "dart:io" show Process, pid;
 import "dart:math" show Random;
 
 import "package:http/http.dart" as http;
-import "package:nyxx/nyxx.dart" show CacheOptions, CachePolicyLocation, ClientOptions, Constants, DiscordColor, EmbedBuilder, EmbedFooterBuilder, GatewayIntents, MessageBuilder, Nyxx, Snowflake, TextChannel, TextGuildChannel;
+import "package:nyxx/nyxx.dart" show CacheOptions, CachePolicyLocation, ClientOptions, Constants, DiscordColor, EmbedBuilder, EmbedFooterBuilder, GatewayIntents, Message, MessageBuilder, Nyxx, Snowflake, TextChannel, TextGuildChannel;
 import "package:nyxx_commander/commander.dart" show CommandContext, CommandGroup, Commander;
 import "package:nyxx_interactions/interactions.dart";
 import "package:time_ago_provider/time_ago_provider.dart" show formatFull;
 
 import "modules/docs.dart" as docs;
 import "modules/exec.dart" as exec;
+import "utils/db.dart" as db;
 import "utils/utils.dart" as utils;
 
 late Nyxx botInstance;
 
 void main(List<String> arguments) async {
+  await db.RodDb.openDatabase();
+
   final cacheOptions = CacheOptions()
     ..memberCachePolicyLocation = CachePolicyLocation.none()
     ..userCachePolicyLocation = CachePolicyLocation.none();
 
   botInstance = Nyxx(utils.envToken!, GatewayIntents.allUnprivileged, options: ClientOptions(guildSubscriptions: false), cacheOptions: cacheOptions);
+
+  botInstance.onMessageReceived.listen((event) {
+    processMessage(event.message);
+  });
+
   Commander(botInstance, prefix: utils.envPrefix)
     // Admin stuff
     ..registerCommandGroup(CommandGroup(beforeHandler: utils.checkForAdmin)
@@ -49,7 +57,10 @@ void main(List<String> arguments) async {
     // Qr code stuff
     ..registerCommandGroup(CommandGroup(name: "qr")
       ..registerSubCommand("gen", genQrCodeCommand)
-      ..registerSubCommand("read", readQrCodeCommand));
+      ..registerSubCommand("read", readQrCodeCommand))
+    ..registerCommandGroup(CommandGroup(name: "tag")
+      ..registerSubCommand("enable", tagsEnableCommand, beforeHandler: utils.checkForAdmin)
+      ..registerSubCommand("add", addTagCommand, beforeHandler: utils.checkForAdmin));
 
   Interactions(botInstance)
     ..registerSlashCommand(SlashCommandBuilder("info", "Info about bot state ", [])
@@ -324,4 +335,40 @@ Future<void> infoSlashCommand(InteractionEvent event) async {
 
 Future<void> infoCommand(CommandContext ctx, String content) async {
   await ctx.reply(MessageBuilder.embed(await infoGenericCommand(ctx.client, ctx.shardId)));
+}
+
+Future<void> tagsEnableCommand(CommandContext ctx, String content) async {
+  final result = await db.RodDb.channelStore.insert(ctx.channel.id.toString());
+
+  await ctx.reply(MessageBuilder.content("result: $result"));
+}
+
+Future<void> addTagCommand(CommandContext ctx, String content) async {
+  final args = ctx.getArguments();
+
+  final name = args.first;
+  final content = args.last;
+
+  final result = await db.RodDb.tagStore.insert(name, content);
+
+  await ctx.reply(MessageBuilder.content("result: $result"));
+}
+
+Future<void> processMessage(Message message) async {
+  if (message.author.bot) {
+    return;
+  }
+
+  final channelHasEnabledTags = await db.RodDb.channelStore.hasEnabledTags(message.channel.id.toString());
+  if (!channelHasEnabledTags) {
+    return;
+  }
+
+  final result = await db.RodDb.tagStore.matchInString(message.content);
+
+  if (result == null) {
+    return;
+  }
+
+  await message.channel.sendMessage(MessageBuilder.content(result));
 }
