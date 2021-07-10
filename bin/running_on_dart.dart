@@ -17,23 +17,26 @@ import "package:time_ago_provider/time_ago_provider.dart" show formatFull;
 
 import "modules/docs.dart" as docs;
 import "modules/exec.dart" as exec;
-import "utils/db.dart" as db;
+import "modules/inline_tags.dart" as inline_tags;
 import "utils/utils.dart" as utils;
 
 late Nyxx botInstance;
 
 void main(List<String> arguments) async {
-  await db.RodDb.openDatabase();
+  await inline_tags.openDb();
 
   final cacheOptions = CacheOptions()
     ..memberCachePolicyLocation = CachePolicyLocation.none()
     ..userCachePolicyLocation = CachePolicyLocation.none();
 
-  botInstance = Nyxx(utils.envToken!, GatewayIntents.allUnprivileged, options: ClientOptions(guildSubscriptions: false), cacheOptions: cacheOptions);
+  botInstance = Nyxx(
+      utils.envToken!,
+      GatewayIntents.allUnprivileged,
+      options: ClientOptions(guildSubscriptions: false),
+      cacheOptions: cacheOptions
+  );
 
-  botInstance.onMessageReceived.listen((event) {
-    processMessage(event.message);
-  });
+  botInstance.onMessageReceived.listen(inline_tags.processMessage);
 
   Commander(botInstance, prefix: utils.envPrefix)
     // Admin stuff
@@ -59,8 +62,8 @@ void main(List<String> arguments) async {
       ..registerSubCommand("gen", genQrCodeCommand)
       ..registerSubCommand("read", readQrCodeCommand))
     ..registerCommandGroup(CommandGroup(name: "tag")
-      ..registerSubCommand("enable", tagsEnableCommand, beforeHandler: utils.checkForAdmin)
-      ..registerSubCommand("add", addTagCommand, beforeHandler: utils.checkForAdmin));
+      ..registerSubCommand("enable", inline_tags.tagsEnableCommand, beforeHandler: utils.checkForAdmin)
+      ..registerSubCommand("add", inline_tags.addTagCommand, beforeHandler: utils.checkForAdmin));
 
   Interactions(botInstance)
     ..registerSlashCommand(SlashCommandBuilder("info", "Info about bot state ", [])
@@ -335,40 +338,4 @@ Future<void> infoSlashCommand(InteractionEvent event) async {
 
 Future<void> infoCommand(CommandContext ctx, String content) async {
   await ctx.reply(MessageBuilder.embed(await infoGenericCommand(ctx.client, ctx.shardId)));
-}
-
-Future<void> tagsEnableCommand(CommandContext ctx, String content) async {
-  final result = await db.RodDb.channelStore.insert(ctx.channel.id.toString());
-
-  await ctx.reply(MessageBuilder.content("result: $result"));
-}
-
-Future<void> addTagCommand(CommandContext ctx, String content) async {
-  final args = ctx.getArguments();
-
-  final name = args.first;
-  final content = args.last;
-
-  final result = await db.RodDb.tagStore.insert(name, content);
-
-  await ctx.reply(MessageBuilder.content("result: $result"));
-}
-
-Future<void> processMessage(Message message) async {
-  if (message.author.bot) {
-    return;
-  }
-
-  final channelHasEnabledTags = await db.RodDb.channelStore.hasEnabledTags(message.channel.id.toString());
-  if (!channelHasEnabledTags) {
-    return;
-  }
-
-  final result = await db.RodDb.tagStore.matchInString(message.content);
-
-  if (result == null) {
-    return;
-  }
-
-  await message.channel.sendMessage(MessageBuilder.content(result));
 }
