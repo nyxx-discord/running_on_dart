@@ -19,11 +19,12 @@ import "modules/docs.dart" as docs;
 import "modules/exec.dart" as exec;
 import "modules/inline_tags.dart" as inline_tags;
 import "utils/utils.dart" as utils;
+import 'utils/db/db.dart' as db;
 
 late Nyxx botInstance;
 
 void main(List<String> arguments) async {
-  await inline_tags.openDb();
+  db.openDb();
 
   final cacheOptions = CacheOptions()
     ..memberCachePolicyLocation = CachePolicyLocation.none()
@@ -36,7 +37,7 @@ void main(List<String> arguments) async {
       cacheOptions: cacheOptions
   );
 
-  botInstance.onMessageReceived.listen(inline_tags.processMessage);
+  // botInstance.onMessageReceived.listen(inline_tags.processMessage);
 
   Commander(botInstance, prefix: utils.envPrefix)
     // Admin stuff
@@ -60,10 +61,10 @@ void main(List<String> arguments) async {
     // Qr code stuff
     ..registerCommandGroup(CommandGroup(name: "qr")
       ..registerSubCommand("gen", genQrCodeCommand)
-      ..registerSubCommand("read", readQrCodeCommand))
-    ..registerCommandGroup(CommandGroup(name: "tag")
-      ..registerSubCommand("enable", inline_tags.tagsEnableCommand, beforeHandler: utils.checkForAdmin)
-      ..registerSubCommand("add", inline_tags.addTagCommand, beforeHandler: utils.checkForAdmin));
+      ..registerSubCommand("read", readQrCodeCommand));
+    // ..registerCommandGroup(CommandGroup(name: "tag")
+    //   ..registerSubCommand("enable", inline_tags.tagsEnableCommand, beforeHandler: utils.checkForAdmin)
+    //   ..registerSubCommand("add", inline_tags.addTagCommand, beforeHandler: utils.checkForAdmin));
 
   Interactions(botInstance)
     ..registerSlashCommand(SlashCommandBuilder("info", "Info about bot state ", [])
@@ -103,7 +104,7 @@ Future<void> selfNickCommand(CommandContext ctx, String content) async {
     return;
   }
 
-  await ctx.guild?.changeSelfNick(ctx.getArguments().first);
+  await ctx.guild?.modifyCurrentMember(nick: ctx.getArguments().first);
 }
 
 Future<void> shutdownCommand(CommandContext ctx, String content) async {
