@@ -281,7 +281,7 @@ Future<EmbedBuilder> infoGenericCommand(Nyxx client, [int shardId = 0]) async {
     ..addAuthor((author) {
       author.name = client.self.tag;
       author.iconUrl = client.self.avatarURL();
-      author.url = "https://github.com/l7ssha/nyxx";
+      author.url = "https://github.com/nyxx-discord/nyxx";
     })
     ..addFooter((footer) {
       footer.text = "Nyxx ${Constants.version} | Shard [${shardId + 1}] of [${client.shards}] | Dart SDK ${utils.dartVersion}";
