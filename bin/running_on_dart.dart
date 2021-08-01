@@ -10,7 +10,7 @@ import "dart:io" show Process, pid;
 import "dart:math" show Random;
 
 import "package:http/http.dart" as http;
-import "package:nyxx/nyxx.dart" show CacheOptions, CachePolicyLocation, ClientOptions, Constants, DiscordColor, EmbedBuilder, EmbedFooterBuilder, GatewayIntents, Message, MessageBuilder, Nyxx, Snowflake, TextChannel, TextGuildChannel;
+import "package:nyxx/nyxx.dart" show CacheOptions, CachePolicyLocation, ClientOptions, Constants, DiscordColor, EmbedBuilder, EmbedFooterBuilder, GatewayIntents, MessageBuilder, Nyxx, Snowflake, TextChannel, TextGuildChannel;
 import "package:nyxx_commander/commander.dart" show CommandContext, CommandGroup, Commander;
 import "package:nyxx_interactions/interactions.dart";
 import "package:time_ago_provider/time_ago_provider.dart" show formatFull;
@@ -18,8 +18,8 @@ import "package:time_ago_provider/time_ago_provider.dart" show formatFull;
 import "modules/docs.dart" as docs;
 import "modules/exec.dart" as exec;
 import "modules/inline_tags.dart" as inline_tags;
+import "utils/db/db.dart" as db;
 import "utils/utils.dart" as utils;
-import 'utils/db/db.dart' as db;
 
 late Nyxx botInstance;
 
@@ -69,7 +69,7 @@ void main(List<String> arguments) async {
         ..registerHandler((event) => showTagHandler(event, ephemeral: false)),
       CommandOptionBuilder(CommandOptionType.subCommand, "preview", "Shows tag only for yourself", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag to show")])
         ..registerHandler((event) => showTagHandler(event, ephemeral: true)),
-      CommandOptionBuilder(CommandOptionType.subCommand, "create", "Creates new tag", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag"), CommandOptionBuilder(CommandOptionType.string, "name", "Content of the tag")])
+      CommandOptionBuilder(CommandOptionType.subCommand, "create", "Creates new tag", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag"), CommandOptionBuilder(CommandOptionType.string, "content", "Content of the tag")])
         ..registerHandler(createTagHandler),
       CommandOptionBuilder(CommandOptionType.subCommand, "delete", "Deletes tag", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag")])
         ..registerHandler(deleteTagHandler),
