@@ -80,7 +80,7 @@ void main(List<String> arguments) async {
 Future<void> showTagHandler(SlashCommandInteractionEvent event, {required bool ephemeral}) async {
   await event.acknowledge();
 
-  final tagName = event.interaction.options.firstWhere((element) => element.name == "name").value.toString();
+  final tagName = event.interaction.options.first.args.firstWhere((element) => element.name == "name").value.toString();
   final tag = await inline_tags.findTagForGuild(tagName, event.interaction.guild!.id);
 
   if (tag == null) {
@@ -93,8 +93,8 @@ Future<void> showTagHandler(SlashCommandInteractionEvent event, {required bool e
 Future<void> createTagHandler(SlashCommandInteractionEvent event) async {
   await event.acknowledge();
 
-  final tagName = event.interaction.options.firstWhere((element) => element.name == "name").value.toString();
-  final tagContent = event.interaction.options.firstWhere((element) => element.name == "content").value.toString();
+  final tagName = (event.interaction.options.first.args.firstWhere((element) => element.name == "name")).value.toString();
+  final tagContent = (event.interaction.options.first.args.firstWhere((element) => element.name == "content")).value.toString();
 
   final result = await inline_tags.createTagForGuild(tagName, tagContent, event.interaction.guild!.id, event.interaction.memberAuthor.id);
   if (!result) {
@@ -107,7 +107,7 @@ Future<void> createTagHandler(SlashCommandInteractionEvent event) async {
 Future<void> deleteTagHandler(SlashCommandInteractionEvent event) async {
   await event.acknowledge();
 
-  final tagName = event.interaction.options.firstWhere((element) => element.name == "name").value.toString();
+  final tagName = event.interaction.options.first.args.firstWhere((element) => element.name == "name").value.toString();
 
   final result = await inline_tags.deleteTagForGuild(tagName, event.interaction.guild!.id, event.interaction.memberAuthor.id);
   if (!result) {

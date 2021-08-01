@@ -28,11 +28,9 @@ FutureOr<void> openDbAndRunMigrations() async {
         name VARCHAR NOT NULL,
         content VARCHAR NOT NULL,
         enabled BOOLEAN NOT NULL DEFAULT TRUE,
-        guild_id INT NOT NULL,
-        author_id INT NOT NULL
+        guild_id VARCHAR NOT NULL,
+        author_id VARCHAR NOT NULL
       );
-    """)
-    ..enqueueMigration("1.1", """
       CREATE INDEX name_index ON tags USING btree(name);
       CREATE INDEX guild_index ON tags USING btree(guild_id);
       ALTER TABLE tags ADD CONSTRAINT name_guild_id_unique UNIQUE (name, guild_id);

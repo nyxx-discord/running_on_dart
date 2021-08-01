@@ -40,7 +40,7 @@ Future<bool> deleteTagForGuild(String name, Snowflake guildId, Snowflake authorI
 Future<bool> createTagForGuild(String name, String content, Snowflake guildId, Snowflake authorId) async {
   const query = """
     INSERT INTO tags (name, content, enabled, guild_id, author_id)
-    VALUES (@name, @content, 1, @guildId, @authorId);
+    VALUES (@name, @content, true, @guildId, @authorId);
   """;
 
   final affectedRows = await db.connection.execute(query, substitutionValues: {
