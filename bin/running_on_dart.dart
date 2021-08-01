@@ -24,7 +24,7 @@ import 'utils/db/db.dart' as db;
 late Nyxx botInstance;
 
 void main(List<String> arguments) async {
-  db.openDb();
+  db.openDbAndRunMigrations();
 
   final cacheOptions = CacheOptions()
     ..memberCachePolicyLocation = CachePolicyLocation.none()
@@ -36,8 +36,6 @@ void main(List<String> arguments) async {
       options: ClientOptions(guildSubscriptions: false),
       cacheOptions: cacheOptions
   );
-
-  // botInstance.onMessageReceived.listen(inline_tags.processMessage);
 
   Commander(botInstance, prefix: utils.envPrefix)
     // Admin stuff
@@ -62,14 +60,61 @@ void main(List<String> arguments) async {
     ..registerCommandGroup(CommandGroup(name: "qr")
       ..registerSubCommand("gen", genQrCodeCommand)
       ..registerSubCommand("read", readQrCodeCommand));
-    // ..registerCommandGroup(CommandGroup(name: "tag")
-    //   ..registerSubCommand("enable", inline_tags.tagsEnableCommand, beforeHandler: utils.checkForAdmin)
-    //   ..registerSubCommand("add", inline_tags.addTagCommand, beforeHandler: utils.checkForAdmin));
 
   Interactions(botInstance)
     ..registerSlashCommand(SlashCommandBuilder("info", "Info about bot state ", [])
       ..registerHandler(infoSlashCommand))
+    ..registerSlashCommand(SlashCommandBuilder("tag", "Show and manipulate tags", [
+      CommandOptionBuilder(CommandOptionType.subCommand, "show", "Shows tag to everyone", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag to show")])
+        ..registerHandler((event) => showTagHandler(event, ephemeral: false)),
+      CommandOptionBuilder(CommandOptionType.subCommand, "preview", "Shows tag only for yourself", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag to show")])
+        ..registerHandler((event) => showTagHandler(event, ephemeral: true)),
+      CommandOptionBuilder(CommandOptionType.subCommand, "create", "Creates new tag", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag"), CommandOptionBuilder(CommandOptionType.string, "name", "Content of the tag")])
+        ..registerHandler(createTagHandler),
+      CommandOptionBuilder(CommandOptionType.subCommand, "delete", "Deletes tag", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag")])
+        ..registerHandler(deleteTagHandler),
+    ], guild: Snowflake(302360552993456135)))
     ..syncOnReady();
+}
+
+Future<void> showTagHandler(SlashCommandInteractionEvent event, {required bool ephemeral}) async {
+  await event.acknowledge();
+
+  final tagName = event.interaction.options.firstWhere((element) => element.name == "name").value.toString();
+  final tag = await inline_tags.findTagForGuild(tagName, event.interaction.guild!.id);
+
+  if (tag == null) {
+    return event.respond(MessageBuilder.content("Tag with name: `$tagName` does not exist"), hidden: ephemeral);
+  }
+
+  return event.respond(MessageBuilder.content(tag.content), hidden: ephemeral);
+}
+
+Future<void> createTagHandler(SlashCommandInteractionEvent event) async {
+  await event.acknowledge();
+
+  final tagName = event.interaction.options.firstWhere((element) => element.name == "name").value.toString();
+  final tagContent = event.interaction.options.firstWhere((element) => element.name == "content").value.toString();
+
+  final result = await inline_tags.createTagForGuild(tagName, tagContent, event.interaction.guild!.id, event.interaction.memberAuthor.id);
+  if (!result) {
+    return event.respond(MessageBuilder.content("Error occurred when creating tag. Report problem to developer"), hidden: true);
+  }
+
+  return event.respond(MessageBuilder.content("Tag created successfully"), hidden: true);
+}
+
+Future<void> deleteTagHandler(SlashCommandInteractionEvent event) async {
+  await event.acknowledge();
+
+  final tagName = event.interaction.options.firstWhere((element) => element.name == "name").value.toString();
+
+  final result = await inline_tags.deleteTagForGuild(tagName, event.interaction.guild!.id, event.interaction.memberAuthor.id);
+  if (!result) {
+    return event.respond(MessageBuilder.content("Error occurred when deleting tag. Report problem to developer"), hidden: true);
+  }
+
+  return event.respond(MessageBuilder.content("Tag deleted successfully"), hidden: true);
 }
 
 Future<void> helpCommand(CommandContext ctx, String content) async {

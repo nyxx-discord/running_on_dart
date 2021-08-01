@@ -1,46 +1,54 @@
+import "dart:async";
+
 import "package:nyxx/nyxx.dart";
-import "package:nyxx_commander/commander.dart";
 
-import '../utils/db/db.dart' as db;
+import "../utils/db/db.dart" as db;
+import "../utils/db/tags.dart";
 
-// Future<void> openDb() async {
-//   await db.RodDb.openDatabase();
-// }
-//
-// Future<void> processMessage(MessageReceivedEvent messageReceivedEvent) async {
-//   final message = messageReceivedEvent.message;
-//
-//   if (message.author.bot) {
-//     return;
-//   }
-//
-//   final channelHasEnabledTags = await db.RodDb.channelStore.hasEnabledTags(message.channel.id.toString());
-//   if (!channelHasEnabledTags) {
-//     return;
-//   }
-//
-//   final result = await db.RodDb.tagStore.matchInString(message.content);
-//
-//   if (result == null) {
-//     return;
-//   }
-//
-//   await message.channel.sendMessage(MessageBuilder.content(result));
-// }
-//
-// Future<void> tagsEnableCommand(CommandContext ctx, String content) async {
-//   final result = await db.RodDb.channelStore.insert(ctx.channel.id.toString());
-//
-//   await ctx.reply(MessageBuilder.content("result: $result"));
-// }
-//
-// Future<void> addTagCommand(CommandContext ctx, String content) async {
-//   final args = ctx.getArguments();
-//
-//   final name = args.first;
-//   final content = args.last;
-//
-//   final result = await db.RodDb.tagStore.insert(name, content);
-//
-//   await ctx.reply(MessageBuilder.content("result: $result"));
-// }
+Future<Tag?> findTagForGuild(String name, Snowflake guildId, {bool enabled = true}) async {
+  const query = """
+    SELECT t.* FROM tags t WHERE t.name = @name AND t.guild_id = @guildId AND t.enabled = @enabled;
+  """;
+
+  final result = await db.connection.query(query, substitutionValues: {
+    "name": name,
+    "guildId": guildId.toString(),
+    "enabled": enabled,
+  });
+
+  if (result.isEmpty) {
+    return null;
+  }
+
+  return Tag.fromDatabaseRecord(result.first.toColumnMap());
+}
+
+Future<bool> deleteTagForGuild(String name, Snowflake guildId, Snowflake authorId) async {
+  const query = """
+    DELETE FROM tags t WHERE t.name = @name AND t.guild_id = @guildId AND t.author_id = @authorId; 
+  """;
+
+  final affectedRows = await db.connection.execute(query, substitutionValues: {
+    "name": name,
+    "guildId": guildId.toString(),
+    "author_id": authorId.toString(),
+  });
+
+  return affectedRows == 1;
+}
+
+Future<bool> createTagForGuild(String name, String content, Snowflake guildId, Snowflake authorId) async {
+  const query = """
+    INSERT INTO tags (name, content, enabled, guild_id, author_id)
+    VALUES (@name, @content, 1, @guildId, @authorId);
+  """;
+
+  final affectedRows = await db.connection.execute(query, substitutionValues: {
+    "name": name,
+    "content": content,
+    "guildId": guildId.toString(),
+    "authorId": authorId.toString(),
+  });
+
+  return affectedRows == 1;
+}

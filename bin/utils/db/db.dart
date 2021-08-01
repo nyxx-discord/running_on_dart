@@ -12,7 +12,10 @@ String get _dbName => Platform.environment["POSTGRES_DB"]!;
 
 PostgreSQLConnection? _connection;
 
-FutureOr<void> openDb() async {
+/// Postgres connection
+PostgreSQLConnection get connection => _connection!;
+
+FutureOr<void> openDbAndRunMigrations() async {
   await Future.delayed(const Duration(seconds: 5)); // hack for postgres
 
   _connection = PostgreSQLConnection(_dbHost, _dbPort, _dbName, username: _dbUser, password: _dbPassword);
@@ -25,7 +28,8 @@ FutureOr<void> openDb() async {
         name VARCHAR NOT NULL,
         content VARCHAR NOT NULL,
         enabled BOOLEAN NOT NULL DEFAULT TRUE,
-        guild_id INT NOT NULL
+        guild_id INT NOT NULL,
+        author_id INT NOT NULL
       );
     """)
     ..enqueueMigration("1.1", """
