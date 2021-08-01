@@ -64,6 +64,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.7.0"
+  migent:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: a69f4fb9a72ff21e49fc5a25e591a2628d8367cd
+      url: "git://github.com/nyxx-discord/migent.git"
+    source: git
+    version: "1.0.0"
   nyxx:
     dependency: "direct main"
     description:

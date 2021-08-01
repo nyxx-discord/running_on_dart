@@ -6,6 +6,7 @@ homepage: https://github.com/nyxx-discord/running_on_dart
 repository: https://github.com/nyxx-discord/running_on_dart
 documentation: https://github.com/nyxx-discord/running_on_dart
 issue_tracker: https://github.com/nyxx-discord/running_on_dart/issues
+publish_to: none
 
 environment:
   sdk: '>=2.13.0 <3.0.0'
@@ -17,3 +18,5 @@ dependencies:
   nyxx_interactions: "^2.0.0-rc.7"
   postgres: "^2.3.2"
   time_ago_provider: "^4.0.0"
+  migent:
+    git: git://github.com/nyxx-discord/migent.git

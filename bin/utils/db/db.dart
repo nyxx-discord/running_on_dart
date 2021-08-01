@@ -2,8 +2,7 @@ import "dart:async";
 import "dart:io";
 
 import "package:postgres/postgres.dart";
-
-import "migrations.dart" as migrations;
+import "package:migent/migent.dart";
 
 String get _dbHost => Platform.environment["DB_HOST"]!;
 int get _dbPort => int.parse(Platform.environment["DB_PORT"]!);
@@ -19,7 +18,7 @@ FutureOr<void> openDb() async {
   _connection = PostgreSQLConnection(_dbHost, _dbPort, _dbName, username: _dbUser, password: _dbPassword);
   await _connection!.open();
 
-  migrations.RODMigrations(_connection!, _dbName)
+  Migent(_connection!, _dbName)
     ..enqueueMigration("1", """
       CREATE TABLE tags (
         id SERIAL PRIMARY KEY,
