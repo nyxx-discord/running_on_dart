@@ -93,7 +93,7 @@ packages:
       name: nyxx_interactions
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0-rc.16"
+    version: "2.0.0-rc.17"
   path:
     dependency: transitive
     description:
@@ -142,7 +142,7 @@ packages:
       name: time_ago_provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.1.0"
+    version: "4.1.1"
   typed_data:
     dependency: transitive
     description:

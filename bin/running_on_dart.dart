@@ -78,16 +78,16 @@ void main(List<String> arguments) async {
 }
 
 Future<void> showTagHandler(SlashCommandInteractionEvent event, {required bool ephemeral}) async {
-  await event.acknowledge();
+  await event.acknowledge(hidden: ephemeral);
 
   final tagName = event.interaction.options.first.args.firstWhere((element) => element.name == "name").value.toString();
   final tag = await inline_tags.findTagForGuild(tagName, event.interaction.guild!.id);
 
   if (tag == null) {
-    return event.respond(MessageBuilder.content("Tag with name: `$tagName` does not exist"), hidden: ephemeral);
+    return event.respond(MessageBuilder.content("Tag with name: `$tagName` does not exist"));
   }
 
-  return event.respond(MessageBuilder.content(tag.content), hidden: ephemeral);
+  return event.respond(MessageBuilder.content(tag.content));
 }
 
 Future<void> createTagHandler(SlashCommandInteractionEvent event) async {
