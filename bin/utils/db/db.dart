@@ -43,6 +43,7 @@ FutureOr<void> openDbAndRunMigrations() async {
         hidden bool DEFAULT FALSE,
         FOREIGN KEY(command_id) REFERENCES tags(id)
       );
+      CREATE INDEX command_id_index ON tag_usage USING btree(command_id);
     """)
     ..runMigrations();
 }
