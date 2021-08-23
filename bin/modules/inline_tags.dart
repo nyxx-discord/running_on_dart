@@ -5,6 +5,37 @@ import "package:nyxx/nyxx.dart";
 import "../utils/db/db.dart" as db;
 import "../utils/db/tags.dart";
 
+Future<Map<String, List<int>>> fetchUsageStats(Snowflake guildId) async {
+  const query = """
+    SELECT t.name, COUNT(u.id), COUNT(nullif(u.hidden, false)) FROM tags t JOIN tag_usage u ON t.id = u.command_id WHERE t.guild_id = @guildId GROUP BY t.name LIMIT 3;
+  """;
+
+  final result = await db.connection.query(query, substitutionValues: {
+    "guildId": guildId.toString(),
+  });
+
+  final finalResult = <String, List<int>>{};
+  for (final row in result) {
+    final name = row[0] as String;
+    final count = row[1] as int;
+    final countHidden = row[2] as int;
+
+    finalResult[name] = [count, countHidden];
+  }
+  return finalResult;
+}
+
+Future<void> updateUsageStats(int id, bool hidden) async {
+  const query = """
+    INSERT INTO tag_usage(command_id, hidden) VALUES (@id, @hidden);
+  """;
+
+  await db.connection.execute(query, substitutionValues: {
+    "id": id,
+    "hidden": hidden,
+  });
+}
+
 Future<Tag?> findTagForGuild(String name, Snowflake guildId, {bool enabled = true}) async {
   const query = """
     SELECT t.* FROM tags t WHERE t.name = @name AND t.guild_id = @guildId AND t.enabled = @enabled;

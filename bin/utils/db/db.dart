@@ -35,6 +35,15 @@ FutureOr<void> openDbAndRunMigrations() async {
       CREATE INDEX guild_index ON tags USING btree(guild_id);
       ALTER TABLE tags ADD CONSTRAINT name_guild_id_unique UNIQUE (name, guild_id);
     """)
+    ..enqueueMigration("1.1", """
+      CREATE TABLE tag_usage (
+        id SERIAL PRIMARY KEY,
+        command_id SERIAL,
+        use_date TIMESTAMP DEFAULT NOW(),
+        hidden bool DEFAULT FALSE,
+        FOREIGN KEY(command_id) REFERENCES tags(id)
+      );
+    """)
     ..runMigrations();
 }
 

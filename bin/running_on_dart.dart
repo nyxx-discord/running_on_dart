@@ -73,8 +73,34 @@ void main(List<String> arguments) async {
         ..registerHandler(createTagHandler),
       CommandOptionBuilder(CommandOptionType.subCommand, "delete", "Deletes tag", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag")])
         ..registerHandler(deleteTagHandler),
+      CommandOptionBuilder(CommandOptionType.subCommand, "stats", "Tag stats", options: [])
+        ..registerHandler(tagStatsHandler),
     ], guild: Snowflake(302360552993456135)))
     ..syncOnReady();
+}
+
+Future<void> tagStatsHandler(SlashCommandInteractionEvent event) async {
+  await event.acknowledge(hidden: true);
+
+  if (event.interaction.guild == null) {
+    await event.respond(MessageBuilder.content("Message cannot be executed in DMs"));
+    return;
+  }
+
+  final results = await inline_tags.fetchUsageStats(event.interaction.guild!.id);
+
+  if (results.isEmpty) {
+    await event.respond(MessageBuilder.content("No stats at the moment"));
+    return;
+  }
+
+  final embed = EmbedBuilder()
+    ..description = "Tag stats";
+  for (final entry in results.entries) {
+    embed.addField(name: entry.key, content: "${entry.value.first} total (ephemeral: ${entry.value.last})");
+  }
+
+  return event.respond(MessageBuilder.embed(embed));
 }
 
 Future<void> showTagHandler(SlashCommandInteractionEvent event, {required bool ephemeral}) async {
@@ -86,6 +112,8 @@ Future<void> showTagHandler(SlashCommandInteractionEvent event, {required bool e
   if (tag == null) {
     return event.respond(MessageBuilder.content("Tag with name: `$tagName` does not exist"));
   }
+
+  await inline_tags.updateUsageStats(tag.id, ephemeral);
 
   return event.respond(MessageBuilder.content(tag.content));
 }
