@@ -7,7 +7,14 @@ packages:
       name: async
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.7.0"
+    version: "2.8.1"
+  buffer:
+    dependency: transitive
+    description:
+      name: buffer
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.1.1"
   charcode:
     dependency: transitive
     description:
@@ -22,6 +29,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.15.0"
+  crypto:
+    dependency: transitive
+    description:
+      name: crypto
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.1"
   http:
     dependency: transitive
     description:
@@ -49,28 +63,37 @@ packages:
       name: meta
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.4.0"
+    version: "1.7.0"
+  migent:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: f4286e25ea423b98dbd3854144eeefc5aedb96ab
+      url: "git://github.com/nyxx-discord/migent.git"
+    source: git
+    version: "1.0.0"
   nyxx:
     dependency: "direct main"
     description:
-      path: "../nyxx/nyxx"
-      relative: true
-    source: path
-    version: "2.0.0-rc.8"
+      name: nyxx
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0-rc.12"
   nyxx_commander:
     dependency: "direct main"
     description:
       name: nyxx_commander
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0-rc.9"
+    version: "2.0.0-rc.12"
   nyxx_interactions:
     dependency: "direct main"
     description:
       name: nyxx_interactions
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0-rc.7"
+    version: "2.0.0-rc.17"
   path:
     dependency: transitive
     description:
@@ -84,7 +107,14 @@ packages:
       name: pedantic
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.11.0"
+    version: "1.11.1"
+  postgres:
+    dependency: "direct main"
+    description:
+      name: postgres
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.3.2"
   source_span:
     dependency: transitive
     description:
@@ -112,7 +142,7 @@ packages:
       name: time_ago_provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.1.0"
+    version: "4.1.1"
   typed_data:
     dependency: transitive
     description:

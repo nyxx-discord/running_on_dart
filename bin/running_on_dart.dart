@@ -17,16 +17,26 @@ import "package:time_ago_provider/time_ago_provider.dart" show formatFull;
 
 import "modules/docs.dart" as docs;
 import "modules/exec.dart" as exec;
+import "modules/inline_tags.dart" as inline_tags;
+import "utils/db/db.dart" as db;
 import "utils/utils.dart" as utils;
 
 late Nyxx botInstance;
 
 void main(List<String> arguments) async {
+  db.openDbAndRunMigrations();
+
   final cacheOptions = CacheOptions()
     ..memberCachePolicyLocation = CachePolicyLocation.none()
     ..userCachePolicyLocation = CachePolicyLocation.none();
 
-  botInstance = Nyxx(utils.envToken!, GatewayIntents.allUnprivileged, options: ClientOptions(guildSubscriptions: false), cacheOptions: cacheOptions);
+  botInstance = Nyxx(
+      utils.envToken!,
+      GatewayIntents.allUnprivileged,
+      options: ClientOptions(guildSubscriptions: false),
+      cacheOptions: cacheOptions
+  );
+
   Commander(botInstance, prefix: utils.envPrefix)
     // Admin stuff
     ..registerCommandGroup(CommandGroup(beforeHandler: utils.checkForAdmin)
@@ -54,7 +64,85 @@ void main(List<String> arguments) async {
   Interactions(botInstance)
     ..registerSlashCommand(SlashCommandBuilder("info", "Info about bot state ", [])
       ..registerHandler(infoSlashCommand))
+    ..registerSlashCommand(SlashCommandBuilder("tag", "Show and manipulate tags", [
+      CommandOptionBuilder(CommandOptionType.subCommand, "show", "Shows tag to everyone", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag to show")])
+        ..registerHandler((event) => showTagHandler(event, ephemeral: false)),
+      CommandOptionBuilder(CommandOptionType.subCommand, "preview", "Shows tag only for yourself", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag to show")])
+        ..registerHandler((event) => showTagHandler(event, ephemeral: true)),
+      CommandOptionBuilder(CommandOptionType.subCommand, "create", "Creates new tag", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag"), CommandOptionBuilder(CommandOptionType.string, "content", "Content of the tag")])
+        ..registerHandler(createTagHandler),
+      CommandOptionBuilder(CommandOptionType.subCommand, "delete", "Deletes tag", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag")])
+        ..registerHandler(deleteTagHandler),
+      CommandOptionBuilder(CommandOptionType.subCommand, "stats", "Tag stats", options: [])
+        ..registerHandler(tagStatsHandler),
+    ], guild: Snowflake(302360552993456135)))
     ..syncOnReady();
+}
+
+Future<void> tagStatsHandler(SlashCommandInteractionEvent event) async {
+  await event.acknowledge(hidden: true);
+
+  if (event.interaction.guild == null) {
+    await event.respond(MessageBuilder.content("Message cannot be executed in DMs"));
+    return;
+  }
+
+  final results = await inline_tags.fetchUsageStats(event.interaction.guild!.id);
+
+  if (results.isEmpty) {
+    await event.respond(MessageBuilder.content("No stats at the moment"));
+    return;
+  }
+
+  final embed = EmbedBuilder()
+    ..description = "Tag stats";
+  for (final entry in results.entries) {
+    embed.addField(name: entry.key, content: "${entry.value.first} total (ephemeral: ${entry.value.last})");
+  }
+
+  return event.respond(MessageBuilder.embed(embed));
+}
+
+Future<void> showTagHandler(SlashCommandInteractionEvent event, {required bool ephemeral}) async {
+  await event.acknowledge(hidden: ephemeral);
+
+  final tagName = event.interaction.options.first.args.firstWhere((element) => element.name == "name").value.toString();
+  final tag = await inline_tags.findTagForGuild(tagName, event.interaction.guild!.id);
+
+  if (tag == null) {
+    return event.respond(MessageBuilder.content("Tag with name: `$tagName` does not exist"));
+  }
+
+  await inline_tags.updateUsageStats(tag.id, ephemeral);
+
+  return event.respond(MessageBuilder.content(tag.content));
+}
+
+Future<void> createTagHandler(SlashCommandInteractionEvent event) async {
+  await event.acknowledge();
+
+  final tagName = (event.interaction.options.first.args.firstWhere((element) => element.name == "name")).value.toString();
+  final tagContent = (event.interaction.options.first.args.firstWhere((element) => element.name == "content")).value.toString();
+
+  final result = await inline_tags.createTagForGuild(tagName, tagContent, event.interaction.guild!.id, event.interaction.memberAuthor.id);
+  if (!result) {
+    return event.respond(MessageBuilder.content("Error occurred when creating tag. Report problem to developer"), hidden: true);
+  }
+
+  return event.respond(MessageBuilder.content("Tag created successfully"), hidden: true);
+}
+
+Future<void> deleteTagHandler(SlashCommandInteractionEvent event) async {
+  await event.acknowledge();
+
+  final tagName = event.interaction.options.first.args.firstWhere((element) => element.name == "name").value.toString();
+
+  final result = await inline_tags.deleteTagForGuild(tagName, event.interaction.guild!.id, event.interaction.memberAuthor.id);
+  if (!result) {
+    return event.respond(MessageBuilder.content("Error occurred when deleting tag. Report problem to developer"), hidden: true);
+  }
+
+  return event.respond(MessageBuilder.content("Tag deleted successfully"), hidden: true);
 }
 
 Future<void> helpCommand(CommandContext ctx, String content) async {
@@ -89,7 +177,7 @@ Future<void> selfNickCommand(CommandContext ctx, String content) async {
     return;
   }
 
-  await ctx.guild?.changeSelfNick(ctx.getArguments().first);
+  await ctx.guild?.modifyCurrentMember(nick: ctx.getArguments().first);
 }
 
 Future<void> shutdownCommand(CommandContext ctx, String content) async {
@@ -266,7 +354,7 @@ Future<EmbedBuilder> infoGenericCommand(Nyxx client, [int shardId = 0]) async {
     ..addAuthor((author) {
       author.name = client.self.tag;
       author.iconUrl = client.self.avatarURL();
-      author.url = "https://github.com/l7ssha/nyxx";
+      author.url = "https://github.com/nyxx-discord/nyxx";
     })
     ..addFooter((footer) {
       footer.text = "Nyxx ${Constants.version} | Shard [${shardId + 1}] of [${client.shards}] | Dart SDK ${utils.dartVersion}";
