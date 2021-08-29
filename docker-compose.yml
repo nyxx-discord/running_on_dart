@@ -15,13 +15,7 @@ services:
     env_file:
       - ./.env
     volumes:
-      - "./pgdata:/var/lib/postgresql/data"
-#  adminer:
-#    image: adminer
-#    restart: always
-#    links:
-#      - db
-#    depends_on:
-#      - db
-#    ports:
-#      - 8080:8080
+      - "rod_db:/var/lib/postgresql/data"
+
+volumes:
+  rod_db:
