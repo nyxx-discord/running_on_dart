@@ -75,7 +75,7 @@ void main(List<String> arguments) async {
         ..registerHandler(deleteTagHandler),
       CommandOptionBuilder(CommandOptionType.subCommand, "stats", "Tag stats", options: [])
         ..registerHandler(tagStatsHandler),
-    ], guild: Snowflake(302360552993456135)))
+    ]))
     ..syncOnReady();
 }
 
@@ -124,7 +124,7 @@ Future<void> createTagHandler(SlashCommandInteractionEvent event) async {
   final tagName = (event.interaction.options.first.args.firstWhere((element) => element.name == "name")).value.toString();
   final tagContent = (event.interaction.options.first.args.firstWhere((element) => element.name == "content")).value.toString();
 
-  final result = await inline_tags.createTagForGuild(tagName, tagContent, event.interaction.guild!.id, event.interaction.memberAuthor.id);
+  final result = await inline_tags.createTagForGuild(tagName, tagContent, event.interaction.guild!.id, event.interaction.memberAuthor!.id);
   if (!result) {
     return event.respond(MessageBuilder.content("Error occurred when creating tag. Report problem to developer"), hidden: true);
   }
@@ -137,7 +137,7 @@ Future<void> deleteTagHandler(SlashCommandInteractionEvent event) async {
 
   final tagName = event.interaction.options.first.args.firstWhere((element) => element.name == "name").value.toString();
 
-  final result = await inline_tags.deleteTagForGuild(tagName, event.interaction.guild!.id, event.interaction.memberAuthor.id);
+  final result = await inline_tags.deleteTagForGuild(tagName, event.interaction.guild!.id, event.interaction.memberAuthor!.id);
   if (!result) {
     return event.respond(MessageBuilder.content("Error occurred when deleting tag. Report problem to developer"), hidden: true);
   }
