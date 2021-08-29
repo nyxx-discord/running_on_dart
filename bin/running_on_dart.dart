@@ -65,13 +65,13 @@ void main(List<String> arguments) async {
     ..registerSlashCommand(SlashCommandBuilder("info", "Info about bot state ", [])
       ..registerHandler(infoSlashCommand))
     ..registerSlashCommand(SlashCommandBuilder("tag", "Show and manipulate tags", [
-      CommandOptionBuilder(CommandOptionType.subCommand, "show", "Shows tag to everyone", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag to show")])
+      CommandOptionBuilder(CommandOptionType.subCommand, "show", "Shows tag to everyone", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag to show", required: true)])
         ..registerHandler((event) => showTagHandler(event, ephemeral: false)),
-      CommandOptionBuilder(CommandOptionType.subCommand, "preview", "Shows tag only for yourself", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag to show")])
+      CommandOptionBuilder(CommandOptionType.subCommand, "preview", "Shows tag only for yourself", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag to show", required: true)])
         ..registerHandler((event) => showTagHandler(event, ephemeral: true)),
-      CommandOptionBuilder(CommandOptionType.subCommand, "create", "Creates new tag", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag"), CommandOptionBuilder(CommandOptionType.string, "content", "Content of the tag")])
+      CommandOptionBuilder(CommandOptionType.subCommand, "create", "Creates new tag", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag", required: true), CommandOptionBuilder(CommandOptionType.string, "content", "Content of the tag", required: true)])
         ..registerHandler(createTagHandler),
-      CommandOptionBuilder(CommandOptionType.subCommand, "delete", "Deletes tag", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag")])
+      CommandOptionBuilder(CommandOptionType.subCommand, "delete", "Deletes tag", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag", required: true)])
         ..registerHandler(deleteTagHandler),
       CommandOptionBuilder(CommandOptionType.subCommand, "stats", "Tag stats", options: [])
         ..registerHandler(tagStatsHandler),
