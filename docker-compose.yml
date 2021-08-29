@@ -14,12 +14,12 @@ services:
     restart: always
     env_file:
       - ./.env
-  adminer:
-    image: adminer
-    restart: always
-    links:
-      - db
-    depends_on:
-      - db
-    ports:
-      - 8080:8080
+#  adminer:
+#    image: adminer
+#    restart: always
+#    links:
+#      - db
+#    depends_on:
+#      - db
+#    ports:
+#      - 8080:8080
