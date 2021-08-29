@@ -87,7 +87,8 @@ Future<void> tagStatsHandler(SlashCommandInteractionEvent event) async {
     return;
   }
 
-  final results = await inline_tags.fetchUsageStats(event.interaction.guild!.id);
+  final mainId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
+  final results = await inline_tags.fetchUsageStats(mainId);
 
   if (results.isEmpty) {
     await event.respond(MessageBuilder.content("No stats at the moment"));
@@ -106,8 +107,10 @@ Future<void> tagStatsHandler(SlashCommandInteractionEvent event) async {
 Future<void> showTagHandler(SlashCommandInteractionEvent event, {required bool ephemeral}) async {
   await event.acknowledge(hidden: ephemeral);
 
+  final mainId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
+
   final tagName = event.interaction.options.first.args.firstWhere((element) => element.name == "name").value.toString();
-  final tag = await inline_tags.findTagForGuild(tagName, event.interaction.guild!.id);
+  final tag = await inline_tags.findTagForGuild(tagName, mainId);
 
   if (tag == null) {
     return event.respond(MessageBuilder.content("Tag with name: `$tagName` does not exist"));
@@ -123,8 +126,17 @@ Future<void> createTagHandler(SlashCommandInteractionEvent event) async {
 
   final tagName = (event.interaction.options.first.args.firstWhere((element) => element.name == "name")).value.toString();
   final tagContent = (event.interaction.options.first.args.firstWhere((element) => element.name == "content")).value.toString();
+  final mainId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
+  final authorId = event.interaction.guild?.id != null
+      ? event.interaction.memberAuthor!.id
+      : event.interaction.userAuthor!.id;
 
-  final result = await inline_tags.createTagForGuild(tagName, tagContent, event.interaction.guild!.id, event.interaction.memberAuthor!.id);
+  final existingTag = await inline_tags.findTagForGuild(tagName, mainId);
+  if (existingTag != null) {
+    return event.respond(MessageBuilder.content("Tag with that name already exists!"), hidden: true);
+  }
+
+  final result = await inline_tags.createTagForGuild(tagName, tagContent, mainId, authorId);
   if (!result) {
     return event.respond(MessageBuilder.content("Error occurred when creating tag. Report problem to developer"), hidden: true);
   }
@@ -136,8 +148,12 @@ Future<void> deleteTagHandler(SlashCommandInteractionEvent event) async {
   await event.acknowledge();
 
   final tagName = event.interaction.options.first.args.firstWhere((element) => element.name == "name").value.toString();
+  final mainId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
+  final authorId = event.interaction.guild?.id != null
+      ? event.interaction.memberAuthor!.id
+      : event.interaction.userAuthor!.id;
 
-  final result = await inline_tags.deleteTagForGuild(tagName, event.interaction.guild!.id, event.interaction.memberAuthor!.id);
+  final result = await inline_tags.deleteTagForGuild(tagName, mainId, authorId);
   if (!result) {
     return event.respond(MessageBuilder.content("Error occurred when deleting tag. Report problem to developer"), hidden: true);
   }
