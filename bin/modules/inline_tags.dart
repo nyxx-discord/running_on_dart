@@ -5,6 +5,16 @@ import "package:nyxx/nyxx.dart";
 import "../utils/db/db.dart" as db;
 import "../utils/db/tags.dart";
 
+Future<int> fetchPerSec() async {
+  const query = """
+    
+  """;
+
+  final result = await db.connection.query(query);
+
+  return int.parse(result[0][0].toString());
+}
+
 Future<Map<String, List<int>>> fetchUsageStats(Snowflake guildId) async {
   const query = """
     SELECT t.name, COUNT(u.id), COUNT(nullif(u.hidden, false)) FROM tags t JOIN tag_usage u ON t.id = u.command_id WHERE t.guild_id = @guildId GROUP BY t.name LIMIT 3;
