@@ -35,10 +35,10 @@ void main(List<String> arguments) async {
 
   final app = Router()
     ..get("/", (Request request) async {
-      final result = await inline_tags.fetchPerSec();
+      final result = await inline_tags.fetchPerDay();
       print("HTTP request: $result");
 
-      return Response.ok("Tags per second: $result");
+      return Response.ok("Tags per day: $result");
     });
   await io.serve(app, "0.0.0.0", 8080);
 
@@ -112,6 +112,12 @@ Future<void> tagStatsHandler(SlashCommandInteractionEvent event) async {
   for (final entry in results.entries) {
     embed.addField(name: entry.key, content: "${entry.value.first} total (ephemeral: ${entry.value.last})");
   }
+
+  final commandsUsed = await inline_tags.fetchPerDay();
+  final commandsUsedString = commandsUsed == 0
+    ? "No commands data yet!"
+    : commandsUsed;
+  embed.addField(name: "Commands used per day (last 3 days)", content: commandsUsedString);
 
   return event.respond(MessageBuilder.embed(embed));
 }

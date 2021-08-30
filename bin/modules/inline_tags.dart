@@ -5,9 +5,9 @@ import "package:nyxx/nyxx.dart";
 import "../utils/db/db.dart" as db;
 import "../utils/db/tags.dart";
 
-Future<int> fetchPerSec() async {
+Future<int> fetchPerDay() async {
   const query = """
-    
+    SELECT COUNT(t.id)::decimal FROM tag_usage t WHERE t.use_date BETWEEN NOW() - INTERVAL '3 days' AND NOW();
   """;
 
   final result = await db.connection.query(query);
