@@ -97,9 +97,11 @@ packages:
   nyxx_interactions:
     dependency: "direct main"
     description:
-      name: nyxx_interactions
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "nyxx_interactions/"
+      ref: HEAD
+      resolved-ref: "3beec5b6888b2869a21b9aaf1e41a81ee1abc58f"
+      url: "git://github.com/nyxx-discord/nyxx.git"
+    source: git
     version: "2.0.0-rc.20"
   path:
     dependency: transitive

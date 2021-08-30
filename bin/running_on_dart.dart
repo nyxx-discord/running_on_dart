@@ -54,24 +54,14 @@ void main(List<String> arguments) async {
     ..registerCommandGroup(CommandGroup(beforeHandler: utils.checkForAdmin)
       ..registerSubCommand("leave", leaveChannelCommand)
       ..registerSubCommand("join", joinChannelCommand)
-      ..registerSubCommand("exec", execCommand)
-      ..registerSubCommand("shutdown", shutdownCommand)
-      ..registerSubCommand("selfNick", selfNickCommand))
+      ..registerSubCommand("exec", execCommand))
     // Docs commands
     ..registerCommandGroup(CommandGroup(name: "docs")
       ..registerDefaultCommand(docsCommand)
       ..registerSubCommand("get", docsGetCommand)
       ..registerSubCommand("search", docsSearchCommand))
     // Minor commands
-    ..registerCommand("info", infoCommand)
-    ..registerCommand("ping", pingCommand)
-    ..registerCommand("help", helpCommand)
-    ..registerCommand("description", descriptionCommand)
-    ..registerCommand("avatar", userAvatarCommand)
-    // Qr code stuff
-    ..registerCommandGroup(CommandGroup(name: "qr")
-      ..registerSubCommand("gen", genQrCodeCommand)
-      ..registerSubCommand("read", readQrCodeCommand));
+    ..registerCommand("info", infoCommand);
 
   Interactions(botInstance)
     ..registerSlashCommand(SlashCommandBuilder("info", "Info about bot state ", [])
@@ -88,6 +78,10 @@ void main(List<String> arguments) async {
       CommandOptionBuilder(CommandOptionType.subCommand, "stats", "Tag stats", options: [])
         ..registerHandler(tagStatsHandler),
     ]))
+    ..registerSlashCommand(SlashCommandBuilder("avatar", "Shows avatar of the user", [CommandOptionBuilder(CommandOptionType.user, "user", "User to display avatar")])
+      ..registerHandler(avatarSlashHandler))
+    ..registerSlashCommand(SlashCommandBuilder("ping", "Shows bots latency", [])
+      ..registerHandler(pingSlashHandler))
     ..syncOnReady();
 }
 
@@ -179,101 +173,15 @@ Future<void> deleteTagHandler(SlashCommandInteractionEvent event) async {
   return event.respond(MessageBuilder.content("Tag deleted successfully"), hidden: true);
 }
 
-Future<void> helpCommand(CommandContext ctx, String content) async {
-  // Assign method to variable for shorter name
-  const helpGen = utils.helpCommandGen;
+Future<void> avatarSlashHandler(SlashCommandInteractionEvent event) async {
+  await event.acknowledge();
 
-  // Write zero-width character to skip first line where nick is
-  final buffer = StringBuffer("‎\n");
-
-  buffer.write(helpGen("join", "join specified channel", additionalInfo: "<channel_id>"));
-  buffer.write(helpGen("leave", "leaves channel"));
-  buffer.write(helpGen("exec", "executes Dart code", additionalInfo: "<string_to_execute>"));
-  buffer.write(helpGen("docs", "Sends link to nyxx docs"));
-  buffer.write(helpGen("docs get", "Sends url to nyxx docs for specified entry", additionalInfo: "<ClassName[#memberName]>"));
-  buffer.write(helpGen("docs search", "Searches docs for *query*", additionalInfo: "<query>"));
-  buffer.write(helpGen("info", "sends basic info about bot"));
-  buffer.write(helpGen("ping", "sends current bot latency"));
-  buffer.write(helpGen("help", "this command"));
-  buffer.write(helpGen("description", "sends current channel description"));
-  buffer.write(helpGen("avatar", "Replies with mentioned user avatar"));
-  buffer.write(helpGen("qr gen ", "Generates qr code with provided data", additionalInfo: "<data>"));
-  buffer.write(helpGen("qr read", "Reads qr code from uploaded image in same message as command"));
-  buffer.write(helpGen("selfNick", "Sets nick of bot"));
-  buffer.write(helpGen("shutdown", "Shuts down bot"));
-
-  await ctx.sendMessage(MessageBuilder.content(buffer.toString()));
-}
-
-Future<void> selfNickCommand(CommandContext ctx, String content) async {
-  if (ctx.guild == null) {
-    await ctx.sendMessage(MessageBuilder.content("Cannot change nick in DMs"));
-    return;
+  final user = event.interaction.resolved?.users.first;
+  if (user == null) {
+    return event.respond(MessageBuilder.content("Invalid user specified"));
   }
 
-  await ctx.guild?.modifyCurrentMember(nick: ctx.getArguments().first);
-}
-
-Future<void> shutdownCommand(CommandContext ctx, String content) async {
-  Process.killPid(pid);
-}
-
-Future<void> readQrCodeCommand(CommandContext ctx, String content) async {
-  if(ctx.message.attachments.isEmpty) {
-    await ctx.sendMessage(MessageBuilder.content("Invalid usage. Upload image alongside with command!"));
-    return;
-  }
-
-  final url = Uri.https("api.qrserver.com", "v1/read-qr-code/", {
-    "fileurl" : ctx.message.attachments.first.url
-  });
-
-  final result = jsonDecode(await http.read(url));
-
-  if(result.first["symbol"].first["error"] != null) {
-    await ctx.sendMessage(MessageBuilder.content("Error: `${result.first["symbol"]["error"]}`"));
-    return;
-  }
-
-  await ctx.sendMessage(MessageBuilder.embed(EmbedBuilder()..description = result.first["symbol"].first["data"].toString()));
-}
-
-Future<void> genQrCodeCommand(CommandContext ctx, String content) async {
-  final args = ctx.getArguments().toList().join(" ");
-
-  if(args.isEmpty) {
-    await ctx.sendMessage(MessageBuilder.content("Specify text for qr code."));
-    return;
-  }
-
-  final queryParams = <String, String> {
-    "data": args
-  };
-
-  final url = Uri.https("api.qrserver.com", "v1/create-qr-code/", queryParams);
-
-  await ctx.sendMessage(MessageBuilder.content(url.toString()));
-}
-
-Future<void> userAvatarCommand(CommandContext ctx, String content) async {
-  String? avatarUrl;
-
-  if(ctx.message.mentions.isEmpty) {
-    avatarUrl = ctx.author.avatarURL(size: 1024);
-  } else {
-    try {
-      avatarUrl = (await ctx.message.mentions.first.getOrDownload()).avatarURL(size: 1024);
-    } on Exception {
-      avatarUrl = null;
-    }
-  }
-
-  if(avatarUrl == null) {
-    await ctx.sendMessage(MessageBuilder.content("Cannot obtain avatar url."));
-    return;
-  }
-
-  await ctx.sendMessage(MessageBuilder.content(avatarUrl));
+  return event.respond(MessageBuilder.content(user.avatarURL(size: 512)), hidden: true);
 }
 
 Future<void> descriptionCommand(CommandContext ctx, String content) async {
@@ -285,10 +193,10 @@ Future<void> descriptionCommand(CommandContext ctx, String content) async {
   await ctx.sendMessage(MessageBuilder.content("Invalid channel!"));
 }
 
-Future<void> pingCommand(CommandContext ctx, String content) async {
+Future<void> pingSlashHandler(SlashCommandInteractionEvent event) async {
   final random = Random();
   final color = DiscordColor.fromRgb(random.nextInt(255), random.nextInt(255), random.nextInt(255));
-  final gatewayDelayInMillis = ctx.client.shardManager.shards.firstWhere((element) => element.id == ctx.shardId).gatewayLatency.inMilliseconds;
+  final gatewayDelayInMillis = botInstance.shardManager.shards.map((e) => e.gatewayLatency.inMilliseconds).reduce((value, element) => value + element) /~ botInstance.shards;
 
   final apiStopwatch = Stopwatch()..start();
   await http.head(Uri(scheme: "https", host: Constants.host, path: Constants.baseUri));
@@ -302,12 +210,12 @@ Future<void> pingCommand(CommandContext ctx, String content) async {
     ..addField(name: "REST latency", content: "$apiPing ms", inline: true)
     ..addField(name: "Message roundup time", content: "Pending...", inline: true);
 
-  final message = await ctx.sendMessage(MessageBuilder.embed(embed));
+  await event.respond(MessageBuilder.embed(embed));
 
   embed
     ..replaceField(name: "Message roundup time", content: "${stopwatch.elapsedMilliseconds} ms", inline: true);
 
-  await message.edit(MessageBuilder.embed(embed));
+  await event.editOriginalResponse(MessageBuilder.embed(embed));
 }
 
 Future<void> leaveChannelCommand(CommandContext ctx, String content) async {
