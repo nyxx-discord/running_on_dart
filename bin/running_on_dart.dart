@@ -14,7 +14,7 @@ import "package:nyxx_interactions/interactions.dart";
 import "package:time_ago_provider/time_ago_provider.dart" show formatFull;
 
 import "modules/docs.dart" as docs;
-import "modules/exec.dart" as exec;
+// import "modules/exec.dart" as exec;
 import "modules/inline_tags.dart" as inline_tags;
 import "utils/db/db.dart" as db;
 import "utils/utils.dart" as utils;
@@ -36,11 +36,6 @@ void main(List<String> arguments) async {
   );
 
   Commander(botInstance, prefix: utils.envPrefix)
-    // Admin stuff
-    ..registerCommandGroup(CommandGroup(beforeHandler: utils.checkForAdmin)
-      ..registerSubCommand("leave", leaveChannelCommand)
-      ..registerSubCommand("join", joinChannelCommand)
-      ..registerSubCommand("exec", execCommand))
     // Docs commands
     ..registerCommandGroup(CommandGroup(name: "docs")
       ..registerDefaultCommand(docsCommand)
@@ -68,6 +63,14 @@ void main(List<String> arguments) async {
       ..registerHandler(avatarSlashHandler))
     ..registerSlashCommand(SlashCommandBuilder("ping", "Shows bots latency", [])
       ..registerHandler(pingSlashHandler))
+    ..registerSlashCommand(SlashCommandBuilder("docs", "Documentation for nyxx", [
+      CommandOptionBuilder(CommandOptionType.subCommand, "get", "Fetches docs for given phrase", options: [CommandOptionBuilder(CommandOptionType.string, "phrase", "Phrase to fetch from docs", required: true)])
+        ..registerHandler(docsGetSlashHandler),
+      CommandOptionBuilder(CommandOptionType.subCommand, "search", "Searches docs for wanted phrase", options: [CommandOptionBuilder(CommandOptionType.string, "phrase", "Phrase to fetch from docs", required: true)])
+        ..registerHandler(docsSearchHandler),
+      CommandOptionBuilder(CommandOptionType.subCommand, "links", "Returns links to docs")
+        ..registerHandler(docsLinksHandler)
+    ]))
     ..syncOnReady();
 }
 
@@ -204,63 +207,76 @@ Future<void> pingSlashHandler(SlashCommandInteractionEvent event) async {
   await event.editOriginalResponse(MessageBuilder.embed(embed));
 }
 
-Future<void> leaveChannelCommand(CommandContext ctx, String content) async {
-  final shard = ctx.client.shardManager.shards.firstWhere((element) => element.guilds.contains(ctx.guild!.id));
+/// Commented for now since I haven't decided yet if I want to keep such functionality
+// Future<void> leaveChannelCommand(CommandContext ctx, String content) async {
+//   final shard = ctx.client.shardManager.shards.firstWhere((element) => element.guilds.contains(ctx.guild!.id));
+//
+//   shard.changeVoiceState(ctx.guild!.id, null);
+//   await ctx.sendMessage(MessageBuilder.content("Left channel!"));
+// }
+//
+// Future<void> joinChannelCommand(CommandContext ctx, String content) async {
+//   final shard = ctx.client.shardManager.shards.firstWhere((element) => element.guilds.contains(ctx.guild!.id));
+//
+//   shard.changeVoiceState(ctx.guild!.id, Snowflake(content.split(" ").last));
+//   await ctx.sendMessage(MessageBuilder.content("Joined to channel!"));
+// }
+//
+// Future<void> execCommand(CommandContext ctx, String content) async {
+//   final stopwatch = Stopwatch()..start();
+//
+//   final text = ctx.message.content.replaceFirst("${utils.envPrefix}exec", "");
+//   final output = await exec.eval(text);
+//
+//   final footer = EmbedFooterBuilder()..text = "Exec time: ${stopwatch.elapsedMilliseconds} ms";
+//   final embed = EmbedBuilder()
+//     ..title = "Output"
+//     ..description = output
+//     ..footer = footer;
+//
+//   await ctx.sendMessage(MessageBuilder.embed(embed));
+// }
 
-  shard.changeVoiceState(ctx.guild!.id, null);
-  await ctx.sendMessage(MessageBuilder.content("Left channel!"));
-}
+Future<void> docsGetSlashHandler(SlashCommandInteractionEvent event) async {
+  await event.acknowledge();
 
-Future<void> joinChannelCommand(CommandContext ctx, String content) async {
-  final shard = ctx.client.shardManager.shards.firstWhere((element) => element.guilds.contains(ctx.guild!.id));
-
-  shard.changeVoiceState(ctx.guild!.id, Snowflake(content.split(" ").last));
-  await ctx.sendMessage(MessageBuilder.content("Joined to channel!"));
-}
-
-Future<void> execCommand(CommandContext ctx, String content) async {
-  final stopwatch = Stopwatch()..start();
-
-  final text = ctx.message.content.replaceFirst("${utils.envPrefix}exec", "");
-  final output = await exec.eval(text);
-
-  final footer = EmbedFooterBuilder()..text = "Exec time: ${stopwatch.elapsedMilliseconds} ms";
-  final embed = EmbedBuilder()
-    ..title = "Output"
-    ..description = output
-    ..footer = footer;
-
-  await ctx.sendMessage(MessageBuilder.embed(embed));
-}
-
-Future<void> docsCommand(CommandContext ctx, String content) async {
-  await ctx.sendMessage(MessageBuilder.content(docs.basePath));
+  await event.respond(await docsGetMessageBuilder(event.args.firstWhere((element) => element.name == "phrase").value.toString()));
 }
 
 Future<void> docsGetCommand(CommandContext ctx, String content) async {
-  final searchString = content.split(" ").last.split("#|.");
+  await ctx.sendMessage(await docsGetMessageBuilder(content));
+}
+
+Future<MessageBuilder> docsGetMessageBuilder(String phrase) async {
+  final searchString = phrase.split(" ").last.split("#|.");
   final docsDef = await docs.getDocDefinition(searchString.first, searchString.length > 1 ? searchString.last : null);
 
   if (docsDef == null) {
-    await ctx.sendMessage(MessageBuilder.content("Cannot find docs for what you typed"));
-    return;
+    return MessageBuilder.content("Cannot find docs for what you typed");
   }
 
-  final embed = EmbedBuilder()
+  return MessageBuilder.embed(EmbedBuilder()
     ..addField(name: "Type", content: docsDef.type, inline: true)
     ..addField(name: "Name", content: docsDef.name, inline: true)
-    ..description = "[${content.split(" ").last}](${docsDef.absoluteUrl})";
-
-  await ctx.sendMessage(MessageBuilder.embed(embed));
+    ..description = "[${phrase.split(" ").last}](${docsDef.absoluteUrl})");
 }
 
-Future<void> docsSearchCommand(CommandContext ctx, String content) async {
-  final query = content.split(" ").last;
+Future<MessageBuilder> docsLinksMessageBuilder() async => MessageBuilder.content(docs.basePath);
+
+Future<void> docsLinksHandler(SlashCommandInteractionEvent event) async {
+  await event.respond(await docsLinksMessageBuilder());
+}
+
+Future<void> docsCommand(CommandContext ctx, String content) async {
+  await ctx.sendMessage(await docsLinksMessageBuilder());
+}
+
+Future<MessageBuilder> docsSearchMessageBuilder(String phrase) async {
+  final query = phrase.split(" ").last;
   final results = docs.searchDocs(query);
 
   if(results.isEmpty) {
-    await ctx.sendMessage(MessageBuilder.content("Nothing found matching: `$query`"));
-    return;
+    return MessageBuilder.content("Nothing found matching: `$query`");
   }
 
   final buffer = StringBuffer();
@@ -271,7 +287,17 @@ Future<void> docsSearchCommand(CommandContext ctx, String content) async {
   final embed = EmbedBuilder()
     ..description = buffer.toString();
 
-  await ctx.sendMessage(MessageBuilder.embed(embed));
+  return MessageBuilder.embed(embed);
+}
+
+Future<void> docsSearchHandler(SlashCommandInteractionEvent event) async {
+  await event.acknowledge();
+
+  await event.respond(await docsSearchMessageBuilder(event.args.firstWhere((element) => element.name == "phrase").value.toString()));
+}
+
+Future<void> docsSearchCommand(CommandContext ctx, String content) async {
+  await ctx.sendMessage(await docsSearchMessageBuilder(content));
 }
 
 Future<EmbedBuilder> infoGenericCommand(Nyxx client, [int shardId = 0]) async {
