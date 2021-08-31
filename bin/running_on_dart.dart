@@ -5,8 +5,6 @@ Configuration via utils.environment variables:
   ROD_ADMIN_ID - id of admin
 */
 
-import "dart:convert" show jsonDecode;
-import "dart:io" show Process, pid;
 import "dart:math" show Random;
 
 import "package:http/http.dart" as http;
@@ -14,9 +12,6 @@ import "package:nyxx/nyxx.dart" show CacheOptions, CachePolicyLocation, ClientOp
 import "package:nyxx_commander/commander.dart" show CommandContext, CommandGroup, Commander;
 import "package:nyxx_interactions/interactions.dart";
 import "package:time_ago_provider/time_ago_provider.dart" show formatFull;
-import "package:shelf_router/shelf_router.dart";
-import "package:shelf/shelf.dart";
-import "package:shelf/shelf_io.dart" as io;
 
 import "modules/docs.dart" as docs;
 import "modules/exec.dart" as exec;
@@ -32,15 +27,6 @@ void main(List<String> arguments) async {
   final cacheOptions = CacheOptions()
     ..memberCachePolicyLocation = CachePolicyLocation.none()
     ..userCachePolicyLocation = CachePolicyLocation.none();
-
-  final app = Router()
-    ..get("/", (Request request) async {
-      final result = await inline_tags.fetchPerDay();
-      print("HTTP request: $result");
-
-      return Response.ok("Tags per day: $result");
-    });
-  await io.serve(app, "0.0.0.0", 8080);
 
   botInstance = Nyxx(
       utils.envToken!,
