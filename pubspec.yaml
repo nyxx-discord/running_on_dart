@@ -14,8 +14,8 @@ environment:
 dependencies:
   logging: "^1.0.0"
   nyxx: "^2.0.0-rc.10"
-  nyxx_commander: "^2.0.0-rc.9"
 #  nyxx_interactions: "^2.0.0-rc.13"
+  nyxx_commander: "^2.0.0-rc.9"
   nyxx_interactions:
     git:
       url: git://github.com/nyxx-discord/nyxx.git
@@ -26,3 +26,9 @@ dependencies:
     git: git://github.com/nyxx-discord/migent.git
   shelf_router: ^1.1.1
   shelf: ^1.2.0
+
+dependency_overrides:
+  nyxx:
+    git:
+      url: git://github.com/nyxx-discord/nyxx.git
+      path: nyxx/

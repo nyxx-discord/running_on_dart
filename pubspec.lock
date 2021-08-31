@@ -83,9 +83,11 @@ packages:
   nyxx:
     dependency: "direct main"
     description:
-      name: nyxx
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "nyxx/"
+      ref: HEAD
+      resolved-ref: b0f9e8d7c7d3f5313ad7da26e39efce9a09c17df
+      url: "git://github.com/nyxx-discord/nyxx.git"
+    source: git
     version: "2.0.0-rc.13"
   nyxx_commander:
     dependency: "direct main"
@@ -99,7 +101,7 @@ packages:
     description:
       path: "nyxx_interactions/"
       ref: HEAD
-      resolved-ref: "3beec5b6888b2869a21b9aaf1e41a81ee1abc58f"
+      resolved-ref: b0f9e8d7c7d3f5313ad7da26e39efce9a09c17df
       url: "git://github.com/nyxx-discord/nyxx.git"
     source: git
     version: "2.0.0-rc.20"

@@ -2,8 +2,8 @@ import "dart:async";
 
 import "package:nyxx/nyxx.dart";
 
-import "../utils/db/db.dart" as db;
-import "../utils/db/tags.dart";
+import "../internal/db.dart" as db;
+import "../internal/tags.dart";
 
 Future<int> fetchPerDay() async {
   const query = """
