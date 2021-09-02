@@ -1,6 +1,6 @@
 import "dart:io" show Platform, ProcessInfo;
 
-import 'package:nyxx/nyxx.dart';
+import "package:nyxx/nyxx.dart";
 import "package:nyxx_commander/commander.dart";
 
 String? get envPrefix => Platform.environment["ROD_PREFIX"];

@@ -2,7 +2,7 @@ import "dart:async";
 
 import "package:nyxx/nyxx.dart";
 import "package:nyxx_commander/commander.dart";
-import "package:running_on_dart/src/modules/settings.dart";
+import 'package:running_on_dart/src/modules/settings/settings.dart';
 
 FutureOr<bool> adminBeforehandler(CommandContext context) =>
     privilegedAdmonSnowflakes.contains(context.author.id.id);

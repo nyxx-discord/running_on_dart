@@ -61,5 +61,9 @@ void main(List<String> arguments) async {
       CommandOptionBuilder(CommandOptionType.subCommand, "leave", "Leaves voice channel")
         ..registerHandler(rod.leaveVoiceHandler),
     ]))
+    ..registerSlashCommand(SlashCommandBuilder("settings", "Manages settings in guild", [
+      CommandOptionBuilder(CommandOptionType.subCommand, "enable", "Allows to enable features in a guild", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of feature to enable", choices: rod.getFeaturesAsChoices().toList(), required: true)])
+        ..registerHandler(rod.enableFeatureSlash)
+    ]))
     ..syncOnReady();
 }
