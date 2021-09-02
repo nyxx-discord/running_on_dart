@@ -5,11 +5,9 @@ const _poopEmoji = "💩";
 final _poopRegexp = RegExp(r"[!#@^%&-*\.+']");
 
 Future<void> poopNickName(Member member) async {
-  final nickName = member.nickname?.trim();
+  final user = await member.user.getOrDownload();
 
-  if (nickName == null) {
-    return;
-  }
+  final nickName = member.nickname?.trim() ?? user.username;
 
   if (nickName.startsWith(_poopRegexp)) {
     await member.edit(nick: _poopEmoji);
