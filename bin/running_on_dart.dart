@@ -3,7 +3,6 @@ import "package:nyxx_commander/commander.dart" show CommandGroup, Commander;
 import "package:nyxx_interactions/interactions.dart";
 
 import "package:running_on_dart/running_on_dart.dart" as rod;
-import "package:running_on_dart/src/modules/nicknamePoop.dart";
 
 late Nyxx botInstance;
 
@@ -65,7 +64,9 @@ void main(List<String> arguments) async {
     ]))
     ..registerSlashCommand(SlashCommandBuilder("settings", "Manages settings in guild", [
       CommandOptionBuilder(CommandOptionType.subCommand, "enable", "Allows to enable features in a guild", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of feature to enable", choices: rod.getFeaturesAsChoices().toList(), required: true)])
-        ..registerHandler(rod.enableFeatureSlash)
+        ..registerHandler(rod.enableFeatureSlash),
+      CommandOptionBuilder(CommandOptionType.subCommand, "disabled", "Disables feature in guild", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of option to disable", required: true)])
+        ..registerHandler(rod.disableFeatureSlash)
     ]))
     ..syncOnReady();
 }

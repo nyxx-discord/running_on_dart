@@ -17,3 +17,18 @@ Future<void> enableFeatureSlash(SlashCommandInteractionEvent event) async {
 
   await addFeatureSettings(targetId, featureName.value.toString(), whoEnabledId);
 }
+
+Future<void> disableFeatureSlash(SlashCommandInteractionEvent event) async {
+  await event.acknowledge(hidden: true);
+
+  final permissions = event.interaction.memberAuthorPermissions;
+  if (permissions != null && !permissions.manageGuild) {
+    await event.respond(MessageBuilder.content("You need to have manager guild permisson to use this command"));
+    return;
+  }
+
+  final featureName = event.getArg("name");
+  final targetId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
+
+  await deleteFeatureSettings(targetId, featureName.value.toString());
+}
