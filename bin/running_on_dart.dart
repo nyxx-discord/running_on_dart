@@ -3,6 +3,7 @@ import "package:nyxx_commander/commander.dart" show CommandGroup, Commander;
 import "package:nyxx_interactions/interactions.dart";
 
 import "package:running_on_dart/running_on_dart.dart" as rod;
+import "package:running_on_dart/src/modules/nicknamePoop.dart";
 
 late Nyxx botInstance;
 
@@ -14,7 +15,8 @@ void main(List<String> arguments) async {
       rod.intents,
       options: ClientOptions(guildSubscriptions: false),
       cacheOptions: rod.cacheOptions
-  );
+  )..onGuildMemberAdd.listen(rod.nicknamePoopJoinEvent)
+  ..onGuildMemberUpdate.listen(rod.nicknamePoopUpdateEvent);
 
   Commander(botInstance, prefixHandler: rod.prefixHandler)
     ..registerCommandGroup(CommandGroup(beforeHandler: rod.adminBeforehandler)
