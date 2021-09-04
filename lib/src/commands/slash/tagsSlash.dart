@@ -50,7 +50,7 @@ Future<void> showTagHandler(SlashCommandInteractionEvent event, {required bool e
 
   final mainId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
 
-  final tagName = event.interaction.options.first.args.firstWhere((element) => element.name == "name").value.toString();
+  final tagName = event.getArg("name").value as String;
   final tag = await inline_tags.findTagForGuild(tagName, mainId);
 
   if (tag == null) {
@@ -65,8 +65,9 @@ Future<void> showTagHandler(SlashCommandInteractionEvent event, {required bool e
 Future<void> createTagHandler(SlashCommandInteractionEvent event) async {
   await event.acknowledge();
 
-  final tagName = (event.interaction.options.first.args.firstWhere((element) => element.name == "name")).value.toString();
-  final tagContent = (event.interaction.options.first.args.firstWhere((element) => element.name == "content")).value.toString();
+  final tagName = event.getArg("name").value.toString();
+  final tagContent = event.getArg("content").value.toString();
+
   final mainId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
   final authorId = event.interaction.guild?.id != null
       ? event.interaction.memberAuthor!.id
@@ -88,7 +89,7 @@ Future<void> createTagHandler(SlashCommandInteractionEvent event) async {
 Future<void> deleteTagHandler(SlashCommandInteractionEvent event) async {
   await event.acknowledge();
 
-  final tagName = event.interaction.options.first.args.firstWhere((element) => element.name == "name").value.toString();
+  final tagName = event.getArg("name").value.toString();
   final mainId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
   final authorId = event.interaction.guild?.id != null
       ? event.interaction.memberAuthor!.id
