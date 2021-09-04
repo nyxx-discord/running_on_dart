@@ -5,6 +5,11 @@ This is repo for a multipurpose bot, primarily built for developing [nyxx](https
 #### Configuration
 
 Bot requires environment variables to be set before starting:
- - `DISCORD_TOKEN` - token of your bot
- - `ROD_PREFIX` - prefix for your bot
- - `ROD_ADMIN` - id of admin
+ - `ROD_PREFIX` - prefix for chan commands
+ - `ROD_TOKEN` - bot token
+ - `ROD_INTENT_FEATURES_ENABLE` - if member intent features should be enabled (`false` by default)
+ - `DB_HOST` - host of postgres database (`db` when using built in docker)
+ - `DB_PORT` - port of postgres database (`5432` when using built in docker)
+ - `POSTGRES_PASSWORD` - password of postgres user
+ - `POSTGRES_USER` - name of postgres user
+ - `POSTGRES_DB` - name of postgres db

@@ -1,4 +1,5 @@
 import "package:nyxx/nyxx.dart";
+import "package:running_on_dart/src/internal/utils.dart";
 import "package:running_on_dart/src/modules/settings/settings.dart";
 
 const _poopEmoji = "💩";
@@ -16,7 +17,7 @@ Future<void> poopNickName(Member member) async {
 
 Future<void> nicknamePoopUpdateEvent(GuildMemberUpdateEvent event) async {
   final poopFeature = await fetchFeatureSettings(event.guild.id, nickNamePoopingSettingName);
-  if (poopFeature == null) {
+  if (poopFeature == null || !enabledIntentFeatures) {
     return;
   }
 
@@ -25,7 +26,7 @@ Future<void> nicknamePoopUpdateEvent(GuildMemberUpdateEvent event) async {
 
 Future<void> nicknamePoopJoinEvent(GuildMemberAddEvent event) async {
   final poopFeature = await fetchFeatureSettings(event.guild.id, nickNamePoopingSettingName);
-  if (poopFeature == null) {
+  if (poopFeature == null || !enabledIntentFeatures) {
     return;
   }
 

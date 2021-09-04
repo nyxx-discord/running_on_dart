@@ -85,7 +85,7 @@ packages:
     description:
       path: "nyxx/"
       ref: HEAD
-      resolved-ref: e5ea1c00d5caa4f374fdddbf112b3dcce7831004
+      resolved-ref: e10c1cb5cfb9b1e723b4a75b50f47e675eb4f78a
       url: "git://github.com/nyxx-discord/nyxx.git"
     source: git
     version: "2.0.0-rc.13"
@@ -101,7 +101,7 @@ packages:
     description:
       path: "nyxx_interactions/"
       ref: HEAD
-      resolved-ref: e5ea1c00d5caa4f374fdddbf112b3dcce7831004
+      resolved-ref: e10c1cb5cfb9b1e723b4a75b50f47e675eb4f78a
       url: "git://github.com/nyxx-discord/nyxx.git"
     source: git
     version: "2.0.0-rc.20"
