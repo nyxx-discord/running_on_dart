@@ -5,7 +5,7 @@ late DateTime lastDocUpdate;
 DateTime lastDocUpdateTimer = DateTime(2005);
 
 List<dynamic> _indexJson = jsonDecode(File("docfiles/nyxxdocs.json").readAsStringSync()) as List<dynamic>;
-String get basePath => "https://nyxx.l7ssha.xyz/";
+String get basePath => "https://nyxx.l7ssha.xyz/dartdocs/";
 Uri get docUpdatePath => Uri.parse("https://api.github.com/repos/nyxx-discord/nyxx/actions/runs?status=success&per_page=1&page=1");
 
 class DocDefinition {
