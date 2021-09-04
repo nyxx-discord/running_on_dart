@@ -2,10 +2,10 @@ import "dart:async";
 
 import "package:nyxx/nyxx.dart";
 import "package:nyxx_commander/commander.dart";
-import 'package:running_on_dart/src/modules/settings/settings.dart';
+import "package:running_on_dart/src/modules/settings/settings.dart";
 
 FutureOr<bool> adminBeforehandler(CommandContext context) =>
-    privilegedAdmonSnowflakes.contains(context.author.id.id);
+    privilegedAdminSnowflakes.contains(context.author.id.id);
 
 Future<void> leaveChannel(Snowflake guildId, Nyxx client) async {
   final shard = client.shardManager.shards.firstWhere((element) => element.guilds.contains(guildId));

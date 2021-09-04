@@ -1,13 +1,13 @@
 import "package:nyxx/nyxx.dart";
 import "package:nyxx_interactions/interactions.dart";
 import "package:running_on_dart/src/commands/voiceCommon.dart";
-import 'package:running_on_dart/src/modules/settings/settings.dart';
+import "package:running_on_dart/src/modules/settings/settings.dart";
 
 Future<void> joinVoiceHandler(SlashCommandInteractionEvent event) async {
   await event.acknowledge();
 
   final author = event.interaction.memberAuthor;
-  if (author == null || !privilegedAdmonSnowflakes.contains(author.id.id)) {
+  if (author == null || !privilegedAdminSnowflakes.contains(author.id.id)) {
     await event.respond(MessageBuilder.content("You don't have permissions to do that"), hidden: true);
   }
 
@@ -21,7 +21,7 @@ Future<void> leaveVoiceHandler(SlashCommandInteractionEvent event) async {
   await event.acknowledge();
 
   final author = event.interaction.memberAuthor;
-  if (author == null || !privilegedAdmonSnowflakes.contains(author.id.id)) {
+  if (author == null || !privilegedAdminSnowflakes.contains(author.id.id)) {
     await event.respond(MessageBuilder.content("You don't have permissions to do that"), hidden: true);
   }
 

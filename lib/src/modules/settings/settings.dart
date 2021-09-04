@@ -45,7 +45,7 @@ final cacheOptions = CacheOptions()
   ..memberCachePolicyLocation = CachePolicyLocation.none()
   ..userCachePolicyLocation = CachePolicyLocation.none();
 
-const privilegedAdmonSnowflakes = [
+const privilegedAdminSnowflakes = [
   302359032612651009,
   281314080923320321,
   612653298532745217
