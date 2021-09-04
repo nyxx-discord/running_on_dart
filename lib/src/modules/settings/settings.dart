@@ -15,16 +15,20 @@ const availableFeatureSettings = {
   memberJoinLogsSettingName: "Logs member join events into specified channel",
 };
 
+// const intents =
+//   GatewayIntents.guilds
+//   | GatewayIntents.guildBans
+//   | GatewayIntents.guildEmojis
+//   | GatewayIntents.guildIntegrations
+//   | GatewayIntents.guildWebhooks
+//   | GatewayIntents.guildInvites
+//   | GatewayIntents.guildVoiceState
+//   | GatewayIntents.guildMessages
+//   | GatewayIntents.directMessages
+//   | GatewayIntents.guildMembers;
+
 const intents =
-  GatewayIntents.guilds
-  | GatewayIntents.guildBans
-  | GatewayIntents.guildEmojis
-  | GatewayIntents.guildIntegrations
-  | GatewayIntents.guildWebhooks
-  | GatewayIntents.guildInvites
-  | GatewayIntents.guildVoiceState
-  | GatewayIntents.guildMessages
-  | GatewayIntents.directMessages
+  GatewayIntents.allUnprivileged
   | GatewayIntents.guildMembers;
 
 String get botToken => envToken!;

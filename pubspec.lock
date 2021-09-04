@@ -76,7 +76,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: d5ff716cef5e075ac8134471f004b287f7abc6a5
+      resolved-ref: "9b51c34c7aefc645e18e6804d7dcb0f2f3088158"
       url: "git://github.com/nyxx-discord/migent.git"
     source: git
     version: "1.0.0"
@@ -85,7 +85,7 @@ packages:
     description:
       path: "nyxx/"
       ref: HEAD
-      resolved-ref: e81fafb10aa5824f7351cd261eb8fe9a4818df0d
+      resolved-ref: e5ea1c00d5caa4f374fdddbf112b3dcce7831004
       url: "git://github.com/nyxx-discord/nyxx.git"
     source: git
     version: "2.0.0-rc.13"
@@ -101,7 +101,7 @@ packages:
     description:
       path: "nyxx_interactions/"
       ref: HEAD
-      resolved-ref: e81fafb10aa5824f7351cd261eb8fe9a4818df0d
+      resolved-ref: e5ea1c00d5caa4f374fdddbf112b3dcce7831004
       url: "git://github.com/nyxx-discord/nyxx.git"
     source: git
     version: "2.0.0-rc.20"

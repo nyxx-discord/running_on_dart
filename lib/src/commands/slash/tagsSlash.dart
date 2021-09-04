@@ -1,14 +1,26 @@
-import 'package:nyxx/nyxx.dart';
-import 'package:nyxx_interactions/interactions.dart';
-import 'package:running_on_dart/src/modules/inline_tags.dart' as inline_tags;
+import "package:nyxx/nyxx.dart";
+import "package:nyxx_interactions/interactions.dart";
+import "package:running_on_dart/src/modules/inline_tags.dart" as inline_tags;
+
+Future<void> tagSearchHandler(SlashCommandInteractionEvent event) async {
+  await event.acknowledge(hidden: true);
+
+  final mainId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
+
+  final buffer = StringBuffer(MessageBuilder.clearCharacter);
+  await for (final tag in inline_tags.findTags(mainId, event.getArg("query").value.toString())) {
+    buffer.writeln("`${tag.name}` (<@${tag.authorId}>)");
+  }
+
+  final messageBuilder = MessageBuilder()
+    ..allowedMentions = AllowedMentions()
+    ..content = buffer.toString();
+
+  await event.respond(messageBuilder, hidden: true);
+}
 
 Future<void> tagStatsHandler(SlashCommandInteractionEvent event) async {
   await event.acknowledge(hidden: true);
-
-  if (event.interaction.guild == null) {
-    await event.respond(MessageBuilder.content("Message cannot be executed in DMs"));
-    return;
-  }
 
   final mainId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
   final results = await inline_tags.fetchUsageStats(mainId);

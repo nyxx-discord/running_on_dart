@@ -63,6 +63,9 @@ FutureOr<void> openDbAndRunMigrations() async {
         FOREIGN KEY(feature_setting_id) REFERENCES feature_settings(id)
       );
     """)
+    ..enqueueMigration("1.3", """
+      CREATE EXTENSION pg_trgm;
+    """)
     ..runMigrations();
 }
 

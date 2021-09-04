@@ -46,6 +46,20 @@ Future<void> updateUsageStats(int id, bool hidden) async {
   });
 }
 
+Stream<Tag> findTags(Snowflake guildId, String query) async* {
+  const query = """
+    SELECT t.* from tags t ORDER BY t.name <-> @query LIMIT 10;
+  """;
+
+  final result = await db.connection.query(query, substitutionValues: {
+    "query": query
+  });
+
+  for (final row in result) {
+    yield Tag.fromDatabaseRecord(row.toColumnMap());
+  }
+}
+
 Future<Tag?> findTagForGuild(String name, Snowflake guildId, {bool enabled = true}) async {
   const query = """
     SELECT t.* FROM tags t WHERE t.name = @name AND t.guild_id = @guildId AND t.enabled = @enabled;
@@ -72,7 +86,7 @@ Future<bool> deleteTagForGuild(String name, Snowflake guildId, Snowflake authorI
   final affectedRows = await db.connection.execute(query, substitutionValues: {
     "name": name,
     "guildId": guildId.toString(),
-    "author_id": authorId.toString(),
+    "authorId": authorId.toString(),
   });
 
   return affectedRows == 1;

@@ -43,6 +43,8 @@ void main(List<String> arguments) async {
         ..registerHandler(rod.deleteTagHandler),
       CommandOptionBuilder(CommandOptionType.subCommand, "stats", "Tag stats", options: [])
         ..registerHandler(rod.tagStatsHandler),
+      CommandOptionBuilder(CommandOptionType.subCommand, "search", "Allows to search tags", options: [CommandOptionBuilder(CommandOptionType.string, "query", "Query to search tags with", required: true)])
+        ..registerHandler(rod.tagSearchHandler),
     ]))
     ..registerSlashCommand(SlashCommandBuilder("avatar", "Shows avatar of the user", [CommandOptionBuilder(CommandOptionType.user, "user", "User to display avatar")])
       ..registerHandler(rod.avatarSlashHandler))

@@ -14,8 +14,13 @@ Future<void> enableFeatureSlash(SlashCommandInteractionEvent event) async {
   final featureName = event.getArg("name");
   final targetId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
   final whoEnabledId = event.interaction.memberAuthor?.id ?? event.interaction.userAuthor!.id;
+  try {
+    await addFeatureSettings(targetId, featureName.value.toString(), whoEnabledId);
 
-  await addFeatureSettings(targetId, featureName.value.toString(), whoEnabledId);
+    await event.respond(MessageBuilder.content("Successfully enabled feature `$featureName`"));
+  } on CommandExecutionException catch (e) {
+    await event.respond(MessageBuilder.content(e.message));
+  }
 }
 
 Future<void> disableFeatureSlash(SlashCommandInteractionEvent event) async {
@@ -31,4 +36,5 @@ Future<void> disableFeatureSlash(SlashCommandInteractionEvent event) async {
   final targetId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
 
   await deleteFeatureSettings(targetId, featureName.value.toString());
+  await event.respond(MessageBuilder.content("Successfully disabled feature `$featureName`"));
 }
