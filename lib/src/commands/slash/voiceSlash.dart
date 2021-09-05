@@ -11,10 +11,10 @@ Future<void> joinVoiceHandler(SlashCommandInteractionEvent event) async {
     await event.respond(MessageBuilder.content("You don't have permissions to do that"), hidden: true);
   }
 
-  final channel = event.getArg("channel");
+  final channel = event.getArg("channel").value.toString();
   await joinChannel(event.interaction.guild!.id, Snowflake(channel), event.client);
 
-  await event.respond(MessageBuilder.content("Left channel!"));
+  await event.respond(MessageBuilder.content("Channel joined!"));
 }
 
 Future<void> leaveVoiceHandler(SlashCommandInteractionEvent event) async {

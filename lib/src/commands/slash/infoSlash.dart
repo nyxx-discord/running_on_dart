@@ -25,7 +25,7 @@ Future<void> pingSlashHandler(SlashCommandInteractionEvent event) async {
 
   final embed = EmbedBuilder()
     ..color = color
-    ..addField(name: "Gateway latency", content: "$gatewayDelayInMillis ms", inline: true)
+    ..addField(name: "Gateway latency", content: "${gatewayDelayInMillis.abs()} ms", inline: true)
     ..addField(name: "REST latency", content: "$apiPing ms", inline: true)
     ..addField(name: "Message roundup time", content: "Pending...", inline: true);
 

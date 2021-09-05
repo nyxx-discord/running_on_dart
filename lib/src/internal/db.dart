@@ -57,7 +57,6 @@ FutureOr<void> openDbAndRunMigrations() async {
       CREATE TABLE feature_settings_additional_data (
         id SERIAL PRIMARY KEY,
         name VARCHAR(20) NOT NULL,
-        
         data VARCHAR NOT NULL,
         feature_setting_id SERIAL,
         FOREIGN KEY(feature_setting_id) REFERENCES feature_settings(id)

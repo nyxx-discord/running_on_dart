@@ -11,11 +11,18 @@ Future<void> enableFeatureSlash(SlashCommandInteractionEvent event) async {
     return;
   }
 
-  final featureName = event.getArg("name");
+  final featureName = event.getArg("name").value.toString();
   final targetId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
   final whoEnabledId = event.interaction.memberAuthor?.id ?? event.interaction.userAuthor!.id;
+
+  final featureEnabled = await fetchFeatureSettings(targetId, featureName);
+  if (featureEnabled != null) {
+    await event.respond(MessageBuilder.content("Feature `$featureName` is already enabled"));
+    return;
+  }
+
   try {
-    await addFeatureSettings(targetId, featureName.value.toString(), whoEnabledId);
+    await addFeatureSettings(targetId, featureName, whoEnabledId);
 
     await event.respond(MessageBuilder.content("Successfully enabled feature `$featureName`"));
   } on CommandExecutionException catch (e) {
@@ -32,9 +39,27 @@ Future<void> disableFeatureSlash(SlashCommandInteractionEvent event) async {
     return;
   }
 
-  final featureName = event.getArg("name");
+  final featureName = event.getArg("name").value.toString();
   final targetId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
 
-  await deleteFeatureSettings(targetId, featureName.value.toString());
+  final featureEnabled = await fetchFeatureSettings(targetId, featureName);
+  if (featureEnabled != null) {
+    await event.respond(MessageBuilder.content("Feature `$featureName` is not enabled"));
+    return;
+  }
+
+  await deleteFeatureSettings(targetId, featureName);
   await event.respond(MessageBuilder.content("Successfully disabled feature `$featureName`"));
+}
+
+Future<void> showFeaturesSlash(SlashCommandInteractionEvent event) async {
+  final targetId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
+  final features = fetchEnabledFeatureForGuild(targetId).map((event) => "`${event.name}`");
+
+  var content = await features.join(", ");
+  if (content.isEmpty) {
+    content = "No features enabled yet!";
+  }
+
+  await event.respond(MessageBuilder.content(content));
 }
