@@ -43,7 +43,7 @@ Future<void> disableFeatureSlash(SlashCommandInteractionEvent event) async {
   final targetId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
 
   final featureEnabled = await fetchFeatureSettings(targetId, featureName);
-  if (featureEnabled != null) {
+  if (featureEnabled == null) {
     await event.respond(MessageBuilder.content("Feature `$featureName` is not enabled"));
     return;
   }
