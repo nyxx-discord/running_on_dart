@@ -27,9 +27,19 @@ const availableFeatureSettings = {
 //   | GatewayIntents.directMessages
 //   | GatewayIntents.guildMembers;
 
-const intents =
+const intentsMembers =
   GatewayIntents.allUnprivileged
   | GatewayIntents.guildMembers;
+
+const intentsNoMembers = GatewayIntents.allUnprivileged;
+
+int get setIntents {
+  if (enabledIntentFeatures) {
+    return intentsMembers;
+  }
+
+  return intentsNoMembers;
+}
 
 String get botToken => envToken!;
 

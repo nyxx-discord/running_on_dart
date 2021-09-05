@@ -11,7 +11,7 @@ void main(List<String> arguments) async {
 
   botInstance = Nyxx(
       rod.botToken,
-      rod.intents,
+      rod.setIntents,
       options: ClientOptions(guildSubscriptions: false),
       cacheOptions: rod.cacheOptions
   )..onGuildMemberAdd.listen(rod.nicknamePoopJoinEvent)
