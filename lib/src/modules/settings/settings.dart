@@ -115,6 +115,7 @@ Future<void> addFeatureSettings(Snowflake guildId, String name, Snowflake whoEna
     }
 
     additionalDataQueryBuilder.write(buffer.join(","));
+    additionalDataQueryBuilder.write(";");
 
     final additionalDataResult = await connection.execute(
         additionalDataQueryBuilder.toString(),
