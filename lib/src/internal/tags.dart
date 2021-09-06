@@ -6,12 +6,14 @@ class Tag {
   late final String content;
   late final bool enabled;
   late final Snowflake guildId;
+  late final Snowflake authorId;
 
   Tag.fromDatabaseRecord(Map<String, dynamic> row) {
     this.id = row["id"] as int;
     this.name = row["name"] as String;
     this.content = row["content"] as String;
     this.enabled = row["enabled"] as bool;
-    this.guildId = Snowflake(row["guild_id"] as String);
+    this.guildId = Snowflake(row["guild_id"]);
+    this.authorId = Snowflake(row["author_id"]);
   }
 }

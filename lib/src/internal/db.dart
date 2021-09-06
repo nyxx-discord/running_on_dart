@@ -45,6 +45,26 @@ FutureOr<void> openDbAndRunMigrations() async {
       );
       CREATE INDEX command_id_index ON tag_usage USING btree(command_id);
     """)
+    ..enqueueMigration("1.2", """
+      CREATE TABLE feature_settings (
+        id SERIAL PRIMARY KEY,
+        name varchar(20) NOT NULL,
+        guild_id VARCHAR NOT NULL,
+        add_date TIMESTAMP DEFAULT NOW(),
+        who_enabled VARCHAR NOT NULL
+      );
+      CREATE INDEX guild_id_name_index ON feature_settings USING btree(guild_id, name);
+      CREATE TABLE feature_settings_additional_data (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(20) NOT NULL,
+        data VARCHAR NOT NULL,
+        feature_setting_id SERIAL,
+        FOREIGN KEY(feature_setting_id) REFERENCES feature_settings(id)
+      );
+    """)
+    ..enqueueMigration("1.3", """
+      CREATE EXTENSION pg_trgm;
+    """)
     ..runMigrations();
 }
 
