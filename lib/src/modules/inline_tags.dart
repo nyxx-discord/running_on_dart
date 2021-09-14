@@ -92,6 +92,21 @@ Future<bool> deleteTagForGuild(String name, Snowflake guildId, Snowflake authorI
   return affectedRows == 1;
 }
 
+Future<bool> updateTagForGuild(int tagId, String content) async {
+  const query = """
+    UPDATE tags
+    SET content = @content
+    WHERE id = @tagId;
+  """;
+
+  final affectedRows = await db.connection.execute(query, substitutionValues: {
+    "tagId": tagId,
+    "content": content,
+  });
+
+  return affectedRows == 1;
+}
+
 Future<bool> createTagForGuild(String name, String content, Snowflake guildId, Snowflake authorId) async {
   const query = """
     INSERT INTO tags (name, content, enabled, guild_id, author_id)

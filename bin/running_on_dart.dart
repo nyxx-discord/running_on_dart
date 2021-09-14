@@ -45,6 +45,8 @@ void main(List<String> arguments) async {
         ..registerHandler(rod.tagStatsHandler),
       CommandOptionBuilder(CommandOptionType.subCommand, "search", "Allows to search tags", options: [CommandOptionBuilder(CommandOptionType.string, "query", "Query to search tags with", required: true)])
         ..registerHandler(rod.tagSearchHandler),
+      CommandOptionBuilder(CommandOptionType.subCommand, "edit", "Allows editing existing tag", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag", required: true), CommandOptionBuilder(CommandOptionType.string, "content", "Content of the tag", required: true)])
+        ..registerHandler(rod.tagEditHandler),
     ]))
     ..registerSlashCommand(SlashCommandBuilder("avatar", "Shows avatar of the user", [CommandOptionBuilder(CommandOptionType.user, "user", "User to display avatar")])
       ..registerHandler(rod.avatarSlashHandler))
@@ -67,7 +69,7 @@ void main(List<String> arguments) async {
     ..registerSlashCommand(SlashCommandBuilder("settings", "Manages settings of guild", [
       CommandOptionBuilder(CommandOptionType.subCommand, "enable", "Allows to enable features in a guild", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of feature to enable", choices: rod.getFeaturesAsChoices().toList(), required: true)])
         ..registerHandler(rod.enableFeatureSlash),
-      CommandOptionBuilder(CommandOptionType.subCommand, "disabled", "Disables feature in guild", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of option to disable", required: true)])
+      CommandOptionBuilder(CommandOptionType.subCommand, "disable", "Disables feature in guild", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of option to disable", required: true)])
         ..registerHandler(rod.disableFeatureSlash)
     ]))
     ..syncOnReady();

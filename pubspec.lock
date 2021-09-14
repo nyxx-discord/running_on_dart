@@ -63,7 +63,7 @@ packages:
       name: logging
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.1"
+    version: "1.0.2"
   meta:
     dependency: transitive
     description:
@@ -83,12 +83,12 @@ packages:
   nyxx:
     dependency: "direct main"
     description:
-      path: "nyxx/"
+      path: nyxx
       ref: HEAD
-      resolved-ref: "828b4b5260faabf8a102bcd70fdd23d7445faab8"
+      resolved-ref: "861bd977396d1ac142ff98861bef90207af648f8"
       url: "git://github.com/nyxx-discord/nyxx.git"
     source: git
-    version: "2.0.0-rc.13"
+    version: "2.0.0-rc.15"
   nyxx_commander:
     dependency: "direct main"
     description:
@@ -99,12 +99,12 @@ packages:
   nyxx_interactions:
     dependency: "direct main"
     description:
-      path: "nyxx_interactions/"
+      path: nyxx_interactions
       ref: HEAD
-      resolved-ref: "828b4b5260faabf8a102bcd70fdd23d7445faab8"
+      resolved-ref: "861bd977396d1ac142ff98861bef90207af648f8"
       url: "git://github.com/nyxx-discord/nyxx.git"
     source: git
-    version: "2.0.0-rc.20"
+    version: "2.0.0-rc.23"
   path:
     dependency: transitive
     description:

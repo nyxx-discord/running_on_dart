@@ -2,6 +2,38 @@ import "package:nyxx/nyxx.dart";
 import "package:nyxx_interactions/interactions.dart";
 import "package:running_on_dart/src/modules/inline_tags.dart" as inline_tags;
 
+Future<void> tagEditHandler(SlashCommandInteractionEvent event) async {
+  await event.acknowledge();
+
+  final mainId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
+
+  final tagName = event.getArg("name").value as String;
+  final tag = await inline_tags.findTagForGuild(tagName, mainId);
+
+  if (tag == null) {
+    return event.respond(MessageBuilder.content("Tag with name: `$tagName` does not exist"));
+  }
+
+  final authorId = event.interaction.guild?.id != null
+      ? event.interaction.memberAuthor!.id
+      : event.interaction.userAuthor!.id;
+
+  if (tag.authorId != authorId) {
+    final messageBuilder = MessageBuilder.content("You can only edit tags that are created by you; This tag was created by <@${tag.authorId}>")
+      ..allowedMentions = AllowedMentions();
+
+    return event.respond(messageBuilder, hidden: true);
+  }
+
+  final content = event.getArg("content").value.toString();
+  final result = await inline_tags.updateTagForGuild(tag.id, content);
+  if (!result) {
+    return event.respond(MessageBuilder.content("Error occurred when editing tag. Report problem to developer"), hidden: true);
+  }
+
+  return event.respond(MessageBuilder.content("Tag `${tag.name}` edited successfully with content: `$content`"));
+}
+
 Future<void> tagSearchHandler(SlashCommandInteractionEvent event) async {
   await event.acknowledge(hidden: true);
 
@@ -75,7 +107,7 @@ Future<void> createTagHandler(SlashCommandInteractionEvent event) async {
 
   final existingTag = await inline_tags.findTagForGuild(tagName, mainId);
   if (existingTag != null) {
-    return event.respond(MessageBuilder.content("Tag with that name already exists!"), hidden: true);
+    return event.respond(MessageBuilder.content("Tag with that name: `$tagName` already exists!"), hidden: true);
   }
 
   final result = await inline_tags.createTagForGuild(tagName, tagContent, mainId, authorId);
@@ -83,7 +115,7 @@ Future<void> createTagHandler(SlashCommandInteractionEvent event) async {
     return event.respond(MessageBuilder.content("Error occurred when creating tag. Report problem to developer"), hidden: true);
   }
 
-  return event.respond(MessageBuilder.content("Tag created successfully"), hidden: true);
+  return event.respond(MessageBuilder.content("Tag with name: `$tagName`, content: `$tagContent` created successfully"), hidden: true);
 }
 
 Future<void> deleteTagHandler(SlashCommandInteractionEvent event) async {
@@ -100,5 +132,5 @@ Future<void> deleteTagHandler(SlashCommandInteractionEvent event) async {
     return event.respond(MessageBuilder.content("Error occurred when deleting tag. Report problem to developer"), hidden: true);
   }
 
-  return event.respond(MessageBuilder.content("Tag deleted successfully"), hidden: true);
+  return event.respond(MessageBuilder.content("Tag with name: `$tagName` deleted successfully"), hidden: true);
 }
