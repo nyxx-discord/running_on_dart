@@ -65,6 +65,12 @@ FutureOr<void> openDbAndRunMigrations() async {
     ..enqueueMigration("1.3", """
       CREATE EXTENSION pg_trgm;
     """)
+    ..enqueueMigration("1.4", """
+      DROP TABLE feature_settings_additional_data;
+    """)
+    ..enqueueMigration("1.5", """
+      ALTER TABLE feature_settings ADD COLUMN additional_data VARCHAR NULL;
+    """)
     ..runMigrations();
 }
 

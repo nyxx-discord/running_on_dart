@@ -1,4 +1,6 @@
-import "package:nyxx/nyxx.dart" show ClientOptions, Nyxx;
+import "dart:async";
+
+import "package:nyxx/nyxx.dart" show ClientOptions, IntExtensions, Nyxx;
 import "package:nyxx_commander/commander.dart" show CommandGroup, Commander;
 import "package:nyxx_interactions/interactions.dart";
 
@@ -14,8 +16,13 @@ void main(List<String> arguments) async {
       rod.setIntents,
       options: ClientOptions(guildSubscriptions: false),
       cacheOptions: rod.cacheOptions
-  )..onGuildMemberAdd.listen(rod.nicknamePoopJoinEvent)
-  ..onGuildMemberUpdate.listen(rod.nicknamePoopUpdateEvent);
+  )..onGuildMemberAdd.listen((event) {
+    unawaited(rod.nicknamePoopJoinEvent(event));
+    unawaited(rod.joinLogJoinEvent(event));
+  })
+  ..onGuildMemberUpdate.listen((event) {
+    unawaited(rod.nicknamePoopUpdateEvent(event));
+  });
 
   Commander(botInstance, prefixHandler: rod.prefixHandler)
     ..registerCommandGroup(CommandGroup(beforeHandler: rod.adminBeforehandler)
@@ -67,10 +74,10 @@ void main(List<String> arguments) async {
         ..registerHandler(rod.leaveVoiceHandler),
     ]))
     ..registerSlashCommand(SlashCommandBuilder("settings", "Manages settings of guild", [
-      CommandOptionBuilder(CommandOptionType.subCommand, "enable", "Allows to enable features in a guild", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of feature to enable", choices: rod.getFeaturesAsChoices().toList(), required: true)])
+      CommandOptionBuilder(CommandOptionType.subCommand, "enable", "Allows to enable features in a guild", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of feature to enable", choices: rod.getFeaturesAsChoices().toList(), required: true), CommandOptionBuilder(CommandOptionType.string, "data", "Additional data for feature")])
         ..registerHandler(rod.enableFeatureSlash),
       CommandOptionBuilder(CommandOptionType.subCommand, "disable", "Disables feature in guild", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of option to disable", required: true)])
         ..registerHandler(rod.disableFeatureSlash)
-    ]))
+    ], guild: 302360552993456135.toSnowflake()))
     ..syncOnReady();
 }

@@ -1,4 +1,4 @@
-FROM google/dart:2.13
+FROM google/dart:2.14
 
 WORKDIR /app
 
@@ -30,7 +30,7 @@ RUN pub get --offline
 
 RUN dart run ./scripts/genDocJson.dart
 
-RUN dart2native bin/running_on_dart.dart
+RUN dart compile exe bin/running_on_dart.dart
 
 CMD []
 ENTRYPOINT [ "./bin/running_on_dart.exe" ]

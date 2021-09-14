@@ -7,7 +7,7 @@ Future<void> enableFeatureSlash(SlashCommandInteractionEvent event) async {
 
   final permissions = event.interaction.memberAuthorPermissions;
   if (permissions != null && !permissions.manageGuild) {
-    await event.respond(MessageBuilder.content("You need to have manager guild permisson to use this command"));
+    await event.respond(MessageBuilder.content("You need to have manage guild permisson to use this command"));
     return;
   }
 
@@ -21,8 +21,17 @@ Future<void> enableFeatureSlash(SlashCommandInteractionEvent event) async {
     return;
   }
 
+  String? additionalData;
   try {
-    await addFeatureSettings(targetId, featureName, whoEnabledId);
+    additionalData = event.getArg("data").value.toString();
+  } on StateError {
+    if (featureSettingsThatNeedsAdditionalData.containsKey(featureName)) {
+      return event.respond(MessageBuilder.content("That feature requires to provide additional data"));
+    }
+  }
+
+  try {
+    await addFeatureSettings(targetId, featureName, whoEnabledId, additionalData: additionalData);
 
     await event.respond(MessageBuilder.content("Successfully enabled feature `$featureName`"));
   } on CommandExecutionException catch (e) {
@@ -35,7 +44,7 @@ Future<void> disableFeatureSlash(SlashCommandInteractionEvent event) async {
 
   final permissions = event.interaction.memberAuthorPermissions;
   if (permissions != null && !permissions.manageGuild) {
-    await event.respond(MessageBuilder.content("You need to have manager guild permisson to use this command"));
+    await event.respond(MessageBuilder.content("You need to have manage guild permission to use this command"));
     return;
   }
 
