@@ -1,8 +1,8 @@
 import "dart:async";
 import "dart:io";
 
-import "package:postgres/postgres.dart";
 import "package:migent/migent.dart";
+import "package:postgres/postgres.dart";
 
 String get _dbHost => Platform.environment["DB_HOST"]!;
 int get _dbPort => int.parse(Platform.environment["DB_PORT"]!);
@@ -12,6 +12,8 @@ String get _dbName => Platform.environment["POSTGRES_DB"]!;
 
 PostgreSQLConnection? _connection;
 
+bool dbStarted = false;
+
 /// Postgres connection
 PostgreSQLConnection get connection => _connection!;
 
@@ -20,6 +22,8 @@ FutureOr<void> openDbAndRunMigrations() async {
 
   _connection = PostgreSQLConnection(_dbHost, _dbPort, _dbName, username: _dbUser, password: _dbPassword);
   await _connection!.open();
+
+  dbStarted = true;
 
   Migent(_connection!, _dbName)
     ..enqueueMigration("1", """

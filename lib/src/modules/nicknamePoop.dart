@@ -1,4 +1,5 @@
 import "package:nyxx/nyxx.dart";
+import 'package:running_on_dart/src/internal/db.dart';
 import "package:running_on_dart/src/internal/utils.dart";
 import "package:running_on_dart/src/modules/settings/settings.dart";
 
@@ -16,6 +17,10 @@ Future<void> poopNickName(Member member) async {
 }
 
 Future<void> nicknamePoopUpdateEvent(GuildMemberUpdateEvent event) async {
+  if (!dbStarted) {
+    return;
+  }
+
   final poopFeature = await fetchFeatureSettings(event.guild.id, nickNamePoopingSettingName);
   if (poopFeature == null || !enabledIntentFeatures) {
     return;
@@ -25,6 +30,10 @@ Future<void> nicknamePoopUpdateEvent(GuildMemberUpdateEvent event) async {
 }
 
 Future<void> nicknamePoopJoinEvent(GuildMemberAddEvent event) async {
+  if (!dbStarted) {
+    return;
+  }
+
   final poopFeature = await fetchFeatureSettings(event.guild.id, nickNamePoopingSettingName);
   if (poopFeature == null || !enabledIntentFeatures) {
     return;
