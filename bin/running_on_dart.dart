@@ -78,6 +78,6 @@ void main(List<String> arguments) async {
         ..registerHandler(rod.enableFeatureSlash),
       CommandOptionBuilder(CommandOptionType.subCommand, "disable", "Disables feature in guild", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of option to disable", required: true)])
         ..registerHandler(rod.disableFeatureSlash)
-    ], guild: 302360552993456135.toSnowflake()))
+    ]))
     ..syncOnReady();
 }
