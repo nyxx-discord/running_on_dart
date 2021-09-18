@@ -1,6 +1,6 @@
-import "package:nyxx/nyxx.dart";
-import "package:running_on_dart/src/internal/utils.dart";
-import "package:running_on_dart/src/modules/settings/settings.dart";
+import "package:nyxx/nyxx.dart" show EmbedBuilder, GuildMemberAddEvent, Member, MessageBuilder, Snowflake, User;
+import "package:running_on_dart/src/internal/utils.dart" show enabledIntentFeatures;
+import "package:running_on_dart/src/modules/settings/settings.dart" show fetchFeatureSettings, memberJoinLogsSettingName;
 
 Map<Snowflake, Snowflake> channelCache = {};
 

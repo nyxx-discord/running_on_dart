@@ -1,4 +1,4 @@
-import "package:nyxx/nyxx.dart";
+import "package:nyxx/nyxx.dart" show Snowflake;
 
 class FeatureSettings {
   late final int id;

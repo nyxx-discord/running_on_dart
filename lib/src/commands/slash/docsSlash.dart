@@ -1,5 +1,5 @@
-import "package:nyxx_interactions/interactions.dart";
-import "package:running_on_dart/src/commands/docsCommon.dart";
+import "package:nyxx_interactions/interactions.dart" show SlashCommandInteractionEvent;
+import "package:running_on_dart/src/commands/docsCommon.dart" show docsGetMessageBuilder, docsLinksMessageBuilder, docsSearchMessageBuilder;
 
 Future<void> docsGetSlashHandler(SlashCommandInteractionEvent event) async {
   await event.acknowledge();

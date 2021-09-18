@@ -1,7 +1,7 @@
-import "package:nyxx/nyxx.dart";
-import 'package:running_on_dart/src/internal/db.dart';
-import "package:running_on_dart/src/internal/utils.dart";
-import "package:running_on_dart/src/modules/settings/settings.dart";
+import "package:nyxx/nyxx.dart" show GuildMemberAddEvent, GuildMemberUpdateEvent, Member;
+import "package:running_on_dart/src/internal/db.dart" show dbStarted;
+import "package:running_on_dart/src/internal/utils.dart" show enabledIntentFeatures;
+import "package:running_on_dart/src/modules/settings/settings.dart" show fetchFeatureSettings, nickNamePoopingSettingName;
 
 const _poopEmoji = "💩";
 final _poopRegexp = RegExp(r"[!#@^%&-*\.+']");

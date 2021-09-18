@@ -1,6 +1,6 @@
-import "package:nyxx/nyxx.dart";
-import "package:nyxx_commander/commander.dart";
-import "package:running_on_dart/src/commands/voiceCommon.dart";
+import "package:nyxx/nyxx.dart" show MessageBuilder, Snowflake;
+import "package:nyxx_commander/commander.dart" show CommandContext;
+import "package:running_on_dart/src/commands/voiceCommon.dart" show joinChannel, leaveChannel;
 
 Future<void> leaveChannelCommand(CommandContext ctx, String content) async {
   await leaveChannel(ctx.guild!.id, ctx.client);

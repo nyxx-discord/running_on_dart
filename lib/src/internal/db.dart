@@ -1,8 +1,8 @@
-import "dart:async";
-import "dart:io";
+import "dart:async" show Future, FutureOr;
+import "dart:io" show Platform;
 
-import "package:migent/migent.dart";
-import "package:postgres/postgres.dart";
+import "package:migent/migent.dart" show Migent;
+import "package:postgres/postgres.dart" show PostgreSQLConnection;
 
 String get _dbHost => Platform.environment["DB_HOST"]!;
 int get _dbPort => int.parse(Platform.environment["DB_PORT"]!);

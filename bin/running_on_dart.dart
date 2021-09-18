@@ -1,8 +1,8 @@
 import "dart:async";
 
-import "package:nyxx/nyxx.dart" show ClientOptions, IntExtensions, Nyxx;
+import "package:nyxx/nyxx.dart" show ClientOptions, Nyxx;
 import "package:nyxx_commander/commander.dart" show CommandGroup, Commander;
-import "package:nyxx_interactions/interactions.dart";
+import "package:nyxx_interactions/interactions.dart" show CommandOptionBuilder, CommandOptionType, Interactions, SlashCommandBuilder;
 
 import "package:running_on_dart/running_on_dart.dart" as rod;
 

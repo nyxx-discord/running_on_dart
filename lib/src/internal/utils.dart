@@ -1,6 +1,6 @@
 import "dart:io" show Platform, ProcessInfo;
 
-import "package:nyxx/nyxx.dart";
+import "package:nyxx/nyxx.dart" show Nyxx;
 
 String? get envPrefix => Platform.environment["ROD_PREFIX"];
 String? get envHotReload => Platform.environment["ROD_HOT_RELOAD"];

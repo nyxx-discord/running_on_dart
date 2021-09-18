@@ -1,5 +1,5 @@
-import "package:nyxx/nyxx.dart";
-import "package:nyxx_interactions/interactions.dart";
+import "package:nyxx/nyxx.dart" show AllowedMentions, EmbedBuilder, MessageBuilder;
+import "package:nyxx_interactions/interactions.dart" show SlashCommandInteractionEvent;
 import "package:running_on_dart/src/modules/inline_tags.dart" as inline_tags;
 
 Future<void> tagEditHandler(SlashCommandInteractionEvent event) async {
@@ -19,7 +19,7 @@ Future<void> tagEditHandler(SlashCommandInteractionEvent event) async {
       : event.interaction.userAuthor!.id;
 
   if (tag.authorId != authorId) {
-    final messageBuilder = MessageBuilder.content("You can only edit tags that are created by you; This tag was created by <@${tag.authorId}>")
+    final messageBuilder = MessageBuilder.content("You can only edit tags that are created by you. This tag was created by <@${tag.authorId}>")
       ..allowedMentions = AllowedMentions();
 
     return event.respond(messageBuilder, hidden: true);

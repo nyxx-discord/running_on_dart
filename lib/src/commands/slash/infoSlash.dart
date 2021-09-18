@@ -1,10 +1,10 @@
-import "dart:math";
+import "dart:math" show Random;
 
 import "package:http/http.dart" as http;
 
-import "package:nyxx/nyxx.dart";
-import "package:nyxx_interactions/interactions.dart";
-import "package:running_on_dart/src/commands/infoCommon.dart";
+import "package:nyxx/nyxx.dart" show Constants, DiscordColor, EmbedBuilder, MessageBuilder;
+import "package:nyxx_interactions/interactions.dart" show InteractionEvent, SlashCommandInteractionEvent;
+import "package:running_on_dart/src/commands/infoCommon.dart" show infoGenericCommand;
 
 Future<void> infoSlashCommand(InteractionEvent event) async {
   await event.acknowledge();

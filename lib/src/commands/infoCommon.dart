@@ -1,9 +1,9 @@
-import "dart:math";
+import "dart:math" show Random;
 
-import "package:nyxx/nyxx.dart";
-import "package:running_on_dart/src/internal/utils.dart";
-import "package:running_on_dart/src/modules/docs.dart";
-import "package:time_ago_provider/time_ago_provider.dart";
+import "package:nyxx/nyxx.dart" show Constants, DiscordColor, EmbedBuilder, Nyxx, TextChannel;
+import "package:running_on_dart/src/internal/utils.dart" show dartVersion, getApproxMemberCount, getMemoryUsageString;
+import "package:running_on_dart/src/modules/docs.dart" show fetchLastDocUpdate;
+import "package:time_ago_provider/time_ago_provider.dart" show formatFull;
 
 Future<EmbedBuilder> infoGenericCommand(Nyxx client, [int shardId = 0]) async {
   final color = DiscordColor.fromRgb(
