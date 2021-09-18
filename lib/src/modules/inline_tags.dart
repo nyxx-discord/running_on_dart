@@ -79,16 +79,27 @@ Future<Tag?> findTagForGuild(String name, Snowflake guildId, {bool enabled = tru
   return Tag.fromDatabaseRecord(result.first.toColumnMap());
 }
 
+// ignore: prefer_expression_function_bodies
 Future<bool> deleteTagForGuild(int tagId) async {
-  const query = """
-    DELETE FROM tags t WHERE t.id = @id; 
-  """;
+  return await db.connection.transaction((connection) async {
+    const tagStatsQuery = """
+      DELETE FROM tag_usage tu WHERE tu.command_id = @id;
+    """;
 
-  final affectedRows = await db.connection.execute(query, substitutionValues: {
-    "id": tagId,
-  });
+    final affectedRowsTagStats = await connection.execute(tagStatsQuery, substitutionValues: {
+      "id": tagId,
+    });
 
-  return affectedRows >= 0;
+    const tagsQuery = """
+      DELETE FROM tags t WHERE t.id = @id; 
+    """;
+
+    final affectedRowsTags = await connection.execute(tagsQuery, substitutionValues: {
+      "id": tagId,
+    });
+
+    return affectedRowsTagStats >= 0 && affectedRowsTags >= 0;
+  }) as bool;
 }
 
 Future<bool> updateTagForGuild(int tagId, String content) async {
