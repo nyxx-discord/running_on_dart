@@ -132,7 +132,8 @@ Future<void> deleteTagHandler(SlashCommandInteractionEvent event) async {
     return event.respond(MessageBuilder.content("There is no tag with name: `$tagName`"), hidden: true);
   }
 
-  if (tag.authorId != authorId) {
+  final hasManageGuildPermission = event.interaction.memberAuthorPermissions?.manageGuild == true;
+  if (tag.authorId != authorId && !hasManageGuildPermission) {
     return event.respond(MessageBuilder.content("you are not owner of tag with name: `$tagName`"), hidden: true);
   }
 
