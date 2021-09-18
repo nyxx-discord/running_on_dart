@@ -119,7 +119,7 @@ Future<void> createTagHandler(SlashCommandInteractionEvent event) async {
 }
 
 Future<void> deleteTagHandler(SlashCommandInteractionEvent event) async {
-  await event.acknowledge();
+  await event.acknowledge(hidden: true);
 
   final tagName = event.getArg("name").value.toString();
   final mainId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
@@ -127,9 +127,18 @@ Future<void> deleteTagHandler(SlashCommandInteractionEvent event) async {
       ? event.interaction.memberAuthor!.id
       : event.interaction.userAuthor!.id;
 
-  final result = await inline_tags.deleteTagForGuild(tagName, mainId, authorId);
+  final tag = await inline_tags.findTagForGuild(tagName, mainId);
+  if (tag == null) {
+    return event.respond(MessageBuilder.content("There is no tag with name: `$tagName`"), hidden: true);
+  }
+
+  if (tag.authorId != authorId) {
+    return event.respond(MessageBuilder.content("you are not owner of tag with name: `$tagName`"), hidden: true);
+  }
+
+  final result = await inline_tags.deleteTagForGuild(tag.id);
   if (!result) {
-    return event.respond(MessageBuilder.content("Error occurred when deleting tag. Report problem to developer"), hidden: true);
+    return event.respond(MessageBuilder.content("Error occurred when deleting tag. Please report problem to developer"), hidden: true);
   }
 
   return event.respond(MessageBuilder.content("Tag with name: `$tagName` deleted successfully"), hidden: true);

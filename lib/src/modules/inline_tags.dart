@@ -48,11 +48,12 @@ Future<void> updateUsageStats(int id, bool hidden) async {
 
 Stream<Tag> findTags(Snowflake guildId, String query) async* {
   const query = """
-    SELECT t.* from tags t ORDER BY t.name <-> @query LIMIT 10;
+    SELECT t.* from tags t WHERE t.guild_id = @guildId ORDER BY t.name <-> @query LIMIT 10;
   """;
 
   final result = await db.connection.query(query, substitutionValues: {
-    "query": query
+    "query": query,
+    "guild_id": guildId.toString(),
   });
 
   for (final row in result) {
@@ -78,18 +79,16 @@ Future<Tag?> findTagForGuild(String name, Snowflake guildId, {bool enabled = tru
   return Tag.fromDatabaseRecord(result.first.toColumnMap());
 }
 
-Future<bool> deleteTagForGuild(String name, Snowflake guildId, Snowflake authorId) async {
+Future<bool> deleteTagForGuild(int tagId) async {
   const query = """
-    DELETE FROM tags t WHERE t.name = @name AND t.guild_id = @guildId AND t.author_id = @authorId; 
+    DELETE FROM tags t WHERE t.id = @id; 
   """;
 
   final affectedRows = await db.connection.execute(query, substitutionValues: {
-    "name": name,
-    "guildId": guildId.toString(),
-    "authorId": authorId.toString(),
+    "id": tagId,
   });
 
-  return affectedRows == 1;
+  return affectedRows >= 0;
 }
 
 Future<bool> updateTagForGuild(int tagId, String content) async {
