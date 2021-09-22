@@ -65,13 +65,11 @@ const privilegedAdminSnowflakes = [
 ];
 
 Future<void> deleteFeatureSettings(Snowflake guildId, String name) async {
-  await db.connection.transaction((connection) async {
-    await connection.execute("""
+  await db.connection.execute("""
       DELETE FROM feature_settings WHERE name = @name AND guild_id = @guildId;
     """, substitutionValues: {
-      "name": name,
-      "guildId": guildId.toString(),
-    });
+    "name": name,
+    "guildId": guildId.toString(),
   });
 }
 
@@ -81,19 +79,16 @@ Future<void> addFeatureSettings(Snowflake guildId, String name, Snowflake whoEna
     VALUES (@name, @guildId, CURRENT_TIMESTAMP, @whoEnabled, @additionalData) RETURNING id;
   """;
 
-  await db.connection.transaction((connection) async {
-    final result = await connection.query(query, substitutionValues: {
-      "name": name,
-      "guildId": guildId.toString(),
-      "whoEnabled": whoEnabled.toString(),
-      "additionalData": additionalData
-    });
-
-    if (result.isEmpty) {
-      connection.cancelTransaction(reason: "Unexpected error occurred during saving to database [0]");
-      throw CommandExecutionException("Unexpected error occurred during saving to database [0]");
-    }
+  final result = await db.connection.query(query, substitutionValues: {
+    "name": name,
+    "guildId": guildId.toString(),
+    "whoEnabled": whoEnabled.toString(),
+    "additionalData": additionalData
   });
+
+  if (result.isEmpty) {
+    throw CommandExecutionException("Unexpected error occurred during saving to database [0]");
+  }
 }
 
 Future<FeatureSettings?> fetchFeatureSettings(Snowflake guildId, String name) async {

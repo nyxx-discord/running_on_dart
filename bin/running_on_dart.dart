@@ -16,12 +16,12 @@ void main(List<String> arguments) async {
       rod.setIntents,
       options: ClientOptions(guildSubscriptions: false),
       cacheOptions: rod.cacheOptions
-  )..onGuildMemberAdd.listen((event) {
-    unawaited(rod.nicknamePoopJoinEvent(event));
-    unawaited(rod.joinLogJoinEvent(event));
+  )..onGuildMemberAdd.listen((event) async {
+    await rod.joinLogJoinEvent(event);
+    await rod.nicknamePoopJoinEvent(event);
   })
-  ..onGuildMemberUpdate.listen((event) {
-    unawaited(rod.nicknamePoopUpdateEvent(event));
+  ..onGuildMemberUpdate.listen((event) async {
+    await rod.nicknamePoopUpdateEvent(event);
   });
 
   Commander(botInstance, prefixHandler: rod.prefixHandler)
