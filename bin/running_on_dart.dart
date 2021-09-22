@@ -77,7 +77,9 @@ void main(List<String> arguments) async {
       CommandOptionBuilder(CommandOptionType.subCommand, "enable", "Allows to enable features in a guild", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of feature to enable", choices: rod.getFeaturesAsChoices().toList(), required: true), CommandOptionBuilder(CommandOptionType.string, "data", "Additional data for feature")])
         ..registerHandler(rod.enableFeatureSlash),
       CommandOptionBuilder(CommandOptionType.subCommand, "disable", "Disables feature in guild", options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of option to disable", required: true)])
-        ..registerHandler(rod.disableFeatureSlash)
+        ..registerHandler(rod.disableFeatureSlash),
+      CommandOptionBuilder(CommandOptionType.subCommand, "list", "Lists features enabled in guild")
+        ..registerHandler(rod.listFeaturesSlash),
     ]))
     ..syncOnReady();
 }

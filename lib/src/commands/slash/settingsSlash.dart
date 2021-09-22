@@ -2,6 +2,20 @@ import "package:nyxx/nyxx.dart" show MessageBuilder;
 import "package:nyxx_interactions/interactions.dart" show SlashCommandInteractionEvent;
 import "package:running_on_dart/src/modules/settings/settings.dart" show CommandExecutionException, addFeatureSettings, deleteFeatureSettings, featureSettingsThatNeedsAdditionalData, fetchEnabledFeatureForGuild, fetchFeatureSettings;
 
+Future<void> listFeaturesSlash(SlashCommandInteractionEvent event) async {
+  await event.acknowledge(hidden: true);
+
+  final targetId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
+
+  final buffer = StringBuffer();
+
+  await for (final feature in fetchEnabledFeatureForGuild(targetId)) {
+    buffer.writeln("${feature.name} (${feature.additionalData ?? "(empty)"})");
+  }
+
+  await event.respond(MessageBuilder.content("```${buffer.toString()}```"));
+}
+
 Future<void> enableFeatureSlash(SlashCommandInteractionEvent event) async {
   await event.acknowledge(hidden: true);
 
