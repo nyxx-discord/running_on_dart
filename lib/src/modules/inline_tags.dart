@@ -17,7 +17,7 @@ Future<int> fetchPerDay() async {
 
 Future<Map<String, List<int>>> fetchUsageStats(Snowflake guildId) async {
   const query = """
-    SELECT t.name, COUNT(u.id), COUNT(nullif(u.hidden, false)) FROM tags t JOIN tag_usage u ON t.id = u.command_id WHERE t.guild_id = @guildId GROUP BY t.name LIMIT 3;
+    SELECT t.name, COUNT(u.id) as count, COUNT(nullif(u.hidden, false)) FROM tags t JOIN tag_usage u ON t.id = u.command_id WHERE t.guild_id = @guildId GROUP BY t.name ORDER BY count DESC, t.name LIMIT 6;
   """;
 
   final result = await db.connection.query(query, substitutionValues: {
