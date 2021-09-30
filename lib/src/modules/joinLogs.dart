@@ -2,7 +2,6 @@ import "package:nyxx/nyxx.dart" show EmbedBuilder, GuildMemberAddEvent, Member, 
 import "package:running_on_dart/src/internal/utils.dart" show enabledIntentFeatures;
 import "package:running_on_dart/src/modules/settings/settings.dart" show fetchFeatureSettings, memberJoinLogsSettingName;
 
-
 Future<void> joinLogJoinEvent(GuildMemberAddEvent event) async {
   if (!enabledIntentFeatures) {
     return;
@@ -31,7 +30,7 @@ MessageBuilder _getBuilderForMember(Member member, User user) {
           author.name = user.tag;
         })
         ..addField(name: "ID", content: user.id, inline: true)
-        ..addField(name: "Joined", content: "<t:$joinedSeconds:F>", inline: true)
-        ..addField(name: "Created account", content: "<t:$createdAccountSeconds:F>")
+        ..addField(name: "Joined", content: "<t:$joinedSeconds:d> (<t:$joinedSeconds:R>)", inline: true)
+        ..addField(name: "Created account", content: "<t:$createdAccountSeconds:d> (<t:$createdAccountSeconds:R>)")
   );
 }
