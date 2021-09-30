@@ -53,7 +53,7 @@ Stream<Tag> findTags(Snowflake guildId, String query) async* {
 
   final result = await db.connection.query(query, substitutionValues: {
     "query": query,
-    "guild_id": guildId.toString(),
+    "guildId": guildId.toString(),
   });
 
   for (final row in result) {
