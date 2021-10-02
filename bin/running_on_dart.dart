@@ -14,7 +14,7 @@ void main(List<String> arguments) async {
   botInstance = Nyxx(
       rod.botToken,
       rod.setIntents,
-      options: ClientOptions(guildSubscriptions: false),
+      options: ClientOptions(guildSubscriptions: false, messageCacheSize: 10),
       cacheOptions: rod.cacheOptions
   )..onGuildMemberAdd.listen((event) async {
     await rod.joinLogJoinEvent(event);
