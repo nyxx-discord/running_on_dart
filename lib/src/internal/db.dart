@@ -75,6 +75,18 @@ FutureOr<void> openDbAndRunMigrations() async {
     ..enqueueMigration("1.5", """
       ALTER TABLE feature_settings ADD COLUMN additional_data VARCHAR NULL;
     """)
+    ..enqueueMigration("1.6", """
+      CREATE TABLE reminders (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR NOT NULL,
+        channel_id VARCHAR NOT NULL,
+        message_id VARCHAR NULL,
+        add_date TIMESTAMP NOT NULL,
+        trigger_date TIMESTAMP NOT NULL,
+        message VARCHAR(50) NOT NULL
+      );
+      CREATE INDEX reminder_trigger_date_idx ON reminders USING btree(trigger_date);
+    """)
     ..runMigrations();
 }
 
