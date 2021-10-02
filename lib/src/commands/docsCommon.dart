@@ -35,4 +35,4 @@ Future<MessageBuilder> docsSearchMessageBuilder(String phrase) async {
   return MessageBuilder.embed(embed);
 }
 
-Future<MessageBuilder> docsLinksMessageBuilder() async => MessageBuilder.content(basePath);
+Future<MessageBuilder> docsLinksMessageBuilder() async => MessageBuilder.content("https://nyxx.l7ssha.xyz");
