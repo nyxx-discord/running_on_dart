@@ -1,6 +1,6 @@
 import "dart:async";
 
-import "package:nyxx/nyxx.dart" show ClientOptions, Nyxx;
+import "package:nyxx/nyxx.dart" show ClientOptions, Nyxx, Snowflake;
 import "package:nyxx_commander/commander.dart" show CommandGroup, Commander;
 import "package:nyxx_interactions/interactions.dart" show CommandOptionBuilder, CommandOptionType, Interactions, SlashCommandBuilder;
 
@@ -81,5 +81,11 @@ void main(List<String> arguments) async {
       CommandOptionBuilder(CommandOptionType.subCommand, "list", "Lists features enabled in guild")
         ..registerHandler(rod.listFeaturesSlash),
     ]))
+    ..registerSlashCommand(SlashCommandBuilder("reminder", "Manages reminders", [
+      CommandOptionBuilder(CommandOptionType.subCommand, "create", "Creates reminder in current channel", options: [
+        CommandOptionBuilder(CommandOptionType.string, "trigger-at", "When reminder should go on", required: true),
+        CommandOptionBuilder(CommandOptionType.string, "message", "Additional message", required: true),
+      ])..registerHandler(rod.createTagHandler),
+    ], guild: Snowflake(302360552993456135)))
     ..syncOnReady();
 }

@@ -25,6 +25,7 @@ Future<void> executeRemindersCache() async {
 
     if (now.difference(entry.triggerDate).inMilliseconds.abs() < 1000) {
       unawaited(client.httpEndpoints.sendMessage(entry.channelId, getMessageBuilderForReminder(entry)));
+      _remindersCache.removeAt(i);
     }
   }
 }
@@ -86,9 +87,9 @@ Stream<ReminderEntity> fetchCurrentRemindersForUser(Snowflake userId) async* {
 Future<bool> createReminder(
   Snowflake userId,
   Snowflake channelId,
-  Snowflake? messageId,
   DateTime triggerDate,
-  String message
+  String message,
+  {Snowflake? messageId}
 ) async {
   const query = """
     INSERT INTO reminders (user_id, channel_id, message_id, add_date, trigger_date, message)

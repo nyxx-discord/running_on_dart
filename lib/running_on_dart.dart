@@ -6,6 +6,7 @@ export "src/commands/legacy/voiceLegacy.dart";
 
 export "src/commands/slash/docsSlash.dart";
 export "src/commands/slash/infoSlash.dart";
+export "src/commands/slash/reminderSlash.dart";
 export "src/commands/slash/settingsSlash.dart";
 export "src/commands/slash/tagsSlash.dart";
 export "src/commands/slash/voiceSlash.dart";

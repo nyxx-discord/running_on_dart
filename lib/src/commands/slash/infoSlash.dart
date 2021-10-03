@@ -6,7 +6,7 @@ import "package:nyxx/nyxx.dart" show Constants, DiscordColor, EmbedBuilder, Mess
 import "package:nyxx_interactions/interactions.dart" show InteractionEvent, SlashCommandInteractionEvent;
 import "package:running_on_dart/src/commands/infoCommon.dart" show infoGenericCommand;
 
-Future<void> infoSlashCommand(InteractionEvent event) async {
+Future<void> infoSlashCommand(SlashCommandInteractionEvent event) async {
   await event.acknowledge();
 
   await event.respond(MessageBuilder.embed(await infoGenericCommand(event.client)));
