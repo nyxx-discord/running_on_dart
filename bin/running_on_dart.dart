@@ -85,7 +85,7 @@ void main(List<String> arguments) async {
       CommandOptionBuilder(CommandOptionType.subCommand, "create", "Creates reminder in current channel", options: [
         CommandOptionBuilder(CommandOptionType.string, "trigger-at", "When reminder should go on", required: true),
         CommandOptionBuilder(CommandOptionType.string, "message", "Additional message", required: true),
-      ])..registerHandler(rod.createTagHandler),
+      ])..registerHandler(rod.reminderAddSlash),
     ], guild: Snowflake(302360552993456135)))
     ..syncOnReady();
 }
