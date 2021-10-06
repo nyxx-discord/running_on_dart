@@ -9,7 +9,7 @@ import "package:running_on_dart/running_on_dart.dart" as rod;
 late Nyxx botInstance;
 
 void main(List<String> arguments) async {
-  rod.openDbAndRunMigrations();
+  await rod.openDbAndRunMigrations();
 
   botInstance = Nyxx(
       rod.botToken,
@@ -86,6 +86,10 @@ void main(List<String> arguments) async {
         CommandOptionBuilder(CommandOptionType.string, "trigger-at", "When reminder should go on", required: true),
         CommandOptionBuilder(CommandOptionType.string, "message", "Additional message", required: true),
       ])..registerHandler(rod.reminderAddSlash),
+      CommandOptionBuilder(CommandOptionType.subCommand, "list", "List your current remainders")
+        ..registerHandler(rod.getUserRemainders),
     ], guild: Snowflake(302360552993456135)))
     ..syncOnReady();
+
+  await rod.initReminderModule(botInstance);
 }

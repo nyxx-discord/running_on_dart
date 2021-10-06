@@ -17,7 +17,7 @@ bool dbStarted = false;
 /// Postgres connection
 PostgreSQLConnection get connection => _connection!;
 
-FutureOr<void> openDbAndRunMigrations() async {
+Future<void> openDbAndRunMigrations() async {
   await Future.delayed(const Duration(seconds: 5)); // hack for postgres
 
   _connection = PostgreSQLConnection(_dbHost, _dbPort, _dbName, username: _dbUser, password: _dbPassword);

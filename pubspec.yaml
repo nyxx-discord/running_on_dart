@@ -22,3 +22,5 @@ dependencies:
     git: git://github.com/nyxx-discord/migent.git
   shelf_router: ^1.1.1
   shelf: ^1.2.0
+  duration_parser:
+    git: git://github.com/l7ssha/duration_parser.git

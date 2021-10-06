@@ -1,45 +1,62 @@
 import "dart:async";
 
+import "package:logging/logging.dart";
 import "package:nyxx/nyxx.dart";
 import "package:nyxx_interactions/interactions.dart";
 import "package:running_on_dart/src/internal/db.dart" as db;
 import "package:running_on_dart/src/modules/reminder/ReminderEntity.dart";
 
-List<ReminderEntity> _remindersCache = [];
-late Nyxx client;
+Logger _logger = new Logger("ROD - Reminder");
 
-Future<void> init(Nyxx nyxx) async {
-  client = nyxx;
+List<ReminderEntity> _remindersCache = [];
+late Nyxx _client;
+
+Future<void> initReminderModule(Nyxx nyxx) async {
+  _client = nyxx;
+  _logger.info("Starting reminder module");
 
   await syncRemindersCache();
-  Timer(const Duration(seconds: 30), syncRemindersCache);
 
-  Timer(const Duration(seconds: 1), executeRemindersCache);
+  Timer.periodic(const Duration(seconds: 30), (timer) => syncRemindersCache());
+  Timer.periodic(const Duration(seconds: 1), (timer) => executeRemindersCache());
 }
 
 Future<void> executeRemindersCache() async {
+  final remindersLength = _remindersCache.length;
+  if (remindersLength == 0) {
+    return;
+  }
+
   final now = DateTime.now();
 
-  for (var i = 0; i < _remindersCache.length; i++) {
+  for (var i = 0; i < remindersLength; i++) {
     final entry = _remindersCache[i];
 
     if (now.difference(entry.triggerDate).inMilliseconds.abs() < 1000) {
-      unawaited(client.httpEndpoints.sendMessage(entry.channelId, getMessageBuilderForReminder(entry)));
+      unawaited(_client.httpEndpoints.sendMessage(entry.channelId, getMessageBuilderForReminder(entry)));
       _remindersCache.removeAt(i);
     }
+  }
+
+  final remindersDifference = remindersLength - _remindersCache.length;
+  if (remindersDifference > 0) {
+    _logger.info("[$remindersDifference] reminders executed successfully");
   }
 }
 
 MessageBuilder getMessageBuilderForReminder(ReminderEntity reminderEntity) {
-  final content = "<t:${reminderEntity.addDate.millisecondsSinceEpoch /~ 1000}:R>";
+  final content = "Reminder: <t:${reminderEntity.addDate.millisecondsSinceEpoch ~/ 1000}:R>: `${reminderEntity.message}`";
 
-  return ComponentMessageBuilder()
-      ..content = content
-      ..replyBuilder = ReplyBuilder(reminderEntity.messageId);
+  final builder = ComponentMessageBuilder()
+      ..content = content;
+
+  return builder;
 }
 
 Future<void> syncRemindersCache() async {
+  _logger.info("Syncing reminder cache");
   _remindersCache = await fetchCurrentReminders().toList();
+  _logger.info("Synced reminder cache. Number of entries: ${_remindersCache.length}");
 }
 
 Future<ReminderEntity?> fetchReminder(int id) async {
@@ -100,7 +117,7 @@ Future<bool> createReminder(
     "userId": userId.toString(),
     "channelId": channelId.toString(),
     "messageId": messageId?.toString(),
-    "triggerDate": triggerDate.millisecondsSinceEpoch /~ 1000,
+    "triggerDate": triggerDate.toIso8601String(),
     "message": message
   });
 
@@ -117,3 +134,6 @@ Future<bool> createReminder(
 
   return true;
 }
+
+Iterable<ReminderEntity> fetchRemaindersForUser(Snowflake userId) =>
+    _remindersCache.where((element) => element.userId == userId).take(6);

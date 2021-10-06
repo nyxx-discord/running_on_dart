@@ -36,13 +36,22 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.1"
+  duration_parser:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "187ba183ff2828f1ca9249841a7afd89148b7c8b"
+      url: "git://github.com/l7ssha/duration_parser.git"
+    source: git
+    version: "1.0.0"
   http:
     dependency: transitive
     description:
       name: http
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.13.3"
+    version: "0.13.4"
   http_methods:
     dependency: transitive
     description:
@@ -86,7 +95,7 @@ packages:
       name: nyxx
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.2"
+    version: "2.0.3"
   nyxx_commander:
     dependency: "direct main"
     description:
@@ -207,4 +216,4 @@ packages:
     source: hosted
     version: "0.2.0"
 sdks:
-  dart: ">=2.13.0 <3.0.0"
+  dart: ">=2.14.3 <3.0.0"

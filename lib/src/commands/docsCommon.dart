@@ -18,7 +18,7 @@ Future<MessageBuilder> docsGetMessageBuilder(String phrase) async {
 
 Future<MessageBuilder> docsSearchMessageBuilder(String phrase) async {
   final query = phrase.split(" ").last;
-  final results = searchDocs(query);
+  final results = await searchDocs(query).toList();
 
   if(results.isEmpty) {
     return MessageBuilder.content("Nothing found matching: `$query`");

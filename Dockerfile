@@ -1,34 +1,12 @@
-FROM google/dart:2.14
+FROM google/dart:2.14.3
 
 WORKDIR /app
 
-RUN git clone https://github.com/l7ssha/nyxx.git
-
-WORKDIR /app/nyxx
-RUN git fetch
-RUN git checkout dev
-
-WORKDIR /app/nyxx/nyxx
-RUN dartdoc
-
-WORKDIR /app/nyxx/nyxx_commander
-RUN dartdoc
-
-WORKDIR /app/nyxx/nyxx_extensions
-RUN dartdoc
-
-WORKDIR /app/nyxx/nyxx_interactions
-RUN dartdoc
-
-WORKDIR /app/bot
-
-ADD pubspec.* /app/bot/
+ADD pubspec.* /app
 RUN pub get
 
-ADD . /app/bot/
+ADD . /app
 RUN pub get --offline
-
-RUN dart run ./scripts/genDocJson.dart
 
 RUN dart compile exe bin/running_on_dart.dart
 
