@@ -45,7 +45,7 @@ Future<void> executeRemindersCache() async {
 }
 
 MessageBuilder getMessageBuilderForReminder(ReminderEntity reminderEntity) {
-  final content = "Reminder: <t:${reminderEntity.addDate.millisecondsSinceEpoch ~/ 1000}:R>: `${reminderEntity.message}`";
+  final content = "Reminder: <t:${reminderEntity.addDate.millisecondsSinceEpoch ~/ 1000}:R>: ${reminderEntity.message}";
 
   final builder = ComponentMessageBuilder()
       ..content = content;

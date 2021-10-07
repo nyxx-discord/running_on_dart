@@ -2,6 +2,7 @@ library running_on_dart;
 
 export "src/commands/legacy/docsLegacy.dart";
 export "src/commands/legacy/infoLegacy.dart";
+export "src/commands/legacy/remainderLegacy.dart";
 export "src/commands/legacy/voiceLegacy.dart";
 
 export "src/commands/slash/docsSlash.dart";

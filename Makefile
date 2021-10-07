@@ -11,7 +11,7 @@ build-no-cache: ## build images discarding cache
 stop: ## stop images
 	docker compose down
 
-start: ## start images from docker compose
+start: build ## start images from docker compose
 	docker compose up
 
 clean: stop ## clean container created by docker compose

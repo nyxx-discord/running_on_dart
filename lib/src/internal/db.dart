@@ -87,6 +87,9 @@ Future<void> openDbAndRunMigrations() async {
       );
       CREATE INDEX reminder_trigger_date_idx ON reminders USING btree(trigger_date);
     """)
+    ..enqueueMigration("1.7", """
+      ALTER TABLE reminders ALTER COLUMN message TYPE VARCHAR(200)
+    """)
     ..runMigrations();
 }
 

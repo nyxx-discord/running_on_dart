@@ -34,7 +34,8 @@ void main(List<String> arguments) async {
       ..registerSubCommand("get", rod.docsGetCommand)
       ..registerSubCommand("search", rod.docsSearchCommand))
     // Minor commands
-    ..registerCommand("info", rod.infoCommand);
+    ..registerCommand("info", rod.infoCommand)
+    ..registerCommand("remainder", rod.remainderCommand);
 
   Interactions(botInstance)
     ..registerSlashCommand(SlashCommandBuilder("info", "Info about bot state", [])
