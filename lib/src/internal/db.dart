@@ -90,6 +90,9 @@ Future<void> openDbAndRunMigrations() async {
     ..enqueueMigration("1.7", """
       ALTER TABLE reminders ALTER COLUMN message TYPE VARCHAR(200)
     """)
+    ..enqueueMigration("1.8", """
+      ALTER TABLE reminders ADD COLUMN active BOOLEAN NOT NULL; 
+    """)
     ..runMigrations();
 }
 

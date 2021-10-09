@@ -8,6 +8,7 @@ class ReminderEntity {
   late final DateTime addDate;
   late final DateTime triggerDate;
   late final String message;
+  late final bool active;
 
   ReminderEntity(Map<String, dynamic> raw) {
     this.id = raw["id"] as int;
@@ -17,5 +18,6 @@ class ReminderEntity {
     this.addDate = DateTime.parse(raw["add_date"].toString());
     this.triggerDate = DateTime.parse(raw["trigger_date"].toString());
     this.message = raw["message"] as String;
+    this.active = raw["active"] as bool;
   }
 }

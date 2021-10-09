@@ -88,7 +88,12 @@ void main(List<String> arguments) async {
         CommandOptionBuilder(CommandOptionType.string, "message", "Additional message", required: true),
       ])..registerHandler(rod.reminderAddSlash),
       CommandOptionBuilder(CommandOptionType.subCommand, "list", "List your current remainders")
-        ..registerHandler(rod.getUserRemainders),
+        ..registerHandler(rod.remainderGetUsers),
+      CommandOptionBuilder(CommandOptionType.subCommand, "clear", "Clears all your remainders")
+        ..registerHandler(rod.remaindersClear),
+      CommandOptionBuilder(CommandOptionType.subCommand, "remove", "Remove single remainder", options: [
+        CommandOptionBuilder(CommandOptionType.integer, "id", "Id of remainder to delete")
+      ])..registerHandler(rod.remainderRemove)
     ], guild: Snowflake(302360552993456135)))
     ..syncOnReady();
 

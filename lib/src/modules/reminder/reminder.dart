@@ -77,7 +77,7 @@ Future<ReminderEntity?> fetchReminder(int id) async {
 
 Stream<ReminderEntity> fetchCurrentReminders() async* {
   const query = """
-    SELECT r.* FROM reminders r WHERE r.trigger_date > NOW();
+    SELECT r.* FROM reminders r WHERE r.trigger_date > NOW() AND r.active = TRUE;
   """;
 
   final dbResult = await db.connection.query(query);
@@ -89,7 +89,7 @@ Stream<ReminderEntity> fetchCurrentReminders() async* {
 
 Stream<ReminderEntity> fetchCurrentRemindersForUser(Snowflake userId) async* {
   const query = """
-    SELECT r.* FROM reminders r WHERE r.trigger_date > NOW() AND r.user = @userId;
+    SELECT r.* FROM reminders r WHERE r.trigger_date > NOW() AND r.user = @userId AND r.active = TRUE;
   """;
 
   final dbResult = await db.connection.query(query, substitutionValues: {
@@ -109,8 +109,8 @@ Future<bool> createReminder(
   {Snowflake? messageId}
 ) async {
   const query = """
-    INSERT INTO reminders (user_id, channel_id, message_id, add_date, trigger_date, message)
-    VALUES (@userId, @channelId, @messageId, CURRENT_TIMESTAMP, @triggerDate, @message) RETURNING id;
+    INSERT INTO reminders (user_id, channel_id, message_id, add_date, trigger_date, message, active)
+    VALUES (@userId, @channelId, @messageId, CURRENT_TIMESTAMP, @triggerDate, @message, TRUE) RETURNING id;
   """;
 
   final resultingId = await db.connection.query(query, substitutionValues: {
@@ -136,4 +136,41 @@ Future<bool> createReminder(
 }
 
 Iterable<ReminderEntity> fetchRemaindersForUser(Snowflake userId) =>
-    _remindersCache.where((element) => element.userId == userId).take(6);
+    _remindersCache.where((element) => element.userId == userId && element.active == true).take(6);
+
+Future<int> clearRemaindersForUser(Snowflake userId) async {
+  const query = """
+    UPDATE reminders 
+    SET active = FALSE
+    WHERE user_id = @userId
+  """;
+
+  final result = await db.connection.execute(query, substitutionValues: {
+    "userId": userId.toString()
+  });
+
+  if (result > 0) {
+    _remindersCache.removeWhere((element) => element.userId == userId);
+  }
+
+  return result;
+}
+
+Future<bool> removeRemainderForUser(int id, Snowflake userId) async {
+  const query = """
+    UPDATE reminders 
+    SET active = FALSE
+    WHERE user_id = @userId AND id = @id
+  """;
+
+  final result = await db.connection.execute(query, substitutionValues: {
+    "userId": userId.toString(),
+    "id": id
+  });
+
+  if (result > 0) {
+    _remindersCache.removeWhere((element) => element.id == 15 && element.userId == userId);
+  }
+
+  return result == 1;
+}
