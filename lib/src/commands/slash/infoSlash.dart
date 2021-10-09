@@ -12,7 +12,7 @@ Future<void> infoSlashCommand(SlashCommandInteractionEvent event) async {
   final messageBuilder = ComponentMessageBuilder()
     ..embeds = [await infoGenericCommand(event.client)]
     ..components = [[
-        LinkButtonBuilder("Add nyxx to your guild", "https://discord.com/oauth2/authorize?client_id=${event.client.app.id}&scope=bot")
+        LinkButtonBuilder("Add nyxx to your guild", event.client.app.getInviteUrl())
     ]];
 
   await event.respond(messageBuilder);

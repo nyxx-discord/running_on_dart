@@ -13,14 +13,11 @@ environment:
 
 dependencies:
   logging: "^1.0.0"
-  nyxx: "^2.0.2"
+  nyxx: "^2.0.4"
   nyxx_commander: "^2.0.0"
   nyxx_interactions: "^2.0.0"
   postgres: "^2.3.2"
   time_ago_provider: "^4.0.0"
   migent:
     git: git://github.com/nyxx-discord/migent.git
-  shelf_router: ^1.1.1
-  shelf: ^1.2.0
-  duration_parser:
-    git: git://github.com/l7ssha/duration_parser.git
+  human_duration_parser: ^2.0.1

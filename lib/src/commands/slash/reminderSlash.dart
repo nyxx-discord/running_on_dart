@@ -1,4 +1,4 @@
-import "package:duration_parser/duration_parser.dart";
+import "package:human_duration_parser/human_duration_parser.dart";
 import "package:nyxx/nyxx.dart";
 import "package:nyxx_interactions/interactions.dart";
 import "package:running_on_dart/src/internal/utils.dart";
