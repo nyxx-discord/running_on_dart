@@ -1,5 +1,3 @@
-import "dart:async";
-
 import "package:nyxx/nyxx.dart" show ClientOptions, Nyxx, Snowflake;
 import "package:nyxx_commander/commander.dart" show CommandGroup, Commander;
 import "package:nyxx_interactions/interactions.dart" show CommandOptionBuilder, CommandOptionType, Interactions, SlashCommandBuilder;
@@ -94,7 +92,7 @@ void main(List<String> arguments) async {
       CommandOptionBuilder(CommandOptionType.subCommand, "remove", "Remove single remainder", options: [
         CommandOptionBuilder(CommandOptionType.integer, "id", "Id of remainder to delete")
       ])..registerHandler(rod.remainderRemove)
-    ], guild: Snowflake(302360552993456135)))
+    ]))
     ..syncOnReady();
 
   await rod.initReminderModule(botInstance);
