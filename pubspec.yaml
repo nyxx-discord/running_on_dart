@@ -1,7 +1,6 @@
 name: running_on_dart
-version: 2.0.0
+version: 2.1.0
 description: Discord Bot for nyxx development
-author: Szymon Uglis <szymon@l7ssha.xyz>
 homepage: https://github.com/nyxx-discord/running_on_dart
 repository: https://github.com/nyxx-discord/running_on_dart
 documentation: https://github.com/nyxx-discord/running_on_dart
