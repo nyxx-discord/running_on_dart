@@ -42,14 +42,7 @@ packages:
       name: http
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.13.3"
-  http_methods:
-    dependency: transitive
-    description:
-      name: http_methods
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.1.0"
+    version: "0.13.4"
   http_parser:
     dependency: transitive
     description:
@@ -57,6 +50,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.0.0"
+  human_duration_parser:
+    dependency: "direct main"
+    description:
+      name: human_duration_parser
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.1"
   logging:
     dependency: "direct main"
     description:
@@ -83,28 +83,24 @@ packages:
   nyxx:
     dependency: "direct main"
     description:
-      path: nyxx
-      ref: HEAD
-      resolved-ref: "861bd977396d1ac142ff98861bef90207af648f8"
-      url: "git://github.com/nyxx-discord/nyxx.git"
-    source: git
-    version: "2.0.0-rc.15"
+      name: nyxx
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.4"
   nyxx_commander:
     dependency: "direct main"
     description:
       name: nyxx_commander
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0-rc.12"
+    version: "2.0.0"
   nyxx_interactions:
     dependency: "direct main"
     description:
-      path: nyxx_interactions
-      ref: HEAD
-      resolved-ref: "861bd977396d1ac142ff98861bef90207af648f8"
-      url: "git://github.com/nyxx-discord/nyxx.git"
-    source: git
-    version: "2.0.0-rc.23"
+      name: nyxx_interactions
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.1"
   path:
     dependency: transitive
     description:
@@ -140,20 +136,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.2"
-  shelf:
-    dependency: "direct main"
-    description:
-      name: shelf
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.2.0"
-  shelf_router:
-    dependency: "direct main"
-    description:
-      name: shelf_router
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.1.1"
   source_span:
     dependency: transitive
     description:
@@ -161,20 +143,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.8.1"
-  stack_trace:
-    dependency: transitive
-    description:
-      name: stack_trace
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.10.0"
-  stream_channel:
-    dependency: transitive
-    description:
-      name: stream_channel
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.1.0"
   string_scanner:
     dependency: transitive
     description:
@@ -211,4 +179,4 @@ packages:
     source: hosted
     version: "0.2.0"
 sdks:
-  dart: ">=2.13.0 <3.0.0"
+  dart: ">=2.14.3 <3.0.0"

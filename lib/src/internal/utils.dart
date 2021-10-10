@@ -1,6 +1,7 @@
 import "dart:io" show Platform, ProcessInfo;
 
-import "package:nyxx/nyxx.dart" show Nyxx;
+import "package:nyxx/nyxx.dart" show Nyxx, Snowflake;
+import "package:nyxx_interactions/interactions.dart";
 
 String? get envPrefix => Platform.environment["ROD_PREFIX"];
 String? get envHotReload => Platform.environment["ROD_HOT_RELOAD"];
@@ -46,3 +47,8 @@ String getApproxMemberCount(Nyxx client) {
 
   return "$_approxMemberOnline/$_approxMemberCount";
 }
+
+Snowflake getAuthorId(InteractionEvent event) =>
+    event.interaction.guild?.id != null
+      ? event.interaction.memberAuthor!.id
+      : event.interaction.userAuthor!.id;

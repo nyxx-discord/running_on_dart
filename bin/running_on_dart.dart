@@ -1,6 +1,4 @@
-import "dart:async";
-
-import "package:nyxx/nyxx.dart" show ClientOptions, Nyxx;
+import "package:nyxx/nyxx.dart" show ClientOptions, Nyxx, Snowflake;
 import "package:nyxx_commander/commander.dart" show CommandGroup, Commander;
 import "package:nyxx_interactions/interactions.dart" show CommandOptionBuilder, CommandOptionType, Interactions, SlashCommandBuilder;
 
@@ -9,7 +7,7 @@ import "package:running_on_dart/running_on_dart.dart" as rod;
 late Nyxx botInstance;
 
 void main(List<String> arguments) async {
-  rod.openDbAndRunMigrations();
+  await rod.openDbAndRunMigrations();
 
   botInstance = Nyxx(
       rod.botToken,
@@ -34,7 +32,8 @@ void main(List<String> arguments) async {
       ..registerSubCommand("get", rod.docsGetCommand)
       ..registerSubCommand("search", rod.docsSearchCommand))
     // Minor commands
-    ..registerCommand("info", rod.infoCommand);
+    ..registerCommand("info", rod.infoCommand)
+    ..registerCommand("remainder", rod.remainderCommand);
 
   Interactions(botInstance)
     ..registerSlashCommand(SlashCommandBuilder("info", "Info about bot state", [])
@@ -81,5 +80,20 @@ void main(List<String> arguments) async {
       CommandOptionBuilder(CommandOptionType.subCommand, "list", "Lists features enabled in guild")
         ..registerHandler(rod.listFeaturesSlash),
     ]))
+    ..registerSlashCommand(SlashCommandBuilder("reminder", "Manages reminders", [
+      CommandOptionBuilder(CommandOptionType.subCommand, "create", "Creates reminder in current channel", options: [
+        CommandOptionBuilder(CommandOptionType.string, "trigger-at", "When reminder should go on", required: true),
+        CommandOptionBuilder(CommandOptionType.string, "message", "Additional message", required: true),
+      ])..registerHandler(rod.reminderAddSlash),
+      CommandOptionBuilder(CommandOptionType.subCommand, "list", "List your current remainders")
+        ..registerHandler(rod.remainderGetUsers),
+      CommandOptionBuilder(CommandOptionType.subCommand, "clear", "Clears all your remainders")
+        ..registerHandler(rod.remaindersClear),
+      CommandOptionBuilder(CommandOptionType.subCommand, "remove", "Remove single remainder", options: [
+        CommandOptionBuilder(CommandOptionType.integer, "id", "Id of remainder to delete")
+      ])..registerHandler(rod.remainderRemove)
+    ]))
     ..syncOnReady();
+
+  await rod.initReminderModule(botInstance);
 }

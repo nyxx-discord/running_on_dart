@@ -3,13 +3,19 @@ import "dart:math" show Random;
 import "package:http/http.dart" as http;
 
 import "package:nyxx/nyxx.dart" show Constants, DiscordColor, EmbedBuilder, MessageBuilder;
-import "package:nyxx_interactions/interactions.dart" show InteractionEvent, SlashCommandInteractionEvent;
+import "package:nyxx_interactions/interactions.dart" show ComponentMessageBuilder, ComponentRowBuilder, InteractionEvent, LinkButtonBuilder, SlashCommandInteractionEvent;
 import "package:running_on_dart/src/commands/infoCommon.dart" show infoGenericCommand;
 
-Future<void> infoSlashCommand(InteractionEvent event) async {
+Future<void> infoSlashCommand(SlashCommandInteractionEvent event) async {
   await event.acknowledge();
 
-  await event.respond(MessageBuilder.embed(await infoGenericCommand(event.client)));
+  final messageBuilder = ComponentMessageBuilder()
+    ..embeds = [await infoGenericCommand(event.client)]
+    ..components = [[
+        LinkButtonBuilder("Add nyxx to your guild", event.client.app.getInviteUrl())
+    ]];
+
+  await event.respond(messageBuilder);
 }
 
 Future<void> pingSlashHandler(SlashCommandInteractionEvent event) async {

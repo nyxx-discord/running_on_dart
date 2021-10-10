@@ -17,7 +17,7 @@ bool dbStarted = false;
 /// Postgres connection
 PostgreSQLConnection get connection => _connection!;
 
-FutureOr<void> openDbAndRunMigrations() async {
+Future<void> openDbAndRunMigrations() async {
   await Future.delayed(const Duration(seconds: 5)); // hack for postgres
 
   _connection = PostgreSQLConnection(_dbHost, _dbPort, _dbName, username: _dbUser, password: _dbPassword);
@@ -74,6 +74,24 @@ FutureOr<void> openDbAndRunMigrations() async {
     """)
     ..enqueueMigration("1.5", """
       ALTER TABLE feature_settings ADD COLUMN additional_data VARCHAR NULL;
+    """)
+    ..enqueueMigration("1.6", """
+      CREATE TABLE reminders (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR NOT NULL,
+        channel_id VARCHAR NOT NULL,
+        message_id VARCHAR NULL,
+        add_date TIMESTAMP NOT NULL,
+        trigger_date TIMESTAMP NOT NULL,
+        message VARCHAR(50) NOT NULL
+      );
+      CREATE INDEX reminder_trigger_date_idx ON reminders USING btree(trigger_date);
+    """)
+    ..enqueueMigration("1.7", """
+      ALTER TABLE reminders ALTER COLUMN message TYPE VARCHAR(200)
+    """)
+    ..enqueueMigration("1.8", """
+      ALTER TABLE reminders ADD COLUMN active BOOLEAN NOT NULL; 
     """)
     ..runMigrations();
 }
