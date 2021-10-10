@@ -2,10 +2,10 @@ FROM google/dart:2.14.3
 
 WORKDIR /app
 
-ADD pubspec.* /app
+ADD pubspec.* /app/
 RUN pub get
 
-ADD . /app
+ADD . /app/
 RUN pub get --offline
 
 RUN dart compile exe bin/running_on_dart.dart
