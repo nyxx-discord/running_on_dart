@@ -10,8 +10,8 @@ const nickNamePoopingSettingName = "poop_name";
 const memberJoinLogsSettingName = "join_logs";
 
 const availableFeatureSettings = {
-  nickNamePoopingSettingName: "Replace nicknames of members with poop emoji if member tries to hoist it's position with nickname",
-  memberJoinLogsSettingName: "Logs member join events into specified channel",
+  nickNamePoopingSettingName: "$nickNamePoopingSettingName: Replace nickname of member with poop emoji if member tries to hoist",
+  memberJoinLogsSettingName: "$memberJoinLogsSettingName: Logs member join events into specified channel",
 };
 
 const featureSettingsThatNeedsAdditionalData = {
@@ -49,7 +49,7 @@ String get botToken => envToken!;
 
 Iterable<ArgChoiceBuilder> getFeaturesAsChoices() sync* {
   for (final featureEntry in availableFeatureSettings.entries) {
-    yield ArgChoiceBuilder(featureEntry.key, featureEntry.key);
+    yield ArgChoiceBuilder(featureEntry.value, featureEntry.key);
   }
 }
 
