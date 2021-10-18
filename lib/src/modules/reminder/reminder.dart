@@ -135,10 +135,10 @@ Future<bool> createReminder(
   return true;
 }
 
-Iterable<ReminderEntity> fetchRemaindersForUser(Snowflake userId) =>
+Iterable<ReminderEntity> fetchRemindersForUser(Snowflake userId) =>
     _remindersCache.where((element) => element.userId == userId && element.active == true).take(6);
 
-Future<int> clearRemaindersForUser(Snowflake userId) async {
+Future<int> clearRemindersForUser(Snowflake userId) async {
   const query = """
     UPDATE reminders 
     SET active = FALSE
@@ -156,7 +156,7 @@ Future<int> clearRemaindersForUser(Snowflake userId) async {
   return result;
 }
 
-Future<bool> removeRemainderForUser(int id, Snowflake userId) async {
+Future<bool> removeReminderForUser(int id, Snowflake userId) async {
   const query = """
     UPDATE reminders 
     SET active = FALSE

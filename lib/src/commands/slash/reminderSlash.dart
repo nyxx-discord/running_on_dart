@@ -28,47 +28,47 @@ Future<void> reminderAddSlash(SlashCommandInteractionEvent event) async {
   return event.respond(MessageBuilder.content("Internal server error. Report to developer"));
 }
 
-Future<void> remainderGetUsers(SlashCommandInteractionEvent event) async {
+Future<void> reminderGetUsers(SlashCommandInteractionEvent event) async {
   await event.acknowledge(hidden: true);
 
   final authorId = event.interaction.guild?.id != null
       ? event.interaction.memberAuthor!.id
       : event.interaction.userAuthor!.id;
 
-  final remainders = fetchRemaindersForUser(authorId);
+  final reminders = fetchRemindersForUser(authorId);
 
-  if (remainders.isEmpty) {
-    return event.respond(MessageBuilder.content("You dont have any remainders at the moment"));
+  if (reminders.isEmpty) {
+    return event.respond(MessageBuilder.content("You dont have any reminders at the moment"));
   }
 
-  final stringBuffer = StringBuffer("Your current remainders:\n");
-  for (final remainder in remainders) {
-    stringBuffer.writeln("- [ID: ${remainder.id}] <t:${remainder.triggerDate.millisecondsSinceEpoch ~/ 1000}:R> - ${remainder.message}\n");
+  final stringBuffer = StringBuffer("Your current reminders:\n");
+  for (final reminder in reminders) {
+    stringBuffer.writeln("- [ID: ${reminder.id}] <t:${reminder.triggerDate.millisecondsSinceEpoch ~/ 1000}:R> - ${reminder.message}\n");
   }
-  stringBuffer.writeln("Remainders are cached for 30s. This could not be complete list of all remainders");
+  stringBuffer.writeln("Reminders are cached for 30s. This could not be complete list of all reminders");
 
   await event.respond(MessageBuilder.content(stringBuffer.toString()), hidden: true);
 }
 
-Future<void> remaindersClear(SlashCommandInteractionEvent event) async {
+Future<void> remindersClear(SlashCommandInteractionEvent event) async {
   await event.acknowledge(hidden: true);
 
   final authorId = getAuthorId(event);
 
-  final result = await clearRemaindersForUser(authorId);
-  return event.respond(MessageBuilder.content("Deleted $result remainders"));
+  final result = await clearRemindersForUser(authorId);
+  return event.respond(MessageBuilder.content("Deleted $result reminders"));
 }
 
-Future<void> remainderRemove(SlashCommandInteractionEvent event) async {
+Future<void> reminderRemove(SlashCommandInteractionEvent event) async {
   await event.acknowledge(hidden: true);
 
   final authorId = getAuthorId(event);
   final id = event.getArg("id").value as int;
 
-  final result = await removeRemainderForUser(id, authorId);
+  final result = await removeReminderForUser(id, authorId);
   if (!result) {
-    return event.respond(MessageBuilder.content("There was an problem deleting your remainder"));
+    return event.respond(MessageBuilder.content("There was an problem deleting your reminder"));
   }
 
-  return event.respond(MessageBuilder.content("Removed remainder with id: $id"));
+  return event.respond(MessageBuilder.content("Removed reminder with id: $id"));
 }

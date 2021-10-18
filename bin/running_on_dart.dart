@@ -86,12 +86,12 @@ void main(List<String> arguments) async {
         CommandOptionBuilder(CommandOptionType.string, "message", "Additional message", required: true),
       ])..registerHandler(rod.reminderAddSlash),
       CommandOptionBuilder(CommandOptionType.subCommand, "list", "List your current remainders")
-        ..registerHandler(rod.remainderGetUsers),
+        ..registerHandler(rod.reminderGetUsers),
       CommandOptionBuilder(CommandOptionType.subCommand, "clear", "Clears all your remainders")
-        ..registerHandler(rod.remaindersClear),
+        ..registerHandler(rod.remindersClear),
       CommandOptionBuilder(CommandOptionType.subCommand, "remove", "Remove single remainder", options: [
         CommandOptionBuilder(CommandOptionType.integer, "id", "Id of remainder to delete")
-      ])..registerHandler(rod.remainderRemove)
+      ])..registerHandler(rod.reminderRemove)
     ]))
     ..syncOnReady();
 
