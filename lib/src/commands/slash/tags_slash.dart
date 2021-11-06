@@ -1,8 +1,8 @@
-import "package:nyxx/nyxx.dart" show AllowedMentions, EmbedBuilder, MessageBuilder;
-import "package:nyxx_interactions/interactions.dart" show SlashCommandInteractionEvent;
+import "package:nyxx/nyxx.dart";
+import "package:nyxx_interactions/nyxx_interactions.dart";
 import "package:running_on_dart/src/modules/inline_tags.dart" as inline_tags;
 
-Future<void> tagEditHandler(SlashCommandInteractionEvent event) async {
+Future<void> tagEditHandler(ISlashCommandInteractionEvent event) async {
   await event.acknowledge();
 
   final mainId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
@@ -32,7 +32,7 @@ Future<void> tagEditHandler(SlashCommandInteractionEvent event) async {
   return event.respond(MessageBuilder.content("Tag `${tag.name}` edited successfully with content: `$content`"));
 }
 
-Future<void> tagSearchHandler(SlashCommandInteractionEvent event) async {
+Future<void> tagSearchHandler(ISlashCommandInteractionEvent event) async {
   await event.acknowledge(hidden: true);
 
   final mainId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
@@ -49,7 +49,7 @@ Future<void> tagSearchHandler(SlashCommandInteractionEvent event) async {
   await event.respond(messageBuilder, hidden: true);
 }
 
-Future<void> tagStatsHandler(SlashCommandInteractionEvent event) async {
+Future<void> tagStatsHandler(ISlashCommandInteractionEvent event) async {
   await event.acknowledge(hidden: true);
 
   final mainId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
@@ -72,7 +72,7 @@ Future<void> tagStatsHandler(SlashCommandInteractionEvent event) async {
   return event.respond(MessageBuilder.embed(embed));
 }
 
-Future<void> showTagHandler(SlashCommandInteractionEvent event, {required bool ephemeral}) async {
+Future<void> showTagHandler(ISlashCommandInteractionEvent event, {required bool ephemeral}) async {
   await event.acknowledge(hidden: ephemeral);
 
   final mainId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
@@ -89,7 +89,7 @@ Future<void> showTagHandler(SlashCommandInteractionEvent event, {required bool e
   return event.respond(MessageBuilder.content(tag.content));
 }
 
-Future<void> createTagHandler(SlashCommandInteractionEvent event) async {
+Future<void> createTagHandler(ISlashCommandInteractionEvent event) async {
   await event.acknowledge();
 
   final tagName = event.getArg("name").value.toString();
@@ -111,7 +111,7 @@ Future<void> createTagHandler(SlashCommandInteractionEvent event) async {
   return event.respond(MessageBuilder.content("Tag with name: `$tagName`, content: `$tagContent` created successfully"), hidden: true);
 }
 
-Future<void> deleteTagHandler(SlashCommandInteractionEvent event) async {
+Future<void> deleteTagHandler(ISlashCommandInteractionEvent event) async {
   await event.acknowledge(hidden: true);
 
   final tagName = event.getArg("name").value.toString();

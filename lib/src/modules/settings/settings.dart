@@ -1,7 +1,7 @@
 import "dart:async" show Future, FutureOr, Stream;
 
-import "package:nyxx/nyxx.dart" show CacheOptions, CachePolicyLocation, GatewayIntents, Message, Snowflake;
-import "package:nyxx_interactions/interactions.dart" show ArgChoiceBuilder;
+import "package:nyxx/nyxx.dart";
+import "package:nyxx_interactions/nyxx_interactions.dart";
 import "package:running_on_dart/src/internal/db.dart" as db;
 import "package:running_on_dart/src/internal/utils.dart" show enabledIntentFeatures, envPrefix, envToken;
 import "package:running_on_dart/src/modules/settings/feature_settings.dart" show FeatureSettings;
@@ -51,7 +51,7 @@ Iterable<ArgChoiceBuilder> getFeaturesAsChoices() sync* {
   }
 }
 
-FutureOr<String?> prefixHandler(Message message) async => envPrefix;
+FutureOr<String?> prefixHandler(IMessage message) async => envPrefix;
 
 final cacheOptions = CacheOptions()
   ..memberCachePolicyLocation = CachePolicyLocation.none()

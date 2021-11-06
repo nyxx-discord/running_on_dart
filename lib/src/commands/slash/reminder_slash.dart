@@ -1,10 +1,10 @@
 import "package:human_duration_parser/human_duration_parser.dart";
 import "package:nyxx/nyxx.dart";
-import "package:nyxx_interactions/interactions.dart";
+import "package:nyxx_interactions/nyxx_interactions.dart";
 import "package:running_on_dart/src/internal/utils.dart";
 import "package:running_on_dart/src/modules/reminder/reminder.dart";
 
-Future<void> reminderAddSlash(SlashCommandInteractionEvent event) async {
+Future<void> reminderAddSlash(ISlashCommandInteractionEvent event) async {
   await event.acknowledge();
 
   final authorId = getAuthorId(event);
@@ -21,7 +21,7 @@ Future<void> reminderAddSlash(SlashCommandInteractionEvent event) async {
   return event.respond(MessageBuilder.content("Internal server error. Report to developer"));
 }
 
-Future<void> reminderGetUsers(SlashCommandInteractionEvent event) async {
+Future<void> reminderGetUsers(ISlashCommandInteractionEvent event) async {
   await event.acknowledge(hidden: true);
 
   final authorId = event.interaction.guild?.id != null ? event.interaction.memberAuthor!.id : event.interaction.userAuthor!.id;
@@ -41,7 +41,7 @@ Future<void> reminderGetUsers(SlashCommandInteractionEvent event) async {
   await event.respond(MessageBuilder.content(stringBuffer.toString()), hidden: true);
 }
 
-Future<void> remindersClear(SlashCommandInteractionEvent event) async {
+Future<void> remindersClear(ISlashCommandInteractionEvent event) async {
   await event.acknowledge(hidden: true);
 
   final authorId = getAuthorId(event);
@@ -50,7 +50,7 @@ Future<void> remindersClear(SlashCommandInteractionEvent event) async {
   return event.respond(MessageBuilder.content("Deleted $result reminders"));
 }
 
-Future<void> reminderRemove(SlashCommandInteractionEvent event) async {
+Future<void> reminderRemove(ISlashCommandInteractionEvent event) async {
   await event.acknowledge(hidden: true);
 
   final authorId = getAuthorId(event);

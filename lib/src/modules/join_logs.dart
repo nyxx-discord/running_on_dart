@@ -1,8 +1,8 @@
-import "package:nyxx/nyxx.dart" show EmbedBuilder, GuildMemberAddEvent, Member, MessageBuilder, Snowflake, User;
+import "package:nyxx/nyxx.dart";
 import "package:running_on_dart/src/internal/utils.dart" show enabledIntentFeatures;
 import "package:running_on_dart/src/modules/settings/settings.dart" show fetchFeatureSettings, memberJoinLogsSettingName;
 
-Future<void> joinLogJoinEvent(GuildMemberAddEvent event) async {
+Future<void> joinLogJoinEvent(IGuildMemberAddEvent event) async {
   if (!enabledIntentFeatures) {
     return;
   }
@@ -15,7 +15,7 @@ Future<void> joinLogJoinEvent(GuildMemberAddEvent event) async {
   await event.member.client.httpEndpoints.sendMessage(Snowflake(joinLogFeature.additionalData!), _getBuilderForMember(event.member, event.user));
 }
 
-MessageBuilder _getBuilderForMember(Member member, User user) {
+MessageBuilder _getBuilderForMember(IMember member, IUser user) {
   final joinedSeconds = (DateTime.now().millisecondsSinceEpoch / 1000).round();
   final createdAccountSeconds = (user.id.timestamp.millisecondsSinceEpoch / 1000).round();
 

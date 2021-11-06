@@ -1,5 +1,5 @@
-import "package:nyxx/nyxx.dart" show MessageBuilder;
-import "package:nyxx_interactions/interactions.dart" show SlashCommandInteractionEvent;
+import "package:nyxx/nyxx.dart";
+import "package:nyxx_interactions/nyxx_interactions.dart";
 import "package:running_on_dart/src/modules/settings/settings.dart"
     show
         CommandExecutionException,
@@ -9,7 +9,7 @@ import "package:running_on_dart/src/modules/settings/settings.dart"
         fetchEnabledFeatureForGuild,
         fetchFeatureSettings;
 
-Future<void> listFeaturesSlash(SlashCommandInteractionEvent event) async {
+Future<void> listFeaturesSlash(ISlashCommandInteractionEvent event) async {
   await event.acknowledge(hidden: true);
 
   final targetId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
@@ -23,7 +23,7 @@ Future<void> listFeaturesSlash(SlashCommandInteractionEvent event) async {
   await event.respond(MessageBuilder.content("```${buffer.toString()}```"));
 }
 
-Future<void> enableFeatureSlash(SlashCommandInteractionEvent event) async {
+Future<void> enableFeatureSlash(ISlashCommandInteractionEvent event) async {
   await event.acknowledge(hidden: true);
 
   final permissions = event.interaction.memberAuthorPermissions;
@@ -60,7 +60,7 @@ Future<void> enableFeatureSlash(SlashCommandInteractionEvent event) async {
   }
 }
 
-Future<void> disableFeatureSlash(SlashCommandInteractionEvent event) async {
+Future<void> disableFeatureSlash(ISlashCommandInteractionEvent event) async {
   await event.acknowledge(hidden: true);
 
   final permissions = event.interaction.memberAuthorPermissions;
@@ -82,7 +82,7 @@ Future<void> disableFeatureSlash(SlashCommandInteractionEvent event) async {
   await event.respond(MessageBuilder.content("Successfully disabled feature `$featureName`"));
 }
 
-Future<void> showFeaturesSlash(SlashCommandInteractionEvent event) async {
+Future<void> showFeaturesSlash(ISlashCommandInteractionEvent event) async {
   final targetId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
   final features = fetchEnabledFeatureForGuild(targetId).map((event) => "`${event.name}`");
 

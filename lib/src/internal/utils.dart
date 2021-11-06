@@ -1,7 +1,7 @@
 import "dart:io" show Platform, ProcessInfo;
 
-import "package:nyxx/nyxx.dart" show Nyxx, Snowflake;
-import "package:nyxx_interactions/interactions.dart";
+import "package:nyxx/nyxx.dart";
+import "package:nyxx_interactions/nyxx_interactions.dart";
 
 String? get envPrefix => Platform.environment["ROD_PREFIX"];
 String? get envHotReload => Platform.environment["ROD_HOT_RELOAD"];
@@ -23,7 +23,7 @@ String getMemoryUsageString() {
   return "$current/${rss}MB";
 }
 
-String getApproxMemberCount(Nyxx client) {
+String getApproxMemberCount(INyxxWebsocket client) {
   if (DateTime.now().difference(_approxMemberCountLastAccess).inMinutes > 5 || _approxMemberCount == -1) {
     Future(() async {
       var amc = 0;
@@ -48,4 +48,4 @@ String getApproxMemberCount(Nyxx client) {
   return "$_approxMemberOnline/$_approxMemberCount";
 }
 
-Snowflake getAuthorId(InteractionEvent event) => event.interaction.guild?.id != null ? event.interaction.memberAuthor!.id : event.interaction.userAuthor!.id;
+Snowflake getAuthorId(IInteractionEvent event) => event.interaction.guild?.id != null ? event.interaction.memberAuthor!.id : event.interaction.userAuthor!.id;

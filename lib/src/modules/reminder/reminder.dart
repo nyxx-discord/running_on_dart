@@ -2,16 +2,16 @@ import "dart:async";
 
 import "package:logging/logging.dart";
 import "package:nyxx/nyxx.dart";
-import "package:nyxx_interactions/interactions.dart";
+import "package:nyxx_interactions/nyxx_interactions.dart";
 import "package:running_on_dart/src/internal/db.dart" as db;
 import "package:running_on_dart/src/modules/reminder/reminder_entity.dart";
 
 Logger _logger = Logger("ROD - Reminder");
 
 List<ReminderEntity> _remindersCache = [];
-late Nyxx _client;
+late INyxxWebsocket _client;
 
-Future<void> initReminderModule(Nyxx nyxx) async {
+Future<void> initReminderModule(INyxxWebsocket nyxx) async {
   _client = nyxx;
   _logger.info("Starting reminder module");
 

@@ -14,7 +14,7 @@ export "src/commands/slash/voice_slash.dart";
 export "src/commands/voice_common.dart" show adminBeforeHandler;
 
 export "src/internal/db.dart" show openDbAndRunMigrations;
-export "src/modules/joinLogs.dart" show joinLogJoinEvent;
+export "src/modules/join_logs.dart" show joinLogJoinEvent;
 export "src/modules/nickname_poop.dart" show nicknamePoopJoinEvent, nicknamePoopUpdateEvent;
 export "src/modules/reminder/reminder.dart" show initReminderModule;
 export "src/modules/settings/settings.dart" show prefixHandler, botToken, setIntents, cacheOptions, getFeaturesAsChoices;

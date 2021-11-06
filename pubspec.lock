@@ -90,24 +90,30 @@ packages:
   nyxx:
     dependency: "direct main"
     description:
-      name: nyxx
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.1.1"
+      path: "."
+      ref: next
+      resolved-ref: "049c48bdfaa2b9f7b15288449177798f3586e651"
+      url: "https://github.com/nyxx-discord/nyxx.git"
+    source: git
+    version: "3.0.0-dev.0"
   nyxx_commander:
     dependency: "direct main"
     description:
-      name: nyxx_commander
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.0.1"
+      path: "."
+      ref: next
+      resolved-ref: cabe640651866e9b9f9c77bdef63a2a3e2ef0c7f
+      url: "https://github.com/nyxx-discord/nyxx_commander.git"
+    source: git
+    version: "3.0.0-dev.0"
   nyxx_interactions:
     dependency: "direct main"
     description:
-      name: nyxx_interactions
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.0.3"
+      path: "."
+      ref: next
+      resolved-ref: "0c1091790d13e896d1abf25ca446bfe957e29bc5"
+      url: "https://github.com/nyxx-discord/nyxx_interactions.git"
+    source: git
+    version: "3.0.0-dev"
   path:
     dependency: transitive
     description:

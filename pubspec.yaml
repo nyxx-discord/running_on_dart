@@ -23,3 +23,17 @@ dependencies:
 
 dev_dependencies:
   lints: ^1.0.1
+
+dependency_overrides:
+  nyxx:
+    git:
+      url: 'https://github.com/nyxx-discord/nyxx.git'
+      ref: next
+  nyxx_commander:
+    git:
+      url: 'https://github.com/nyxx-discord/nyxx_commander.git'
+      ref: next
+  nyxx_interactions:
+    git:
+      url: 'https://github.com/nyxx-discord/nyxx_interactions.git'
+      ref: next

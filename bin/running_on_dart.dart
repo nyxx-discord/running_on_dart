@@ -1,24 +1,24 @@
-import "package:nyxx/nyxx.dart" show ClientOptions, Nyxx, Snowflake;
-import "package:nyxx_commander/commander.dart" show CommandGroup, Commander;
-import "package:nyxx_interactions/interactions.dart" show CommandOptionBuilder, CommandOptionType, Interactions, SlashCommandBuilder;
+import "package:nyxx/nyxx.dart";
+import "package:nyxx_commander/nyxx_commander.dart";
+import "package:nyxx_interactions/nyxx_interactions.dart";
 
 import "package:running_on_dart/running_on_dart.dart" as rod;
 
-late Nyxx botInstance;
+late INyxxWebsocket botInstance;
 
 void main(List<String> arguments) async {
   await rod.openDbAndRunMigrations();
 
-  botInstance = Nyxx(rod.botToken, rod.setIntents, options: ClientOptions(guildSubscriptions: false, messageCacheSize: 10), cacheOptions: rod.cacheOptions)
-    ..onGuildMemberAdd.listen((event) async {
+  botInstance = NyxxFactory.createNyxxWebsocket(rod.botToken, rod.setIntents, options: ClientOptions(guildSubscriptions: false, messageCacheSize: 10), cacheOptions: rod.cacheOptions)
+    ..eventsWs.onGuildMemberAdd.listen((event) async {
       await rod.joinLogJoinEvent(event);
       await rod.nicknamePoopJoinEvent(event);
     })
-    ..onGuildMemberUpdate.listen((event) async {
+    ..eventsWs.onGuildMemberUpdate.listen((event) async {
       await rod.nicknamePoopUpdateEvent(event);
     });
 
-  Commander(botInstance, prefixHandler: rod.prefixHandler)
+  Commander(botInstance, rod.prefixHandler)
     ..registerCommandGroup(CommandGroup(beforeHandler: rod.adminBeforeHandler)
       ..registerSubCommand("leave", rod.leaveChannelCommand)
       ..registerSubCommand("join", rod.joinChannelCommand))
@@ -31,7 +31,7 @@ void main(List<String> arguments) async {
     ..registerCommand("info", rod.infoCommand)
     ..registerCommand("remainder", rod.remainderCommand);
 
-  Interactions(botInstance)
+  Interactions(WebsocketInteractionBackend(botInstance))
     ..registerSlashCommand(SlashCommandBuilder("info", "Info about bot state", [])..registerHandler(rod.infoSlashCommand))
     ..registerSlashCommand(SlashCommandBuilder("tag", "Show and manipulate tags", [
       CommandOptionBuilder(CommandOptionType.subCommand, "show", "Shows tag to everyone",
@@ -99,7 +99,7 @@ void main(List<String> arguments) async {
       CommandOptionBuilder(CommandOptionType.subCommand, "remove", "Remove single remainder",
           options: [CommandOptionBuilder(CommandOptionType.integer, "id", "Id of remainder to delete")])
         ..registerHandler(rod.reminderRemove)
-    ]))
+    ], guild: 302360552993456135.toSnowflake()))
     ..syncOnReady();
 
   await rod.initReminderModule(botInstance);

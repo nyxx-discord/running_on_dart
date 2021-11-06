@@ -2,28 +2,27 @@ import "dart:math" show Random;
 
 import "package:http/http.dart" as http;
 
-import "package:nyxx/nyxx.dart" show Constants, DiscordColor, EmbedBuilder, MessageBuilder;
-import "package:nyxx_interactions/interactions.dart"
-    show ComponentMessageBuilder, ComponentRowBuilder, InteractionEvent, LinkButtonBuilder, SlashCommandInteractionEvent;
+import "package:nyxx/nyxx.dart";
+import "package:nyxx_interactions/nyxx_interactions.dart";
 import "package:running_on_dart/src/commands/info_common.dart" show infoGenericCommand;
 
-Future<void> infoSlashCommand(SlashCommandInteractionEvent event) async {
+Future<void> infoSlashCommand(ISlashCommandInteractionEvent event) async {
   await event.acknowledge();
 
   final messageBuilder = ComponentMessageBuilder()
-    ..embeds = [await infoGenericCommand(event.client)]
-    ..components = [
-      [LinkButtonBuilder("Add nyxx to your guild", event.client.app.getInviteUrl())]
+    ..embeds = [await infoGenericCommand(event.client as INyxxWebsocket)]
+    ..componentRows = [
+      [LinkButtonBuilder("Add nyxx to your guild", (event.client as INyxxWebsocket).app.getInviteUrl())]
     ];
 
   await event.respond(messageBuilder);
 }
 
-Future<void> pingSlashHandler(SlashCommandInteractionEvent event) async {
+Future<void> pingSlashHandler(ISlashCommandInteractionEvent event) async {
   final random = Random();
   final color = DiscordColor.fromRgb(random.nextInt(255), random.nextInt(255), random.nextInt(255));
   final gatewayDelayInMillis =
-      event.client.shardManager.shards.map((e) => e.gatewayLatency.inMilliseconds).reduce((value, element) => value + element) / ~event.client.shards;
+      (event.client as INyxxWebsocket).shardManager.shards.map((e) => e.gatewayLatency.inMilliseconds).reduce((value, element) => value + element) /~ (event.client as INyxxWebsocket).shards;
 
   final apiStopwatch = Stopwatch()..start();
   await http.head(Uri(scheme: "https", host: Constants.host, path: Constants.baseUri));
@@ -44,7 +43,7 @@ Future<void> pingSlashHandler(SlashCommandInteractionEvent event) async {
   await event.editOriginalResponse(MessageBuilder.embed(embed));
 }
 
-Future<void> avatarSlashHandler(SlashCommandInteractionEvent event) async {
+Future<void> avatarSlashHandler(ISlashCommandInteractionEvent event) async {
   await event.acknowledge();
 
   final user = event.interaction.resolved?.users.first;
