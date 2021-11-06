@@ -1,3 +1,7 @@
+## 2.1.3
+
+- Improve docker image size
+
 ## 2.1.2
 
 - Improve docker image size

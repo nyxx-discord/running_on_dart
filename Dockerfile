@@ -10,10 +10,9 @@ RUN pub get --offline
 
 RUN dart compile exe bin/running_on_dart.dart
 
-FROM ubuntu
-WORKDIR /app
+FROM subfuzion/dart:slim
 
+WORKDIR /app
 COPY --from=builder /app/bin/running_on_dart.exe /app
 
-CMD []
-ENTRYPOINT [ "./running_on_dart.exe" ]
+CMD [ "./running_on_dart.exe" ]
