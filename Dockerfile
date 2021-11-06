@@ -1,4 +1,4 @@
-FROM google/dart:2.14.3
+FROM google/dart:2.14.3 as builder
 
 WORKDIR /app
 
@@ -10,5 +10,10 @@ RUN pub get --offline
 
 RUN dart compile exe bin/running_on_dart.dart
 
+FROM ubuntu
+WORKDIR /app
+
+COPY --from=builder /app/bin/running_on_dart.exe /app
+
 CMD []
-ENTRYPOINT [ "./bin/running_on_dart.exe" ]
+ENTRYPOINT [ "./running_on_dart.exe" ]

@@ -1,0 +1,7 @@
+Dockerfile
+build/
+.dart_tool/
+.git/
+.github/
+.gitignore
+.packages
