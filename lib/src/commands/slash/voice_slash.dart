@@ -1,6 +1,6 @@
 import "package:nyxx/nyxx.dart" show MessageBuilder, Snowflake;
 import "package:nyxx_interactions/interactions.dart" show SlashCommandInteractionEvent;
-import "package:running_on_dart/src/commands/voiceCommon.dart" show joinChannel, leaveChannel;
+import "package:running_on_dart/src/commands/voice_common.dart" show joinChannel, leaveChannel;
 import "package:running_on_dart/src/modules/settings/settings.dart" show privilegedAdminSnowflakes;
 
 Future<void> joinVoiceHandler(SlashCommandInteractionEvent event) async {

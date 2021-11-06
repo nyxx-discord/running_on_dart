@@ -5,7 +5,7 @@ import "package:http/http.dart" as http;
 import "package:nyxx/nyxx.dart" show Constants, DiscordColor, EmbedBuilder, MessageBuilder;
 import "package:nyxx_interactions/interactions.dart"
     show ComponentMessageBuilder, ComponentRowBuilder, InteractionEvent, LinkButtonBuilder, SlashCommandInteractionEvent;
-import "package:running_on_dart/src/commands/infoCommon.dart" show infoGenericCommand;
+import "package:running_on_dart/src/commands/info_common.dart" show infoGenericCommand;
 
 Future<void> infoSlashCommand(SlashCommandInteractionEvent event) async {
   await event.acknowledge();

@@ -4,7 +4,7 @@ import "package:logging/logging.dart";
 import "package:nyxx/nyxx.dart";
 import "package:nyxx_interactions/interactions.dart";
 import "package:running_on_dart/src/internal/db.dart" as db;
-import "package:running_on_dart/src/modules/reminder/ReminderEntity.dart";
+import "package:running_on_dart/src/modules/reminder/reminder_entity.dart";
 
 Logger _logger = Logger("ROD - Reminder");
 

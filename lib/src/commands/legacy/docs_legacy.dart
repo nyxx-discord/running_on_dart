@@ -1,5 +1,5 @@
 import "package:nyxx_commander/commander.dart" show CommandContext;
-import "package:running_on_dart/src/commands/docsCommon.dart" show docsGetMessageBuilder, docsLinksMessageBuilder, docsSearchMessageBuilder;
+import "package:running_on_dart/src/commands/docs_common.dart" show docsGetMessageBuilder, docsLinksMessageBuilder, docsSearchMessageBuilder;
 
 Future<void> docsGetCommand(CommandContext ctx, String content) async {
   await ctx.sendMessage(await docsGetMessageBuilder(content));

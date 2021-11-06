@@ -4,7 +4,7 @@ import "package:nyxx/nyxx.dart" show CacheOptions, CachePolicyLocation, GatewayI
 import "package:nyxx_interactions/interactions.dart" show ArgChoiceBuilder;
 import "package:running_on_dart/src/internal/db.dart" as db;
 import "package:running_on_dart/src/internal/utils.dart" show enabledIntentFeatures, envPrefix, envToken;
-import "package:running_on_dart/src/modules/settings/FeatureSettings.dart" show FeatureSettings;
+import "package:running_on_dart/src/modules/settings/feature_settings.dart" show FeatureSettings;
 
 const nickNamePoopingSettingName = "poop_name";
 const memberJoinLogsSettingName = "join_logs";

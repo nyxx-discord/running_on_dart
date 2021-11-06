@@ -19,7 +19,7 @@ void main(List<String> arguments) async {
     });
 
   Commander(botInstance, prefixHandler: rod.prefixHandler)
-    ..registerCommandGroup(CommandGroup(beforeHandler: rod.adminBeforehandler)
+    ..registerCommandGroup(CommandGroup(beforeHandler: rod.adminBeforeHandler)
       ..registerSubCommand("leave", rod.leaveChannelCommand)
       ..registerSubCommand("join", rod.joinChannelCommand))
     // Docs commands
