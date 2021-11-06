@@ -12,25 +12,20 @@ Future<void> joinLogJoinEvent(GuildMemberAddEvent event) async {
     return;
   }
 
-  await event.member.client.httpEndpoints.sendMessage(
-      Snowflake(joinLogFeature.additionalData!),
-      _getBuilderForMember(event.member, event.user)
-  );
+  await event.member.client.httpEndpoints.sendMessage(Snowflake(joinLogFeature.additionalData!), _getBuilderForMember(event.member, event.user));
 }
 
 MessageBuilder _getBuilderForMember(Member member, User user) {
   final joinedSeconds = (DateTime.now().millisecondsSinceEpoch / 1000).round();
   final createdAccountSeconds = (user.id.timestamp.millisecondsSinceEpoch / 1000).round();
 
-  return MessageBuilder.embed(
-      EmbedBuilder()
-        ..description = "**Member joined**"
-        ..addAuthor((author) {
-          author.iconUrl = user.avatarURL();
-          author.name = user.tag;
-        })
-        ..addField(name: "ID", content: user.id, inline: true)
-        ..addField(name: "Joined", content: "<t:$joinedSeconds:d> (<t:$joinedSeconds:R>)", inline: true)
-        ..addField(name: "Created account", content: "<t:$createdAccountSeconds:d> (<t:$createdAccountSeconds:R>)")
-  );
+  return MessageBuilder.embed(EmbedBuilder()
+    ..description = "**Member joined**"
+    ..addAuthor((author) {
+      author.iconUrl = user.avatarURL();
+      author.name = user.tag;
+    })
+    ..addField(name: "ID", content: user.id, inline: true)
+    ..addField(name: "Joined", content: "<t:$joinedSeconds:d> (<t:$joinedSeconds:R>)", inline: true)
+    ..addField(name: "Created account", content: "<t:$createdAccountSeconds:d> (<t:$createdAccountSeconds:R>)"));
 }

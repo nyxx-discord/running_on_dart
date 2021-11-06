@@ -14,9 +14,7 @@ Future<void> tagEditHandler(SlashCommandInteractionEvent event) async {
     return event.respond(MessageBuilder.content("Tag with name: `$tagName` does not exist"));
   }
 
-  final authorId = event.interaction.guild?.id != null
-      ? event.interaction.memberAuthor!.id
-      : event.interaction.userAuthor!.id;
+  final authorId = event.interaction.guild?.id != null ? event.interaction.memberAuthor!.id : event.interaction.userAuthor!.id;
 
   if (tag.authorId != authorId) {
     final messageBuilder = MessageBuilder.content("You can only edit tags that are created by you. This tag was created by <@${tag.authorId}>")
@@ -62,16 +60,13 @@ Future<void> tagStatsHandler(SlashCommandInteractionEvent event) async {
     return;
   }
 
-  final embed = EmbedBuilder()
-    ..description = "Tag stats";
+  final embed = EmbedBuilder()..description = "Tag stats";
   for (final entry in results.entries) {
     embed.addField(name: entry.key, content: "${entry.value.first} total (ephemeral: ${entry.value.last})");
   }
 
   final commandsUsed = await inline_tags.fetchPerDay();
-  final commandsUsedString = commandsUsed == 0
-      ? "No commands data yet!"
-      : commandsUsed;
+  final commandsUsedString = commandsUsed == 0 ? "No commands data yet!" : commandsUsed;
   embed.addField(name: "Commands used per day (last 3 days)", content: commandsUsedString);
 
   return event.respond(MessageBuilder.embed(embed));
@@ -101,9 +96,7 @@ Future<void> createTagHandler(SlashCommandInteractionEvent event) async {
   final tagContent = event.getArg("content").value.toString();
 
   final mainId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
-  final authorId = event.interaction.guild?.id != null
-      ? event.interaction.memberAuthor!.id
-      : event.interaction.userAuthor!.id;
+  final authorId = event.interaction.guild?.id != null ? event.interaction.memberAuthor!.id : event.interaction.userAuthor!.id;
 
   final existingTag = await inline_tags.findTagForGuild(tagName, mainId);
   if (existingTag != null) {
@@ -123,9 +116,7 @@ Future<void> deleteTagHandler(SlashCommandInteractionEvent event) async {
 
   final tagName = event.getArg("name").value.toString();
   final mainId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
-  final authorId = event.interaction.guild?.id != null
-      ? event.interaction.memberAuthor!.id
-      : event.interaction.userAuthor!.id;
+  final authorId = event.interaction.guild?.id != null ? event.interaction.memberAuthor!.id : event.interaction.userAuthor!.id;
 
   final tag = await inline_tags.findTagForGuild(tagName, mainId);
   if (tag == null) {

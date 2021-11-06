@@ -6,7 +6,7 @@ import "package:nyxx_interactions/interactions.dart";
 import "package:running_on_dart/src/internal/db.dart" as db;
 import "package:running_on_dart/src/modules/reminder/ReminderEntity.dart";
 
-Logger _logger = new Logger("ROD - Reminder");
+Logger _logger = Logger("ROD - Reminder");
 
 List<ReminderEntity> _remindersCache = [];
 late Nyxx _client;
@@ -47,8 +47,7 @@ Future<void> executeRemindersCache() async {
 MessageBuilder getMessageBuilderForReminder(ReminderEntity reminderEntity) {
   final content = "Reminder: <t:${reminderEntity.addDate.millisecondsSinceEpoch ~/ 1000}:R>: ${reminderEntity.message}";
 
-  final builder = ComponentMessageBuilder()
-      ..content = content;
+  final builder = ComponentMessageBuilder()..content = content;
 
   return builder;
 }
@@ -64,9 +63,7 @@ Future<ReminderEntity?> fetchReminder(int id) async {
     SELECT r.* FROM reminders r WHERE r.id = @id;
   """;
 
-  final dbResult = await db.connection.query(query, substitutionValues: {
-    "id": id
-  });
+  final dbResult = await db.connection.query(query, substitutionValues: {"id": id});
 
   if (dbResult.isEmpty) {
     return null;
@@ -82,7 +79,7 @@ Stream<ReminderEntity> fetchCurrentReminders() async* {
 
   final dbResult = await db.connection.query(query);
 
-  for(final dbRow in dbResult) {
+  for (final dbRow in dbResult) {
     yield ReminderEntity(dbRow.toColumnMap());
   }
 }
@@ -92,22 +89,14 @@ Stream<ReminderEntity> fetchCurrentRemindersForUser(Snowflake userId) async* {
     SELECT r.* FROM reminders r WHERE r.trigger_date > NOW() AND r.user = @userId AND r.active = TRUE;
   """;
 
-  final dbResult = await db.connection.query(query, substitutionValues: {
-    "userId": userId
-  });
+  final dbResult = await db.connection.query(query, substitutionValues: {"userId": userId});
 
-  for(final dbRow in dbResult) {
+  for (final dbRow in dbResult) {
     yield ReminderEntity(dbRow.toColumnMap());
   }
 }
 
-Future<bool> createReminder(
-  Snowflake userId,
-  Snowflake channelId,
-  DateTime triggerDate,
-  String message,
-  {Snowflake? messageId}
-) async {
+Future<bool> createReminder(Snowflake userId, Snowflake channelId, DateTime triggerDate, String message, {Snowflake? messageId}) async {
   const query = """
     INSERT INTO reminders (user_id, channel_id, message_id, add_date, trigger_date, message, active)
     VALUES (@userId, @channelId, @messageId, CURRENT_TIMESTAMP, @triggerDate, @message, TRUE) RETURNING id;
@@ -145,9 +134,7 @@ Future<int> clearRemindersForUser(Snowflake userId) async {
     WHERE user_id = @userId
   """;
 
-  final result = await db.connection.execute(query, substitutionValues: {
-    "userId": userId.toString()
-  });
+  final result = await db.connection.execute(query, substitutionValues: {"userId": userId.toString()});
 
   if (result > 0) {
     _remindersCache.removeWhere((element) => element.userId == userId);
@@ -163,10 +150,7 @@ Future<bool> removeReminderForUser(int id, Snowflake userId) async {
     WHERE user_id = @userId AND id = @id
   """;
 
-  final result = await db.connection.execute(query, substitutionValues: {
-    "userId": userId.toString(),
-    "id": id
-  });
+  final result = await db.connection.execute(query, substitutionValues: {"userId": userId.toString(), "id": id});
 
   if (result > 0) {
     _remindersCache.removeWhere((element) => element.id == 15 && element.userId == userId);

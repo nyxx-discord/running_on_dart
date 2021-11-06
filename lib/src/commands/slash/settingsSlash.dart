@@ -1,6 +1,13 @@
 import "package:nyxx/nyxx.dart" show MessageBuilder;
 import "package:nyxx_interactions/interactions.dart" show SlashCommandInteractionEvent;
-import "package:running_on_dart/src/modules/settings/settings.dart" show CommandExecutionException, addFeatureSettings, deleteFeatureSettings, featureSettingsThatNeedsAdditionalData, fetchEnabledFeatureForGuild, fetchFeatureSettings;
+import "package:running_on_dart/src/modules/settings/settings.dart"
+    show
+        CommandExecutionException,
+        addFeatureSettings,
+        deleteFeatureSettings,
+        featureSettingsThatNeedsAdditionalData,
+        fetchEnabledFeatureForGuild,
+        fetchFeatureSettings;
 
 Future<void> listFeaturesSlash(SlashCommandInteractionEvent event) async {
   await event.acknowledge(hidden: true);

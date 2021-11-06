@@ -3,7 +3,8 @@ import "dart:math" show Random;
 import "package:http/http.dart" as http;
 
 import "package:nyxx/nyxx.dart" show Constants, DiscordColor, EmbedBuilder, MessageBuilder;
-import "package:nyxx_interactions/interactions.dart" show ComponentMessageBuilder, ComponentRowBuilder, InteractionEvent, LinkButtonBuilder, SlashCommandInteractionEvent;
+import "package:nyxx_interactions/interactions.dart"
+    show ComponentMessageBuilder, ComponentRowBuilder, InteractionEvent, LinkButtonBuilder, SlashCommandInteractionEvent;
 import "package:running_on_dart/src/commands/infoCommon.dart" show infoGenericCommand;
 
 Future<void> infoSlashCommand(SlashCommandInteractionEvent event) async {
@@ -11,9 +12,9 @@ Future<void> infoSlashCommand(SlashCommandInteractionEvent event) async {
 
   final messageBuilder = ComponentMessageBuilder()
     ..embeds = [await infoGenericCommand(event.client)]
-    ..components = [[
-        LinkButtonBuilder("Add nyxx to your guild", event.client.app.getInviteUrl())
-    ]];
+    ..components = [
+      [LinkButtonBuilder("Add nyxx to your guild", event.client.app.getInviteUrl())]
+    ];
 
   await event.respond(messageBuilder);
 }
@@ -21,7 +22,8 @@ Future<void> infoSlashCommand(SlashCommandInteractionEvent event) async {
 Future<void> pingSlashHandler(SlashCommandInteractionEvent event) async {
   final random = Random();
   final color = DiscordColor.fromRgb(random.nextInt(255), random.nextInt(255), random.nextInt(255));
-  final gatewayDelayInMillis = event.client.shardManager.shards.map((e) => e.gatewayLatency.inMilliseconds).reduce((value, element) => value + element) /~ event.client.shards;
+  final gatewayDelayInMillis =
+      event.client.shardManager.shards.map((e) => e.gatewayLatency.inMilliseconds).reduce((value, element) => value + element) / ~event.client.shards;
 
   final apiStopwatch = Stopwatch()..start();
   await http.head(Uri(scheme: "https", host: Constants.host, path: Constants.baseUri));
@@ -37,8 +39,7 @@ Future<void> pingSlashHandler(SlashCommandInteractionEvent event) async {
 
   await event.respond(MessageBuilder.embed(embed));
 
-  embed
-    ..replaceField(name: "Message roundup time", content: "${stopwatch.elapsedMilliseconds} ms", inline: true);
+  embed.replaceField(name: "Message roundup time", content: "${stopwatch.elapsedMilliseconds} ms", inline: true);
 
   await event.editOriginalResponse(MessageBuilder.embed(embed));
 }

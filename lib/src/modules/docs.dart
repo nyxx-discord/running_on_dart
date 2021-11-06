@@ -52,7 +52,7 @@ Future<DocDefinition?> getDocDefinition(String className, [String? fieldName]) a
     searchResult = await _findInDocs((element) => (element["qualifiedName"] as String).endsWith("$className.$fieldName")) as Map<String, dynamic>?;
   }
 
-  if(searchResult == null) {
+  if (searchResult == null) {
     return null;
   }
 
@@ -71,9 +71,7 @@ Future<DateTime> fetchLastDocUpdate() async {
   if (lastDocUpdateTimer.difference(DateTime.now()).inMinutes.abs() > 15) {
     final jsonBody = jsonDecode((await http.get(docUpdatePath)).body);
 
-    final result = DateTime.parse(
-        jsonBody["workflow_runs"][0]["updated_at"] as String
-    );
+    final result = DateTime.parse(jsonBody["workflow_runs"][0]["updated_at"] as String);
 
     lastDocUpdateTimer = DateTime.now();
     lastDocUpdate = result;
@@ -102,6 +100,6 @@ class DocDefinition {
     this.type = element["type"] as String;
 
     final libPath = element["href"].split("/").first;
-    this.absoluteUrl ="$basePath$libPath/${element['href']}";
+    this.absoluteUrl = "$basePath$libPath/${element['href']}";
   }
 }

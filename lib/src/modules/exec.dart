@@ -1,8 +1,7 @@
 import "dart:convert" show utf8;
 import "dart:io" show File, FileMode, Process;
 
-String getFileContent(String code) =>
-    """
+String getFileContent(String code) => """
       import "dart:convert";
       import "dart:io";
       import "dart:async";

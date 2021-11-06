@@ -31,14 +31,12 @@ const featureSettingsThatNeedsAdditionalData = {
 //   | GatewayIntents.directMessages
 //   | GatewayIntents.guildMembers;
 
-const intentsMembers =
-  GatewayIntents.allUnprivileged
-  | GatewayIntents.guildMembers;
+const intentsMembers = GatewayIntents.allUnprivileged | GatewayIntents.guildMembers;
 
 const intentsNoMembers = GatewayIntents.allUnprivileged;
 
 int get setIntents {
- if (enabledIntentFeatures) {
+  if (enabledIntentFeatures) {
     return intentsMembers;
   }
 
@@ -59,11 +57,7 @@ final cacheOptions = CacheOptions()
   ..memberCachePolicyLocation = CachePolicyLocation.none()
   ..userCachePolicyLocation = CachePolicyLocation.none();
 
-const privilegedAdminSnowflakes = [
-  302359032612651009,
-  281314080923320321,
-  612653298532745217
-];
+const privilegedAdminSnowflakes = [302359032612651009, 281314080923320321, 612653298532745217];
 
 Future<void> deleteFeatureSettings(Snowflake guildId, String name) async {
   await db.connection.execute("""
@@ -80,12 +74,8 @@ Future<void> addFeatureSettings(Snowflake guildId, String name, Snowflake whoEna
     VALUES (@name, @guildId, CURRENT_TIMESTAMP, @whoEnabled, @additionalData) RETURNING id;
   """;
 
-  final result = await db.connection.query(query, substitutionValues: {
-    "name": name,
-    "guildId": guildId.toString(),
-    "whoEnabled": whoEnabled.toString(),
-    "additionalData": additionalData
-  });
+  final result = await db.connection
+      .query(query, substitutionValues: {"name": name, "guildId": guildId.toString(), "whoEnabled": whoEnabled.toString(), "additionalData": additionalData});
 
   if (result.isEmpty) {
     throw CommandExecutionException("Unexpected error occurred during saving to database [0]");
@@ -98,10 +88,7 @@ Future<FeatureSettings?> fetchFeatureSettings(Snowflake guildId, String name) as
     WHERE s.guild_id = @guildId AND s.name = @name;
   """;
 
-  final result = await db.connection.query(query, substitutionValues: {
-    "guildId": guildId.toString(),
-    "name": name
-  });
+  final result = await db.connection.query(query, substitutionValues: {"guildId": guildId.toString(), "name": name});
 
   if (result.isEmpty) {
     return null;
@@ -116,9 +103,7 @@ Stream<FeatureSettings> fetchEnabledFeatureForGuild(Snowflake guildId) async* {
     WHERE s.guild_id = @guildId;
   """;
 
-  final result = await db.connection.query(query, substitutionValues: {
-    "guildId": guildId.toString()
-  });
+  final result = await db.connection.query(query, substitutionValues: {"guildId": guildId.toString()});
 
   if (result.isEmpty) {
     yield* const Stream.empty();

@@ -6,8 +6,7 @@ import "package:running_on_dart/src/modules/docs.dart" show fetchLastDocUpdate;
 import "package:time_ago_provider/time_ago_provider.dart" show formatFull;
 
 Future<EmbedBuilder> infoGenericCommand(Nyxx client, [int shardId = 0]) async {
-  final color = DiscordColor.fromRgb(
-      Random().nextInt(255), Random().nextInt(255), Random().nextInt(255));
+  final color = DiscordColor.fromRgb(Random().nextInt(255), Random().nextInt(255), Random().nextInt(255));
 
   return EmbedBuilder()
     ..addAuthor((author) {
@@ -21,44 +20,19 @@ Future<EmbedBuilder> infoGenericCommand(Nyxx client, [int shardId = 0]) async {
     ..color = color
     ..addField(name: "Cached guilds", content: client.guilds.count, inline: true)
     ..addField(name: "Cached users", content: client.users.count, inline: true)
-    ..addField(
-        name: "Cached channels",
-        content: client.channels.count,
-        inline: true
-    )
-    ..addField(
-        name: "Cached voice states",
-        content: client.guilds.values
-            .map((g) => g.voiceStates.count)
-            .reduce((f, s) => f + s),
-        inline: true
-    )
-    ..addField(
-        name: "Shard count",
-        content: client.shards,
-        inline: true
-    )
+    ..addField(name: "Cached channels", content: client.channels.count, inline: true)
+    ..addField(name: "Cached voice states", content: client.guilds.values.map((g) => g.voiceStates.count).reduce((f, s) => f + s), inline: true)
+    ..addField(name: "Shard count", content: client.shards, inline: true)
     ..addField(
         name: "Cached messages",
-        content: client.channels.find((item) => item is TextChannel).cast<TextChannel>().map((e) => e.messageCache.count).fold(0, (first, second) => (first as int) + second),
-        inline: true
-    )
-    ..addField(
-        name: "Memory usage (current/RSS)",
-        content: getMemoryUsageString(),
-        inline: true
-    )
-    ..addField(
-        name: "Member count (online/total)",
-        content: getApproxMemberCount(client),
-        inline: true
-    )
-    ..addField(
-        name: "Uptime",
-        content: formatFull(client.startTime)
-    )
-    ..addField(
-        name: "Last doc update",
-        content: formatFull(await fetchLastDocUpdate())
-    );
+        content: client.channels
+            .find((item) => item is TextChannel)
+            .cast<TextChannel>()
+            .map((e) => e.messageCache.count)
+            .fold(0, (first, second) => (first as int) + second),
+        inline: true)
+    ..addField(name: "Memory usage (current/RSS)", content: getMemoryUsageString(), inline: true)
+    ..addField(name: "Member count (online/total)", content: getApproxMemberCount(client), inline: true)
+    ..addField(name: "Uptime", content: formatFull(client.startTime))
+    ..addField(name: "Last doc update", content: formatFull(await fetchLastDocUpdate()));
 }

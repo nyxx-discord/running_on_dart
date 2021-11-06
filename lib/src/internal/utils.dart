@@ -48,7 +48,4 @@ String getApproxMemberCount(Nyxx client) {
   return "$_approxMemberOnline/$_approxMemberCount";
 }
 
-Snowflake getAuthorId(InteractionEvent event) =>
-    event.interaction.guild?.id != null
-      ? event.interaction.memberAuthor!.id
-      : event.interaction.userAuthor!.id;
+Snowflake getAuthorId(InteractionEvent event) => event.interaction.guild?.id != null ? event.interaction.memberAuthor!.id : event.interaction.userAuthor!.id;

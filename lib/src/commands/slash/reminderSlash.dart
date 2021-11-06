@@ -10,16 +10,9 @@ Future<void> reminderAddSlash(SlashCommandInteractionEvent event) async {
   final authorId = getAuthorId(event);
 
   final messageArg = event.getArg("message").value.toString();
-  final triggerAt = DateTime.now().add(
-      parseStringToDuration(event.getArg("trigger-at").value.toString())
-  );
+  final triggerAt = DateTime.now().add(parseStringToDuration(event.getArg("trigger-at").value.toString()));
 
-  final result = await createReminder(
-      authorId,
-      event.interaction.channel.id,
-      triggerAt,
-      messageArg
-  );
+  final result = await createReminder(authorId, event.interaction.channel.id, triggerAt, messageArg);
 
   if (result) {
     return event.respond(MessageBuilder.content("All right, <t:${triggerAt.millisecondsSinceEpoch ~/ 1000}:R> will remind about: `$messageArg`"));
@@ -31,9 +24,7 @@ Future<void> reminderAddSlash(SlashCommandInteractionEvent event) async {
 Future<void> reminderGetUsers(SlashCommandInteractionEvent event) async {
   await event.acknowledge(hidden: true);
 
-  final authorId = event.interaction.guild?.id != null
-      ? event.interaction.memberAuthor!.id
-      : event.interaction.userAuthor!.id;
+  final authorId = event.interaction.guild?.id != null ? event.interaction.memberAuthor!.id : event.interaction.userAuthor!.id;
 
   final reminders = fetchRemindersForUser(authorId);
 

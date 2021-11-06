@@ -20,7 +20,7 @@ Future<MessageBuilder> docsSearchMessageBuilder(String phrase) async {
   final query = phrase.split(" ").last;
   final results = await searchDocs(query).toList();
 
-  if(results.isEmpty) {
+  if (results.isEmpty) {
     return MessageBuilder.content("Nothing found matching: `$query`");
   }
 
@@ -29,8 +29,7 @@ Future<MessageBuilder> docsSearchMessageBuilder(String phrase) async {
     buffer.write("[${def.name}](${def.absoluteUrl})\n");
   }
 
-  final embed = EmbedBuilder()
-    ..description = buffer.toString();
+  final embed = EmbedBuilder()..description = buffer.toString();
 
   return MessageBuilder.embed(embed);
 }
