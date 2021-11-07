@@ -13,3 +13,4 @@ Bot requires environment variables to be set before starting:
  - `POSTGRES_PASSWORD` - password of postgres user
  - `POSTGRES_USER` - name of postgres user
  - `POSTGRES_DB` - name of postgres db
+ - `SYNC_COMMANDS` - set to true if commands should be synced with discord
