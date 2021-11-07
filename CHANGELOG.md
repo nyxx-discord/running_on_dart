@@ -1,3 +1,7 @@
+## 2.1.4
+
+- Docker compose build from Dockerfile
+
 ## 2.1.3
 
 - Improve docker image size

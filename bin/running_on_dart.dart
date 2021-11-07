@@ -6,7 +6,6 @@ import "package:nyxx_interactions/nyxx_interactions.dart";
 import "package:running_on_dart/running_on_dart.dart" as rod;
 
 late INyxxWebsocket botInstance;
-final Logger logger = Logger("Running on Dart");
 
 void main(List<String> arguments) async {
   await rod.openDbAndRunMigrations();
@@ -107,10 +106,7 @@ void main(List<String> arguments) async {
             ..registerHandler(rod.reminderRemove)
         ],
         guild: 302360552993456135.toSnowflake()))
-    ..syncOnReady(syncRule: ManualCommandSync(sync: rod.syncCommands))
-    ..events.onSlashCommand.listen((event) {
-      logger.info("Received slash command with name: [${event.interaction.name}]");
-    });
+    ..syncOnReady(syncRule: ManualCommandSync(sync: rod.syncCommands));
 
   await rod.initReminderModule(botInstance);
 }
