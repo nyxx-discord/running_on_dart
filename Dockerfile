@@ -1,4 +1,4 @@
-FROM google/dart:2.14.3 as builder
+FROM google/dart:2.15.0-82.2.beta as builder
 
 WORKDIR /app
 
