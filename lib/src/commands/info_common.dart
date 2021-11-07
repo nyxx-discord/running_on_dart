@@ -25,10 +25,7 @@ Future<EmbedBuilder> infoGenericCommand(INyxxWebsocket client, [int shardId = 0]
     ..addField(name: "Shard count", content: client.shards, inline: true)
     ..addField(
         name: "Cached messages",
-        content: client.channels.values
-            .whereType<ITextChannel>()
-            .map((e) => e.messageCache.length)
-            .fold(0, (first, second) => (first as int) + second),
+        content: client.channels.values.whereType<ITextChannel>().map((e) => e.messageCache.length).fold(0, (first, second) => (first as int) + second),
         inline: true)
     ..addField(name: "Memory usage (current/RSS)", content: getMemoryUsageString(), inline: true)
     ..addField(name: "Member count (online/total)", content: getApproxMemberCount(client), inline: true)

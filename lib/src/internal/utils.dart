@@ -7,6 +7,7 @@ String? get envPrefix => Platform.environment["ROD_PREFIX"];
 String? get envHotReload => Platform.environment["ROD_HOT_RELOAD"];
 String? get envToken => Platform.environment["ROD_TOKEN"];
 bool get enabledIntentFeatures => Platform.environment["ROD_INTENT_FEATURES_ENABLE"] == "true";
+bool get syncCommands => Platform.environment["SYNC_COMMANDS"] == "true";
 
 DateTime _approxMemberCountLastAccess = DateTime.utc(2005);
 int _approxMemberCount = -1;

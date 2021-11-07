@@ -22,7 +22,8 @@ Future<void> pingSlashHandler(ISlashCommandInteractionEvent event) async {
   final random = Random();
   final color = DiscordColor.fromRgb(random.nextInt(255), random.nextInt(255), random.nextInt(255));
   final gatewayDelayInMillis =
-      (event.client as INyxxWebsocket).shardManager.shards.map((e) => e.gatewayLatency.inMilliseconds).reduce((value, element) => value + element) /~ (event.client as INyxxWebsocket).shards;
+      (event.client as INyxxWebsocket).shardManager.shards.map((e) => e.gatewayLatency.inMilliseconds).reduce((value, element) => value + element) /
+          ~(event.client as INyxxWebsocket).shards;
 
   final apiStopwatch = Stopwatch()..start();
   await http.head(Uri(scheme: "https", host: Constants.host, path: Constants.baseUri));

@@ -9,7 +9,8 @@ late INyxxWebsocket botInstance;
 void main(List<String> arguments) async {
   await rod.openDbAndRunMigrations();
 
-  botInstance = NyxxFactory.createNyxxWebsocket(rod.botToken, rod.setIntents, options: ClientOptions(guildSubscriptions: false, messageCacheSize: 10), cacheOptions: rod.cacheOptions)
+  botInstance = NyxxFactory.createNyxxWebsocket(rod.botToken, rod.setIntents,
+      options: ClientOptions(guildSubscriptions: false, messageCacheSize: 10), cacheOptions: rod.cacheOptions)
     ..eventsWs.onGuildMemberAdd.listen((event) async {
       await rod.joinLogJoinEvent(event);
       await rod.nicknamePoopJoinEvent(event);
@@ -88,19 +89,23 @@ void main(List<String> arguments) async {
         ..registerHandler(rod.disableFeatureSlash),
       CommandOptionBuilder(CommandOptionType.subCommand, "list", "Lists features enabled in guild")..registerHandler(rod.listFeaturesSlash),
     ]))
-    ..registerSlashCommand(SlashCommandBuilder("reminder", "Manages reminders", [
-      CommandOptionBuilder(CommandOptionType.subCommand, "create", "Creates reminder in current channel", options: [
-        CommandOptionBuilder(CommandOptionType.string, "trigger-at", "When reminder should go on", required: true),
-        CommandOptionBuilder(CommandOptionType.string, "message", "Additional message", required: true),
-      ])
-        ..registerHandler(rod.reminderAddSlash),
-      CommandOptionBuilder(CommandOptionType.subCommand, "list", "List your current remainders")..registerHandler(rod.reminderGetUsers),
-      CommandOptionBuilder(CommandOptionType.subCommand, "clear", "Clears all your remainders")..registerHandler(rod.remindersClear),
-      CommandOptionBuilder(CommandOptionType.subCommand, "remove", "Remove single remainder",
-          options: [CommandOptionBuilder(CommandOptionType.integer, "id", "Id of remainder to delete")])
-        ..registerHandler(rod.reminderRemove)
-    ], guild: 302360552993456135.toSnowflake()))
-    ..syncOnReady();
+    ..registerSlashCommand(SlashCommandBuilder(
+        "reminder",
+        "Manages reminders",
+        [
+          CommandOptionBuilder(CommandOptionType.subCommand, "create", "Creates reminder in current channel", options: [
+            CommandOptionBuilder(CommandOptionType.string, "trigger-at", "When reminder should go on", required: true),
+            CommandOptionBuilder(CommandOptionType.string, "message", "Additional message", required: true),
+          ])
+            ..registerHandler(rod.reminderAddSlash),
+          CommandOptionBuilder(CommandOptionType.subCommand, "list", "List your current remainders")..registerHandler(rod.reminderGetUsers),
+          CommandOptionBuilder(CommandOptionType.subCommand, "clear", "Clears all your remainders")..registerHandler(rod.remindersClear),
+          CommandOptionBuilder(CommandOptionType.subCommand, "remove", "Remove single remainder",
+              options: [CommandOptionBuilder(CommandOptionType.integer, "id", "Id of remainder to delete")])
+            ..registerHandler(rod.reminderRemove)
+        ],
+        guild: 302360552993456135.toSnowflake()))
+    ..syncOnReady(syncRule: ManualCommandSync(sync: rod.syncCommands));
 
   await rod.initReminderModule(botInstance);
 }
