@@ -1,3 +1,7 @@
+## 2.1.5
+
+- Fixup commander remind command name
+
 ## 2.1.4
 
 - Docker compose build from Dockerfile

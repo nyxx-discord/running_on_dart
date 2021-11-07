@@ -31,7 +31,7 @@ void main(List<String> arguments) async {
       ..registerSubCommand("search", rod.docsSearchCommand))
     // Minor commands
     ..registerCommand("info", rod.infoCommand)
-    ..registerCommand("remainder", rod.remainderCommand);
+    ..registerCommand("remind", rod.reminderCommand);
 
   Interactions(WebsocketInteractionBackend(botInstance))
     ..registerSlashCommand(SlashCommandBuilder("info", "Info about bot state", [])..registerHandler(rod.infoSlashCommand))

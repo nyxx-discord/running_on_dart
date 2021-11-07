@@ -3,11 +3,11 @@ import "package:nyxx/nyxx.dart";
 import "package:nyxx_commander/nyxx_commander.dart";
 import "package:running_on_dart/src/modules/reminder/reminder.dart";
 
-Future<void> remainderCommand(ICommandContext ctx, String content) async {
+Future<void> reminderCommand(ICommandContext ctx, String content) async {
   final argString = ctx.getArguments().join(" ");
 
   if (argString.isEmpty) {
-    await ctx.reply(MessageBuilder.content("Provide duration when remainder should be triggered"));
+    await ctx.reply(MessageBuilder.content("Provide duration when reminder should be triggered"));
     return;
   }
 
@@ -15,7 +15,7 @@ Future<void> remainderCommand(ICommandContext ctx, String content) async {
   final replyMessage = ctx.message.referencedMessage?.message?.url;
 
   if (replyMessage == null) {
-    await ctx.reply(MessageBuilder.content("Reply to message to create remainder"));
+    await ctx.reply(MessageBuilder.content("Reply to message to create reminder"));
     return;
   }
 
