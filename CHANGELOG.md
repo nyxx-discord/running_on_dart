@@ -1,3 +1,7 @@
+## 2.2.0
+
+- Add debug env option to enable tracing
+
 ## 2.1.5
 
 - Fixup commander remind command name

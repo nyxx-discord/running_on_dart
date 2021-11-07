@@ -8,6 +8,10 @@ import "package:running_on_dart/running_on_dart.dart" as rod;
 late INyxxWebsocket botInstance;
 
 void main(List<String> arguments) async {
+  if (rod.debug) {
+    Logger.root.level = Level.ALL;
+  }
+
   await rod.openDbAndRunMigrations();
 
   botInstance = NyxxFactory.createNyxxWebsocket(rod.botToken, rod.setIntents,
