@@ -4,18 +4,18 @@ help:
 
 .PHONY: build
 build: ## build images
-	docker compose build
+	docker build .
 
 .PHONY: build-no-cache
 build-no-cache: ## build images discarding cache
-	docker compose build --no-cache
+	docker build .
 
 .PHONY: stop
 stop: ## stop images
 	docker compose down
 
 .PHONY: start
-start: build ## start images from docker compose
+start: ## start images from docker compose
 	docker compose up
 
 .PHONY: clean
