@@ -1,3 +1,7 @@
+## 2.2.3
+
+- Fixup cache bug
+
 ## 2.2.2
 
 - Bump nyxx and nyxx+_interactions to fix message cache size not respected
