@@ -1,3 +1,7 @@
+## 2.2.2
+
+- Bump nyxx and nyxx+_interactions to fix message cache size not respected
+
 ## 2.2.1
 
 - Remove exposed ports from docker-compose.yml
