@@ -1,3 +1,8 @@
+## 2.3.0
+
+- Fixes #13
+- Fixes #14
+
 ## 2.2.4
 
 - Remove unneeded guild command which should be global
