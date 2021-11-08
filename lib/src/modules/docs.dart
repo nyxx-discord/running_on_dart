@@ -1,3 +1,4 @@
+import 'dart:async';
 import "dart:convert" show jsonDecode;
 
 import "package:http/http.dart" as http;
@@ -16,7 +17,7 @@ DateTime lastDocUpdateTimer = DateTime(2005);
 String get basePath => "https://nyxx.l7ssha.xyz/dartdocs/";
 Uri get docUpdatePath => Uri.parse("https://api.github.com/repos/nyxx-discord/nyxx/actions/runs?status=success&per_page=1&page=1");
 
-Future<dynamic> _findInDocs(bool predicate(dynamic)) async {
+Future<dynamic> _findInDocs(bool Function(dynamic) predicate) async {
   for (final path in docUrls) {
     final payload = jsonDecode((await http.get(Uri.parse(path))).body) as List<dynamic>;
 
@@ -28,7 +29,7 @@ Future<dynamic> _findInDocs(bool predicate(dynamic)) async {
   return null;
 }
 
-Future<List<dynamic>> _whereInDocs(int count, bool predicate(dynamic)) async {
+Future<List<dynamic>> _whereInDocs(int count, bool Function(dynamic) predicate) async {
   final resultingList = [];
 
   for (final path in docUrls) {
@@ -92,14 +93,14 @@ class DocDefinition {
 
   DocDefinition(Map<String, dynamic> element) {
     if (element["enclosedBy"] != null && element["enclosedBy"]["type"] == "class") {
-      this.name = "${element['enclosedBy']['name']}#${element['name']}";
+      name = "${element['enclosedBy']['name']}#${element['name']}";
     } else {
-      this.name = element["name"] as String;
+      name = element["name"] as String;
     }
 
-    this.type = element["type"] as String;
+    type = element["type"] as String;
 
     final libPath = element["href"].split("/").first;
-    this.absoluteUrl = "$basePath$libPath/${element['href']}";
+    absoluteUrl = "$basePath$libPath/${element['href']}";
   }
 }

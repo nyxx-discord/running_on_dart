@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import "package:nyxx/nyxx.dart";
 import "package:nyxx_interactions/nyxx_interactions.dart";
 import "package:running_on_dart/src/modules/inline_tags.dart" as inline_tags;
@@ -134,4 +136,13 @@ Future<void> deleteTagHandler(ISlashCommandInteractionEvent event) async {
   }
 
   return event.respond(MessageBuilder.content("Tag with name: `$tagName` deleted successfully"), hidden: true);
+}
+
+FutureOr<void> tagsSearchAutocompleteHandler(IAutocompleteInteractionEvent event) async {
+  final query = event.focusedOption.value.toString();
+  final mainId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
+
+  final result = inline_tags.findTags(mainId, query).map((tag) => ArgChoiceBuilder(tag.name, tag.name));
+
+  await event.respond(await result.toList());
 }

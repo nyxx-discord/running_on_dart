@@ -9,7 +9,7 @@ import "package:time_ago_provider/time_ago_provider.dart" show formatFull;
 Future<ComponentMessageBuilder> infoGenericCommand(INyxxWebsocket client, [int shardId = 0]) async {
   final color = DiscordColor.fromRgb(Random().nextInt(255), Random().nextInt(255), Random().nextInt(255));
 
-  final embed =  EmbedBuilder()
+  final embed = EmbedBuilder()
     ..addAuthor((author) {
       author.name = client.self.tag;
       author.iconUrl = client.self.avatarURL();

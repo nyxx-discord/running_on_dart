@@ -41,10 +41,10 @@ void main(List<String> arguments) async {
     ..registerSlashCommand(SlashCommandBuilder("info", "Info about bot state", [])..registerHandler(rod.infoSlashCommand))
     ..registerSlashCommand(SlashCommandBuilder("tag", "Show and manipulate tags", [
       CommandOptionBuilder(CommandOptionType.subCommand, "show", "Shows tag to everyone",
-          options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag to show", required: true)])
+          options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag to show", required: true, autoComplete: true)..registerAutocompleteHandler(rod.tagsSearchAutocompleteHandler)])
         ..registerHandler((event) => rod.showTagHandler(event, ephemeral: false)),
       CommandOptionBuilder(CommandOptionType.subCommand, "preview", "Shows tag only for yourself",
-          options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag to show", required: true)])
+          options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag to show", required: true, autoComplete: true)..registerAutocompleteHandler(rod.tagsSearchAutocompleteHandler)])
         ..registerHandler((event) => rod.showTagHandler(event, ephemeral: true)),
       CommandOptionBuilder(CommandOptionType.subCommand, "create", "Creates new tag", options: [
         CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag", required: true),
@@ -52,26 +52,29 @@ void main(List<String> arguments) async {
       ])
         ..registerHandler(rod.createTagHandler),
       CommandOptionBuilder(CommandOptionType.subCommand, "delete", "Deletes tag",
-          options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag", required: true)])
+          options: [CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag", required: true, autoComplete: true)..registerAutocompleteHandler(rod.tagsSearchAutocompleteHandler)])
         ..registerHandler(rod.deleteTagHandler),
       CommandOptionBuilder(CommandOptionType.subCommand, "stats", "Tag stats", options: [])..registerHandler(rod.tagStatsHandler),
       CommandOptionBuilder(CommandOptionType.subCommand, "search", "Allows to search tags",
           options: [CommandOptionBuilder(CommandOptionType.string, "query", "Query to search tags with", required: true)])
         ..registerHandler(rod.tagSearchHandler),
       CommandOptionBuilder(CommandOptionType.subCommand, "edit", "Allows editing existing tag", options: [
-        CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag", required: true),
+        CommandOptionBuilder(CommandOptionType.string, "name", "Name of tag", required: true, autoComplete: true)..registerAutocompleteHandler(rod.tagsSearchAutocompleteHandler),
         CommandOptionBuilder(CommandOptionType.string, "content", "Content of the tag", required: true)
       ])
         ..registerHandler(rod.tagEditHandler),
-    ]))
+    ], guild: 302360552993456135.toSnowflake()))
     ..registerSlashCommand(
         SlashCommandBuilder("avatar", "Shows avatar of the user", [CommandOptionBuilder(CommandOptionType.user, "user", "User to display avatar")])
           ..registerHandler(rod.avatarSlashHandler))
     ..registerSlashCommand(SlashCommandBuilder("ping", "Shows bots latency", [])..registerHandler(rod.pingSlashHandler))
     ..registerSlashCommand(SlashCommandBuilder("docs", "Documentation for nyxx", [
       CommandOptionBuilder(CommandOptionType.subCommand, "get", "Fetches docs for given phrase",
-          options: [CommandOptionBuilder(CommandOptionType.string, "phrase", "Phrase to fetch from docs", required: true)])
-        ..registerHandler(rod.docsGetSlashHandler),
+          options: [
+            CommandOptionBuilder(CommandOptionType.string, "phrase", "Phrase to fetch from docs", required: true, autoComplete: true)
+              ..registerAutocompleteHandler(rod.docsSearchAutocompleteHandler)
+          ]
+      )..registerHandler(rod.docsGetSlashHandler),
       CommandOptionBuilder(CommandOptionType.subCommand, "search", "Searches docs for wanted phrase",
           options: [CommandOptionBuilder(CommandOptionType.string, "phrase", "Phrase to fetch from docs", required: true)])
         ..registerHandler(rod.docsSearchHandler),
@@ -94,22 +97,18 @@ void main(List<String> arguments) async {
         ..registerHandler(rod.disableFeatureSlash),
       CommandOptionBuilder(CommandOptionType.subCommand, "list", "Lists features enabled in guild")..registerHandler(rod.listFeaturesSlash),
     ]))
-    ..registerSlashCommand(SlashCommandBuilder(
-        "reminder",
-        "Manages reminders",
-        [
-          CommandOptionBuilder(CommandOptionType.subCommand, "create", "Creates reminder in current channel", options: [
-            CommandOptionBuilder(CommandOptionType.string, "trigger-at", "When reminder should go on", required: true),
-            CommandOptionBuilder(CommandOptionType.string, "message", "Additional message", required: true),
-          ])
-            ..registerHandler(rod.reminderAddSlash),
-          CommandOptionBuilder(CommandOptionType.subCommand, "list", "List your current remainders")..registerHandler(rod.reminderGetUsers),
-          CommandOptionBuilder(CommandOptionType.subCommand, "clear", "Clears all your remainders")..registerHandler(rod.remindersClear),
-          CommandOptionBuilder(CommandOptionType.subCommand, "remove", "Remove single remainder",
-              options: [CommandOptionBuilder(CommandOptionType.integer, "id", "Id of remainder to delete")])
-            ..registerHandler(rod.reminderRemove)
-        ])
-    )
+    ..registerSlashCommand(SlashCommandBuilder("reminder", "Manages reminders", [
+      CommandOptionBuilder(CommandOptionType.subCommand, "create", "Creates reminder in current channel", options: [
+        CommandOptionBuilder(CommandOptionType.string, "trigger-at", "When reminder should go on", required: true),
+        CommandOptionBuilder(CommandOptionType.string, "message", "Additional message", required: true),
+      ])
+        ..registerHandler(rod.reminderAddSlash),
+      CommandOptionBuilder(CommandOptionType.subCommand, "list", "List your current remainders")..registerHandler(rod.reminderGetUsers),
+      CommandOptionBuilder(CommandOptionType.subCommand, "clear", "Clears all your remainders")..registerHandler(rod.remindersClear),
+      CommandOptionBuilder(CommandOptionType.subCommand, "remove", "Remove single remainder",
+          options: [CommandOptionBuilder(CommandOptionType.integer, "id", "Id of remainder to delete")])
+        ..registerHandler(rod.reminderRemove)
+    ]))
     ..syncOnReady(syncRule: ManualCommandSync(sync: rod.syncCommands));
 
   await rod.initReminderModule(botInstance);

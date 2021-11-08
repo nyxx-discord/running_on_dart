@@ -9,11 +9,11 @@ class Tag {
   late final Snowflake authorId;
 
   Tag.fromDatabaseRecord(Map<String, dynamic> row) {
-    this.id = row["id"] as int;
-    this.name = row["name"] as String;
-    this.content = row["content"] as String;
-    this.enabled = row["enabled"] as bool;
-    this.guildId = Snowflake(row["guild_id"]);
-    this.authorId = Snowflake(row["author_id"]);
+    id = row["id"] as int;
+    name = row["name"] as String;
+    content = row["content"] as String;
+    enabled = row["enabled"] as bool;
+    guildId = Snowflake(row["guild_id"]);
+    authorId = Snowflake(row["author_id"]);
   }
 }

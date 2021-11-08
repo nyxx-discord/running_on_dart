@@ -1,6 +1,6 @@
 import "package:nyxx/nyxx.dart" show EmbedBuilder, MessageBuilder;
 
-import "package:running_on_dart/src/modules/docs.dart" show basePath, getDocDefinition, searchDocs;
+import "package:running_on_dart/src/modules/docs.dart" show getDocDefinition, searchDocs;
 
 Future<MessageBuilder> docsGetMessageBuilder(String phrase) async {
   final searchString = phrase.split(" ").last.split("#|.");
