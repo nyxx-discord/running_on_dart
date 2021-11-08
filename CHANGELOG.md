@@ -1,3 +1,7 @@
+## 2.2.1
+
+- Remove exposed ports from docker-compose.yml
+
 ## 2.2.0
 
 - Add debug env option to enable tracing
