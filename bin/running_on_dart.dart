@@ -108,8 +108,8 @@ void main(List<String> arguments) async {
           CommandOptionBuilder(CommandOptionType.subCommand, "remove", "Remove single remainder",
               options: [CommandOptionBuilder(CommandOptionType.integer, "id", "Id of remainder to delete")])
             ..registerHandler(rod.reminderRemove)
-        ],
-        guild: 302360552993456135.toSnowflake()))
+        ])
+    )
     ..syncOnReady(syncRule: ManualCommandSync(sync: rod.syncCommands));
 
   await rod.initReminderModule(botInstance);

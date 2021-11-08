@@ -1,3 +1,7 @@
+## 2.2.4
+
+- Remove unneeded guild command which should be global
+
 ## 2.2.3
 
 - Fixup cache bug
