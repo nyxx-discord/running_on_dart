@@ -1,14 +1,15 @@
 import "dart:math" show Random;
 
 import "package:nyxx/nyxx.dart";
+import 'package:nyxx_interactions/nyxx_interactions.dart';
 import "package:running_on_dart/src/internal/utils.dart" show dartVersion, getApproxMemberCount, getMemoryUsageString;
 import "package:running_on_dart/src/modules/docs.dart" show fetchLastDocUpdate;
 import "package:time_ago_provider/time_ago_provider.dart" show formatFull;
 
-Future<EmbedBuilder> infoGenericCommand(INyxxWebsocket client, [int shardId = 0]) async {
+Future<ComponentMessageBuilder> infoGenericCommand(INyxxWebsocket client, [int shardId = 0]) async {
   final color = DiscordColor.fromRgb(Random().nextInt(255), Random().nextInt(255), Random().nextInt(255));
 
-  return EmbedBuilder()
+  final embed =  EmbedBuilder()
     ..addAuthor((author) {
       author.name = client.self.tag;
       author.iconUrl = client.self.avatarURL();
@@ -31,4 +32,10 @@ Future<EmbedBuilder> infoGenericCommand(INyxxWebsocket client, [int shardId = 0]
     ..addField(name: "Member count (online/total)", content: getApproxMemberCount(client), inline: true)
     ..addField(name: "Uptime", content: formatFull(client.startTime))
     ..addField(name: "Last doc update", content: formatFull(await fetchLastDocUpdate()));
+
+  return ComponentMessageBuilder()
+    ..embeds = [embed]
+    ..componentRows = [
+      [LinkButtonBuilder("Add nyxx to your guild", client.app.getInviteUrl())]
+    ];
 }

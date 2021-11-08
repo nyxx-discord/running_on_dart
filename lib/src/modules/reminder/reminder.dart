@@ -45,17 +45,14 @@ Future<void> executeRemindersCache() async {
 }
 
 MessageBuilder getMessageBuilderForReminder(ReminderEntity reminderEntity) {
-  final content = "Reminder: <t:${reminderEntity.addDate.millisecondsSinceEpoch ~/ 1000}:R>: ${reminderEntity.message}";
+  final content = "<@${reminderEntity.userId}> Reminder: <t:${reminderEntity.addDate.millisecondsSinceEpoch ~/ 1000}:R>: ${reminderEntity.message}";
 
-  final builder = ComponentMessageBuilder()..content = content;
-
-  return builder;
+  return ComponentMessageBuilder()..content = content;
 }
 
 Future<void> syncRemindersCache() async {
-  _logger.info("Syncing reminder cache");
   _remindersCache = await fetchCurrentReminders().toList();
-  _logger.info("Synced reminder cache. Number of entries: ${_remindersCache.length}");
+  _logger.fine("Synced reminder cache. Number of entries: ${_remindersCache.length}");
 }
 
 Future<ReminderEntity?> fetchReminder(int id) async {

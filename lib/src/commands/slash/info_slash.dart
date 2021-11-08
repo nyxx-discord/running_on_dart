@@ -9,13 +9,7 @@ import "package:running_on_dart/src/commands/info_common.dart" show infoGenericC
 Future<void> infoSlashCommand(ISlashCommandInteractionEvent event) async {
   await event.acknowledge();
 
-  final messageBuilder = ComponentMessageBuilder()
-    ..embeds = [await infoGenericCommand(event.client as INyxxWebsocket)]
-    ..componentRows = [
-      [LinkButtonBuilder("Add nyxx to your guild", (event.client as INyxxWebsocket).app.getInviteUrl())]
-    ];
-
-  await event.respond(messageBuilder);
+  await event.respond(await infoGenericCommand(event.client as INyxxWebsocket));
 }
 
 Future<void> pingSlashHandler(ISlashCommandInteractionEvent event) async {
