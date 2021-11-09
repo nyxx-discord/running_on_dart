@@ -101,7 +101,7 @@ packages:
     description:
       path: "."
       ref: next
-      resolved-ref: "6028a7b336511eee6942212217bb884486de2a52"
+      resolved-ref: fb2532a35e1467b01bd43fc9a8cf5220fd43722d
       url: "https://github.com/nyxx-discord/nyxx_commander.git"
     source: git
     version: "3.0.0-dev.0"
