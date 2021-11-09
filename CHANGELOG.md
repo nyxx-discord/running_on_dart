@@ -1,3 +1,8 @@
+## 2.3.1
+
+- Bump nyxx_commander version
+- Bump nyxx version
+
 ## 2.3.0
 
 - Fixes #13
