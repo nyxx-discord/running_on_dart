@@ -92,7 +92,7 @@ packages:
     description:
       path: "."
       ref: next
-      resolved-ref: ae51767141e6fc98983b2735229153d6e885db45
+      resolved-ref: fad369e5275c7c8268cc5d11d43fe1ce1e923e5c
       url: "https://github.com/nyxx-discord/nyxx.git"
     source: git
     version: "3.0.0-dev.0"
