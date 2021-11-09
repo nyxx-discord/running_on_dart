@@ -146,3 +146,14 @@ FutureOr<void> tagsSearchAutocompleteHandler(IAutocompleteInteractionEvent event
 
   await event.respond(await result.toList());
 }
+
+FutureOr<void> tagsSearchForUserAutocompleteHandler(IAutocompleteInteractionEvent event) async {
+  final query = event.focusedOption.value.toString();
+
+  final mainId = event.interaction.guild?.id ?? event.interaction.userAuthor!.id;
+  final authorId = event.interaction.guild?.id != null ? event.interaction.memberAuthor!.id : event.interaction.userAuthor!.id;
+
+  final result = inline_tags.findTagsForUser(mainId, authorId, query).map((tag) => ArgChoiceBuilder(tag.name, tag.name));
+
+  await event.respond(await result.toList());
+}

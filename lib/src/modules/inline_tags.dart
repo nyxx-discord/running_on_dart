@@ -61,6 +61,22 @@ Stream<Tag> findTags(Snowflake guildId, String query) async* {
   }
 }
 
+Stream<Tag> findTagsForUser(Snowflake guildId, Snowflake userId, String query) async* {
+  const query = """
+    SELECT t.* from tags t WHERE t.guild_id = @guildId ABD t.user_id = @userId ORDER BY t.name <-> @query LIMIT 10;
+  """;
+
+  final result = await db.connection.query(query, substitutionValues: {
+    "query": query,
+    "guildId": guildId.toString(),
+    "userId": userId.toString(),
+  });
+
+  for (final row in result) {
+    yield Tag.fromDatabaseRecord(row.toColumnMap());
+  }
+}
+
 Future<Tag?> findTagForGuild(String name, Snowflake guildId, {bool enabled = true}) async {
   const query = """
     SELECT t.* FROM tags t WHERE t.name = @name AND t.guild_id = @guildId AND t.enabled = @enabled;

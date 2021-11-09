@@ -1,3 +1,7 @@
+## 2.3.3
+
+- In tags edit and delete autocomplete handlers filter by user invoking command
+
 ## 2.3.2
 
 - Fixup put by mistake guild constraint
