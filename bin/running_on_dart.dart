@@ -63,7 +63,7 @@ void main(List<String> arguments) async {
         CommandOptionBuilder(CommandOptionType.string, "content", "Content of the tag", required: true)
       ])
         ..registerHandler(rod.tagEditHandler),
-    ], guild: 302360552993456135.toSnowflake()))
+    ]))
     ..registerSlashCommand(
         SlashCommandBuilder("avatar", "Shows avatar of the user", [CommandOptionBuilder(CommandOptionType.user, "user", "User to display avatar")])
           ..registerHandler(rod.avatarSlashHandler))

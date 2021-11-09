@@ -1,3 +1,7 @@
+## 2.3.2
+
+- Fixup put by mistake guild constraint
+
 ## 2.3.1
 
 - Bump nyxx_commander version
