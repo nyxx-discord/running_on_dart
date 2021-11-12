@@ -36,6 +36,6 @@ Future<ComponentMessageBuilder> infoGenericCommand(INyxxWebsocket client, [int s
   return ComponentMessageBuilder()
     ..embeds = [embed]
     ..componentRows = [
-      [LinkButtonBuilder("Add nyxx to your guild", client.app.getInviteUrl())]
+      [LinkButtonBuilder("Add running on dart to your guild", client.app.getInviteUrl())]
     ];
 }
