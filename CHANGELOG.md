@@ -1,3 +1,7 @@
+## 2.3.5
+
+- Fixup broken docs commands
+
 ## 2.3.4
 
 - Fixup invite button on info command
