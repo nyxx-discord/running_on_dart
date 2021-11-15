@@ -13,11 +13,9 @@ const docUrls = [
 
 late DateTime lastDocUpdate;
 DateTime lastDocUpdateTimer = DateTime(2005);
-
-String get basePath => "https://nyxx.l7ssha.xyz/dartdocs/";
 Uri get docUpdatePath => Uri.parse("https://api.github.com/repos/nyxx-discord/nyxx/actions/runs?status=success&per_page=1&page=1");
 
-Future<dynamic> _findInDocs(bool Function(dynamic) predicate) async {
+Future<SearchResult?> _findInDocs(bool Function(dynamic) predicate) async {
   for (final path in docUrls) {
     final response = await http.get(Uri.parse(path));
 
@@ -28,19 +26,19 @@ Future<dynamic> _findInDocs(bool Function(dynamic) predicate) async {
     final payload = jsonDecode(response.body) as List<dynamic>;
 
     try {
-      return payload.firstWhere(predicate);
+      return SearchResult(payload.firstWhere(predicate), path);
     } on StateError {}
   }
 
   return null;
 }
 
-Future<List<dynamic>> _whereInDocs(int count, bool Function(dynamic) predicate) async {
-  final resultingList = [];
+Future<List<SearchResult>> _whereInDocs(int count, bool Function(dynamic) predicate) async {
+  final resultingList = <SearchResult>[];
 
   for (final path in docUrls) {
     final payload = jsonDecode((await http.get(Uri.parse(path))).body) as List<dynamic>;
-    resultingList.addAll(payload.where(predicate).take(count));
+    resultingList.addAll(payload.where(predicate).take(count).map((e) => SearchResult(e, path)));
 
     if (resultingList.length >= count) {
       return resultingList;
@@ -51,12 +49,12 @@ Future<List<dynamic>> _whereInDocs(int count, bool Function(dynamic) predicate) 
 }
 
 Future<DocDefinition?> getDocDefinition(String className, [String? fieldName]) async {
-  Map<String, dynamic>? searchResult;
+ SearchResult? searchResult;
 
   if (fieldName == null) {
-    searchResult = await _findInDocs((element) => (element["name"] as String).endsWith(className)) as Map<String, dynamic>?;
+    searchResult = await _findInDocs((element) => (element["name"] as String).endsWith(className));
   } else {
-    searchResult = await _findInDocs((element) => (element["qualifiedName"] as String).endsWith("$className.$fieldName")) as Map<String, dynamic>?;
+    searchResult = await _findInDocs((element) => (element["qualifiedName"] as String).endsWith("$className.$fieldName"));
   }
 
   if (searchResult == null) {
@@ -70,7 +68,7 @@ Stream<DocDefinition> searchDocs(String query) async* {
   final searchResults = await _whereInDocs(10, (element) => (element["name"] as String).toLowerCase().contains(query.toLowerCase()));
 
   for (final element in searchResults) {
-    yield DocDefinition(element as Map<String, dynamic>);
+    yield DocDefinition(element);
   }
 }
 
@@ -87,6 +85,17 @@ Future<DateTime> fetchLastDocUpdate() async {
   return lastDocUpdate;
 }
 
+class SearchResult {
+  late final Map<String, dynamic> data;
+  final String path;
+
+  String get basePath => path.replaceFirst("index.json", "");
+
+  SearchResult(dynamic result, this.path) {
+    data = result as Map<String, dynamic>;
+  }
+}
+
 class DocDefinition {
   /// Name of documentation element
   late final String name;
@@ -97,16 +106,16 @@ class DocDefinition {
   /// Type of documentation element
   late final String type;
 
-  DocDefinition(Map<String, dynamic> element) {
-    if (element["enclosedBy"] != null && element["enclosedBy"]["type"] == "class") {
-      name = "${element['enclosedBy']['name']}#${element['name']}";
+  DocDefinition(SearchResult result) {
+    if (result.data["enclosedBy"] != null && result.data["enclosedBy"]["type"] == "class") {
+      name = "${result.data['enclosedBy']['name']}#${result.data['name']}";
     } else {
-      name = element["name"] as String;
+      name = result.data["name"] as String;
     }
 
-    type = element["type"] as String;
+    type = result.data["type"] as String;
 
-    final libPath = element["href"].split("/").first;
-    absoluteUrl = "$basePath$libPath/${element['href']}";
+    final libPath = result.data["href"].split("/").first;
+    absoluteUrl = "${result.basePath}$libPath/${result.data['href']}";
   }
 }
