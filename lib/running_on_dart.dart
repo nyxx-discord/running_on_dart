@@ -18,4 +18,5 @@ export "src/modules/join_logs.dart" show joinLogJoinEvent;
 export "src/modules/nickname_poop.dart" show nicknamePoopJoinEvent, nicknamePoopUpdateEvent;
 export "src/modules/reminder/reminder.dart" show initReminderModule;
 export "src/modules/settings/settings.dart" show prefixHandler, botToken, setIntents, cacheOptions, getFeaturesAsChoices;
+export "src/modules/prometheus.dart" show slashCommandsTotalUsageMetric, registerPrometheus;
 export "src/internal/utils.dart" show syncCommands, debug;

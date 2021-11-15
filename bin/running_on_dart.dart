@@ -13,6 +13,7 @@ void main(List<String> arguments) async {
   }
 
   await rod.openDbAndRunMigrations();
+  await rod.registerPrometheus();
 
   botInstance = NyxxFactory.createNyxxWebsocket(rod.botToken, rod.setIntents,
       options: ClientOptions(guildSubscriptions: false, messageCacheSize: 10), cacheOptions: rod.cacheOptions)
@@ -24,7 +25,7 @@ void main(List<String> arguments) async {
       await rod.nicknamePoopUpdateEvent(event);
     });
 
-  Commander(botInstance, rod.prefixHandler)
+  ICommander.create(botInstance, rod.prefixHandler)
     ..registerCommandGroup(CommandGroup(beforeHandler: rod.adminBeforeHandler)
       ..registerSubCommand("leave", rod.leaveChannelCommand)
       ..registerSubCommand("join", rod.joinChannelCommand))
@@ -37,7 +38,7 @@ void main(List<String> arguments) async {
     ..registerCommand("info", rod.infoCommand)
     ..registerCommand("remind", rod.reminderCommand);
 
-  Interactions(WebsocketInteractionBackend(botInstance))
+  IInteractions.create(WebsocketInteractionBackend(botInstance))
     ..registerSlashCommand(SlashCommandBuilder("info", "Info about bot state", [])..registerHandler(rod.infoSlashCommand))
     ..registerSlashCommand(SlashCommandBuilder("tag", "Show and manipulate tags", [
       CommandOptionBuilder(CommandOptionType.subCommand, "show", "Shows tag to everyone", options: [
@@ -115,7 +116,8 @@ void main(List<String> arguments) async {
           options: [CommandOptionBuilder(CommandOptionType.integer, "id", "Id of remainder to delete")])
         ..registerHandler(rod.reminderRemove)
     ]))
-    ..syncOnReady(syncRule: ManualCommandSync(sync: rod.syncCommands));
+    ..syncOnReady(syncRule: ManualCommandSync(sync: rod.syncCommands))
+    ..events.onSlashCommand.listen((event) => rod.slashCommandsTotalUsageMetric.labels([event.interaction.name]).inc());
 
   await rod.initReminderModule(botInstance);
 }

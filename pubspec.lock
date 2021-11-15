@@ -43,6 +43,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.13.4"
+  http_methods:
+    dependency: transitive
+    description:
+      name: http_methods
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.1.0"
   http_parser:
     dependency: transitive
     description:
@@ -92,7 +99,7 @@ packages:
     description:
       path: "."
       ref: next
-      resolved-ref: fad369e5275c7c8268cc5d11d43fe1ce1e923e5c
+      resolved-ref: "8c84f04898ededd77f1778d2282cf080b84d1125"
       url: "https://github.com/nyxx-discord/nyxx.git"
     source: git
     version: "3.0.0-dev.0"
@@ -101,7 +108,7 @@ packages:
     description:
       path: "."
       ref: next
-      resolved-ref: fb2532a35e1467b01bd43fc9a8cf5220fd43722d
+      resolved-ref: "294e945731b026e75e4cdc280ec90f4bf6b825f0"
       url: "https://github.com/nyxx-discord/nyxx_commander.git"
     source: git
     version: "3.0.0-dev.0"
@@ -110,7 +117,7 @@ packages:
     description:
       path: "."
       ref: next
-      resolved-ref: "4bc05c7ba4873520f834c8f13b932cfaf9b64014"
+      resolved-ref: "4ab810e64fec142584f3ff22c257202a9984f938"
       url: "https://github.com/nyxx-discord/nyxx_interactions.git"
     source: git
     version: "3.0.0-dev"
@@ -135,6 +142,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.4.2"
+  prometheus_client:
+    dependency: "direct main"
+    description:
+      name: prometheus_client
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.5.0"
+  prometheus_client_shelf:
+    dependency: "direct main"
+    description:
+      name: prometheus_client_shelf
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.5.0"
   sasl_scram:
     dependency: transitive
     description:
@@ -149,6 +170,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.2"
+  shelf:
+    dependency: "direct main"
+    description:
+      name: shelf
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.2.0"
+  shelf_router:
+    dependency: "direct main"
+    description:
+      name: shelf_router
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.1.2"
   source_span:
     dependency: transitive
     description:
@@ -156,6 +191,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.8.1"
+  stack_trace:
+    dependency: transitive
+    description:
+      name: stack_trace
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.10.0"
+  stream_channel:
+    dependency: transitive
+    description:
+      name: stream_channel
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.1.0"
   string_scanner:
     dependency: transitive
     description:
