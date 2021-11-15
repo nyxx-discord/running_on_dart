@@ -4,11 +4,11 @@ import "dart:convert" show jsonDecode;
 import "package:http/http.dart" as http;
 
 const docUrls = [
-  "https://nyxx.l7ssha.xyz/dartdocs/nyxx/index.json",
-  "https://nyxx.l7ssha.xyz/dartdocs/nyxx_interactions/index.json",
-  "https://nyxx.l7ssha.xyz/dartdocs/nyxx_commander/index.json",
-  "https://nyxx.l7ssha.xyz/dartdocs/nyxx_lavalink/index.json",
-  "https://nyxx.l7ssha.xyz/dartdocs/nyxx_extensions/index.json",
+  "https://pub.dev/documentation/nyxx/latest/index.json",
+  "https://pub.dev/documentation/nyxx_interactions/latest/index.jsoni",
+  "https://pub.dev/documentation/nyxx_commander/latest/index.json",
+  "https://pub.dev/documentation/nyxx_lavalink/latest/index.json",
+  "https://pub.dev/documentation/nyxx_extensions/latest/index.json",
 ];
 
 late DateTime lastDocUpdate;
@@ -19,7 +19,13 @@ Uri get docUpdatePath => Uri.parse("https://api.github.com/repos/nyxx-discord/ny
 
 Future<dynamic> _findInDocs(bool Function(dynamic) predicate) async {
   for (final path in docUrls) {
-    final payload = jsonDecode((await http.get(Uri.parse(path))).body) as List<dynamic>;
+    final response = await http.get(Uri.parse(path));
+
+    if (response.statusCode >= 400) {
+      continue;
+    }
+
+    final payload = jsonDecode(response.body) as List<dynamic>;
 
     try {
       return payload.firstWhere(predicate);
