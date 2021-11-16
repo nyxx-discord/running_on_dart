@@ -20,12 +20,21 @@ void main(List<String> arguments) async {
     ..eventsWs.onGuildMemberAdd.listen((event) async {
       await rod.joinLogJoinEvent(event);
       await rod.nicknamePoopJoinEvent(event);
+
+      rod.nyxxTotalGuildJoinsMetric.labels([event.guild.id.toString()]).inc();
     })
     ..eventsWs.onGuildMemberUpdate.listen((event) async {
       await rod.nicknamePoopUpdateEvent(event);
+    })
+    ..eventsWs.onMessageReceived.listen((event) {
+      final id = event.message.guild != null
+        ? event.message.guild!.id.toString()
+        : 'dm';
+
+      rod.nyxxTotalMessagesSentMetric.labels([id]).inc();
     });
 
-  ICommander.create(botInstance, rod.prefixHandler)
+  ICommander.create(botInstance, rod.prefixHandler, afterCommandHandler: (ICommandContext context) => rod.commanderTotalUsageMetric.labels([context.commandMatcher]).inc())
     ..registerCommandGroup(CommandGroup(beforeHandler: rod.adminBeforeHandler)
       ..registerSubCommand("leave", rod.leaveChannelCommand)
       ..registerSubCommand("join", rod.joinChannelCommand))
@@ -120,4 +129,5 @@ void main(List<String> arguments) async {
     ..events.onSlashCommand.listen((event) => rod.slashCommandsTotalUsageMetric.labels([event.interaction.name]).inc());
 
   await rod.initReminderModule(botInstance);
+  rod.registerPeriodicCollectors(botInstance);
 }
