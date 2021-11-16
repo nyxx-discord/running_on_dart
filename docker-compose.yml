@@ -34,7 +34,7 @@ services:
     image: grafana/grafana:latest
     container_name: running_on_dart_grafana
     ports:
-      - "9191:3000"
+      - "127.0.0.1:9191:3000"
     volumes:
       - grafana-data:/var/lib/grafana
     restart: unless-stopped
