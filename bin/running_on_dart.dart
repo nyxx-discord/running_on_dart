@@ -32,7 +32,10 @@ void main(List<String> arguments) async {
         : 'dm';
 
       rod.nyxxTotalMessagesSentMetric.labels([id]).inc();
-    });
+    })
+    ..eventsRest.onHttpResponse.listen((event) => rod.nyxxHttpResponse.labels([event.response.statusCode.toString()]).inc())
+    ..eventsRest.onHttpError.listen((event) => rod.nyxxHttpResponse.labels([event.response.statusCode.toString()]).inc())
+    ..eventsRest.onRateLimited.listen((event) => rod.nyxxHttpResponse.labels(['429']).inc());
 
   ICommander.create(botInstance, rod.prefixHandler, afterCommandHandler: (ICommandContext context) => rod.commanderTotalUsageMetric.labels([context.commandMatcher]).inc())
     ..registerCommandGroup(CommandGroup(beforeHandler: rod.adminBeforeHandler)

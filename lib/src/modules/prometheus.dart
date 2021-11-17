@@ -22,6 +22,8 @@ late final Gauge nyxxTotalVoiceStates;
 
 late final Gauge nyxxWsLatencyMetric;
 
+late final Counter nyxxHttpResponse;
+
 void registerPeriodicCollectors(INyxxWebsocket client) {
   Timer.periodic(const Duration(seconds: 5), (t) {
     nyxxTotalUsersMetric.value = client.users.length.toDouble();
@@ -86,6 +88,12 @@ Future<void> registerPrometheus() async {
       name: 'nyxx_ws_latency',
       help: "Websocket latency",
       labelNames: ['shard_id']
+  )..register();
+
+  nyxxHttpResponse = Counter(
+      name: 'nyxx_http_response',
+      help: 'Code of http responses',
+      labelNames: ['code']
   )..register();
 
   final router = Router()
