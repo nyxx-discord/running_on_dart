@@ -1,3 +1,8 @@
+## 2.4.0
+
+- Add /admin clean cleaup
+- Add testing backdoor
+
 ## 2.3.5
 
 - Fixup broken docs commands

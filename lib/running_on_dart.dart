@@ -11,6 +11,7 @@ export "src/commands/slash/reminder_slash.dart";
 export "src/commands/slash/settings_slash.dart";
 export "src/commands/slash/tags_slash.dart";
 export "src/commands/slash/voice_slash.dart";
+export 'src/commands/slash/admin_slash.dart';
 export "src/commands/voice_common.dart" show adminBeforeHandler;
 
 export "src/internal/db.dart" show openDbAndRunMigrations;
@@ -19,4 +20,4 @@ export "src/modules/nickname_poop.dart" show nicknamePoopJoinEvent, nicknamePoop
 export "src/modules/reminder/reminder.dart" show initReminderModule;
 export "src/modules/settings/settings.dart" show prefixHandler, botToken, setIntents, cacheOptions, getFeaturesAsChoices;
 export "src/modules/prometheus.dart";
-export "src/internal/utils.dart" show syncCommands, debug;
+export "src/internal/utils.dart" show syncCommands, debug, isTest, testGuildSnowflake;

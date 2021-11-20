@@ -128,6 +128,11 @@ void main(List<String> arguments) async {
           options: [CommandOptionBuilder(CommandOptionType.integer, "id", "Id of remainder to delete")])
         ..registerHandler(rod.reminderRemove)
     ]))
+    ..registerSlashCommand(SlashCommandBuilder("admin", "Admin commands for server management", [
+      CommandOptionBuilder(CommandOptionType.subCommandGroup, "clean", 'Chat cleanup commands', options: [
+        CommandOptionBuilder(CommandOptionType.subCommand, "cleanup", "Cleans given number of messages. Uses cache!", options: [CommandOptionBuilder(CommandOptionType.integer, "count", "Number of messages to clean")])..registerHandler(rod.cleanupSlashHandler)
+      ])
+    ], guild: rod.testGuildSnowflake))
     ..syncOnReady(syncRule: ManualCommandSync(sync: rod.syncCommands))
     ..events.onSlashCommand.listen((event) => rod.slashCommandsTotalUsageMetric.labels([event.interaction.name]).inc());
 
