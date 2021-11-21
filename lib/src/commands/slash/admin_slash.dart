@@ -4,7 +4,7 @@ import 'package:nyxx_interactions/nyxx_interactions.dart';
 Future<void> cleanupSlashHandler(ISlashCommandInteractionEvent event) async {
   await event.acknowledge(hidden: true);
 
-  if(event.interaction.memberAuthorPermissions != null && !event.interaction.memberAuthorPermissions!.connect) {
+  if (event.interaction.memberAuthorPermissions != null && !event.interaction.memberAuthorPermissions!.connect) {
     return event.respond(MessageBuilder.content("You don't have permissions"));
   }
 

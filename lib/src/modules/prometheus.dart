@@ -28,7 +28,8 @@ void registerPeriodicCollectors(INyxxWebsocket client) {
   Timer.periodic(const Duration(seconds: 5), (t) {
     nyxxTotalUsersMetric.value = client.users.length.toDouble();
     nyxxTotalChannelsMetric.value = client.channels.length.toDouble();
-    nyxxTotalMessageCacheMetric.value = client.channels.values.whereType<ITextChannel>().map((e) => e.messageCache.length).fold(0, (first, second) => first + second);
+    nyxxTotalMessageCacheMetric.value =
+        client.channels.values.whereType<ITextChannel>().map((e) => e.messageCache.length).fold(0, (first, second) => first + second);
     nyxxTotalVoiceStates.value = client.guilds.values.map((g) => g.voiceStates.length).reduce((f, s) => f + s).toDouble();
 
     for (final shard in client.shardManager.shards) {
@@ -40,68 +41,30 @@ void registerPeriodicCollectors(INyxxWebsocket client) {
 Future<void> registerPrometheus() async {
   runtime_metrics.register();
 
-  slashCommandsTotalUsageMetric = Counter(
-    name: 'slash_commands_total_usage',
-    help: 'The total amount of used slash commands',
-    labelNames: ['name']
-  )..register();
+  slashCommandsTotalUsageMetric = Counter(name: 'slash_commands_total_usage', help: 'The total amount of used slash commands', labelNames: ['name'])
+    ..register();
 
-  commanderTotalUsageMetric = Counter(
-      name: 'commander_total_usage',
-      help: 'The total amount of used commander commands',
-      labelNames: ['name']
-  )..register();
+  commanderTotalUsageMetric = Counter(name: 'commander_total_usage', help: 'The total amount of used commander commands', labelNames: ['name'])..register();
 
-  nyxxTotalMessagesSentMetric = Counter(
-      name: 'nyxx_total_messages_sent',
-      help: "Total number of messages sent",
-      labelNames: ['guild_id']
-  )..register();
+  nyxxTotalMessagesSentMetric = Counter(name: 'nyxx_total_messages_sent', help: "Total number of messages sent", labelNames: ['guild_id'])..register();
 
-  nyxxTotalGuildJoinsMetric = Counter(
-      name: 'nyxx_total_guild_joins',
-      help: "Total number of guild joins",
-      labelNames: ['guild_id']
-  )..register();
+  nyxxTotalGuildJoinsMetric = Counter(name: 'nyxx_total_guild_joins', help: "Total number of guild joins", labelNames: ['guild_id'])..register();
 
-  nyxxTotalUsersMetric = Gauge(
-      name: 'nyxx_total_users_cache',
-      help: "Total number of users in cache"
-  )..register();
+  nyxxTotalUsersMetric = Gauge(name: 'nyxx_total_users_cache', help: "Total number of users in cache")..register();
 
-  nyxxTotalChannelsMetric = Gauge(
-      name: 'nyxx_total_channels_cache',
-      help: "Total number of channels in cache"
-  )..register();
+  nyxxTotalChannelsMetric = Gauge(name: 'nyxx_total_channels_cache', help: "Total number of channels in cache")..register();
 
-  nyxxTotalMessageCacheMetric = Gauge(
-      name: 'nyxx_total_messages_cache',
-      help: "Total number of messages in cache"
-  )..register();
+  nyxxTotalMessageCacheMetric = Gauge(name: 'nyxx_total_messages_cache', help: "Total number of messages in cache")..register();
 
-  nyxxTotalVoiceStates = Gauge(
-      name: 'nyxx_total_voice_states_cache',
-      help: "Total number of voice states in cache"
-  )..register();
+  nyxxTotalVoiceStates = Gauge(name: 'nyxx_total_voice_states_cache', help: "Total number of voice states in cache")..register();
 
-  nyxxWsLatencyMetric = Gauge(
-      name: 'nyxx_ws_latency',
-      help: "Websocket latency",
-      labelNames: ['shard_id']
-  )..register();
+  nyxxWsLatencyMetric = Gauge(name: 'nyxx_ws_latency', help: "Websocket latency", labelNames: ['shard_id'])..register();
 
-  nyxxHttpResponse = Counter(
-      name: 'nyxx_http_response',
-      help: 'Code of http responses',
-      labelNames: ['code']
-  )..register();
+  nyxxHttpResponse = Counter(name: 'nyxx_http_response', help: 'Code of http responses', labelNames: ['code'])..register();
 
-  final router = Router()
-      ..get('/metrics', prometheusHandler());
+  final router = Router()..get('/metrics', prometheusHandler());
 
-  var handler = const shelf.Pipeline()
-      .addMiddleware(shelf_metrics.register())
-      .addHandler(router);
+  var handler = const shelf.Pipeline().addMiddleware(shelf_metrics.register()).addHandler(router);
 
   var server = await io.serve(handler, '0.0.0.0', 8080);
   print('Serving at http://${server.address.host}:${server.port}');

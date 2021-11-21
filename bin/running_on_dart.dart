@@ -27,9 +27,7 @@ void main(List<String> arguments) async {
       await rod.nicknamePoopUpdateEvent(event);
     })
     ..eventsWs.onMessageReceived.listen((event) {
-      final id = event.message.guild != null
-        ? event.message.guild!.id.toString()
-        : 'dm';
+      final id = event.message.guild != null ? event.message.guild!.id.toString() : 'dm';
 
       rod.nyxxTotalMessagesSentMetric.labels([id]).inc();
     })
@@ -37,7 +35,8 @@ void main(List<String> arguments) async {
     ..eventsRest.onHttpError.listen((event) => rod.nyxxHttpResponse.labels([event.response.statusCode.toString()]).inc())
     ..eventsRest.onRateLimited.listen((event) => rod.nyxxHttpResponse.labels(['429']).inc());
 
-  ICommander.create(botInstance, rod.prefixHandler, afterCommandHandler: (ICommandContext context) => rod.commanderTotalUsageMetric.labels([context.commandMatcher]).inc())
+  ICommander.create(botInstance, rod.prefixHandler,
+      afterCommandHandler: (ICommandContext context) => rod.commanderTotalUsageMetric.labels([context.commandMatcher]).inc())
     ..registerCommandGroup(CommandGroup(beforeHandler: rod.adminBeforeHandler)
       ..registerSubCommand("leave", rod.leaveChannelCommand)
       ..registerSubCommand("join", rod.joinChannelCommand))
@@ -128,11 +127,17 @@ void main(List<String> arguments) async {
           options: [CommandOptionBuilder(CommandOptionType.integer, "id", "Id of remainder to delete")])
         ..registerHandler(rod.reminderRemove)
     ]))
-    ..registerSlashCommand(SlashCommandBuilder("admin", "Admin commands for server management", [
-      CommandOptionBuilder(CommandOptionType.subCommandGroup, "clean", 'Chat cleanup commands', options: [
-        CommandOptionBuilder(CommandOptionType.subCommand, "cleanup", "Cleans given number of messages. Uses cache!", options: [CommandOptionBuilder(CommandOptionType.integer, "count", "Number of messages to clean")])..registerHandler(rod.cleanupSlashHandler)
-      ])
-    ], guild: rod.testGuildSnowflake))
+    ..registerSlashCommand(SlashCommandBuilder(
+        "admin",
+        "Admin commands for server management",
+        [
+          CommandOptionBuilder(CommandOptionType.subCommandGroup, "clean", 'Chat cleanup commands', options: [
+            CommandOptionBuilder(CommandOptionType.subCommand, "cleanup", "Cleans given number of messages. Uses cache!",
+                options: [CommandOptionBuilder(CommandOptionType.integer, "count", "Number of messages to clean")])
+              ..registerHandler(rod.cleanupSlashHandler)
+          ])
+        ],
+        guild: rod.testGuildSnowflake))
     ..syncOnReady(syncRule: ManualCommandSync(sync: rod.syncCommands))
     ..events.onSlashCommand.listen((event) => rod.slashCommandsTotalUsageMetric.labels([event.interaction.name]).inc());
 
