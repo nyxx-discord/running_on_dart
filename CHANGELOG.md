@@ -1,3 +1,9 @@
+## 2.4.1
+
+- Upgrade migent
+- Add index on name of tag
+- Fixup tag sorting bug
+
 ## 2.4.0
 
 - Add /admin clean cleaup
