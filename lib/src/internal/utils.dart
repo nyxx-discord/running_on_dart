@@ -33,7 +33,7 @@ String getMemoryUsageString() {
 }
 
 String getApproxMemberCount(INyxxWebsocket client) {
-  if (DateTime.now().difference(_approxMemberCountLastAccess).inMinutes > 5 || _approxMemberCount == -1) {
+  if (DateTime.now().difference(_approxMemberCountLastAccess).inMinutes > 60 || _approxMemberCount == -1) {
     Future(() async {
       var amc = 0;
       var amo = 0;
