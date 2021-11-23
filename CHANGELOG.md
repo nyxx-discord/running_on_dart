@@ -1,3 +1,14 @@
+## 2.4.1
+
+- Upgrade migent
+- Add index on name of tag
+- Fixup tag sorting bug
+
+## 2.4.0
+
+- Add /admin clean cleaup
+- Add testing backdoor
+
 ## 2.3.5
 
 - Fixup broken docs commands

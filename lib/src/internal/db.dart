@@ -1,7 +1,7 @@
 import "dart:async" show Future, FutureOr;
 import "dart:io" show Platform;
 
-import "package:migent/migent.dart" show Migent;
+import "package:migent/migent.dart";
 import "package:postgres/postgres.dart" show PostgreSQLConnection;
 
 String get _dbHost => Platform.environment["DB_HOST"]!;
@@ -25,7 +25,7 @@ Future<void> openDbAndRunMigrations() async {
 
   dbStarted = true;
 
-  Migent(_connection!, _dbName)
+  MigentMigrationRunner(_connection!, _dbName, MemoryMigrationAccess())
     ..enqueueMigration("1", """
       CREATE TABLE tags (
         id SERIAL PRIMARY KEY,
@@ -92,6 +92,9 @@ Future<void> openDbAndRunMigrations() async {
     """)
     ..enqueueMigration("1.8", """
       ALTER TABLE reminders ADD COLUMN active BOOLEAN NOT NULL; 
+    """)
+    ..enqueueMigration("1.9", """
+      CREATE INDEX name_trgm_idx ON tags USING gin (name gin_trgm_ops);
     """)
     ..runMigrations();
 }

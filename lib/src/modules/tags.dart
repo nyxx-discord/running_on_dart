@@ -46,13 +46,13 @@ Future<void> updateUsageStats(int id, bool hidden) async {
   });
 }
 
-Stream<Tag> findTags(Snowflake guildId, String query) async* {
+Stream<Tag> findTags(Snowflake guildId, String queryIn) async* {
   const query = """
-    SELECT t.* from tags t WHERE t.guild_id = @guildId ORDER BY t.name <-> @query LIMIT 10;
+    SELECT t.* from tags t WHERE t.guild_id = @guildId ORDER BY similarity(t.name, @query:text) DESC LIMIT 10;
   """;
 
   final result = await db.connection.query(query, substitutionValues: {
-    "query": query,
+    "query": queryIn,
     "guildId": guildId.toString(),
   });
 
@@ -61,13 +61,13 @@ Stream<Tag> findTags(Snowflake guildId, String query) async* {
   }
 }
 
-Stream<Tag> findTagsForUser(Snowflake guildId, Snowflake userId, String query) async* {
+Stream<Tag> findTagsForUser(Snowflake guildId, Snowflake userId, String queryIn) async* {
   const query = """
-    SELECT t.* from tags t WHERE t.guild_id = @guildId ABD t.user_id = @userId ORDER BY t.name <-> @query LIMIT 10;
+    SELECT t.* from tags t WHERE t.guild_id = @guildId ORDER BY ORDER BY similarity(t.name, @query:text) LIMIT 10;
   """;
 
   final result = await db.connection.query(query, substitutionValues: {
-    "query": query,
+    "query": queryIn,
     "guildId": guildId.toString(),
     "userId": userId.toString(),
   });
