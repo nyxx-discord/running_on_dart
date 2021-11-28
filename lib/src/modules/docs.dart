@@ -54,7 +54,7 @@ Future<List<SearchResult>> _whereInDocs(int count, bool Function(dynamic) predic
 }
 
 Future<DocDefinition?> getDocDefinition(String className, [String? fieldName]) async {
- SearchResult? searchResult;
+  SearchResult? searchResult;
 
   if (fieldName == null) {
     searchResult = await _findInDocs((element) => (element["name"] as String).endsWith(className));

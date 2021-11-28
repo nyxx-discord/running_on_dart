@@ -2,7 +2,7 @@ import 'dart:async';
 
 import "package:nyxx/nyxx.dart";
 import "package:nyxx_interactions/nyxx_interactions.dart";
-import "package:running_on_dart/src/modules/inline_tags.dart" as inline_tags;
+import "package:running_on_dart/src/modules/tags.dart" as inline_tags;
 
 Future<void> tagEditHandler(ISlashCommandInteractionEvent event) async {
   await event.acknowledge();

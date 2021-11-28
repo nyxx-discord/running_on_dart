@@ -17,7 +17,7 @@ Future<void> pingSlashHandler(ISlashCommandInteractionEvent event) async {
   final color = DiscordColor.fromRgb(random.nextInt(255), random.nextInt(255), random.nextInt(255));
   final gatewayDelayInMillis =
       (event.client as INyxxWebsocket).shardManager.shards.map((e) => e.gatewayLatency.inMilliseconds).reduce((value, element) => value + element) /
-          ~(event.client as INyxxWebsocket).shards;
+          (event.client as INyxxWebsocket).shards;
 
   final apiStopwatch = Stopwatch()..start();
   await http.head(Uri(scheme: "https", host: Constants.host, path: Constants.baseUri));
@@ -27,7 +27,7 @@ Future<void> pingSlashHandler(ISlashCommandInteractionEvent event) async {
 
   final embed = EmbedBuilder()
     ..color = color
-    ..addField(name: "Gateway latency", content: "${gatewayDelayInMillis.abs()} ms", inline: true)
+    ..addField(name: "Gateway latency", content: "${gatewayDelayInMillis.abs().floor()} ms", inline: true)
     ..addField(name: "REST latency", content: "$apiPing ms", inline: true)
     ..addField(name: "Message roundup time", content: "Pending...", inline: true);
 

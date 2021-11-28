@@ -13,18 +13,30 @@ void main(List<String> arguments) async {
   }
 
   await rod.openDbAndRunMigrations();
+  await rod.registerPrometheus();
 
   botInstance = NyxxFactory.createNyxxWebsocket(rod.botToken, rod.setIntents,
       options: ClientOptions(guildSubscriptions: false, messageCacheSize: 10), cacheOptions: rod.cacheOptions)
     ..eventsWs.onGuildMemberAdd.listen((event) async {
       await rod.joinLogJoinEvent(event);
       await rod.nicknamePoopJoinEvent(event);
+
+      rod.nyxxTotalGuildJoinsMetric.labels([event.guild.id.toString()]).inc();
     })
     ..eventsWs.onGuildMemberUpdate.listen((event) async {
       await rod.nicknamePoopUpdateEvent(event);
-    });
+    })
+    ..eventsWs.onMessageReceived.listen((event) {
+      final id = event.message.guild != null ? event.message.guild!.id.toString() : 'dm';
 
-  Commander(botInstance, rod.prefixHandler)
+      rod.nyxxTotalMessagesSentMetric.labels([id]).inc();
+    })
+    ..eventsRest.onHttpResponse.listen((event) => rod.nyxxHttpResponse.labels([event.response.statusCode.toString()]).inc())
+    ..eventsRest.onHttpError.listen((event) => rod.nyxxHttpResponse.labels([event.response.statusCode.toString()]).inc())
+    ..eventsRest.onRateLimited.listen((event) => rod.nyxxHttpResponse.labels(['429']).inc());
+
+  ICommander.create(botInstance, rod.prefixHandler,
+      afterCommandHandler: (ICommandContext context) => rod.commanderTotalUsageMetric.labels([context.commandMatcher]).inc())
     ..registerCommandGroup(CommandGroup(beforeHandler: rod.adminBeforeHandler)
       ..registerSubCommand("leave", rod.leaveChannelCommand)
       ..registerSubCommand("join", rod.joinChannelCommand))
@@ -37,7 +49,7 @@ void main(List<String> arguments) async {
     ..registerCommand("info", rod.infoCommand)
     ..registerCommand("remind", rod.reminderCommand);
 
-  Interactions(WebsocketInteractionBackend(botInstance))
+  IInteractions.create(WebsocketInteractionBackend(botInstance))
     ..registerSlashCommand(SlashCommandBuilder("info", "Info about bot state", [])..registerHandler(rod.infoSlashCommand))
     ..registerSlashCommand(SlashCommandBuilder("tag", "Show and manipulate tags", [
       CommandOptionBuilder(CommandOptionType.subCommand, "show", "Shows tag to everyone", options: [
@@ -115,7 +127,20 @@ void main(List<String> arguments) async {
           options: [CommandOptionBuilder(CommandOptionType.integer, "id", "Id of remainder to delete")])
         ..registerHandler(rod.reminderRemove)
     ]))
-    ..syncOnReady(syncRule: ManualCommandSync(sync: rod.syncCommands));
+    ..registerSlashCommand(SlashCommandBuilder(
+        "admin",
+        "Admin commands for server management",
+        [
+          CommandOptionBuilder(CommandOptionType.subCommandGroup, "clean", 'Chat cleanup commands', options: [
+            CommandOptionBuilder(CommandOptionType.subCommand, "cleanup", "Cleans given number of messages. Uses cache!",
+                options: [CommandOptionBuilder(CommandOptionType.integer, "count", "Number of messages to clean")])
+              ..registerHandler(rod.cleanupSlashHandler)
+          ])
+        ],
+        guild: rod.testGuildSnowflake))
+    ..syncOnReady(syncRule: ManualCommandSync(sync: rod.syncCommands))
+    ..events.onSlashCommand.listen((event) => rod.slashCommandsTotalUsageMetric.labels([event.interaction.name]).inc());
 
   await rod.initReminderModule(botInstance);
+  rod.registerPeriodicCollectors(botInstance);
 }

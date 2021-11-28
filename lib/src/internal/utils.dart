@@ -6,13 +6,20 @@ import "package:nyxx_interactions/nyxx_interactions.dart";
 String? get envPrefix => Platform.environment["ROD_PREFIX"];
 String? get envHotReload => Platform.environment["ROD_HOT_RELOAD"];
 String? get envToken => Platform.environment["ROD_TOKEN"];
-bool get enabledIntentFeatures => Platform.environment["ROD_INTENT_FEATURES_ENABLE"] == "true";
-bool get syncCommands => Platform.environment["SYNC_COMMANDS"] == "true";
-bool get debug => Platform.environment["ROD_DEBUG"] == "true";
+bool get enabledIntentFeatures => isBool(Platform.environment["ROD_INTENT_FEATURES_ENABLE"]);
+bool get syncCommands => isBool(Platform.environment["SYNC_COMMANDS"]);
+bool get debug => isBool(Platform.environment["ROD_DEBUG"]);
+bool get isTest => isBool(Platform.environment["ROD_TEST"]);
 
 DateTime _approxMemberCountLastAccess = DateTime.utc(2005);
 int _approxMemberCount = -1;
 int _approxMemberOnline = -1;
+
+Snowflake? get testGuildSnowflake => isTest ? Snowflake(302360552993456135) : null;
+
+bool isBool(String? value) {
+  return value != null && (value == "true" || value == "1");
+}
 
 String get dartVersion {
   final platformVersion = Platform.version;
@@ -26,7 +33,7 @@ String getMemoryUsageString() {
 }
 
 String getApproxMemberCount(INyxxWebsocket client) {
-  if (DateTime.now().difference(_approxMemberCountLastAccess).inMinutes > 5 || _approxMemberCount == -1) {
+  if (DateTime.now().difference(_approxMemberCountLastAccess).inMinutes > 60 || _approxMemberCount == -1) {
     Future(() async {
       var amc = 0;
       var amo = 0;
