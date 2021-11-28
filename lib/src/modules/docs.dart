@@ -37,7 +37,12 @@ Future<List<SearchResult>> _whereInDocs(int count, bool Function(dynamic) predic
   final resultingList = <SearchResult>[];
 
   for (final path in docUrls) {
-    final payload = jsonDecode((await http.get(Uri.parse(path))).body) as List<dynamic>;
+    final response = await http.get(Uri.parse(path));
+    if (response.statusCode >= 300) {
+      return [];
+    }
+
+    final payload = jsonDecode(response.body) as List<dynamic>;
     resultingList.addAll(payload.where(predicate).take(count).map((e) => SearchResult(e, path)));
 
     if (resultingList.length >= count) {
