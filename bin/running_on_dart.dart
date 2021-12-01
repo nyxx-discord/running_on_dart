@@ -17,6 +17,9 @@ void main(List<String> arguments) async {
 
   botInstance = NyxxFactory.createNyxxWebsocket(rod.botToken, rod.setIntents,
       options: ClientOptions(guildSubscriptions: false, messageCacheSize: 10), cacheOptions: rod.cacheOptions)
+    ..connect();
+
+  botInstance
     ..eventsWs.onGuildMemberAdd.listen((event) async {
       await rod.joinLogJoinEvent(event);
       await rod.nicknamePoopJoinEvent(event);
