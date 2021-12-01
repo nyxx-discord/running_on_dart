@@ -106,7 +106,7 @@ packages:
     description:
       path: "."
       ref: next
-      resolved-ref: "7ca398dcb37bb86cd82aaa1bfb4a7745d4fe9eaa"
+      resolved-ref: "03045740ec112d9ca97ffb4f3ef8250afe028968"
       url: "https://github.com/nyxx-discord/nyxx.git"
     source: git
     version: "3.0.0-dev.0"
