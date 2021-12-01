@@ -16,8 +16,9 @@ void main(List<String> arguments) async {
   await rod.registerPrometheus();
 
   botInstance = NyxxFactory.createNyxxWebsocket(rod.botToken, rod.setIntents,
-      options: ClientOptions(guildSubscriptions: false, messageCacheSize: 10), cacheOptions: rod.cacheOptions)
-    ..connect();
+      options: ClientOptions(guildSubscriptions: false, messageCacheSize: 10), cacheOptions: rod.cacheOptions);
+
+  await botInstance.connect();
 
   botInstance
     ..eventsWs.onGuildMemberAdd.listen((event) async {
