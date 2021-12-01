@@ -16,11 +16,9 @@ void main(List<String> arguments) async {
   await rod.registerPrometheus();
 
   botInstance = NyxxFactory.createNyxxWebsocket(rod.botToken, rod.setIntents,
-      options: ClientOptions(guildSubscriptions: false, messageCacheSize: 10), cacheOptions: rod.cacheOptions);
-
-  await botInstance.connect();
-
-  botInstance
+      options: ClientOptions(guildSubscriptions: false, messageCacheSize: 10), cacheOptions: rod.cacheOptions)
+    ..registerPlugin(Logging())
+    ..registerPlugin(IgnoreExceptions())
     ..eventsWs.onGuildMemberAdd.listen((event) async {
       await rod.joinLogJoinEvent(event);
       await rod.nicknamePoopJoinEvent(event);
@@ -38,6 +36,8 @@ void main(List<String> arguments) async {
     ..eventsRest.onHttpResponse.listen((event) => rod.nyxxHttpResponse.labels([event.response.statusCode.toString()]).inc())
     ..eventsRest.onHttpError.listen((event) => rod.nyxxHttpResponse.labels([event.response.statusCode.toString()]).inc())
     ..eventsRest.onRateLimited.listen((event) => rod.nyxxHttpResponse.labels(['429']).inc());
+
+  await botInstance.connect();
 
   ICommander.create(botInstance, rod.prefixHandler,
       afterCommandHandler: (ICommandContext context) => rod.commanderTotalUsageMetric.labels([context.commandMatcher]).inc())
