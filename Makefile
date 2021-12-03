@@ -39,11 +39,11 @@ analyze: ## Run dart analyze
 
 .PHONY: prod-start
 prod-start: ## build and start prod docker-compose
-	docker-compose -f docker-compose.prod.yml up
+	docker-compose -f docker-compose.prod.yml up -d
 
 .PHONY: prod-start-build
 prod-start-build: ## build and start prod docker-compose
-	docker-compose -f docker-compose.prod.yml up --build
+	docker-compose -f docker-compose.prod.yml up -d --build
 
 .PHONY: prod-stop
 prod-stop: ## build and start prod docker-compose
