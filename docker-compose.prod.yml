@@ -1,0 +1,59 @@
+version: '3.3'
+services:
+  running_on_dart:
+    build: ./
+    container_name: running_on_dart
+    env_file:
+     - ./.env
+    links:
+      - db
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    container_name: running_on_dart_db
+    restart: always
+    env_file:
+      - ./.env
+    volumes:
+      - "rod_db:/var/lib/postgresql/data"
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: running_on_dart_prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    links:
+      - running_on_dart
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: running_on_dart_grafana
+    ports:
+      - "127.0.0.1:9191:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+    links:
+      - prometheus
+    depends_on:
+      - prometheus
+
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 10 --http-api-metrics --http-api-token ${WATCHTOWER_API_KEY} running_on_dart
+
+volumes:
+  rod_db:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local

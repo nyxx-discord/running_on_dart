@@ -17,6 +17,8 @@ int _approxMemberOnline = -1;
 
 Snowflake? get testGuildSnowflake => isTest ? Snowflake(302360552993456135) : null;
 
+bool getSyncCommandsOrOverride([bool? overrideSync]) => overrideSync ?? syncCommands;
+
 bool isBool(String? value) {
   return value != null && (value == "true" || value == "1");
 }

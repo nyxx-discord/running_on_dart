@@ -20,4 +20,4 @@ export "src/modules/nickname_poop.dart" show nicknamePoopJoinEvent, nicknamePoop
 export "src/modules/reminder/reminder.dart" show initReminderModule;
 export "src/modules/settings/settings.dart" show prefixHandler, botToken, setIntents, cacheOptions, getFeaturesAsChoices;
 export "src/modules/prometheus.dart";
-export "src/internal/utils.dart" show syncCommands, debug, isTest, testGuildSnowflake;
+export "src/internal/utils.dart" show syncCommands, debug, isTest, testGuildSnowflake, getSyncCommandsOrOverride;

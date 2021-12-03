@@ -136,13 +136,15 @@ void main(List<String> arguments) async {
         "Admin commands for server management",
         [
           CommandOptionBuilder(CommandOptionType.subCommandGroup, "clean", 'Chat cleanup commands', options: [
-            CommandOptionBuilder(CommandOptionType.subCommand, "cleanup", "Cleans given number of messages. Uses cache!",
-                options: [CommandOptionBuilder(CommandOptionType.integer, "count", "Number of messages to clean")])
+            CommandOptionBuilder(CommandOptionType.subCommand, "cleanup", "Cleans given number of messages. Uses cache!", options: [
+              CommandOptionBuilder(CommandOptionType.integer, "count", "Number of messages to clean", required: true),
+              CommandOptionBuilder(CommandOptionType.user, "user", "Remove messages from given user")
+            ])
               ..registerHandler(rod.cleanupSlashHandler)
           ])
         ],
         guild: rod.testGuildSnowflake))
-    ..syncOnReady(syncRule: ManualCommandSync(sync: rod.syncCommands))
+    ..syncOnReady(syncRule: ManualCommandSync(sync: rod.getSyncCommandsOrOverride(true)))
     ..events.onSlashCommand.listen((event) => rod.slashCommandsTotalUsageMetric.labels([event.interaction.name]).inc());
 
   await rod.initReminderModule(botInstance);

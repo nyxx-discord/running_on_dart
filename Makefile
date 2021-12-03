@@ -36,3 +36,15 @@ format-apply: ## Run dart format
 .PHONY: analyze
 analyze: ## Run dart analyze
 	dart analyze
+
+.PHONY: prod-start
+prod-start: ## build and start prod docker-compose
+	docker-compose -f docker-compose.prod.yml up
+
+.PHONY: prod-start-build
+prod-start-build: ## build and start prod docker-compose
+	docker-compose -f docker-compose.prod.yml up --build
+
+.PHONY: prod-stop
+prod-stop: ## build and start prod docker-compose
+	docker-compose -f docker-compose.prod.yml down

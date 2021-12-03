@@ -17,6 +17,16 @@ Future<void> cleanupSlashHandler(ISlashCommandInteractionEvent event) async {
   final channelLastMessages = await channel.downloadMessages(limit: toTake).toList();
 
   try {
+    final userToFilter = event.interaction.resolved?.users.first;
+
+    if (userToFilter == null) {
+      return;
+    }
+
+    channelLastMessages.removeWhere((element) => element.author.id != userToFilter.id);
+  } on StateError {}
+
+  try {
     await channel.bulkRemoveMessages(channelLastMessages);
     return event.respond(MessageBuilder.content("Messages removed"), hidden: true);
   } on Error {

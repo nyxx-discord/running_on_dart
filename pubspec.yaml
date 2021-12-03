@@ -1,5 +1,5 @@
 name: running_on_dart
-version: 2.4.1
+version: 2.4.2
 description: Discord Bot for nyxx development
 homepage: https://github.com/nyxx-discord/running_on_dart
 repository: https://github.com/nyxx-discord/running_on_dart
@@ -12,9 +12,9 @@ environment:
 
 dependencies:
   logging: ^1.0.0
-  nyxx: ^2.0.4
-  nyxx_commander: ^2.0.0
-  nyxx_interactions: ^2.0.0
+  nyxx: ^3.0.0-dev.1
+  nyxx_commander: ^3.0.0-dev.0
+  nyxx_interactions: ^3.0.0-dev.0
   postgres: ^2.3.2
   time_ago_provider: ^4.0.0
   migent:
@@ -27,17 +27,3 @@ dependencies:
 
 dev_dependencies:
   lints: ^1.0.1
-
-dependency_overrides:
-  nyxx:
-    git:
-      url: 'https://github.com/nyxx-discord/nyxx.git'
-      ref: next
-  nyxx_commander:
-    git:
-      url: 'https://github.com/nyxx-discord/nyxx_commander.git'
-      ref: next
-  nyxx_interactions:
-    git:
-      url: 'https://github.com/nyxx-discord/nyxx_interactions.git'
-      ref: next

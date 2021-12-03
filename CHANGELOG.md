@@ -1,3 +1,9 @@
+## 2.4.2
+
+- Update nyxx and its sub libs to 3.0.0-dev.x
+- Add watchtower to docker-compose
+- Add user filter to clean method
+
 ## 2.4.1
 
 - Upgrade migent
