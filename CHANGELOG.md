@@ -1,3 +1,7 @@
+## 2.4.3
+
+- Update nyxx due message update deserialization bug
+
 ## 2.4.2
 
 - Update nyxx and its sub libs to 3.0.0-dev.x
