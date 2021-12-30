@@ -91,17 +91,21 @@ void main(List<String> arguments) async {
         SlashCommandBuilder("avatar", "Shows avatar of the user", [CommandOptionBuilder(CommandOptionType.user, "user", "User to display avatar")])
           ..registerHandler(rod.avatarSlashHandler))
     ..registerSlashCommand(SlashCommandBuilder("ping", "Shows bots latency", [])..registerHandler(rod.pingSlashHandler))
-    ..registerSlashCommand(SlashCommandBuilder("docs", "Documentation for nyxx", [
-      CommandOptionBuilder(CommandOptionType.subCommand, "get", "Fetches docs for given phrase", options: [
-        CommandOptionBuilder(CommandOptionType.string, "phrase", "Phrase to fetch from docs", required: true, autoComplete: true)
-          ..registerAutocompleteHandler(rod.docsSearchAutocompleteHandler)
-      ])
-        ..registerHandler(rod.docsGetSlashHandler),
-      CommandOptionBuilder(CommandOptionType.subCommand, "search", "Searches docs for wanted phrase",
-          options: [CommandOptionBuilder(CommandOptionType.string, "phrase", "Phrase to fetch from docs", required: true)])
-        ..registerHandler(rod.docsSearchHandler),
-      CommandOptionBuilder(CommandOptionType.subCommand, "links", "Returns links to docs")..registerHandler(rod.docsLinksHandler)
-    ]))
+    ..registerSlashCommand(SlashCommandBuilder(
+        "docs",
+        "Documentation for nyxx",
+        [
+          CommandOptionBuilder(CommandOptionType.subCommand, "get", "Fetches docs for given phrase", options: [
+            CommandOptionBuilder(CommandOptionType.string, "phrase", "Phrase to fetch from docs", required: true, autoComplete: true)
+              ..registerAutocompleteHandler(rod.docsSearchAutocompleteHandler)
+          ])
+            ..registerHandler(rod.docsGetSlashHandler),
+          CommandOptionBuilder(CommandOptionType.subCommand, "search", "Searches docs for wanted phrase",
+              options: [CommandOptionBuilder(CommandOptionType.string, "phrase", "Phrase to fetch from docs", required: true)])
+            ..registerHandler(rod.docsSearchHandler),
+          CommandOptionBuilder(CommandOptionType.subCommand, "links", "Returns links to docs")..registerHandler(rod.docsLinksHandler)
+        ],
+        guild: rod.testGuildSnowflake))
     ..registerSlashCommand(SlashCommandBuilder("voice", "Voice related commands", [
       CommandOptionBuilder(CommandOptionType.subCommand, "join", "Joins voice channel",
           options: [CommandOptionBuilder(CommandOptionType.channel, "channel", "Channel where bot is going to join", required: true)])

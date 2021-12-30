@@ -5,7 +5,7 @@ import "package:http/http.dart" as http;
 
 const docUrls = [
   "https://pub.dev/documentation/nyxx/latest/index.json",
-  "https://pub.dev/documentation/nyxx_interactions/latest/index.jsoni",
+  "https://pub.dev/documentation/nyxx_interactions/latest/index.json",
   "https://pub.dev/documentation/nyxx_commander/latest/index.json",
   "https://pub.dev/documentation/nyxx_lavalink/latest/index.json",
   "https://pub.dev/documentation/nyxx_extensions/latest/index.json",
