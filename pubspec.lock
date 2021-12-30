@@ -107,28 +107,28 @@ packages:
       name: nyxx
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.0-dev.2"
+    version: "3.1.1"
   nyxx_commander:
     dependency: "direct main"
     description:
       name: nyxx_commander
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.0-dev.0"
+    version: "3.0.0"
   nyxx_interactions:
     dependency: "direct main"
     description:
       name: nyxx_interactions
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.0-dev.1"
+    version: "3.1.0"
   path:
     dependency: transitive
     description:
       name: path
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.8.0"
+    version: "1.8.1"
   pedantic:
     dependency: transitive
     description:

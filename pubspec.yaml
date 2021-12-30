@@ -12,9 +12,9 @@ environment:
 
 dependencies:
   logging: ^1.0.0
-  nyxx: ^3.0.0-dev.2
-  nyxx_commander: ^3.0.0-dev.0
-  nyxx_interactions: ^3.0.0-dev.0
+  nyxx: ^3.0.0
+  nyxx_commander: ^3.0.0
+  nyxx_interactions: ^3.0.0
   postgres: ^2.3.2
   time_ago_provider: ^4.0.0
   migent:

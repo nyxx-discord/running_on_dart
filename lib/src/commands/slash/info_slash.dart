@@ -41,9 +41,19 @@ Future<void> pingSlashHandler(ISlashCommandInteractionEvent event) async {
 Future<void> avatarSlashHandler(ISlashCommandInteractionEvent event) async {
   await event.acknowledge();
 
-  final user = event.interaction.resolved?.users.first;
+  final user = event.interaction.resolved?.users.first ?? event.interaction.userAuthor;
   if (user == null) {
-    return event.respond(MessageBuilder.content("Invalid user specified"));
+    final memberUser = event.interaction.memberAuthor;
+    if (memberUser == null) {
+      return event.respond(MessageBuilder.content("Cannot obtain avatar url either from mentioned user or user that invoked command"), hidden: true);
+    }
+
+    final url = memberUser.avatarURL();
+    if (url == null) {
+      return event.respond(MessageBuilder.content("Member in current guild doesn't have avatar and it cannot be obtained from any other source"), hidden: true);
+    }
+
+    return event.respond(MessageBuilder.content(url), hidden: true);
   }
 
   return event.respond(MessageBuilder.content(user.avatarURL(size: 512)), hidden: true);
