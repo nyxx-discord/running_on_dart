@@ -11,10 +11,6 @@ bool get syncCommands => isBool(Platform.environment["SYNC_COMMANDS"]);
 bool get debug => isBool(Platform.environment["ROD_DEBUG"]);
 bool get isTest => isBool(Platform.environment["ROD_TEST"]);
 
-DateTime _approxMemberCountLastAccess = DateTime.utc(2005);
-int _approxMemberCount = -1;
-int _approxMemberOnline = -1;
-
 Snowflake? get testGuildSnowflake => isTest ? Snowflake(302360552993456135) : null;
 
 bool getSyncCommandsOrOverride([bool? overrideSync]) => overrideSync ?? syncCommands;
@@ -32,31 +28,6 @@ String getMemoryUsageString() {
   final current = (ProcessInfo.currentRss / 1024 / 1024).toStringAsFixed(2);
   final rss = (ProcessInfo.maxRss / 1024 / 1024).toStringAsFixed(2);
   return "$current/${rss}MB";
-}
-
-String getApproxMemberCount(INyxxWebsocket client) {
-  if (DateTime.now().difference(_approxMemberCountLastAccess).inMinutes > 60 || _approxMemberCount == -1) {
-    Future(() async {
-      var amc = 0;
-      var amo = 0;
-
-      for (final element in client.guilds.values) {
-        final guildPreview = await element.fetchGuildPreview();
-
-        amc += guildPreview.approxMemberCount;
-        amo += guildPreview.approxOnlineMembers;
-      }
-
-      _approxMemberCount = amc;
-      _approxMemberOnline = amo;
-    });
-  }
-
-  if (_approxMemberCount == -1 || _approxMemberOnline == -1) {
-    return "Loading...";
-  }
-
-  return "$_approxMemberOnline/$_approxMemberCount";
 }
 
 Snowflake getAuthorId(IInteractionEvent event) => event.interaction.guild?.id != null ? event.interaction.memberAuthor!.id : event.interaction.userAuthor!.id;
