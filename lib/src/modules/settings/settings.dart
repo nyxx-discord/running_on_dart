@@ -1,6 +1,7 @@
 import "dart:async" show Future, FutureOr, Stream;
 
 import "package:nyxx/nyxx.dart";
+import 'package:nyxx_commander/nyxx_commander.dart';
 import "package:nyxx_interactions/nyxx_interactions.dart";
 import "package:running_on_dart/src/internal/db.dart" as db;
 import "package:running_on_dart/src/internal/utils.dart" show enabledIntentFeatures, envPrefix, envToken;
@@ -51,7 +52,7 @@ Iterable<ArgChoiceBuilder> getFeaturesAsChoices() sync* {
   }
 }
 
-FutureOr<String?> prefixHandler(IMessage message) async => envPrefix;
+FutureOr<String?> prefixHandler(IMessage message) async => mentionPrefixHandler(message) ?? envPrefix;
 
 final cacheOptions = CacheOptions()
   ..memberCachePolicyLocation = CachePolicyLocation.none()
