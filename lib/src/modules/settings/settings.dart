@@ -19,22 +19,8 @@ const featureSettingsThatNeedsAdditionalData = {
   memberJoinLogsSettingName: true,
 };
 
-// TODO: Commander requires GatewayIntents.allUnprivileged but thats actually stupid because I cannot specify my intents
-// const intents =
-//   GatewayIntents.guilds
-//   | GatewayIntents.guildBans
-//   | GatewayIntents.guildEmojis
-//   | GatewayIntents.guildIntegrations
-//   | GatewayIntents.guildWebhooks
-//   | GatewayIntents.guildInvites
-//   | GatewayIntents.guildVoiceState
-//   | GatewayIntents.guildMessages
-//   | GatewayIntents.directMessages
-//   | GatewayIntents.guildMembers;
-
-const intentsMembers = GatewayIntents.allUnprivileged | GatewayIntents.guildMembers;
-
-const intentsNoMembers = GatewayIntents.allUnprivileged;
+const intentsNoMembers = GatewayIntents.guildMessages | GatewayIntents.directMessages | GatewayIntents.guilds;
+const intentsMembers = intentsNoMembers | GatewayIntents.guildMembers;
 
 int get setIntents {
   if (enabledIntentFeatures) {
