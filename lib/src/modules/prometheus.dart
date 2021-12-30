@@ -43,27 +43,17 @@ Future<void> registerPrometheus() async {
 
   slashCommandsTotalUsageMetric = Counter(name: 'slash_commands_total_usage', help: 'The total amount of used slash commands', labelNames: ['name'])
     ..register();
-
   commanderTotalUsageMetric = Counter(name: 'commander_total_usage', help: 'The total amount of used commander commands', labelNames: ['name'])..register();
-
   nyxxTotalMessagesSentMetric = Counter(name: 'nyxx_total_messages_sent', help: "Total number of messages sent", labelNames: ['guild_id'])..register();
-
   nyxxTotalGuildJoinsMetric = Counter(name: 'nyxx_total_guild_joins', help: "Total number of guild joins", labelNames: ['guild_id'])..register();
-
   nyxxTotalUsersMetric = Gauge(name: 'nyxx_total_users_cache', help: "Total number of users in cache")..register();
-
   nyxxTotalChannelsMetric = Gauge(name: 'nyxx_total_channels_cache', help: "Total number of channels in cache")..register();
-
   nyxxTotalMessageCacheMetric = Gauge(name: 'nyxx_total_messages_cache', help: "Total number of messages in cache")..register();
-
   nyxxTotalVoiceStates = Gauge(name: 'nyxx_total_voice_states_cache', help: "Total number of voice states in cache")..register();
-
   nyxxWsLatencyMetric = Gauge(name: 'nyxx_ws_latency', help: "Websocket latency", labelNames: ['shard_id'])..register();
-
   nyxxHttpResponse = Counter(name: 'nyxx_http_response', help: 'Code of http responses', labelNames: ['code'])..register();
 
   final router = Router()..get('/metrics', prometheusHandler());
-
   var handler = const shelf.Pipeline().addMiddleware(shelf_metrics.register()).addHandler(router);
 
   var server = await io.serve(handler, '0.0.0.0', 8080);
