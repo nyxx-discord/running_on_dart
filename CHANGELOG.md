@@ -1,3 +1,7 @@
+## 2.5.0
+
+- Rewrite of docs module
+
 ## 2.4.3
 
 - Update nyxx due message update deserialization bug
