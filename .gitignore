@@ -14,3 +14,4 @@ doc/api/
 .env
 *.exe
 *.db
+bin/docs_cache.json

@@ -14,6 +14,7 @@ export "src/commands/slash/voice_slash.dart";
 export 'src/commands/slash/admin_slash.dart';
 export "src/commands/voice_common.dart" show adminBeforeHandler;
 
+export 'src/modules/docs.dart' show setupDocsUpdateJob;
 export "src/internal/db.dart" show openDbAndRunMigrations;
 export "src/modules/join_logs.dart" show joinLogJoinEvent;
 export "src/modules/nickname_poop.dart" show nicknamePoopJoinEvent, nicknamePoopUpdateEvent;

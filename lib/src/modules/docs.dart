@@ -1,7 +1,9 @@
 import 'dart:async';
-import "dart:convert" show jsonDecode;
+import "dart:convert" show jsonDecode, jsonEncode;
+import 'dart:io';
 
 import "package:http/http.dart" as http;
+import 'package:logging/logging.dart';
 
 const docUrls = [
   "https://pub.dev/documentation/nyxx/latest/index.json",
@@ -14,65 +16,56 @@ const docUrls = [
 late DateTime lastDocUpdate;
 DateTime lastDocUpdateTimer = DateTime(2005);
 Uri get docUpdatePath => Uri.parse("https://api.github.com/repos/nyxx-discord/nyxx/actions/runs?status=success&per_page=1&page=1");
+final logger = Logger("ROD - docs");
 
-Future<SearchResult?> _findInDocs(bool Function(dynamic) predicate) async {
-  for (final path in docUrls) {
-    final response = await http.get(Uri.parse(path));
+void setupDocsUpdateJob() {
+  logger.info("Starting docs cache updater job");
 
-    if (response.statusCode >= 400) {
-      continue;
+  Timer.periodic(const Duration(minutes: 1), (timer) async {
+    final output = <dynamic>[];
+
+    for (final url in docUrls) {
+      final data = await http.get(Uri.parse(url));
+      final decodedData = jsonDecode(data.body);
+
+      output.addAll(decodedData as List<dynamic>);
     }
 
-    final payload = jsonDecode(response.body) as List<dynamic>;
+    output.sort((first, second) => (first['qualifiedName'] as String).compareTo(second['qualifiedName'] as String));
 
-    try {
-      return SearchResult(payload.firstWhere(predicate), path);
-    } on StateError {}
-  }
+    await File("docs_cache.json").writeAsString(jsonEncode(output), mode: FileMode.write);
 
-  return null;
+    logger.info("Update of docs cache successful");
+  });
 }
 
-Future<List<SearchResult>> _whereInDocs(int count, bool Function(dynamic) predicate) async {
-  final resultingList = <SearchResult>[];
+Stream<SearchResult> _whereInDocs(int count, bool Function(dynamic) predicate) async* {
+  final rawFile = await File('docs_cache.json').readAsString();
+  final docsData = jsonDecode(rawFile) as List<dynamic>;
 
-  for (final path in docUrls) {
-    final response = await http.get(Uri.parse(path));
-    if (response.statusCode >= 300) {
-      return [];
-    }
-
-    final payload = jsonDecode(response.body) as List<dynamic>;
-    resultingList.addAll(payload.where(predicate).take(count).map((e) => SearchResult(e, path)));
-
-    if (resultingList.length >= count) {
-      return resultingList;
-    }
-  }
-
-  return [];
+  yield* Stream.fromIterable(docsData.where(predicate).take(count).map((e) => SearchResult(e)) as List<SearchResult>);
 }
 
 Future<DocDefinition?> getDocDefinition(String className, [String? fieldName]) async {
-  SearchResult? searchResult;
+  try {
+    SearchResult? searchResult;
 
-  if (fieldName == null) {
-    searchResult = await _findInDocs((element) => (element["name"] as String).endsWith(className));
-  } else {
-    searchResult = await _findInDocs((element) => (element["qualifiedName"] as String).endsWith("$className.$fieldName"));
-  }
+    if (fieldName == null) {
+      searchResult = await _whereInDocs(1, (element) => (element["name"] as String).endsWith(className)).first;
+    } else {
+      searchResult = await _whereInDocs(1, (element) => (element["qualifiedName"] as String).endsWith("$className.$fieldName")).first;
+    }
 
-  if (searchResult == null) {
+    return DocDefinition(searchResult);
+  } on StateError {
     return null;
   }
-
-  return DocDefinition(searchResult);
 }
 
 Stream<DocDefinition> searchDocs(String query) async* {
-  final searchResults = await _whereInDocs(10, (element) => (element["name"] as String).toLowerCase().contains(query.toLowerCase()));
+  final searchResults = _whereInDocs(10, (element) => (element["name"] as String).toLowerCase().contains(query.toLowerCase()));
 
-  for (final element in searchResults) {
+  await for (final element in searchResults) {
     yield DocDefinition(element);
   }
 }
@@ -92,11 +85,10 @@ Future<DateTime> fetchLastDocUpdate() async {
 
 class SearchResult {
   late final Map<String, dynamic> data;
-  final String path;
 
-  String get basePath => path.replaceFirst("index.json", "");
+  String get basePath => "https://pub.dev/documentation/${data['packageName']}/latest";
 
-  SearchResult(dynamic result, this.path) {
+  SearchResult(dynamic result) {
     data = result as Map<String, dynamic>;
   }
 }
