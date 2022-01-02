@@ -16,34 +16,40 @@ const docUrls = [
 late DateTime lastDocUpdate;
 DateTime lastDocUpdateTimer = DateTime(2005);
 Uri get docUpdatePath => Uri.parse("https://api.github.com/repos/nyxx-discord/nyxx/actions/runs?status=success&per_page=1&page=1");
-final logger = Logger("ROD - docs");
+
+late final logger = Logger("ROD - docs");
 
 void setupDocsUpdateJob() {
   logger.info("Starting docs cache updater job");
 
-  Timer.periodic(const Duration(minutes: 1), (timer) async {
-    final output = <dynamic>[];
+  updateDocsCache();
+  Timer.periodic(const Duration(minutes: 1), (timer) => updateDocsCache());
+}
 
-    for (final url in docUrls) {
-      final data = await http.get(Uri.parse(url));
-      final decodedData = jsonDecode(data.body);
+Future<void> updateDocsCache() async {
+  logger.info("Updating docs cache...");
 
-      output.addAll(decodedData as List<dynamic>);
-    }
+  final output = <dynamic>[];
 
-    output.sort((first, second) => (first['qualifiedName'] as String).compareTo(second['qualifiedName'] as String));
+  for (final url in docUrls) {
+    final data = await http.get(Uri.parse(url));
+    final decodedData = jsonDecode(data.body);
 
-    await File("docs_cache.json").writeAsString(jsonEncode(output), mode: FileMode.write);
+    output.addAll(decodedData as List<dynamic>);
+  }
 
-    logger.info("Update of docs cache successful");
-  });
+  output.sort((first, second) => (first['qualifiedName'] as String).compareTo(second['qualifiedName'] as String));
+
+  await File("docs_cache.json").writeAsString(jsonEncode(output), mode: FileMode.write);
+
+  logger.info("Update of docs cache successful");
 }
 
 Stream<SearchResult> _whereInDocs(int count, bool Function(dynamic) predicate) async* {
   final rawFile = await File('docs_cache.json').readAsString();
   final docsData = jsonDecode(rawFile) as List<dynamic>;
 
-  yield* Stream.fromIterable(docsData.where(predicate).take(count).map((e) => SearchResult(e)) as List<SearchResult>);
+  yield* Stream.fromIterable(docsData.where(predicate).take(count).map((e) => SearchResult(e)).toList());
 }
 
 Future<DocDefinition?> getDocDefinition(String className, [String? fieldName]) async {
@@ -112,7 +118,6 @@ class DocDefinition {
 
     type = result.data["type"] as String;
 
-    final libPath = result.data["href"].split("/").first;
-    absoluteUrl = "${result.basePath}$libPath/${result.data['href']}";
+    absoluteUrl = "${result.basePath}/${result.data['href']}";
   }
 }

@@ -12,8 +12,6 @@ void main(List<String> arguments) async {
     Logger.root.level = Level.ALL;
   }
 
-  rod.setupDocsUpdateJob();
-
   await rod.openDbAndRunMigrations();
   await rod.registerPrometheus();
 
@@ -155,4 +153,6 @@ void main(List<String> arguments) async {
 
   await rod.initReminderModule(botInstance);
   rod.registerPeriodicCollectors(botInstance);
+
+  rod.setupDocsUpdateJob();
 }
