@@ -1,3 +1,7 @@
+## 2.6.3
+
+- Fixup info command
+
 ## 2.6.2
 
 - Fixup info command

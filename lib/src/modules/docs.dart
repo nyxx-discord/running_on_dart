@@ -14,7 +14,7 @@ const docUrls = [
   "https://pub.dev/documentation/nyxx_commands/latest/index.json",
 ];
 
-DateTime? lastDocCacheUpdate;
+DateTime? lastDocCacheUpdate = null;
 late DateTime lastDocUpdate;
 
 DateTime lastDocUpdateTimer = DateTime(2005);
