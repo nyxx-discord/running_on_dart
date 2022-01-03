@@ -31,7 +31,7 @@ Future<ComponentMessageBuilder> infoGenericCommand(INyxxWebsocket client, [int s
     ..addField(name: "Memory usage (current/RSS)", content: getMemoryUsageString(), inline: true)
     ..addField(name: "Uptime", content: formatFull(client.startTime))
     ..addField(name: "Last doc update", content: formatFull(await fetchLastDocUpdate()))
-    ..addField(name: "Last local docs index update", content: formatFull(lastDocCacheUpdate));
+    ..addField(name: "Last local docs index update", content: lastDocCacheUpdate != null ? formatFull(lastDocCacheUpdate!) : 'never');
 
   return ComponentMessageBuilder()
     ..embeds = [embed]

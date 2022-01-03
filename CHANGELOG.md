@@ -1,3 +1,8 @@
+## 2.6.1
+
+- Remove package that is not published yet
+- Fixup info command
+
 ## 2.6.0
 
 - Add new packages to docs index

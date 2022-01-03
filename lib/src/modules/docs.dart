@@ -12,10 +12,9 @@ const docUrls = [
   "https://pub.dev/documentation/nyxx_lavalink/latest/index.json",
   "https://pub.dev/documentation/nyxx_extensions/latest/index.json",
   "https://pub.dev/documentation/nyxx_commands/latest/index.json",
-  "https://pub.dev/documentation/nyxx_sharding/latest/index.json",
 ];
 
-late DateTime lastDocCacheUpdate;
+late DateTime? lastDocCacheUpdate;
 late DateTime lastDocUpdate;
 
 DateTime lastDocUpdateTimer = DateTime(2005);
