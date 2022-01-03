@@ -3,7 +3,7 @@ import "dart:math" show Random;
 import "package:nyxx/nyxx.dart";
 import 'package:nyxx_interactions/nyxx_interactions.dart';
 import "package:running_on_dart/src/internal/utils.dart" show dartVersion, getMemoryUsageString;
-import "package:running_on_dart/src/modules/docs.dart" show fetchLastDocUpdate;
+import "package:running_on_dart/src/modules/docs.dart" show fetchLastDocUpdate, lastDocCacheUpdate;
 import "package:time_ago_provider/time_ago_provider.dart" show formatFull;
 
 Future<ComponentMessageBuilder> infoGenericCommand(INyxxWebsocket client, [int shardId = 0]) async {
@@ -30,7 +30,8 @@ Future<ComponentMessageBuilder> infoGenericCommand(INyxxWebsocket client, [int s
         inline: true)
     ..addField(name: "Memory usage (current/RSS)", content: getMemoryUsageString(), inline: true)
     ..addField(name: "Uptime", content: formatFull(client.startTime))
-    ..addField(name: "Last doc update", content: formatFull(await fetchLastDocUpdate()));
+    ..addField(name: "Last doc update", content: formatFull(await fetchLastDocUpdate()))
+    ..addField(name: "Last local docs index update", content: formatFull(lastDocCacheUpdate));
 
   return ComponentMessageBuilder()
     ..embeds = [embed]

@@ -1,3 +1,8 @@
+## 2.6.0
+
+- Add new packages to docs index
+- Add local docs update time to info command
+
 ## 2.5.0
 
 - Rewrite of docs module

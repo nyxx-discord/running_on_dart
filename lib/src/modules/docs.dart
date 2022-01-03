@@ -11,13 +11,17 @@ const docUrls = [
   "https://pub.dev/documentation/nyxx_commander/latest/index.json",
   "https://pub.dev/documentation/nyxx_lavalink/latest/index.json",
   "https://pub.dev/documentation/nyxx_extensions/latest/index.json",
+  "https://pub.dev/documentation/nyxx_commands/latest/index.json",
+  "https://pub.dev/documentation/nyxx_sharding/latest/index.json",
 ];
 
+late DateTime lastDocCacheUpdate;
 late DateTime lastDocUpdate;
+
 DateTime lastDocUpdateTimer = DateTime(2005);
 Uri get docUpdatePath => Uri.parse("https://api.github.com/repos/nyxx-discord/nyxx/actions/runs?status=success&per_page=1&page=1");
 
-late final logger = Logger("ROD - docs");
+late final logger = Logger("ROD - Docs");
 
 void setupDocsUpdateJob() {
   logger.info("Starting docs cache updater job");
@@ -43,6 +47,7 @@ Future<void> updateDocsCache() async {
   await File("docs_cache.json").writeAsString(jsonEncode(output), mode: FileMode.write);
 
   logger.info("Update of docs cache successful");
+  lastDocCacheUpdate = DateTime.now();
 }
 
 Stream<SearchResult> _whereInDocs(int count, bool Function(dynamic) predicate) async* {
