@@ -1,3 +1,7 @@
+## 2.6.2
+
+- Fixup info command
+
 ## 2.6.1
 
 - Remove package that is not published yet
