@@ -1,3 +1,8 @@
+## 2.7.0
+
+- Update docker image to full version
+- Update local cache each 15 minutes
+
 ## 2.6.3
 
 - Fixup info command

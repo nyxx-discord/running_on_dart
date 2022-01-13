@@ -26,7 +26,7 @@ void setupDocsUpdateJob() {
   logger.info("Starting docs cache updater job");
 
   updateDocsCache();
-  Timer.periodic(const Duration(minutes: 1), (timer) => updateDocsCache());
+  Timer.periodic(const Duration(minutes: 15), (timer) => updateDocsCache());
 }
 
 Future<void> updateDocsCache() async {
