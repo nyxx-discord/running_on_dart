@@ -1,0 +1,19 @@
+# Docker files
+.dockerignore
+Dockerfile
+
+# Files and directories created by pub
+.dart_tool/
+.packages
+
+# Build files
+build/
+
+# Git
+.git/
+.github/
+.gitignore
+
+# IDE configuration folders
+.vscode/
+.idea/

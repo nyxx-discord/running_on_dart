@@ -1,0 +1,7 @@
+version: '3.9'
+services:
+  running_on_dart:
+    build: .
+    container_name: running_on_dart
+    env_file:
+     - .env
