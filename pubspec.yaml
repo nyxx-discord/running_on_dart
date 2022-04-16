@@ -10,7 +10,10 @@ publish_to: none
 environment:
   sdk: '>=2.13.0 <3.0.0'
 
-dependencies:
+dependencies: 
+  http: ^0.13.4
+  nyxx: ^3.4.1
+  nyxx_commands: ^4.1.1
 
 dev_dependencies: 
   lints: ^1.0.1
