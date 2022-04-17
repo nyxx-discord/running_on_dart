@@ -14,7 +14,8 @@ void main() {
   // Register our commands
   commands
     ..addCommand(ping)
-    ..addCommand(info);
+    ..addCommand(info)
+    ..addCommand(avatar);
 
   // Add logging, CLI, exceptions and commands plugin to our client, then connect
   client
