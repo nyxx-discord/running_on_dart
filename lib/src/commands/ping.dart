@@ -16,8 +16,7 @@ ChatCommand ping = ChatCommand(
     );
 
     // Get Gateway latency
-    int gatewayLatency =
-        (context.client as INyxxWebsocket).shardManager.gatewayLatency.inMilliseconds;
+    int gatewayLatency = (context.client as INyxxWebsocket).shardManager.gatewayLatency.inMilliseconds;
 
     // Get REST API latency
     Stopwatch restLatencyTimer = Stopwatch()..start();
