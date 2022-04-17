@@ -26,12 +26,32 @@ final String prefix = getEnv('ROD_PREFIX');
 /// The IDs of the users that are allowed to use administrator commands
 final List<Snowflake> adminIds = getEnv('ROD_ADMIN_IDS').split(RegExp(r'\s+')).map(Snowflake.new).toList();
 
+/// The interval at which to update the docs cache.
+final Duration docsUpdateInterval = Duration(seconds: int.parse(getEnv('ROD_DOCS_UPDATE_INTERVAL', '900')));
+
+/// The packages to cache documentation for.
+final List<String> docsPackages = getEnv('ROD_DOCS_PACKAGES', 'nyxx nyxx_interactions nyxx_commands nyxx_lavalink nyxx_extensions').split(RegExp(r'\s+'));
+
+/// The default response for the docs command.
+final String defaultDocsResponse = getEnv('ROD_DEFAULT_DOCS_RESPONSE', '''
+__Guides, documentation and development documentation__:
+https://nyxx.l7ssha.xyz
+
+__Package documentation__:
+${docsPackages.map((packageName) => '- $packageName: https://pub.dev/documentation/$packageName/latest').join('\n')}
+
+__Dart documentation__:
+- Main documentation: https://dart.dev/guides
+- API reference: https://api.dart.dev
+- Codelabs: https://dart.dev/codelabs
+''');
+
 /// Whether this instance should run in development mode.
 final bool dev = getEnvBool('ROD_DEV');
 
 /// If this instance is in development mode, the ID of the guild to register commands to, else
 /// `null`.
-late final Snowflake? devGuildId = dev ? Snowflake(getEnv('ROD_DEV_GUILD_ID')) : null;
+final Snowflake? devGuildId = dev ? Snowflake(getEnv('ROD_DEV_GUILD_ID')) : null;
 
 /// The basic intents needed to run Running on Dart without privileged intents.
 final int _baseIntents = GatewayIntents.directMessages | GatewayIntents.guilds | GatewayIntents.guildVoiceState;

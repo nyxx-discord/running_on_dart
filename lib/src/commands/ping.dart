@@ -1,19 +1,13 @@
-import 'dart:math';
-
 import 'package:http/http.dart' as http;
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
+import 'package:running_on_dart/src/util.dart';
 
 ChatCommand ping = ChatCommand(
   'ping',
   'Checks if the bot is online',
   (IChatContext context) async {
-    Random random = Random();
-    DiscordColor color = DiscordColor.fromRgb(
-      random.nextInt(255),
-      random.nextInt(255),
-      random.nextInt(255),
-    );
+    DiscordColor color = getRandomColor();
 
     // Get Gateway latency
     int gatewayLatency = (context.client as INyxxWebsocket).shardManager.gatewayLatency.inMilliseconds;

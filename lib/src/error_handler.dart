@@ -2,7 +2,7 @@ import 'package:logging/logging.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 
-final Logger logger = Logger('ROD');
+final Logger logger = Logger('ROD.CommandErrors');
 
 void commandErrorHandler(CommandsException error) async {
   if (error is CommandInvocationException) {

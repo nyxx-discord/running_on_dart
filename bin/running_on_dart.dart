@@ -16,10 +16,17 @@ void main() {
     ..addCommand(ping)
     ..addCommand(info)
     ..addCommand(avatar)
-    ..addCommand(voice);
+    ..addCommand(voice)
+    ..addCommand(docs);
 
   // Add our error handler
   commands.onCommandError.listen(commandErrorHandler);
+
+  // Add our custom converters
+  commands.addConverter(docEntryConverter);
+
+  // Initialise our services
+  initDocsCache();
 
   // Add logging, CLI, exceptions and commands plugin to our client, then connect
   client

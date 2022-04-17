@@ -1,9 +1,10 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_interactions/nyxx_interactions.dart';
+import 'package:running_on_dart/running_on_dart.dart';
+import 'package:running_on_dart/src/util.dart';
 import 'package:time_ago_provider/time_ago_provider.dart';
 
 String getCurrentMemoryString() {
@@ -16,14 +17,8 @@ ChatCommand info = ChatCommand(
   'info',
   'Get generic information about the bot',
   (IChatContext context) async {
-    Random random = Random();
-    DiscordColor color = DiscordColor.fromRgb(
-      random.nextInt(255),
-      random.nextInt(255),
-      random.nextInt(255),
-    );
+    DiscordColor color = getRandomColor();
 
-    // TODO: Add documentation statistics here
     EmbedBuilder embed = EmbedBuilder()
       ..color = color
       ..addAuthor((author) {
@@ -51,7 +46,8 @@ ChatCommand info = ChatCommand(
         inline: true,
       )
       ..addField(name: 'Memory usage (current/RSS)', content: getCurrentMemoryString(), inline: true)
-      ..addField(name: 'Uptime', content: formatFull(context.client.startTime));
+      ..addField(name: 'Uptime', content: formatFull(context.client.startTime))
+      ..addField(name: 'Last documentation cache update', content: lastDocsUpdate == null ? 'never' : formatFull(lastDocsUpdate!));
 
     await context.respond(ComponentMessageBuilder()
       ..embeds = [embed]
