@@ -23,7 +23,9 @@ void main() {
   commands.onCommandError.listen(commandErrorHandler);
 
   // Add our custom converters
-  commands.addConverter(docEntryConverter);
+  commands
+    ..addConverter(docEntryConverter)
+    ..addConverter(packageDocsConverter);
 
   // Initialise our services
   initDocsCache();

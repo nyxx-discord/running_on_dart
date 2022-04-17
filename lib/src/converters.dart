@@ -7,3 +7,8 @@ Converter<DocEntry> docEntryConverter = Converter<DocEntry>(
   (view, context) => getByQuery(view.getQuotedWord()),
   autocompleteCallback: (context) => searchInDocs(context.currentValue).take(25).map((e) => ArgChoiceBuilder(e.displayName, e.qualifiedName)),
 );
+
+Converter<PackageDocs> packageDocsConverter = Converter<PackageDocs>(
+  (view, context) => getPackageDocs(view.getQuotedWord()),
+  choices: docsPackages.map((packageName) => ArgChoiceBuilder(packageName, packageName)),
+);

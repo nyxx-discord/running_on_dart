@@ -23,10 +23,8 @@ Future<void> _updateDocsCache() async {
   lastDocsUpdate = DateTime.now();
 }
 
-/// Get the documentation for a package.
-///
-/// The package must be included in [docsPackages], or an exception will be thrown.
-FutureOr<PackageDocs> getPackageDocs(String packageName) => _cache[packageName]!;
+/// Get the documentation for a package, or `null` if the package is not cached.
+PackageDocs? getPackageDocs(String packageName) => _cache[packageName];
 
 /// Get all documentation entries across all packages.
 Iterable<DocEntry> getAllEntries() => _cache.values.fold(Iterable.empty(), (previousValue, element) => previousValue.followedBy(element.elements));
@@ -38,9 +36,11 @@ DocEntry? getByQualifiedName(String qualifiedName) => getAllEntries()
     .firstWhere((element) => element?.qualifiedName == qualifiedName, orElse: () => null);
 
 /// Searches for a specific element across all documentation using fuzzy search.
-Iterable<DocEntry> searchInDocs(String query) {
+///
+/// If [package] is provided, only elements from that package will be searched.
+Iterable<DocEntry> searchInDocs(String query, [PackageDocs? package]) {
   List<Result<DocEntry>> results = Fuzzy<DocEntry>(
-    getAllEntries().toList(),
+    (package?.elements ?? getAllEntries()).toList(),
     options: FuzzyOptions(
       keys: [
         WeightedKey(

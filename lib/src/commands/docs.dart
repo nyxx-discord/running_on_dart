@@ -1,5 +1,7 @@
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
+import 'package:nyxx_interactions/nyxx_interactions.dart';
+import 'package:nyxx_pagination/nyxx_pagination.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/docs.dart';
 import 'package:running_on_dart/src/util.dart';
@@ -38,5 +40,86 @@ Package: [${element.packageName}](https://pub.dev/packages/${element.packageName
         await context.respond(MessageBuilder.embed(embed));
       },
     ),
+    ChatCommand(
+      'search',
+      'Search for documentation',
+      (
+        IChatContext context,
+        @Description('The query to search for') @Autocomplete(autocompleteQueryWithPackage) String query, [
+        @Description('The package to search in') PackageDocs? package,
+      ]) async {
+        Iterable<DocEntry> searchResults = searchInDocs(query, package);
+
+        if (searchResults.isEmpty) {
+          await context.respond(MessageBuilder.embed(EmbedBuilder()
+            ..title = 'No results'
+            ..color = DiscordColor.red));
+          return;
+        }
+
+        int pageCount = 0;
+
+        EmbedComponentPagination paginator = EmbedComponentPagination(
+          context.commands.interactions,
+          // Chunk our results so we don't exceed 10 results per page or the 1024 field character limit
+          searchResults
+              .fold<List<List<String>>>([[]], (pages, entry) {
+                String entryContent = '[${entry.displayName} ${entry.type}](${entry.urlToDocs})';
+
+                // +1 for newline
+                int wouldBeLength = pages.last.join('\n').length + entryContent.length + 1;
+
+                if (wouldBeLength > 1024 || pages.last.length >= 10) {
+                  pages.add([]);
+                  pageCount++;
+                }
+
+                return pages..last.add(entryContent);
+              })
+              .asMap()
+              .entries
+              .map((entry) {
+                DiscordColor color = getRandomColor();
+
+                return EmbedBuilder()
+                  ..color = color
+                  ..title = 'Search results - $query'
+                  ..addField(
+                    name: 'Results in ${package != null ? 'package ${package.packageName}' : 'all packages'}',
+                    content: entry.value.join('\n'),
+                  )
+                  ..addFooter((footer) {
+                    footer.text = 'Page ${entry.key} of $pageCount';
+                  });
+              })
+              .toList(),
+        );
+
+        await context.respond(paginator.initMessageBuilder());
+      },
+    ),
   ],
 );
+
+/// Search autocomplete, but only include elements from a given package (if there is one selected).
+Iterable<ArgChoiceBuilder> autocompleteQueryWithPackage(AutocompleteContext context) {
+  String? selectedPackageName = context.interactionEvent.options
+      // Cast to IInteractionOption? so we can return `null` in orElse
+      .cast<IInteractionOption?>()
+      .firstWhere((element) => element?.name == 'package', orElse: () => null)
+      ?.value
+      ?.toString();
+
+  PackageDocs? selectedPackage;
+  if (selectedPackageName != null) {
+    selectedPackage = getPackageDocs(selectedPackageName);
+  }
+
+  return [
+    // Allow the user to select their current value
+    if (context.currentValue.isNotEmpty) ArgChoiceBuilder(context.currentValue, context.currentValue),
+    ...searchInDocs(context.currentValue, selectedPackage)
+        .take(context.currentValue.isEmpty ? 25 : 24)
+        .map((e) => ArgChoiceBuilder(e.displayName, e.qualifiedName)),
+  ];
+}
