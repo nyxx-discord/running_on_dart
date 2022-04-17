@@ -12,7 +12,9 @@ void main() {
   );
 
   // Register our commands
-  commands.addCommand(ping);
+  commands
+    ..addCommand(ping)
+    ..addCommand(info);
 
   // Add logging, CLI, exceptions and commands plugin to our client, then connect
   client
