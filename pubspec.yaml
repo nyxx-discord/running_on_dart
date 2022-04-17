@@ -8,10 +8,11 @@ issue_tracker: https://github.com/nyxx-discord/running_on_dart/issues
 publish_to: none
 
 environment:
-  sdk: '>=2.13.0 <3.0.0'
+  sdk: '>=2.15.0 <3.0.0'
 
 dependencies: 
   http: ^0.13.4
+  logging: ^1.0.2
   nyxx: ^3.4.1
   nyxx_commands: ^4.1.1
   nyxx_interactions: ^4.1.0

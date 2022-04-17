@@ -15,7 +15,11 @@ void main() {
   commands
     ..addCommand(ping)
     ..addCommand(info)
-    ..addCommand(avatar);
+    ..addCommand(avatar)
+    ..addCommand(voice);
+
+  // Add our error handler
+  commands.onCommandError.listen(commandErrorHandler);
 
   // Add logging, CLI, exceptions and commands plugin to our client, then connect
   client
