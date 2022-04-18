@@ -57,7 +57,7 @@ Package: [${element.packageName}](https://pub.dev/packages/${element.packageName
           return;
         }
 
-        int pageCount = 0;
+        int pageCount = 1;
 
         EmbedComponentPagination paginator = EmbedComponentPagination(
           context.commands.interactions,
@@ -89,7 +89,7 @@ Package: [${element.packageName}](https://pub.dev/packages/${element.packageName
                     content: entry.value.join('\n'),
                   )
                   ..addFooter((footer) {
-                    footer.text = 'Page ${entry.key} of $pageCount';
+                    footer.text = 'Page ${entry.key + 1} of $pageCount';
                   });
               })
               .toList(),
