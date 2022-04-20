@@ -5,3 +5,20 @@ services:
     container_name: running_on_dart
     env_file:
      - .env
+    links:
+      - db
+    depends_on:
+      - db
+
+  db:
+    image: postgres:13.5
+    container_name: running_on_dart_db
+    restart: always
+    env_file:
+     - .env
+    volumes:
+      - "rod_db:/var/lib/postgresql/data"
+
+volumes:
+  rod_db:
+    driver: local

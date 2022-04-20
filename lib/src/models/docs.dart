@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
-final Logger logger = Logger('ROD.Packages');
+final Logger _logger = Logger('ROD.Packages');
 
 /// Documentation for an entire package.
 class PackageDocs {
@@ -29,12 +29,12 @@ class PackageDocs {
 
   /// Update this package's local data from [urlToDocs].
   Future<void> update() async {
-    logger.fine('Updating docs for package "$packageName"');
+    _logger.fine('Updating docs for package "$packageName"');
 
     http.Response response = await http.get(Uri.parse(urlToDocs));
 
     if (response.statusCode != 200) {
-      logger.shout('Unable to update docs for package "$packageName": Error ${response.statusCode}');
+      _logger.shout('Unable to update docs for package "$packageName": Error ${response.statusCode}');
       return;
     }
 
@@ -49,7 +49,7 @@ class PackageDocs {
         entries[entry.qualifiedName] = entry;
       }
     } on FormatException {
-      logger.shout('Unable to update docs for package "$packageName": Malformed JSON in response');
+      _logger.shout('Unable to update docs for package "$packageName": Malformed JSON in response');
     }
   }
 }

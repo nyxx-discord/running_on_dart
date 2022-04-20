@@ -13,6 +13,11 @@ The following environment variables are required to be set for Running on Dart t
 - `ROD_DOCS_PACKAGES` (optional, default `nyxx nyxx_interactions nyxx_commands nyxx_lavalink nyxx_extensions`): The space-separated names of the packages to include in documentation searches.
 - `ROD_DEFAULT_DOCS_RESPONSE` (optional, default can be found in `src/settings.dart`): The content of the message to send when `!docs` or `docs info` is run.
 - `ROD_DEV`: A bool (`true` or `false`) indicating whether to run in development mode.
+- `POSTGRES_PASSWORD` (optional): password of postgres user.
+- `POSTGRES_USER`: name of postgres user.
+- `POSTGRES_DB`: name of postgres db.
+- `DB_HOST` (optional, default `db`): host of postgres database
+- `DB_PORT` (optional, default `5432`): port of postgres database
 
 Additionally, if `ROD_DEV` is `true`, the following environment variables must also be set:
 - `ROD_DEV_GUILD_ID`: The ID (snowflake) of the guild to register commands to when developing.
