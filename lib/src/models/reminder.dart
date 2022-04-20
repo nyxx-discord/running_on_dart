@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:postgres/postgres.dart';
 
@@ -50,3 +51,6 @@ class Reminder {
     );
   }
 }
+
+/// A [DateFormat] used to format the trigger times of reminders
+DateFormat reminderDateFormat = DateFormat.yMd()..add_Hm();

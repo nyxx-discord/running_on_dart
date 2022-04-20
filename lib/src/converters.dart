@@ -4,6 +4,8 @@ import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_interactions/nyxx_interactions.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/docs.dart';
+import 'package:running_on_dart/src/models/reminder.dart';
+import 'package:running_on_dart/src/services/reminder.dart';
 
 Converter<DocEntry> docEntryConverter = Converter<DocEntry>(
   (view, context) => getByQuery(view.getQuotedWord()),
@@ -16,7 +18,16 @@ Converter<PackageDocs> packageDocsConverter = Converter<PackageDocs>(
 );
 
 Converter<Duration> durationConverter = Converter<Duration>(
-  (view, context) => parseStringToDuration(view.getQuotedWord()),
+  (view, context) {
+    Duration d = parseStringToDuration(view.getQuotedWord());
+
+    // [parseStringToDuration] returns Duration.zero on parsing failure
+    if (d.inMilliseconds > 0) {
+      return d;
+    }
+
+    return null;
+  },
   autocompleteCallback: autocompleteDuration,
 );
 
@@ -27,7 +38,7 @@ Iterable<ArgChoiceBuilder> autocompleteDuration(AutocompleteContext context) {
 
   Iterable<String> correct(String current, Iterable<String> nextParts) {
     current = current.trim();
-    List<String> currentSplit = current.split(RegExp(r'\s+'));
+    List<String> currentSplit = current.split(RegExp(r'\s+|(?<=\d)(?=\w)|(?<=\w)(?=\d)'));
 
     List<String> corrected = [];
 
@@ -70,3 +81,11 @@ Iterable<ArgChoiceBuilder> autocompleteDuration(AutocompleteContext context) {
 
   return [ArgChoiceBuilder(context.currentValue, context.currentValue)];
 }
+
+Converter<Reminder> reminderConverter = Converter<Reminder>(
+  (view, context) => searchReminders(context.user.id, view.getQuotedWord()).cast<Reminder?>().followedBy([null]).first,
+  autocompleteCallback: (context) => searchReminders(context.user.id, context.currentValue)
+      .take(25)
+      .map((e) => '${reminderDateFormat.format(e.triggerAt)}: ${e.message.length > 50 ? e.message.substring(0, 50) + '...' : e.message}')
+      .map((e) => ArgChoiceBuilder(e, e)),
+);

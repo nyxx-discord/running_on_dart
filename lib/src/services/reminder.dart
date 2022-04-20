@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:fuzzy/data/result.dart';
+import 'package:fuzzy/fuzzy.dart';
 import 'package:logging/logging.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/models/reminder.dart';
@@ -68,6 +70,7 @@ Future<void> _execute(Reminder reminder) async {
   reminders.remove(reminder);
 }
 
+/// Add a new reminder to the database and schedule its execution.
 Future<void> addReminder(Reminder reminder) async {
   await database.addReminder(reminder);
 
@@ -76,6 +79,7 @@ Future<void> addReminder(Reminder reminder) async {
   reminders.add(reminder);
 }
 
+/// Delete a reminder from the database and cancel its execution.
 Future<void> removeReminder(Reminder reminder) async {
   await database.deleteReminder(reminder);
 
@@ -84,4 +88,48 @@ Future<void> removeReminder(Reminder reminder) async {
   reminders.remove(reminder);
 }
 
+/// Get all the reminders for a specific user.
 Iterable<Reminder> getUserReminders(Snowflake userId) => reminders.where((reminder) => reminder.userId == userId);
+
+/// Search reminders for a specific user
+Iterable<Reminder> searchReminders(Snowflake userId, String query) {
+  List<Result<Reminder>> results = Fuzzy<Reminder>(
+    getUserReminders(userId).toList(),
+    options: FuzzyOptions(
+      keys: [
+        WeightedKey(
+          name: 'message',
+          getter: (reminder) => reminder.message.length < 50 ? reminder.message : reminder.message.substring(0, 50) + '...',
+          weight: 1,
+        ),
+        WeightedKey(
+          name: 'timestamp',
+          getter: (reminder) => reminderDateFormat.format(reminder.triggerAt),
+          weight: 1,
+        ),
+        WeightedKey(
+          name: 'Perfect match',
+          getter: (reminder) =>
+              '${reminderDateFormat.format(reminder.triggerAt)}  ${reminder.message.length < 50 ? reminder.message : reminder.message.substring(0, 50) + '...'}',
+          weight: 2,
+        ),
+      ],
+      // We perform our own search later
+      shouldSort: false,
+    ),
+  ).search(query);
+
+  results.sort((a, b) {
+    Duration difference = a.item.triggerAt.difference(b.item.triggerAt);
+
+    num weight = difference.inDays.abs() / 10;
+
+    if (difference.isNegative) {
+      return a.score.compareTo(b.score * weight);
+    } else {
+      return (a.score * weight).compareTo(b.score);
+    }
+  });
+
+  return results.map((result) => result.item);
+}

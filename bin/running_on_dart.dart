@@ -29,7 +29,8 @@ void main() async {
   commands
     ..addConverter(docEntryConverter)
     ..addConverter(packageDocsConverter)
-    ..addConverter(durationConverter);
+    ..addConverter(durationConverter)
+    ..addConverter(reminderConverter);
 
   // Add logging, CLI, exceptions and commands plugin to our client
   client

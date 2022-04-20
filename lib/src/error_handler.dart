@@ -18,7 +18,7 @@ void commandErrorHandler(CommandsException error) async {
     } else if (error is NotEnoughArgumentsException) {
       title = 'Not enough arguments';
       description = "You didn't provide enough arguments for this command."
-          " Please try again and use the Slash Command menu for help, or context a developer for more information.";
+          " Please try again and use the Slash Command menu for help, or contact a developer for more information.";
     } else if (error is BadInputException) {
       title = "Couldn't parse input";
       description = "Your command couldn't be executed because we were unable to understand your input."

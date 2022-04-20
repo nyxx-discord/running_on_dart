@@ -178,8 +178,8 @@ Future<void> addReminder(Reminder reminder) async {
     'user_id': reminder.userId.toString(),
     'channel_id': reminder.channelId.toString(),
     'message_id': reminder.messageId?.toString(),
-    'trigger_date': reminder.triggerAt,
-    'add_date': reminder.addedAt,
+    'trigger_date': reminder.triggerAt.toUtc(),
+    'add_date': reminder.addedAt.toUtc(),
     'message': reminder.message,
   });
 

@@ -14,6 +14,7 @@ dependencies:
   fuzzy: ^0.4.0-nullsafety.0
   http: ^0.13.4
   human_duration_parser: ^2.0.1
+  intl: ^0.17.0
   logging: ^1.0.2
   migent:
     git: https://github.com/nyxx-discord/migent.git
