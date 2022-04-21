@@ -23,6 +23,8 @@ void commandErrorHandler(CommandsException error) async {
       title = "Couldn't parse input";
       description = "Your command couldn't be executed because we were unable to understand your input."
           " Please try again with different inputs or contact a developer for more information.";
+    } else if (error is UncaughtException) {
+      _logger.severe('Uncaught exception in command: ${error.exception}');
     }
 
     // Send a generic "an error occurred" response

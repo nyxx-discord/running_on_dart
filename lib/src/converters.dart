@@ -1,10 +1,12 @@
 import 'package:fuzzy/fuzzy.dart';
 import 'package:human_duration_parser/human_duration_parser.dart';
+import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_interactions/nyxx_interactions.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/docs.dart';
 import 'package:running_on_dart/src/models/reminder.dart';
+import 'package:running_on_dart/src/models/tag.dart';
 import 'package:running_on_dart/src/services/reminder.dart';
 
 Converter<DocEntry> docEntryConverter = Converter<DocEntry>(
@@ -89,3 +91,27 @@ Converter<Reminder> reminderConverter = Converter<Reminder>(
       .map((e) => '${reminderDateFormat.format(e.triggerAt)}: ${e.message.length > 50 ? e.message.substring(0, 50) + '...' : e.message}')
       .map((e) => ArgChoiceBuilder(e, e)),
 );
+
+Converter<Tag> tagConverter = Converter<Tag>(
+  (view, context) => searchTags(view.getQuotedWord(), context.guild?.id ?? Snowflake.zero()).cast<Tag?>().followedBy([null]).first,
+  autocompleteCallback: (context) =>
+      searchTags(context.currentValue, context.guild?.id ?? Snowflake.zero()).take(25).map((e) => e.name).map((e) => ArgChoiceBuilder(e, e)),
+);
+
+// Needs to be const so we can use @UseConverter
+const Converter<Tag> manageableTagConverter = Converter<Tag>(
+  getManageableTag,
+  autocompleteCallback: autocompleteManageableTag,
+);
+
+Tag? getManageableTag(StringView view, IChatContext context) => searchTags(
+      view.getQuotedWord(),
+      context.guild?.id ?? Snowflake.zero(),
+      context.user.id,
+    ).cast<Tag?>().followedBy([null]).first;
+
+Iterable<ArgChoiceBuilder> autocompleteManageableTag(AutocompleteContext context) => searchTags(
+      context.currentValue,
+      context.guild?.id ?? Snowflake.zero(),
+      context.user.id,
+    ).take(25).map((e) => e.name).map((e) => ArgChoiceBuilder(e, e));

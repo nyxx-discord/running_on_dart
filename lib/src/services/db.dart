@@ -5,6 +5,7 @@ import 'package:migent/migent.dart';
 import 'package:postgres/postgres.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/reminder.dart';
+import 'package:running_on_dart/src/models/tag.dart';
 
 /// The user to use when connecting to the database.
 String user = getEnv('POSTGRES_USER');
@@ -140,7 +141,7 @@ Future<Iterable<Reminder>> fetchReminders() async {
 
 /// Delete a reminder from the database.
 Future<void> deleteReminder(Reminder reminder) async {
-  final int? id = reminder.id;
+  int? id = reminder.id;
 
   if (id == null) {
     return;
@@ -184,4 +185,85 @@ Future<void> addReminder(Reminder reminder) async {
   });
 
   reminder.id = result.first.first as int;
+}
+
+/// Fetch all existing tags from the database.
+Future<Iterable<Tag>> fetchTags() async {
+  PostgreSQLResult result = await connection.query('''
+    SELECT * FROM tags;
+  ''');
+
+  return result.map(Tag.fromRow);
+}
+
+/// Delete a tag from the database.
+Future<void> deleteTag(Tag tag) async {
+  int? id = tag.id;
+
+  if (id == null) {
+    return;
+  }
+
+  await connection.execute('''
+    DELETE FROM tags WHERE id = @id;
+  ''', substitutionValues: {
+    'id': id,
+  });
+}
+
+/// Add a tag to the database.
+Future<void> addTag(Tag tag) async {
+  if (tag.id != null) {
+    _logger.warning('Attempting to add tag with id ${tag.id} twice, ignoring');
+    return;
+  }
+
+  PostgreSQLResult result = await connection.query('''
+    INSERT INTO tags (
+      name,
+      content,
+      enabled,
+      guild_id,
+      author_id
+    ) VALUES (
+      @name,
+      @content,
+      @enabled,
+      @guild_id,
+      @author_id
+    ) RETURNING id;
+  ''', substitutionValues: {
+    'name': tag.name,
+    'content': tag.content,
+    'enabled': tag.enabled,
+    'guild_id': tag.guildId.toString(),
+    'author_id': tag.authorId.toString(),
+  });
+
+  tag.id = result.first.first as int;
+}
+
+/// Update a tag in the database.
+Future<void> updateTag(Tag tag) async {
+  if (tag.id == null) {
+    return addTag(tag);
+  }
+
+  await connection.query('''
+    UPDATE tags SET
+      name = @name,
+      content = @content,
+      enabled = @enabled,
+      guild_id = @guild_id,
+      author_id = @author_id
+    WHERE
+      id = @id
+  ''', substitutionValues: {
+    'id': tag.id,
+    'name': tag.name,
+    'content': tag.content,
+    'enabled': tag.enabled,
+    'guild_id': tag.guildId.toString(),
+    'author_id': tag.authorId.toString(),
+  });
 }

@@ -20,7 +20,8 @@ void main() async {
     ..addCommand(avatar)
     ..addCommand(voice)
     ..addCommand(docs)
-    ..addCommand(reminder);
+    ..addCommand(reminder)
+    ..addCommand(tag);
 
   // Add our error handler
   commands.onCommandError.listen(commandErrorHandler);
@@ -30,7 +31,8 @@ void main() async {
     ..addConverter(docEntryConverter)
     ..addConverter(packageDocsConverter)
     ..addConverter(durationConverter)
-    ..addConverter(reminderConverter);
+    ..addConverter(reminderConverter)
+    ..addConverter(tagConverter);
 
   // Add logging, CLI, exceptions and commands plugin to our client
   client
@@ -43,6 +45,7 @@ void main() async {
   initDocsCache();
   await initDatabase();
   await initReminders(client);
+  await initTags();
 
   // Connect
   await client.connect();
