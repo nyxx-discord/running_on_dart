@@ -47,7 +47,8 @@ ChatCommand info = ChatCommand(
       )
       ..addField(name: 'Memory usage (current/RSS)', content: getCurrentMemoryString(), inline: true)
       ..addField(name: 'Uptime', content: formatFull(context.client.startTime))
-      ..addField(name: 'Last documentation cache update', content: lastDocsUpdate == null ? 'never' : formatFull(lastDocsUpdate!));
+      ..addField(
+          name: 'Last documentation cache update', content: DocsService.instance.lastUpdate == null ? 'never' : formatFull(DocsService.instance.lastUpdate!));
 
     await context.respond(ComponentMessageBuilder()
       ..embeds = [embed]

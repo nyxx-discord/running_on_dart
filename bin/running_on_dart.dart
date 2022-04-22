@@ -42,10 +42,7 @@ void main() async {
     ..registerPlugin(commands);
 
   // Initialise our services
-  initDocsCache();
-  await initDatabase();
-  await initReminders(client);
-  await initTags();
+  ReminderService.init(client);
 
   // Connect
   await client.connect();

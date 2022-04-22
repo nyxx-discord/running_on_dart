@@ -17,7 +17,7 @@ ChatCommand tag = ChatCommand.textOnly(
         @Description('The content of the tag') String content, [
         @Description('Whether to enable the tag by default') bool enabled = true,
       ]) async {
-        if (getByName(context.guild?.id ?? Snowflake.zero(), name) != null) {
+        if (TagService.instance.getByName(context.guild?.id ?? Snowflake.zero(), name) != null) {
           await context.respond(MessageBuilder.embed(
             EmbedBuilder()
               ..color = DiscordColor.red
@@ -35,7 +35,7 @@ ChatCommand tag = ChatCommand.textOnly(
           name: name,
         );
 
-        await createTag(tag);
+        await TagService.instance.createTag(tag);
 
         await context.respond(MessageBuilder.content('Tag created successfully!'));
       },
@@ -73,7 +73,7 @@ ChatCommand tag = ChatCommand.textOnly(
         }
 
         tag.enabled = true;
-        await updateTag(tag);
+        await TagService.instance.updateTag(tag);
 
         await context.respond(MessageBuilder.content('Successfully enabled tag!'));
       },
@@ -91,7 +91,7 @@ ChatCommand tag = ChatCommand.textOnly(
         }
 
         tag.enabled = false;
-        await updateTag(tag);
+        await TagService.instance.updateTag(tag);
 
         await context.respond(MessageBuilder.content('Successfully disabled tag!'));
       },
@@ -103,7 +103,7 @@ ChatCommand tag = ChatCommand.textOnly(
         IChatContext context,
         @UseConverter(manageableTagConverter) @Description('The tag to delete') Tag tag,
       ) async {
-        await deleteTag(tag);
+        await TagService.instance.deleteTag(tag);
 
         await context.respond(MessageBuilder.content('Successfully deleted tag!'));
       },

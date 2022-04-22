@@ -9,7 +9,7 @@ export 'src/commands/tag.dart';
 export 'src/commands/voice.dart';
 export 'src/converters.dart';
 export 'src/error_handler.dart';
-export 'src/services/db.dart' show initDatabase;
+export 'src/services/db.dart';
 export 'src/services/docs.dart';
 export 'src/services/tag.dart';
 export 'src/settings.dart';

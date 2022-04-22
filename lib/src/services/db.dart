@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:logging/logging.dart';
@@ -23,29 +24,39 @@ String host = getEnv('DB_HOST', 'db');
 /// The port to connect to the database on.
 int port = int.parse(getEnv('DB_PORT', '5432'));
 
-/// The connection to the database.
-late PostgreSQLConnection connection;
+class DatabaseService {
+  /// The connection to the database.
+  late PostgreSQLConnection _connection;
 
-final Logger _logger = Logger('ROD.Database');
+  final Logger _logger = Logger('ROD.Database');
 
-/// Connect to the database and ensure the schema is up to date.
-Future<PostgreSQLConnection> connectToDatabase() async {
-  _logger.info('Connecting to database');
+  final Completer<void> _readyCompleter = Completer();
+  late final Future<void> _ready = _readyCompleter.future;
 
-  PostgreSQLConnection connection = PostgreSQLConnection(
-    host,
-    port,
-    databaseName,
-    username: user,
-    password: password,
-  );
+  static final DatabaseService instance = DatabaseService._();
 
-  await connection.open();
+  DatabaseService._() {
+    _connect();
+  }
 
-  _logger.info('Running database migrations');
+  /// Connect to the database and ensure the schema is up to date.
+  Future<void> _connect() async {
+    _logger.info('Connecting to database');
 
-  MigentMigrationRunner migrator = MigentMigrationRunner(connection, databaseName, MemoryMigrationAccess())
-    ..enqueueMigration('1', '''
+    _connection = PostgreSQLConnection(
+      host,
+      port,
+      databaseName,
+      username: user,
+      password: password,
+    );
+
+    await _connection.open();
+
+    _logger.info('Running database migrations');
+
+    MigentMigrationRunner migrator = MigentMigrationRunner(_connection, databaseName, MemoryMigrationAccess())
+      ..enqueueMigration('1', '''
       CREATE TABLE tags (
         id SERIAL PRIMARY KEY,
         name VARCHAR NOT NULL,
@@ -58,7 +69,7 @@ Future<PostgreSQLConnection> connectToDatabase() async {
       CREATE INDEX guild_index ON tags USING btree(guild_id);
       ALTER TABLE tags ADD CONSTRAINT name_guild_id_unique UNIQUE (name, guild_id);
     ''')
-    ..enqueueMigration('1.1', '''
+      ..enqueueMigration('1.1', '''
       CREATE TABLE tag_usage (
         id SERIAL PRIMARY KEY,
         command_id SERIAL,
@@ -68,7 +79,7 @@ Future<PostgreSQLConnection> connectToDatabase() async {
       );
       CREATE INDEX command_id_index ON tag_usage USING btree(command_id);
     ''')
-    ..enqueueMigration('1.2', '''
+      ..enqueueMigration('1.2', '''
       CREATE TABLE feature_settings (
         id SERIAL PRIMARY KEY,
         name varchar(20) NOT NULL,
@@ -85,16 +96,16 @@ Future<PostgreSQLConnection> connectToDatabase() async {
         FOREIGN KEY(feature_setting_id) REFERENCES feature_settings(id)
       );
     ''')
-    ..enqueueMigration('1.3', '''
+      ..enqueueMigration('1.3', '''
       CREATE EXTENSION pg_trgm;
     ''')
-    ..enqueueMigration('1.4', '''
+      ..enqueueMigration('1.4', '''
       DROP TABLE feature_settings_additional_data;
     ''')
-    ..enqueueMigration('1.5', '''
+      ..enqueueMigration('1.5', '''
       ALTER TABLE feature_settings ADD COLUMN additional_data VARCHAR NULL;
     ''')
-    ..enqueueMigration('1.6', '''
+      ..enqueueMigration('1.6', '''
       CREATE TABLE reminders (
         id SERIAL PRIMARY KEY,
         user_id VARCHAR NOT NULL,
@@ -106,60 +117,61 @@ Future<PostgreSQLConnection> connectToDatabase() async {
       );
       CREATE INDEX reminder_trigger_date_idx ON reminders USING btree(trigger_date);
     ''')
-    ..enqueueMigration('1.7', '''
+      ..enqueueMigration('1.7', '''
       ALTER TABLE reminders ALTER COLUMN message TYPE VARCHAR(200)
     ''')
-    ..enqueueMigration('1.8', '''
+      ..enqueueMigration('1.8', '''
       ALTER TABLE reminders ADD COLUMN active BOOLEAN NOT NULL; 
     ''')
-    ..enqueueMigration('1.9', '''
+      ..enqueueMigration('1.9', '''
       CREATE INDEX name_trgm_idx ON tags USING gin (name gin_trgm_ops);
     ''')
-    ..enqueueMigration('2.0', '''
+      ..enqueueMigration('2.0', '''
       ALTER TABLE reminders DROP COLUMN active;
       ALTER TABLE reminders ALTER COLUMN message TYPE TEXT NOT NULL;
     ''');
 
-  await migrator.runMigrations();
+    await migrator.runMigrations();
 
-  _logger.info('Connected to database');
+    _logger.info('Connected to database');
 
-  return connection;
-}
-
-/// Initialise the database service.
-Future<void> initDatabase() async {
-  connection = await connectToDatabase();
-}
-
-/// Fetch all reminders currrently in the database.
-Future<Iterable<Reminder>> fetchReminders() async {
-  PostgreSQLResult result = await connection.query('SELECT * FROM reminders');
-
-  return result.map(Reminder.fromRow);
-}
-
-/// Delete a reminder from the database.
-Future<void> deleteReminder(Reminder reminder) async {
-  int? id = reminder.id;
-
-  if (id == null) {
-    return;
+    _readyCompleter.complete();
   }
 
-  await connection.execute('DELETE FROM reminders WHERE id = @id', substitutionValues: {
-    'id': id,
-  });
-}
+  /// Fetch all reminders currrently in the database.
+  Future<Iterable<Reminder>> fetchReminders() async {
+    await _ready;
 
-/// Add a reminder to the database.
-Future<void> addReminder(Reminder reminder) async {
-  if (reminder.id != null) {
-    _logger.warning('Attempting to add reminder with id ${reminder.id} twice, ignoring');
-    return;
+    PostgreSQLResult result = await _connection.query('SELECT * FROM reminders');
+
+    return result.map(Reminder.fromRow);
   }
 
-  PostgreSQLResult result = await connection.query('''
+  /// Delete a reminder from the database.
+  Future<void> deleteReminder(Reminder reminder) async {
+    int? id = reminder.id;
+
+    if (id == null) {
+      return;
+    }
+
+    await _ready;
+
+    await _connection.execute('DELETE FROM reminders WHERE id = @id', substitutionValues: {
+      'id': id,
+    });
+  }
+
+  /// Add a reminder to the database.
+  Future<void> addReminder(Reminder reminder) async {
+    if (reminder.id != null) {
+      _logger.warning('Attempting to add reminder with id ${reminder.id} twice, ignoring');
+      return;
+    }
+
+    await _ready;
+
+    PostgreSQLResult result = await _connection.query('''
     INSERT INTO reminders (
       user_id,
       channel_id,
@@ -176,49 +188,55 @@ Future<void> addReminder(Reminder reminder) async {
       @message
     ) RETURNING id;
   ''', substitutionValues: {
-    'user_id': reminder.userId.toString(),
-    'channel_id': reminder.channelId.toString(),
-    'message_id': reminder.messageId?.toString(),
-    'trigger_date': reminder.triggerAt.toUtc(),
-    'add_date': reminder.addedAt.toUtc(),
-    'message': reminder.message,
-  });
+      'user_id': reminder.userId.toString(),
+      'channel_id': reminder.channelId.toString(),
+      'message_id': reminder.messageId?.toString(),
+      'trigger_date': reminder.triggerAt.toUtc(),
+      'add_date': reminder.addedAt.toUtc(),
+      'message': reminder.message,
+    });
 
-  reminder.id = result.first.first as int;
-}
-
-/// Fetch all existing tags from the database.
-Future<Iterable<Tag>> fetchTags() async {
-  PostgreSQLResult result = await connection.query('''
-    SELECT * FROM tags;
-  ''');
-
-  return result.map(Tag.fromRow);
-}
-
-/// Delete a tag from the database.
-Future<void> deleteTag(Tag tag) async {
-  int? id = tag.id;
-
-  if (id == null) {
-    return;
+    reminder.id = result.first.first as int;
   }
 
-  await connection.execute('''
-    DELETE FROM tags WHERE id = @id;
-  ''', substitutionValues: {
-    'id': id,
-  });
-}
+  /// Fetch all existing tags from the database.
+  Future<Iterable<Tag>> fetchTags() async {
+    await _ready;
 
-/// Add a tag to the database.
-Future<void> addTag(Tag tag) async {
-  if (tag.id != null) {
-    _logger.warning('Attempting to add tag with id ${tag.id} twice, ignoring');
-    return;
+    PostgreSQLResult result = await _connection.query('''
+      SELECT * FROM tags;
+    ''');
+
+    return result.map(Tag.fromRow);
   }
 
-  PostgreSQLResult result = await connection.query('''
+  /// Delete a tag from the database.
+  Future<void> deleteTag(Tag tag) async {
+    int? id = tag.id;
+
+    if (id == null) {
+      return;
+    }
+
+    await _ready;
+
+    await _connection.execute('''
+      DELETE FROM tags WHERE id = @id;
+    ''', substitutionValues: {
+      'id': id,
+    });
+  }
+
+  /// Add a tag to the database.
+  Future<void> addTag(Tag tag) async {
+    if (tag.id != null) {
+      _logger.warning('Attempting to add tag with id ${tag.id} twice, ignoring');
+      return;
+    }
+
+    await _ready;
+
+    PostgreSQLResult result = await _connection.query('''
     INSERT INTO tags (
       name,
       content,
@@ -233,37 +251,40 @@ Future<void> addTag(Tag tag) async {
       @author_id
     ) RETURNING id;
   ''', substitutionValues: {
-    'name': tag.name,
-    'content': tag.content,
-    'enabled': tag.enabled,
-    'guild_id': tag.guildId.toString(),
-    'author_id': tag.authorId.toString(),
-  });
+      'name': tag.name,
+      'content': tag.content,
+      'enabled': tag.enabled,
+      'guild_id': tag.guildId.toString(),
+      'author_id': tag.authorId.toString(),
+    });
 
-  tag.id = result.first.first as int;
-}
-
-/// Update a tag in the database.
-Future<void> updateTag(Tag tag) async {
-  if (tag.id == null) {
-    return addTag(tag);
+    tag.id = result.first.first as int;
   }
 
-  await connection.query('''
-    UPDATE tags SET
-      name = @name,
-      content = @content,
-      enabled = @enabled,
-      guild_id = @guild_id,
-      author_id = @author_id
-    WHERE
-      id = @id
-  ''', substitutionValues: {
-    'id': tag.id,
-    'name': tag.name,
-    'content': tag.content,
-    'enabled': tag.enabled,
-    'guild_id': tag.guildId.toString(),
-    'author_id': tag.authorId.toString(),
-  });
+  /// Update a tag in the database.
+  Future<void> updateTag(Tag tag) async {
+    if (tag.id == null) {
+      return addTag(tag);
+    }
+
+    await _ready;
+
+    await _connection.query('''
+      UPDATE tags SET
+        name = @name,
+        content = @content,
+        enabled = @enabled,
+        guild_id = @guild_id,
+        author_id = @author_id
+      WHERE
+        id = @id
+    ''', substitutionValues: {
+      'id': tag.id,
+      'name': tag.name,
+      'content': tag.content,
+      'enabled': tag.enabled,
+      'guild_id': tag.guildId.toString(),
+      'author_id': tag.authorId.toString(),
+    });
+  }
 }

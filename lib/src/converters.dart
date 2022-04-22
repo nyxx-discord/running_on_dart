@@ -10,12 +10,12 @@ import 'package:running_on_dart/src/models/tag.dart';
 import 'package:running_on_dart/src/services/reminder.dart';
 
 Converter<DocEntry> docEntryConverter = Converter<DocEntry>(
-  (view, context) => getByQuery(view.getQuotedWord()),
-  autocompleteCallback: (context) => searchInDocs(context.currentValue).take(25).map((e) => ArgChoiceBuilder(e.displayName, e.qualifiedName)),
+  (view, context) => DocsService.instance.getByQuery(view.getQuotedWord()),
+  autocompleteCallback: (context) => DocsService.instance.search(context.currentValue).take(25).map((e) => ArgChoiceBuilder(e.displayName, e.qualifiedName)),
 );
 
 Converter<PackageDocs> packageDocsConverter = Converter<PackageDocs>(
-  (view, context) => getPackageDocs(view.getQuotedWord()),
+  (view, context) => DocsService.instance.getPackageDocs(view.getQuotedWord()),
   choices: docsPackages.map((packageName) => ArgChoiceBuilder(packageName, packageName)),
 );
 
@@ -85,17 +85,18 @@ Iterable<ArgChoiceBuilder> autocompleteDuration(AutocompleteContext context) {
 }
 
 Converter<Reminder> reminderConverter = Converter<Reminder>(
-  (view, context) => searchReminders(context.user.id, view.getQuotedWord()).cast<Reminder?>().followedBy([null]).first,
-  autocompleteCallback: (context) => searchReminders(context.user.id, context.currentValue)
+  (view, context) => ReminderService.instance.search(context.user.id, view.getQuotedWord()).cast<Reminder?>().followedBy([null]).first,
+  autocompleteCallback: (context) => ReminderService.instance
+      .search(context.user.id, context.currentValue)
       .take(25)
       .map((e) => '${reminderDateFormat.format(e.triggerAt)}: ${e.message.length > 50 ? e.message.substring(0, 50) + '...' : e.message}')
       .map((e) => ArgChoiceBuilder(e, e)),
 );
 
 Converter<Tag> tagConverter = Converter<Tag>(
-  (view, context) => searchTags(view.getQuotedWord(), context.guild?.id ?? Snowflake.zero()).cast<Tag?>().followedBy([null]).first,
+  (view, context) => TagService.instance.search(view.getQuotedWord(), context.guild?.id ?? Snowflake.zero()).cast<Tag?>().followedBy([null]).first,
   autocompleteCallback: (context) =>
-      searchTags(context.currentValue, context.guild?.id ?? Snowflake.zero()).take(25).map((e) => e.name).map((e) => ArgChoiceBuilder(e, e)),
+      TagService.instance.search(context.currentValue, context.guild?.id ?? Snowflake.zero()).take(25).map((e) => e.name).map((e) => ArgChoiceBuilder(e, e)),
 );
 
 // Needs to be const so we can use @UseConverter
@@ -104,14 +105,21 @@ const Converter<Tag> manageableTagConverter = Converter<Tag>(
   autocompleteCallback: autocompleteManageableTag,
 );
 
-Tag? getManageableTag(StringView view, IChatContext context) => searchTags(
+Tag? getManageableTag(StringView view, IChatContext context) => TagService.instance
+    .search(
       view.getQuotedWord(),
       context.guild?.id ?? Snowflake.zero(),
       context.user.id,
-    ).cast<Tag?>().followedBy([null]).first;
+    )
+    .cast<Tag?>()
+    .followedBy([null]).first;
 
-Iterable<ArgChoiceBuilder> autocompleteManageableTag(AutocompleteContext context) => searchTags(
+Iterable<ArgChoiceBuilder> autocompleteManageableTag(AutocompleteContext context) => TagService.instance
+    .search(
       context.currentValue,
       context.guild?.id ?? Snowflake.zero(),
       context.user.id,
-    ).take(25).map((e) => e.name).map((e) => ArgChoiceBuilder(e, e));
+    )
+    .take(25)
+    .map((e) => e.name)
+    .map((e) => ArgChoiceBuilder(e, e));

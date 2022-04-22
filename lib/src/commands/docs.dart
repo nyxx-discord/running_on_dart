@@ -48,7 +48,7 @@ Package: [${element.packageName}](https://pub.dev/packages/${element.packageName
         @Description('The query to search for') @Autocomplete(autocompleteQueryWithPackage) String query, [
         @Description('The package to search in') PackageDocs? package,
       ]) async {
-        Iterable<DocEntry> searchResults = searchInDocs(query, package);
+        Iterable<DocEntry> searchResults = DocsService.instance.search(query, package);
 
         if (searchResults.isEmpty) {
           await context.respond(MessageBuilder.embed(EmbedBuilder()
@@ -112,13 +112,14 @@ Iterable<ArgChoiceBuilder> autocompleteQueryWithPackage(AutocompleteContext cont
 
   PackageDocs? selectedPackage;
   if (selectedPackageName != null) {
-    selectedPackage = getPackageDocs(selectedPackageName);
+    selectedPackage = DocsService.instance.getPackageDocs(selectedPackageName);
   }
 
   return [
     // Allow the user to select their current value
     if (context.currentValue.isNotEmpty) ArgChoiceBuilder(context.currentValue, context.currentValue),
-    ...searchInDocs(context.currentValue, selectedPackage)
+    ...DocsService.instance
+        .search(context.currentValue, selectedPackage)
         .take(context.currentValue.isEmpty ? 25 : 24)
         .map((e) => ArgChoiceBuilder(e.displayName, e.qualifiedName)),
   ];

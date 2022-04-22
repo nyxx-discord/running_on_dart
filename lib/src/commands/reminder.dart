@@ -19,7 +19,7 @@ ChatGroup reminder = ChatGroup(
       ) async {
         DateTime triggerAt = DateTime.now().add(offset);
 
-        await addReminder(Reminder(
+        await ReminderService.instance.addReminder(Reminder(
           userId: context.user.id,
           channelId: context.channel.id,
           messageId: context is MessageChatContext ? context.message.id : null,
@@ -42,7 +42,7 @@ ChatGroup reminder = ChatGroup(
       'clear',
       'Remove all your reminders',
       (IChatContext context) async {
-        await Future.wait(getUserReminders(context.user.id).map((reminder) => removeReminder(reminder)));
+        await Future.wait(ReminderService.instance.getUserReminders(context.user.id).map((reminder) => ReminderService.instance.removeReminder(reminder)));
 
         await context.respond(MessageBuilder.content('Successfully cleared all your reminders.'));
       },
@@ -54,7 +54,7 @@ ChatGroup reminder = ChatGroup(
         IChatContext context,
         @Description('The reminder to remove') Reminder reminder,
       ) async {
-        await removeReminder(reminder);
+        await ReminderService.instance.removeReminder(reminder);
 
         await context.respond(MessageBuilder.content('Successfully removed your reminder.'));
       },
@@ -63,7 +63,7 @@ ChatGroup reminder = ChatGroup(
       'list',
       'List all your active reminders',
       (IChatContext context) async {
-        List<Reminder> reminders = getUserReminders(context.user.id).toList()..sort((a, b) => a.triggerAt.compareTo(b.triggerAt));
+        List<Reminder> reminders = ReminderService.instance.getUserReminders(context.user.id).toList()..sort((a, b) => a.triggerAt.compareTo(b.triggerAt));
 
         EmbedComponentPagination paginator = EmbedComponentPagination(
           context.commands.interactions,
