@@ -21,7 +21,8 @@ void main() async {
     ..addCommand(voice)
     ..addCommand(docs)
     ..addCommand(reminder)
-    ..addCommand(tag);
+    ..addCommand(tag)
+    ..addCommand(admin);
 
   // Add our error handler
   commands.onCommandError.listen(commandErrorHandler);

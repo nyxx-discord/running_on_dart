@@ -1,5 +1,6 @@
 library running_on_dart;
 
+export 'src/commands/admin.dart';
 export 'src/commands/avatar.dart';
 export 'src/commands/docs.dart';
 export 'src/commands/info.dart';
