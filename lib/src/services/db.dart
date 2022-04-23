@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:migent/migent.dart';
 import 'package:postgres/postgres.dart';
 import 'package:running_on_dart/running_on_dart.dart';
+import 'package:running_on_dart/src/models/guild_settings.dart';
 import 'package:running_on_dart/src/models/reminder.dart';
 import 'package:running_on_dart/src/models/tag.dart';
 
@@ -129,6 +130,9 @@ class DatabaseService {
       ..enqueueMigration('2.0', '''
       ALTER TABLE reminders DROP COLUMN active;
       ALTER TABLE reminders ALTER COLUMN message TYPE TEXT NOT NULL;
+    ''')
+      ..enqueueMigration('2.1', '''
+      ALTER TABLE feature_settings ADD CONSTRAINT settings_name_guild_id_unique UNIQUE (name, guild_id);
     ''');
 
     await migrator.runMigrations();
@@ -285,6 +289,61 @@ class DatabaseService {
       'enabled': tag.enabled,
       'guild_id': tag.guildId.toString(),
       'author_id': tag.authorId.toString(),
+    });
+  }
+
+  /// Fetch all settings for all guilds from the database.
+  Future<Iterable<GuildSetting<dynamic>>> fetchSettings() async {
+    await _ready;
+
+    PostgreSQLResult result = await _connection.query('''
+      SELECT * FROM feature_settings;
+    ''');
+
+    return result.map(GuildSetting.fromRow);
+  }
+
+  /// Enable or update a setting in the database.
+  Future<void> enableSetting<T>(GuildSetting<T> setting) async {
+    await _ready;
+
+    await _connection.execute('''
+      INSERT INTO feature_settings (
+        name,
+        guild_id,
+        add_date,
+        who_enabled,
+        additional_data
+      ) VALUES (
+        @name,
+        @guild_id,
+        @add_date,
+        @who_enabled,
+        @additional_data
+      ) ON CONFLICT ON CONSTRAINT settings_name_guild_id_unique DO UPDATE SET
+        add_date = @add_date,
+        who_enabled = @who_enabled,
+        additional_data = @additional_data
+      WHERE
+        feature_settings.guild_id = @guild_id AND feature_settings.name = @name
+    ''', substitutionValues: {
+      'name': setting.setting.value,
+      'guild_id': setting.guildId.toString(),
+      'add_date': setting.addedAt,
+      'who_enabled': setting.whoEnabled.toString(),
+      'additional_data': setting.data?.toString(),
+    });
+  }
+
+  /// Disable a setting in (remove it from) the database.
+  Future<void> disableSetting<T>(GuildSetting<T> setting) async {
+    await _ready;
+
+    await _connection.execute('''
+      DELETE FROM feature_settings WHERE name = @name AND guild_id = @guild_id
+    ''', substitutionValues: {
+      'name': setting.setting.value,
+      'guild_id': setting.guildId.toString(),
     });
   }
 }

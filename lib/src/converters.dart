@@ -5,6 +5,7 @@ import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_interactions/nyxx_interactions.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/docs.dart';
+import 'package:running_on_dart/src/models/guild_settings.dart';
 import 'package:running_on_dart/src/models/reminder.dart';
 import 'package:running_on_dart/src/models/tag.dart';
 import 'package:running_on_dart/src/services/reminder.dart';
@@ -123,3 +124,12 @@ Iterable<ArgChoiceBuilder> autocompleteManageableTag(AutocompleteContext context
     .take(25)
     .map((e) => e.name)
     .map((e) => ArgChoiceBuilder(e, e));
+
+final Converter<Setting<dynamic>> settingsConverter = Converter<Setting<dynamic>>(
+  (view, context) {
+    String word = view.getQuotedWord();
+
+    return Setting.values.firstWhere((setting) => setting.value == word);
+  },
+  choices: Setting.values.map((setting) => ArgChoiceBuilder('${setting.value}: ${setting.description}', setting.value)),
+);

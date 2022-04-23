@@ -3,7 +3,6 @@ import 'package:fuzzy/fuzzy.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/tag.dart';
-import 'package:running_on_dart/src/services/db.dart';
 
 class TagService {
   final List<Tag> tags = [];

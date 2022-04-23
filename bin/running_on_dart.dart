@@ -22,7 +22,8 @@ void main() async {
     ..addCommand(docs)
     ..addCommand(reminder)
     ..addCommand(tag)
-    ..addCommand(admin);
+    ..addCommand(admin)
+    ..addCommand(settings);
 
   // Add our error handler
   commands.onCommandError.listen(commandErrorHandler);
@@ -33,7 +34,8 @@ void main() async {
     ..addConverter(packageDocsConverter)
     ..addConverter(durationConverter)
     ..addConverter(reminderConverter)
-    ..addConverter(tagConverter);
+    ..addConverter(tagConverter)
+    ..addConverter(settingsConverter);
 
   // Add logging, CLI, exceptions and commands plugin to our client
   client
