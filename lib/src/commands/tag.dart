@@ -2,6 +2,7 @@ import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/tag.dart';
+import 'package:running_on_dart/src/util.dart';
 
 ChatCommand tag = ChatCommand.textOnly(
   'tag',
@@ -48,6 +49,12 @@ ChatCommand tag = ChatCommand.textOnly(
         @Description('The tag to show') Tag tag,
       ) async {
         await context.respond(MessageBuilder.content(tag.content));
+
+        await TagService.instance.registerTagUsedEvent(TagUsedEvent.fromTag(
+          tag: tag,
+          usedAt: DateTime.now(),
+          hidden: false,
+        ));
       },
     ),
     ChatCommand(
@@ -58,6 +65,12 @@ ChatCommand tag = ChatCommand.textOnly(
         @Description('The tag to preview') Tag tag,
       ) async {
         await context.respond(MessageBuilder.content(tag.content), private: true);
+
+        await TagService.instance.registerTagUsedEvent(TagUsedEvent.fromTag(
+          tag: tag,
+          usedAt: DateTime.now(),
+          hidden: true,
+        ));
       },
     ),
     ChatCommand(
@@ -106,6 +119,62 @@ ChatCommand tag = ChatCommand.textOnly(
         await TagService.instance.deleteTag(tag);
 
         await context.respond(MessageBuilder.content('Successfully deleted tag!'));
+      },
+    ),
+    ChatCommand(
+      'stats',
+      'Show tag statistics',
+      (
+        IChatContext context, [
+        @Description('The tag to show stats for') Tag? tag,
+      ]) async {
+        List<TagUsedEvent> events = TagService.instance.getTagUsage(context.guild?.id ?? Snowflake.zero(), tag).toList();
+
+        int totalUses = events.length;
+        int totalHiddenUses = events.where((event) => event.hidden).length;
+
+        DateTime threeDaysAgo = DateTime.now().add(Duration(days: -3));
+        int usesLastThreeDays = events.where((event) => event.usedAt.isAfter(threeDaysAgo)).length;
+        int hiddenUsesLastThreeDays = events.where((event) => event.usedAt.isAfter(threeDaysAgo) && event.hidden).length;
+
+        EmbedBuilder embed = EmbedBuilder()
+          ..color = getRandomColor()
+          ..title = 'Tag stats${tag != null ? ': ${tag.name}' : ''}'
+          ..addField(
+            name: 'Total usage',
+            content: '- Tag${tag == null ? 's' : ''} shown ${totalUses - totalHiddenUses} times\n'
+                '- Tag${tag == null ? 's' : ''} previewed $totalHiddenUses times',
+          )
+          ..addField(
+            name: 'Usage in the last 3 days',
+            content: '- Tag${tag == null ? 's' : ''} shown ${usesLastThreeDays - hiddenUsesLastThreeDays} times\n'
+                '- Tag${tag == null ? 's' : ''} previewed $hiddenUsesLastThreeDays times',
+          );
+
+        if (tag == null) {
+          Map<Tag, int> useCount = {};
+
+          for (final event in events) {
+            Tag? tag = TagService.instance.getById(event.tagId);
+
+            if (tag == null) {
+              continue;
+            }
+
+            useCount[tag] = (useCount[tag] ?? 0) + 1;
+          }
+
+          if (useCount.isNotEmpty) {
+            Iterable<Tag> top5 = (useCount.entries.toList()..sort((a, b) => b.value.compareTo(a.value))).map((entry) => entry.key).take(5);
+
+            embed.addField(
+              name: 'Top tags',
+              content: top5.map((tag) => '- **${tag.name}** (${useCount[tag]})').join('\n'),
+            );
+          }
+        }
+
+        await context.respond(MessageBuilder.embed(embed));
       },
     ),
   ],

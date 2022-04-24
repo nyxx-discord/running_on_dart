@@ -48,6 +48,7 @@ void main() async {
   ReminderService.init(client);
   PoopNameService.init(client);
   JoinLogsService.init(client);
+  TagService.init();
 
   // Connect
   await client.connect();

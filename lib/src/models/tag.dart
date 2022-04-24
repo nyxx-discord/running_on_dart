@@ -45,3 +45,36 @@ class Tag {
     );
   }
 }
+
+class TagUsedEvent {
+  final int tagId;
+  final DateTime usedAt;
+  final bool hidden;
+
+  TagUsedEvent({
+    required this.tagId,
+    required this.usedAt,
+    required this.hidden,
+  });
+
+  factory TagUsedEvent.fromTag({
+    required Tag tag,
+    required DateTime usedAt,
+    required bool hidden,
+  }) =>
+      TagUsedEvent(
+        tagId: tag.id!,
+        usedAt: usedAt,
+        hidden: hidden,
+      );
+
+  factory TagUsedEvent.fromRow(PostgreSQLResultRow row) {
+    Map<String, dynamic> mappedRow = row.toColumnMap();
+
+    return TagUsedEvent(
+      tagId: mappedRow['command_id'] as int,
+      usedAt: mappedRow['use_date'] as DateTime,
+      hidden: mappedRow['hidden'] as bool,
+    );
+  }
+}

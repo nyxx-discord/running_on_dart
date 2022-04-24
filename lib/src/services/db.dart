@@ -292,6 +292,36 @@ class DatabaseService {
     });
   }
 
+  Future<Iterable<TagUsedEvent>> fetchTagUsage() async {
+    await _ready;
+
+    PostgreSQLResult result = await _connection.query('''
+      SELECT * FROM tag_usage;
+    ''');
+
+    return result.map(TagUsedEvent.fromRow);
+  }
+
+  Future<void> registerTagUsedEvent(TagUsedEvent event) async {
+    await _ready;
+
+    await _connection.query('''
+      INSERT INTO tag_usage (
+        command_id,
+        use_date,
+        hidden
+      ) VALUES (
+        @tag_id,
+        @use_date,
+        @hidden
+      )
+    ''', substitutionValues: {
+      'tag_id': event.tagId,
+      'use_date': event.usedAt,
+      'hidden': event.hidden,
+    });
+  }
+
   /// Fetch all settings for all guilds from the database.
   Future<Iterable<GuildSetting<dynamic>>> fetchSettings() async {
     await _ready;

@@ -6,11 +6,18 @@ import 'package:running_on_dart/src/models/tag.dart';
 
 class TagService {
   final List<Tag> tags = [];
+  final List<TagUsedEvent> usedEvents = [];
 
-  static final TagService instance = TagService._();
+  static TagService get instance => _instance ?? (throw Exception('TagService must be initialised with TagService.init()'));
+  static TagService? _instance;
+
+  static void init() {
+    _instance = TagService._();
+  }
 
   TagService._() {
     DatabaseService.instance.fetchTags().then((tags) => this.tags.addAll(tags));
+    DatabaseService.instance.fetchTagUsage().then((events) => usedEvents.addAll(events));
   }
 
   /// Create a new tag.
@@ -71,4 +78,24 @@ class TagService {
 
   /// Get a tag by name.
   Tag? getByName(Snowflake guildId, String name) => tags.where((tag) => tag.guildId == guildId && tag.name == name).cast<Tag?>().followedBy([null]).first;
+
+  Tag? getById(int id) => tags.where((tag) => tag.id == id).cast<Tag?>().followedBy([null]).first;
+
+  Iterable<TagUsedEvent> getTagUsage(Snowflake guildId, [Tag? tag]) {
+    return usedEvents.where((event) {
+      if (tag != null && event.tagId != tag.id) {
+        return false;
+      }
+
+      Tag? fetchedTag = getById(event.tagId);
+
+      return fetchedTag?.guildId == guildId && fetchedTag?.enabled == true;
+    });
+  }
+
+  Future<void> registerTagUsedEvent(TagUsedEvent event) async {
+    await DatabaseService.instance.registerTagUsedEvent(event);
+
+    usedEvents.add(event);
+  }
 }
