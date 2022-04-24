@@ -129,7 +129,7 @@ class DatabaseService {
     ''')
       ..enqueueMigration('2.0', '''
       ALTER TABLE reminders DROP COLUMN active;
-      ALTER TABLE reminders ALTER COLUMN message TYPE TEXT NOT NULL;
+      ALTER TABLE reminders ALTER COLUMN message TYPE TEXT;
     ''')
       ..enqueueMigration('2.1', '''
       ALTER TABLE feature_settings ADD CONSTRAINT settings_name_guild_id_unique UNIQUE (name, guild_id);
