@@ -14,6 +14,7 @@ export 'src/error_handler.dart';
 export 'src/services/db.dart';
 export 'src/services/docs.dart';
 export 'src/services/guild_settings.dart';
+export 'src/services/join_logs.dart';
 export 'src/services/poop_name.dart';
 export 'src/services/tag.dart';
 export 'src/settings.dart';

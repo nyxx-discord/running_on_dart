@@ -86,4 +86,12 @@ class GuildSetting<T> {
       data: mappedRow['additional_data'] as String?,
     );
   }
+
+  GuildSetting<E> cast<E>() => GuildSetting(
+        setting: setting as Setting<E>,
+        guildId: guildId,
+        whoEnabled: whoEnabled,
+        addedAt: addedAt,
+        data: data as E,
+      );
 }

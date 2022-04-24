@@ -11,10 +11,10 @@ class GuildSettingsService {
 
   /// Get the data for a setting in a specific guild, if any.
   Future<GuildSetting<T>?> getSetting<T>(Setting<T> setting, Snowflake guildId) async {
-    Iterable<GuildSetting<T>> result = (await settings).where((s) => s.setting == setting && s.guildId == guildId).cast<GuildSetting<T>>();
+    Iterable<GuildSetting<dynamic>> result = (await settings).where((s) => s.setting == setting && s.guildId == guildId);
 
     if (result.isNotEmpty) {
-      return result.first;
+      return result.first.cast<T>();
     }
 
     return null;

@@ -24,7 +24,7 @@ class PoopNameService {
   }
 
   void _handle(IMember member) async {
-    if (!await GuildSettingsService.instance.isEnabled(Setting.poopName, member.guild.id)) {
+    if (!await GuildSettingsService.instance.isEnabled(Setting.poopName, member.guild.id) || !intentFeaturesEnabled) {
       return;
     }
 
