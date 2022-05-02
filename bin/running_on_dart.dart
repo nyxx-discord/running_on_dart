@@ -49,6 +49,7 @@ void main() async {
   PoopNameService.init(client);
   JoinLogsService.init(client);
   TagService.init();
+  PrometheusService.init(client, commands);
 
   // Connect
   await client.connect();

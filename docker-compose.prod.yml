@@ -1,7 +1,7 @@
 version: '3.9'
 services:
   running_on_dart:
-    build: .
+    image: ghcr.io/nyxx-discord/running_on_dart:latest
     container_name: running_on_dart
     env_file:
      - .env
@@ -23,7 +23,7 @@ services:
     image: prom/prometheus:latest
     container_name: running_on_dart_prometheus
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus.prod.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
     restart: unless-stopped
     command:
@@ -43,6 +43,12 @@ services:
       - prometheus
     depends_on:
       - prometheus
+
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 600 --http-api-metrics --http-api-token watchtower running_on_dart
 
 volumes:
   rod_db:
