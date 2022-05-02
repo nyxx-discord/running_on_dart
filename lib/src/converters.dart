@@ -127,7 +127,7 @@ final Converter<Setting<dynamic>> settingsConverter = Converter<Setting<dynamic>
   (view, context) {
     final word = view.getQuotedWord();
 
-    return Setting.values.firstWhere((setting) => setting.value == word);
+    return Setting.values.cast<Setting<dynamic>?>().firstWhere((setting) => setting!.value == word, orElse: () => null);
   },
   choices: Setting.values.map((setting) => ArgChoiceBuilder('${setting.value}: ${setting.description}', setting.value)),
 );
