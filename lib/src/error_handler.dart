@@ -6,7 +6,7 @@ final Logger _logger = Logger('ROD.CommandErrors');
 
 void commandErrorHandler(CommandsException error) async {
   if (error is CommandInvocationException) {
-    IContext context = error.context;
+    final context = error.context;
 
     String? title;
     String? description;
@@ -28,7 +28,7 @@ void commandErrorHandler(CommandsException error) async {
     }
 
     // Send a generic "an error occurred" response
-    EmbedBuilder embed = EmbedBuilder()
+    final embed = EmbedBuilder()
       ..color = DiscordColor.red
       ..title = title ?? 'An error has occurred'
       ..description = description ?? "Your command couldn't be executed because of an error. Please contact a developer for more information."

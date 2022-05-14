@@ -92,11 +92,10 @@ class DocsService {
         return priorities.length + 1;
       }
 
-      num aWeight = getWeight(a.item);
-      num bWeight = getWeight(b.item);
+      final aWeight = getWeight(a.item);
+      final bWeight = getWeight(b.item);
 
       int result;
-
       if (a.score == 0 && b.score == 0) {
         result = aWeight.compareTo(bWeight);
       } else {
@@ -105,8 +104,8 @@ class DocsService {
 
       if (result == 0) {
         // If both elements had the same score, compare their libraries
-        int aIndex = docsPackages.indexOf(a.item.packageName);
-        int bIndex = docsPackages.indexOf(b.item.packageName);
+        final aIndex = docsPackages.indexOf(a.item.packageName);
+        final bIndex = docsPackages.indexOf(b.item.packageName);
 
         result = aIndex.compareTo(bIndex);
       }
@@ -128,9 +127,6 @@ class DocsService {
   DocEntry? getByQuery(String query) =>
       getByQualifiedName(query) ??
       search(query)
-
-          // Cast to DocEntry? so we can return null in orElse
-          .cast<DocEntry?>()
-          // Return the top result, or `null` if the list is empty
-          .firstWhere((element) => true, orElse: () => null);
+          .cast<DocEntry?>() // Cast to DocEntry? so we can return null in orElse
+          .firstWhere((element) => true, orElse: () => null); // Return the top result, or `null` if the list is empty
 }

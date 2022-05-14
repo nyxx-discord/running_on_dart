@@ -38,7 +38,7 @@ class Reminder {
 
   /// Create a [Reminder] from a database row.
   factory Reminder.fromRow(PostgreSQLResultRow row) {
-    Map<String, dynamic> mappedRow = row.toColumnMap();
+    final mappedRow = row.toColumnMap();
 
     return Reminder(
       userId: Snowflake(mappedRow['user_id'] as String),

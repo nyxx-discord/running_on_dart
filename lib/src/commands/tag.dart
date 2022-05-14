@@ -28,7 +28,7 @@ ChatCommand tag = ChatCommand.textOnly(
           return;
         }
 
-        Tag tag = Tag(
+        final tag = Tag(
           authorId: context.user.id,
           guildId: context.guild?.id ?? Snowflake.zero(),
           content: content,
@@ -128,16 +128,16 @@ ChatCommand tag = ChatCommand.textOnly(
         IChatContext context, [
         @Description('The tag to show stats for') Tag? tag,
       ]) async {
-        List<TagUsedEvent> events = TagService.instance.getTagUsage(context.guild?.id ?? Snowflake.zero(), tag).toList();
+        final events = TagService.instance.getTagUsage(context.guild?.id ?? Snowflake.zero(), tag).toList();
 
-        int totalUses = events.length;
-        int totalHiddenUses = events.where((event) => event.hidden).length;
+        final totalUses = events.length;
+        final totalHiddenUses = events.where((event) => event.hidden).length;
 
-        DateTime threeDaysAgo = DateTime.now().add(Duration(days: -3));
-        int usesLastThreeDays = events.where((event) => event.usedAt.isAfter(threeDaysAgo)).length;
-        int hiddenUsesLastThreeDays = events.where((event) => event.usedAt.isAfter(threeDaysAgo) && event.hidden).length;
+        final threeDaysAgo = DateTime.now().add(Duration(days: -3));
+        final usesLastThreeDays = events.where((event) => event.usedAt.isAfter(threeDaysAgo)).length;
+        final hiddenUsesLastThreeDays = events.where((event) => event.usedAt.isAfter(threeDaysAgo) && event.hidden).length;
 
-        EmbedBuilder embed = EmbedBuilder()
+        final embed = EmbedBuilder()
           ..color = getRandomColor()
           ..title = 'Tag stats${tag != null ? ': ${tag.name}' : ''}'
           ..addField(
@@ -152,10 +152,10 @@ ChatCommand tag = ChatCommand.textOnly(
           );
 
         if (tag == null) {
-          Map<Tag, int> useCount = {};
+          final useCount = <Tag, int>{};
 
           for (final event in events) {
-            Tag? tag = TagService.instance.getById(event.tagId);
+            final tag = TagService.instance.getById(event.tagId);
 
             if (tag == null) {
               continue;
@@ -165,7 +165,7 @@ ChatCommand tag = ChatCommand.textOnly(
           }
 
           if (useCount.isNotEmpty) {
-            Iterable<Tag> top5 = (useCount.entries.toList()..sort((a, b) => b.value.compareTo(a.value))).map((entry) => entry.key).take(5);
+            final top5 = (useCount.entries.toList()..sort((a, b) => b.value.compareTo(a.value))).map((entry) => entry.key).take(5);
 
             embed.addField(
               name: 'Top tags',

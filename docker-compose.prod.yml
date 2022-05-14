@@ -44,12 +44,6 @@ services:
     depends_on:
       - prometheus
 
-  watchtower:
-    image: containrrr/watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 600 --http-api-metrics --http-api-token watchtower running_on_dart
-
 volumes:
   rod_db:
     driver: local

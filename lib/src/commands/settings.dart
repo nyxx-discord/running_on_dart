@@ -35,7 +35,7 @@ ChatGroup settings = ChatGroup(
           return;
         }
 
-        GuildSetting<T> guildSetting = GuildSetting.withData(
+        final guildSetting = GuildSetting.withData(
           setting: setting,
           guildId: context.guild!.id,
           whoEnabled: context.user.id,
@@ -55,7 +55,7 @@ ChatGroup settings = ChatGroup(
         IChatContext context,
         @Description('The setting to disable') Setting<T> setting,
       ) async {
-        GuildSetting<T>? guildSetting = await GuildSettingsService.instance.getSetting(setting, context.guild!.id);
+        final guildSetting = await GuildSettingsService.instance.getSetting(setting, context.guild!.id);
 
         if (guildSetting != null) {
           await GuildSettingsService.instance.disable(guildSetting);
@@ -72,10 +72,10 @@ ChatGroup settings = ChatGroup(
           ..color = getRandomColor()
           ..title = 'Enabled features';
 
-        List<GuildSetting<dynamic>> guildSettings = [];
+        final guildSettings = <GuildSetting<dynamic>>[];
 
         for (final setting in Setting.values) {
-          GuildSetting<dynamic>? guildSetting = await GuildSettingsService.instance.getSetting(setting, context.guild!.id);
+         final guildSetting = await GuildSettingsService.instance.getSetting(setting, context.guild!.id);
 
           if (guildSetting != null) {
             guildSettings.add(guildSetting);

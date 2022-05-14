@@ -10,16 +10,16 @@ ChatCommand ping = ChatCommand(
     DiscordColor color = getRandomColor();
 
     // Get Gateway latency
-    int gatewayLatency = (context.client as INyxxWebsocket).shardManager.gatewayLatency.inMilliseconds;
+    final gatewayLatency = (context.client as INyxxWebsocket).shardManager.gatewayLatency.inMilliseconds;
 
     // Get REST API latency
-    Stopwatch restLatencyTimer = Stopwatch()..start();
+    final restLatencyTimer = Stopwatch()..start();
     await http.head(Uri(
       scheme: 'https',
       host: Constants.host,
       path: Constants.baseUri,
     ));
-    int restLatency = (restLatencyTimer..stop()).elapsedMilliseconds;
+    final restLatency = (restLatencyTimer..stop()).elapsedMilliseconds;
 
     EmbedBuilder embed = EmbedBuilder()
       ..color = color
@@ -28,9 +28,9 @@ ChatCommand ping = ChatCommand(
       ..addField(name: 'Message round-trip', content: 'Pending...', inline: true);
 
     // Get round-trip time
-    Stopwatch roundTripTimer = Stopwatch()..start();
-    IMessage response = await context.respond(MessageBuilder.embed(embed));
-    int roundTrip = (roundTripTimer..stop()).elapsedMilliseconds;
+    final roundTripTimer = Stopwatch()..start();
+    final response = await context.respond(MessageBuilder.embed(embed));
+    final roundTrip = (roundTripTimer..stop()).elapsedMilliseconds;
 
     embed.replaceField(name: 'Message round-trip', content: '${roundTrip}ms', inline: true);
 

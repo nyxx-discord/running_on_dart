@@ -57,7 +57,7 @@ Package: [${element.packageName}](https://pub.dev/packages/${element.packageName
           return;
         }
 
-        int pageCount = 1;
+        var pageCount = 1;
 
         EmbedComponentPagination paginator = EmbedComponentPagination(
           context.commands.interactions,
@@ -67,7 +67,7 @@ Package: [${element.packageName}](https://pub.dev/packages/${element.packageName
                 String entryContent = '[${entry.displayName} ${entry.type}](${entry.urlToDocs})';
 
                 // +1 for newline
-                int wouldBeLength = pages.last.join('\n').length + entryContent.length + 1;
+                var wouldBeLength = pages.last.join('\n').length + entryContent.length + 1;
 
                 if (wouldBeLength > 1024 || pages.last.length >= 10) {
                   pages.add([]);
@@ -103,9 +103,8 @@ Package: [${element.packageName}](https://pub.dev/packages/${element.packageName
 
 /// Search autocomplete, but only include elements from a given package (if there is one selected).
 Iterable<ArgChoiceBuilder> autocompleteQueryWithPackage(AutocompleteContext context) {
-  String? selectedPackageName = context.interactionEvent.options
-      // Cast to IInteractionOption? so we can return `null` in orElse
-      .cast<IInteractionOption?>()
+  final selectedPackageName = context.interactionEvent.options
+      .cast<IInteractionOption?>() // Cast to IInteractionOption? so we can return `null` in orElse
       .firstWhere((element) => element?.name == 'package', orElse: () => null)
       ?.value
       ?.toString();

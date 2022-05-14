@@ -17,7 +17,7 @@ ChatCommand info = ChatCommand(
   'info',
   'Get generic information about the bot',
   (IChatContext context) async {
-    DiscordColor color = getRandomColor();
+    final color = getRandomColor();
 
     EmbedBuilder embed = EmbedBuilder()
       ..color = color

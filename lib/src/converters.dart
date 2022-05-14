@@ -22,11 +22,11 @@ Converter<PackageDocs> packageDocsConverter = Converter<PackageDocs>(
 
 Converter<Duration> durationConverter = Converter<Duration>(
   (view, context) {
-    Duration d = parseStringToDuration(view.getQuotedWord());
+    final duration = parseStringToDuration(view.getQuotedWord());
 
     // [parseStringToDuration] returns Duration.zero on parsing failure
-    if (d.inMilliseconds > 0) {
-      return d;
+    if (duration.inMilliseconds > 0) {
+      return duration;
     }
 
     return null;
@@ -35,23 +35,21 @@ Converter<Duration> durationConverter = Converter<Duration>(
 );
 
 Iterable<ArgChoiceBuilder> autocompleteDuration(AutocompleteContext context) {
-  Iterable<String> clustersSoFar = context.currentValue.split(RegExp(r'((?<=\s)(?=\d))'));
-
-  List<String> options = ['seconds', 'minutes', 'hours', 'days', 'months', 'years'];
+  final clustersSoFar = context.currentValue.split(RegExp(r'((?<=\s)(?=\d))'));
+  final options = ['seconds', 'minutes', 'hours', 'days', 'months', 'years'];
 
   Iterable<String> correct(String current, Iterable<String> nextParts) {
     current = current.trim();
-    List<String> currentSplit = current.split(RegExp(r'\s+|(?<=\d)(?=\w)|(?<=\w)(?=\d)'));
-
-    List<String> corrected = [];
+    final currentSplit = current.split(RegExp(r'\s+|(?<=\d)(?=\w)|(?<=\w)(?=\d)'));
+    final corrected = <String>[];
 
     if (current.isEmpty) {
       // Populate the choices with examples.
       corrected.addAll(options.map((suffix) => '1 $suffix'));
     } else if (currentSplit.length >= 2) {
       // Try to fix the current input. If it is already valid, this code does nothing.
-      Iterable<String> numbers = currentSplit.takeWhile((value) => RegExp(r'\d+').hasMatch(value));
-      String rest = currentSplit.skip(numbers.length).join();
+      final numbers = currentSplit.takeWhile((value) => RegExp(r'\d+').hasMatch(value));
+      final rest = currentSplit.skip(numbers.length).join();
 
       String number = numbers.join();
       if (number.isEmpty) {
@@ -76,7 +74,7 @@ Iterable<ArgChoiceBuilder> autocompleteDuration(AutocompleteContext context) {
             ));
   }
 
-  Iterable<ArgChoiceBuilder> result = correct(clustersSoFar.first, clustersSoFar.skip(1)).take(25).map((e) => ArgChoiceBuilder(e, e));
+  final result = correct(clustersSoFar.first, clustersSoFar.skip(1)).take(25).map((e) => ArgChoiceBuilder(e, e));
 
   if (result.isNotEmpty) {
     return result;
@@ -127,7 +125,7 @@ Iterable<ArgChoiceBuilder> autocompleteManageableTag(AutocompleteContext context
 
 final Converter<Setting<dynamic>> settingsConverter = Converter<Setting<dynamic>>(
   (view, context) {
-    String word = view.getQuotedWord();
+    final word = view.getQuotedWord();
 
     return Setting.values.firstWhere((setting) => setting.value == word);
   },

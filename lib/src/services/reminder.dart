@@ -8,13 +8,13 @@ import 'package:running_on_dart/src/models/reminder.dart';
 import 'package:running_on_dart/src/services/db.dart';
 
 class ReminderService {
+  static ReminderService get instance => _instance ?? (throw Exception('Reminder service must be initialised with Reminder.init'));
+  static ReminderService? _instance;
+
   final List<Reminder> reminders = [];
 
   final Logger _logger = Logger('ROD.Reminders');
   final INyxxWebsocket _client;
-
-  static ReminderService get instance => _instance ?? (throw Exception('Reminder service must be initialised with Reminder.init'));
-  static ReminderService? _instance;
 
   ReminderService._(this._client) {
     DatabaseService.instance.fetchReminders().then((reminders) => this.reminders.addAll(reminders));
@@ -37,9 +37,9 @@ class ReminderService {
 
     _logger.fine('Processing reminders for $now');
 
-    List<Future<void>> executionResults = [];
+    final executionResults = <Future<void>>[];
 
-    // Convert reminders we are running to a seperate list to avoid a concurrent modification exception
+    // Convert reminders we are running to a separate list to avoid a concurrent modification exception
     for (final reminder in reminders.where((reminder) => reminder.triggerAt.isBefore(now)).toList()) {
       executionResults.add(_execute(reminder));
     }
@@ -50,7 +50,7 @@ class ReminderService {
   Future<void> _execute(Reminder reminder) async {
     _logger.fine('Executing reminder ${reminder.id}');
 
-    ITextChannel? channel = _client.channels.values.whereType<ITextChannel?>().firstWhere((channel) => channel?.id == reminder.channelId, orElse: () => null);
+    final channel = _client.channels.values.whereType<ITextChannel?>().firstWhere((channel) => channel?.id == reminder.channelId, orElse: () => null);
 
     if (channel != null) {
       try {
@@ -121,9 +121,8 @@ class ReminderService {
     ).search(query);
 
     results.sort((a, b) {
-      Duration difference = a.item.triggerAt.difference(b.item.triggerAt);
-
-      num weight = difference.inDays.abs() / 10;
+      final difference = a.item.triggerAt.difference(b.item.triggerAt);
+      final weight = difference.inDays.abs() / 10;
 
       if (difference.isNegative) {
         return a.score.compareTo(b.score * weight);

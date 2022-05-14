@@ -5,9 +5,9 @@ import 'package:running_on_dart/src/services/reminder.dart';
 
 void main() async {
   // Create nyxx client and nyxx_commands plugin
-  final INyxxWebsocket client = NyxxFactory.createNyxxWebsocket(token, intents);
+  final client = NyxxFactory.createNyxxWebsocket(token, intents);
 
-  CommandsPlugin commands = CommandsPlugin(
+  final commands = CommandsPlugin(
     prefix: mentionOr((_) => prefix),
     guild: devGuildId,
     options: CommandsOptions(logErrors: false),

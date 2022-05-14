@@ -10,9 +10,3 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       - targets: ['running_on_dart:8080']
-  - job_name: 'watchtower'
-    scrape_interval: 5s
-    metrics_path: /v1/metrics
-    bearer_token: watchtower
-    static_configs:
-      - targets: ['watchtower:8080']

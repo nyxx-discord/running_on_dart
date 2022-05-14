@@ -23,14 +23,13 @@ class JoinLogsService {
       return;
     }
 
-    Snowflake channelId = (await GuildSettingsService.instance.getSetting(Setting.joinLogs, event.guild.id))!.data;
-
-    IChannel? channel = _client.channels[channelId];
+    final channelId = (await GuildSettingsService.instance.getSetting(Setting.joinLogs, event.guild.id))!.data;
+    final channel = _client.channels[channelId];
 
     if (channel is ITextChannel) {
       _logger.fine('Sending join message for member ${event.member.id} in channel $channelId');
 
-      DateTime now = DateTime.now();
+      final now = DateTime.now();
 
       EmbedBuilder embed = EmbedBuilder()
         ..addAuthor((author) {

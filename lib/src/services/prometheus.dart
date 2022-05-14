@@ -23,7 +23,6 @@ class PrometheusService {
 
   final INyxxWebsocket client;
   final CommandsPlugin commands;
-
   final Logger _logger = Logger('ROD.Metrics');
 
   PrometheusService._(this.client, this.commands) {
@@ -40,11 +39,11 @@ class PrometheusService {
   }
 
   void registerPeriodicCollectors() {
-    Gauge totalUsers = Gauge(name: 'nyxx_total_users_cache', help: "Total number of users in cache")..register();
-    Gauge totalChannels = Gauge(name: 'nyxx_total_channels_cache', help: "Total number of channels in cache")..register();
-    Gauge messageCacheSize = Gauge(name: 'nyxx_total_messages_cache', help: "Total number of messages in cache")..register();
-    Gauge totalVoiceStates = Gauge(name: 'nyxx_total_voice_states_cache', help: "Total number of voice states in cache")..register();
-    Gauge shardWebsocketLatency = Gauge(name: 'nyxx_ws_latency', help: "Websocket latency", labelNames: ['shard_id'])..register();
+    final totalUsers = Gauge(name: 'nyxx_total_users_cache', help: "Total number of users in cache")..register();
+    final totalChannels = Gauge(name: 'nyxx_total_channels_cache', help: "Total number of channels in cache")..register();
+    final messageCacheSize = Gauge(name: 'nyxx_total_messages_cache', help: "Total number of messages in cache")..register();
+    final totalVoiceStates = Gauge(name: 'nyxx_total_voice_states_cache', help: "Total number of voice states in cache")..register();
+    final shardWebsocketLatency = Gauge(name: 'nyxx_ws_latency', help: "Websocket latency", labelNames: ['shard_id'])..register();
 
     Timer.periodic(const Duration(seconds: 5), (timer) {
       totalUsers.value = client.users.length.toDouble();
@@ -59,25 +58,25 @@ class PrometheusService {
   }
 
   void registerEventCollectors() {
-    Counter totalMessagesSent = Counter(name: 'nyxx_total_messages_sent', help: "Total number of messages sent", labelNames: ['guild_id'])..register();
+    final totalMessagesSent = Counter(name: 'nyxx_total_messages_sent', help: "Total number of messages sent", labelNames: ['guild_id'])..register();
     client.eventsWs.onMessageReceived.listen((event) => totalMessagesSent.labels([event.message.guild?.id.toString() ?? 'dm']).inc());
 
-    Counter totalGuildJoins = Counter(name: 'nyxx_total_guild_joins', help: "Total number of guild joins", labelNames: ['guild_id'])..register();
+    final totalGuildJoins = Counter(name: 'nyxx_total_guild_joins', help: "Total number of guild joins", labelNames: ['guild_id'])..register();
     client.eventsWs.onGuildMemberAdd.listen((event) => totalGuildJoins.labels([event.guild.id.toString()]).inc());
 
-    Counter httpResponses = Counter(name: 'nyxx_http_response', help: 'Code of http responses', labelNames: ['code'])..register();
+    final httpResponses = Counter(name: 'nyxx_http_response', help: 'Code of http responses', labelNames: ['code'])..register();
     client.eventsRest.onHttpResponse.listen((event) => httpResponses.labels([event.response.statusCode.toString()]).inc());
     client.eventsRest.onHttpError.listen((event) => httpResponses.labels([event.response.statusCode.toString()]).inc());
     client.eventsRest.onRateLimited.listen((event) => httpResponses.labels(['429']).inc());
   }
 
   void registerCommandCollectors() {
-    Counter totalCommands = Counter(name: 'nyxx_total_commands', help: 'The total number of commands used', labelNames: ['name'])..register();
-    Counter totalSlashCommands = Counter(name: 'nyxx_total_slash_commands', help: 'The total number of slash commands used', labelNames: ['name'])..register();
-    Counter totalTextCommands = Counter(name: 'nyxx_total_text_commands', help: 'The total number of text commands used', labelNames: ['name'])..register();
+    final totalCommands = Counter(name: 'nyxx_total_commands', help: 'The total number of commands used', labelNames: ['name'])..register();
+    final totalSlashCommands = Counter(name: 'nyxx_total_slash_commands', help: 'The total number of slash commands used', labelNames: ['name'])..register();
+    final totalTextCommands = Counter(name: 'nyxx_total_text_commands', help: 'The total number of text commands used', labelNames: ['name'])..register();
 
     commands.onPreCall.listen((context) {
-      String name = context.command is ChatCommand ? (context.command as ChatCommand).fullName : context.command.name;
+      final name = context.command is ChatCommand ? (context.command as ChatCommand).fullName : context.command.name;
 
       totalCommands.labels([name]).inc();
       if (context is IInteractionContext) {
@@ -92,8 +91,8 @@ class PrometheusService {
 
     commands.onCommandError.listen((error) {
       if (error is CommandInvocationException) {
-        String name = error.context.command is ChatCommand ? (error.context.command as ChatCommand).fullName : error.context.command.name;
-        String errorName = (error is UncaughtException ? error.exception.runtimeType : error.runtimeType).toString();
+        final name = error.context.command is ChatCommand ? (error.context.command as ChatCommand).fullName : error.context.command.name;
+        final errorName = (error is UncaughtException ? error.exception.runtimeType : error.runtimeType).toString();
 
         totalCommandsFailed.labels([errorName, name]).inc();
       }
@@ -108,19 +107,19 @@ class PrometheusService {
       labelNames: ['name'],
     )..register();
 
-    Expando<DateTime> contextStartTimes = Expando();
+    final contextStartTimes = Expando<DateTime>();
 
     commands.onPreCall.listen((context) => contextStartTimes[context] = DateTime.now());
 
     void handleDone(IContext context) {
-      DateTime? start = contextStartTimes[context];
+      final start = contextStartTimes[context];
 
       if (start == null) {
         return;
       }
 
-      Duration executionTime = DateTime.now().difference(start);
-      String name = context.command is ChatCommand ? (context.command as ChatCommand).fullName : context.command.name;
+      final executionTime = DateTime.now().difference(start);
+      final name = context.command is ChatCommand ? (context.command as ChatCommand).fullName : context.command.name;
 
       commandExecutionTime.labels([name]).observe(executionTime.inMilliseconds.toDouble());
     }
@@ -133,10 +132,10 @@ class PrometheusService {
   }
 
   Future<void> startHttpServer() async {
-    Router router = Router()..get('/metrics', prometheusHandler());
-    Handler handler = Pipeline().addMiddleware(shelf_metrics.register()).addHandler(router);
+    final router = Router()..get('/metrics', prometheusHandler());
+    final handler = Pipeline().addMiddleware(shelf_metrics.register()).addHandler(router);
 
-    HttpServer server = await serve(handler, '0.0.0.0', 8080);
+    final server = await serve(handler, '0.0.0.0', 8080);
     _logger.info('Serving at http://${server.address.host}:${server.port}');
   }
 }

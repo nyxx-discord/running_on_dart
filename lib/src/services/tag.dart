@@ -5,11 +5,11 @@ import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/tag.dart';
 
 class TagService {
-  final List<Tag> tags = [];
-  final List<TagUsedEvent> usedEvents = [];
-
   static TagService get instance => _instance ?? (throw Exception('TagService must be initialised with TagService.init()'));
   static TagService? _instance;
+
+  final List<Tag> tags = [];
+  final List<TagUsedEvent> usedEvents = [];
 
   static void init() {
     _instance = TagService._();
@@ -87,7 +87,7 @@ class TagService {
         return false;
       }
 
-      Tag? fetchedTag = getById(event.tagId);
+      final fetchedTag = getById(event.tagId);
 
       return fetchedTag?.guildId == guildId && fetchedTag?.enabled == true;
     });

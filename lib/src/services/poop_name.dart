@@ -15,7 +15,6 @@ class PoopNameService {
   }
 
   final INyxxWebsocket _client;
-
   final Logger _logger = Logger('ROD.PoopName');
 
   PoopNameService._(this._client) {
