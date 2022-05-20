@@ -9,17 +9,17 @@ import 'package:running_on_dart/src/util.dart';
 ChatCommand docs = ChatCommand.textOnly(
   'docs',
   'Search and get documentation for various packages',
-  (IChatContext context) => context.respond(MessageBuilder.content(defaultDocsResponse.trim())),
+  id('docs', (IChatContext context) => context.respond(MessageBuilder.content(defaultDocsResponse.trim()))),
   children: [
     ChatCommand(
       'info',
       'Get generic documentation information',
-      (IChatContext context) => context.respond(MessageBuilder.content(defaultDocsResponse.trim())),
+      id('docs-info', (IChatContext context) => context.respond(MessageBuilder.content(defaultDocsResponse.trim()))),
     ),
     ChatCommand(
       'get',
       'Get documentation for a specific API element',
-      (
+      id('docs-get', (
         IChatContext context,
         @Description('The element to get documentation for') DocEntry element,
       ) async {
@@ -38,12 +38,12 @@ Package: [${element.packageName}](https://pub.dev/packages/${element.packageName
           });
 
         await context.respond(MessageBuilder.embed(embed));
-      },
+      }),
     ),
     ChatCommand(
       'search',
       'Search for documentation',
-      (
+      id('docs-search', (
         IChatContext context,
         @Description('The query to search for') @Autocomplete(autocompleteQueryWithPackage) String query, [
         @Description('The package to search in') PackageDocs? package,
@@ -96,7 +96,7 @@ Package: [${element.packageName}](https://pub.dev/packages/${element.packageName
         );
 
         await context.respond(paginator.initMessageBuilder());
-      },
+      }),
     ),
   ],
 );

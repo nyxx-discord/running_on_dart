@@ -4,7 +4,7 @@ import 'package:nyxx_commands/nyxx_commands.dart';
 ChatCommand avatar = ChatCommand(
   'avatar',
   "Get a user's avatar",
-  (
+  id('avatar', (
     IChatContext context, [
     @Description('The user to fetch the avatar for') IUser? target,
     @Description("Whether to show the user's guild profile, if they have one") bool showGuildProfile = true,
@@ -34,5 +34,5 @@ ChatCommand avatar = ChatCommand(
     avatarUrl ??= target.avatarURL(size: 512);
 
     await context.respond(MessageBuilder.content(avatarUrl));
-  },
+  }),
 );

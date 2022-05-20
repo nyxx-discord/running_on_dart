@@ -15,7 +15,7 @@ ChatGroup admin = ChatGroup(
     ChatCommand(
       'cleanup',
       'Bulk deletes messages in a channel',
-      (
+      id('admin-cleanup', (
         IChatContext context,
         @UseConverter(IntConverter(min: 1)) @Description('The number of messages to delete') int count, [
         @Description('The user from whom to delete messages') IUser? user,
@@ -54,7 +54,7 @@ ChatGroup admin = ChatGroup(
         } else {
           await context.respond(MessageBuilder.content('Successfully deleted messages!'));
         }
-      },
+      }),
     ),
   ],
 );

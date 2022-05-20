@@ -7,12 +7,12 @@ import 'package:running_on_dart/src/util.dart';
 ChatCommand tag = ChatCommand.textOnly(
   'tag',
   'Create and manage tags',
-  (IChatContext context, Tag tag) => context.respond(MessageBuilder.content(tag.content)),
+  id('tag', (IChatContext context, Tag tag) => context.respond(MessageBuilder.content(tag.content))),
   children: [
     ChatCommand(
       'create',
       'Create a new tag',
-      (
+      id('tag-create', (
         IChatContext context,
         @Description('The name of the tag') String name,
         @Description('The content of the tag') String content, [
@@ -39,12 +39,12 @@ ChatCommand tag = ChatCommand.textOnly(
         await TagService.instance.createTag(tag);
 
         await context.respond(MessageBuilder.content('Tag created successfully!'));
-      },
+      }),
     ),
     ChatCommand(
       'show',
       'Show a tag',
-      (
+      id('tag-show', (
         IChatContext context,
         @Description('The tag to show') Tag tag,
       ) async {
@@ -55,12 +55,12 @@ ChatCommand tag = ChatCommand.textOnly(
           usedAt: DateTime.now(),
           hidden: false,
         ));
-      },
+      }),
     ),
     ChatCommand(
       'preview',
       'View a tag, without making it publically visible',
-      (
+      id('tag-preview', (
         IChatContext context,
         @Description('The tag to preview') Tag tag,
       ) async {
@@ -71,12 +71,12 @@ ChatCommand tag = ChatCommand.textOnly(
           usedAt: DateTime.now(),
           hidden: true,
         ));
-      },
+      }),
     ),
     ChatCommand(
       'enable',
       'Enable a tag',
-      (
+      id('tag-enable', (
         IChatContext context,
         @UseConverter(manageableTagConverter) @Description('The tag to enable') Tag tag,
       ) async {
@@ -89,12 +89,12 @@ ChatCommand tag = ChatCommand.textOnly(
         await TagService.instance.updateTag(tag);
 
         await context.respond(MessageBuilder.content('Successfully enabled tag!'));
-      },
+      }),
     ),
     ChatCommand(
       'disable',
       'Disable a tag',
-      (
+      id('tag-disable', (
         IChatContext context,
         @UseConverter(manageableTagConverter) @Description('The tag to disable') Tag tag,
       ) async {
@@ -107,24 +107,24 @@ ChatCommand tag = ChatCommand.textOnly(
         await TagService.instance.updateTag(tag);
 
         await context.respond(MessageBuilder.content('Successfully disabled tag!'));
-      },
+      }),
     ),
     ChatCommand(
       'delete',
       'Delete an existing tag',
-      (
+      id('tag-delete', (
         IChatContext context,
         @UseConverter(manageableTagConverter) @Description('The tag to delete') Tag tag,
       ) async {
         await TagService.instance.deleteTag(tag);
 
         await context.respond(MessageBuilder.content('Successfully deleted tag!'));
-      },
+      }),
     ),
     ChatCommand(
       'stats',
       'Show tag statistics',
-      (
+      id('tag-stats', (
         IChatContext context, [
         @Description('The tag to show stats for') Tag? tag,
       ]) async {
@@ -175,7 +175,7 @@ ChatCommand tag = ChatCommand.textOnly(
         }
 
         await context.respond(MessageBuilder.embed(embed));
-      },
+      }),
     ),
   ],
 );

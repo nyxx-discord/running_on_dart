@@ -6,7 +6,7 @@ import 'package:running_on_dart/src/util.dart';
 ChatCommand ping = ChatCommand(
   'ping',
   'Checks if the bot is online',
-  (IChatContext context) async {
+  id('ping', (IChatContext context) async {
     DiscordColor color = getRandomColor();
 
     // Get Gateway latency
@@ -35,5 +35,5 @@ ChatCommand ping = ChatCommand(
     embed.replaceField(name: 'Message round-trip', content: '${roundTrip}ms', inline: true);
 
     await response.edit(MessageBuilder.embed(embed));
-  },
+  }),
 );

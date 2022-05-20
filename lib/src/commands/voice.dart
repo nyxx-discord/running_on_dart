@@ -13,7 +13,7 @@ ChatGroup voice = ChatGroup(
     ChatCommand(
       'leave',
       'Leave the channel the bot is currently connected to',
-      (IChatContext context) async {
+      id('voice-leave', (IChatContext context) async {
         (context.client as INyxxWebsocket)
             .shardManager
             .shards
@@ -21,12 +21,12 @@ ChatGroup voice = ChatGroup(
             .changeVoiceState(context.guild!.id, null);
 
         await context.respond(MessageBuilder.content('Left voice channel!'));
-      },
+      }),
     ),
     ChatCommand(
       'join',
       'Make the bot join a voice channel',
-      (
+      id('voice-join', (
         IChatContext context, [
         @Description('The channel to join') IVoiceGuildChannel? channel,
       ]) async {
@@ -44,7 +44,7 @@ ChatGroup voice = ChatGroup(
             .changeVoiceState(context.guild!.id, channel.id);
 
         await context.respond(MessageBuilder.content('Joined voice channel!'));
-      },
+      }),
     ),
   ],
 );

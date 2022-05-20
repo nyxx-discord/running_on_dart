@@ -7,4 +7,6 @@ RUN dart pub get
 COPY . /app
 RUN dart pub get --offline
 
-CMD [ "dart", "run", "bin/running_on_dart.dart" ]
+RUN dart run nyxx_commands:compile bin/running_on_dart.dart -o bot.dart
+
+CMD [ "./bot.exe" ]

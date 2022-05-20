@@ -19,7 +19,7 @@ dependencies:
   migent:
     git: https://github.com/nyxx-discord/migent.git
   nyxx: ^3.4.1
-  nyxx_commands: ^4.2.0-dev.0
+  nyxx_commands: ^4.2.0
   nyxx_interactions: ^4.1.0
   nyxx_pagination: ^2.2.0
   postgres: ^2.4.3

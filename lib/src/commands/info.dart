@@ -16,7 +16,7 @@ String getCurrentMemoryString() {
 ChatCommand info = ChatCommand(
   'info',
   'Get generic information about the bot',
-  (IChatContext context) async {
+  id('info', (IChatContext context) async {
     final color = getRandomColor();
 
     EmbedBuilder embed = EmbedBuilder()
@@ -61,5 +61,5 @@ ChatCommand info = ChatCommand(
             ),
           ),
       ));
-  },
+  }),
 );
