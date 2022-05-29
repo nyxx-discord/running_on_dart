@@ -1,3 +1,4 @@
+import 'package:duration/duration.dart';
 import 'package:logging/logging.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
@@ -12,9 +13,16 @@ void commandErrorHandler(CommandsException error) async {
     String? description;
 
     if (error is CheckFailedException) {
-      title = "You can't use this command!";
-      description = 'This command can only be used by certain users in certain contexts.'
-          ' Check that you have permission to execute the command, or contact a developer for more information.';
+      AbstractCheck failed = error.failed;
+
+      if (failed is CooldownCheck) {
+        title = 'Command on cooldown';
+        description = "You can't use this command right now because it is on cooldown. Please wait ${prettyDuration(failed.remaining(context))} and try again.";
+      } else {
+        title = "You can't use this command!";
+        description = 'This command can only be used by certain users in certain contexts.'
+            ' Check that you have permission to execute the command, or contact a developer for more information.';
+      }
     } else if (error is NotEnoughArgumentsException) {
       title = 'Not enough arguments';
       description = "You didn't provide enough arguments for this command."

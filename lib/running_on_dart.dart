@@ -3,6 +3,7 @@ library running_on_dart;
 export 'src/commands/admin.dart';
 export 'src/commands/avatar.dart';
 export 'src/commands/docs.dart';
+export 'src/commands/github.dart';
 export 'src/commands/info.dart';
 export 'src/commands/ping.dart';
 export 'src/commands/reminder.dart';
