@@ -1,4 +1,4 @@
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:running_on_dart/src/settings.dart';
 
-final Check administratorCheck = UserCheck.anyId(adminIds, 'Administrator check');
+final administratorCheck = UserCheck.anyId(adminIds, 'Administrator check');

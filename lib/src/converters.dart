@@ -10,17 +10,17 @@ import 'package:running_on_dart/src/models/reminder.dart';
 import 'package:running_on_dart/src/models/tag.dart';
 import 'package:running_on_dart/src/services/reminder.dart';
 
-Converter<DocEntry> docEntryConverter = Converter<DocEntry>(
+final docEntryConverter = Converter<DocEntry>(
   (view, context) => DocsService.instance.getByQuery(view.getQuotedWord()),
   autocompleteCallback: (context) => DocsService.instance.search(context.currentValue).take(25).map((e) => ArgChoiceBuilder(e.displayName, e.qualifiedName)),
 );
 
-Converter<PackageDocs> packageDocsConverter = Converter<PackageDocs>(
+final packageDocsConverter = Converter<PackageDocs>(
   (view, context) => DocsService.instance.getPackageDocs(view.getQuotedWord()),
   choices: docsPackages.map((packageName) => ArgChoiceBuilder(packageName, packageName)),
 );
 
-Converter<Duration> durationConverter = Converter<Duration>(
+final durationConverter = Converter<Duration>(
   (view, context) {
     final duration = parseStringToDuration(view.getQuotedWord());
 
@@ -51,12 +51,12 @@ Iterable<ArgChoiceBuilder> autocompleteDuration(AutocompleteContext context) {
       final numbers = currentSplit.takeWhile((value) => RegExp(r'\d+').hasMatch(value));
       final rest = currentSplit.skip(numbers.length).join();
 
-      String number = numbers.join();
+      var number = numbers.join();
       if (number.isEmpty) {
         number = '0';
       }
 
-      String resolvedRest = Fuzzy(options).search(rest).map((result) => result.item).followedBy([rest]).first;
+      final resolvedRest = Fuzzy(options).search(rest).map((result) => result.item).followedBy([rest]).first;
 
       corrected.add('$number $resolvedRest');
     } else if (RegExp(r'\d$').hasMatch(current)) {
@@ -83,7 +83,7 @@ Iterable<ArgChoiceBuilder> autocompleteDuration(AutocompleteContext context) {
   return [ArgChoiceBuilder(context.currentValue, context.currentValue)];
 }
 
-Converter<Reminder> reminderConverter = Converter<Reminder>(
+final reminderConverter = Converter<Reminder>(
   (view, context) => ReminderService.instance.search(context.user.id, view.getQuotedWord()).cast<Reminder?>().followedBy([null]).first,
   autocompleteCallback: (context) => ReminderService.instance
       .search(context.user.id, context.currentValue)
@@ -92,14 +92,14 @@ Converter<Reminder> reminderConverter = Converter<Reminder>(
       .map((e) => ArgChoiceBuilder(e, e)),
 );
 
-Converter<Tag> tagConverter = Converter<Tag>(
+final tagConverter = Converter<Tag>(
   (view, context) => TagService.instance.search(view.getQuotedWord(), context.guild?.id ?? Snowflake.zero()).cast<Tag?>().followedBy([null]).first,
   autocompleteCallback: (context) =>
       TagService.instance.search(context.currentValue, context.guild?.id ?? Snowflake.zero()).take(25).map((e) => e.name).map((e) => ArgChoiceBuilder(e, e)),
 );
 
 // Needs to be const so we can use @UseConverter
-const Converter<Tag> manageableTagConverter = Converter<Tag>(
+const manageableTagConverter = Converter<Tag>(
   getManageableTag,
   autocompleteCallback: autocompleteManageableTag,
 );
@@ -123,7 +123,7 @@ Iterable<ArgChoiceBuilder> autocompleteManageableTag(AutocompleteContext context
     .map((e) => e.name)
     .map((e) => ArgChoiceBuilder(e, e));
 
-final Converter<Setting<dynamic>> settingsConverter = Converter<Setting<dynamic>>(
+final settingsConverter = Converter<Setting<dynamic>>(
   (view, context) {
     final word = view.getQuotedWord();
 
