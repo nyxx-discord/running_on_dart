@@ -56,7 +56,7 @@ class DatabaseService {
 
     _logger.info('Running database migrations');
 
-    MigentMigrationRunner migrator = MigentMigrationRunner(_connection, databaseName, MemoryMigrationAccess())
+    final migrator = MigentMigrationRunner(_connection, databaseName, MemoryMigrationAccess())
       ..enqueueMigration('1', '''
       CREATE TABLE tags (
         id SERIAL PRIMARY KEY,
@@ -146,14 +146,14 @@ class DatabaseService {
   Future<Iterable<Reminder>> fetchReminders() async {
     await _ready;
 
-    PostgreSQLResult result = await _connection.query('SELECT * FROM reminders');
+    final result = await _connection.query('SELECT * FROM reminders');
 
     return result.map(Reminder.fromRow);
   }
 
   /// Delete a reminder from the database.
   Future<void> deleteReminder(Reminder reminder) async {
-    int? id = reminder.id;
+    final id = reminder.id;
 
     if (id == null) {
       return;
@@ -175,7 +175,7 @@ class DatabaseService {
 
     await _ready;
 
-    PostgreSQLResult result = await _connection.query('''
+    final result = await _connection.query('''
     INSERT INTO reminders (
       user_id,
       channel_id,
@@ -207,7 +207,7 @@ class DatabaseService {
   Future<Iterable<Tag>> fetchTags() async {
     await _ready;
 
-    PostgreSQLResult result = await _connection.query('''
+    final result = await _connection.query('''
       SELECT * FROM tags;
     ''');
 
@@ -216,7 +216,7 @@ class DatabaseService {
 
   /// Delete a tag from the database.
   Future<void> deleteTag(Tag tag) async {
-    int? id = tag.id;
+    final id = tag.id;
 
     if (id == null) {
       return;
@@ -240,7 +240,7 @@ class DatabaseService {
 
     await _ready;
 
-    PostgreSQLResult result = await _connection.query('''
+    final result = await _connection.query('''
     INSERT INTO tags (
       name,
       content,
@@ -295,7 +295,7 @@ class DatabaseService {
   Future<Iterable<TagUsedEvent>> fetchTagUsage() async {
     await _ready;
 
-    PostgreSQLResult result = await _connection.query('''
+    final result = await _connection.query('''
       SELECT * FROM tag_usage;
     ''');
 
@@ -326,7 +326,7 @@ class DatabaseService {
   Future<Iterable<GuildSetting<dynamic>>> fetchSettings() async {
     await _ready;
 
-    PostgreSQLResult result = await _connection.query('''
+    final result = await _connection.query('''
       SELECT * FROM feature_settings;
     ''');
 

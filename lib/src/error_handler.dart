@@ -13,7 +13,7 @@ void commandErrorHandler(CommandsException error) async {
     String? description;
 
     if (error is CheckFailedException) {
-      AbstractCheck failed = error.failed;
+      final failed = error.failed;
 
       if (failed is CooldownCheck) {
         title = 'Command on cooldown';

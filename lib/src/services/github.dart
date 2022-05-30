@@ -55,10 +55,10 @@ class GitHubService {
   Future<GitHubStats?> fetchStats([String? accountName]) async {
     accountName ??= githubAccount;
 
-    int starCount = await client.repositories.listUserRepositories(accountName).fold(0, (acc, repo) => acc + repo.stargazersCount);
+    final starCount = await client.repositories.listUserRepositories(accountName).fold<int>(0, (acc, repo) => acc + repo.stargazersCount);
 
     try {
-      github.Organization organization = await client.organizations.get(accountName);
+      final organization = await client.organizations.get(accountName);
 
       return GitHubOrganizationStats(
         memberCount: await client.organizations.listUsers(accountName).length,
@@ -69,7 +69,7 @@ class GitHubService {
         bio: organization.name ?? '',
       );
     } on github.OrganizationNotFound {
-      github.User user = await client.users.getUser(accountName);
+      final user = await client.users.getUser(accountName);
 
       return GitHubStats(
         accountName: accountName,

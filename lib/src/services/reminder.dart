@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:fuzzy/data/result.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:logging/logging.dart';
 import 'package:nyxx/nyxx.dart';
@@ -33,7 +32,7 @@ class ReminderService {
   }
 
   Future<void> _executeScheduled() async {
-    final DateTime now = DateTime.now();
+    final now = DateTime.now();
 
     _logger.fine('Processing reminders for $now');
 
@@ -94,7 +93,7 @@ class ReminderService {
 
   /// Search reminders for a specific user
   Iterable<Reminder> search(Snowflake userId, String query) {
-    List<Result<Reminder>> results = Fuzzy<Reminder>(
+    final results = Fuzzy<Reminder>(
       getUserReminders(userId).toList(),
       options: FuzzyOptions(
         keys: [

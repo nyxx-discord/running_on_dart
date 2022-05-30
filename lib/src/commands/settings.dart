@@ -21,7 +21,7 @@ ChatGroup settings = ChatGroup(
         @Description('Additional data for features that require it') String? data,
       ]) async {
         if (setting.requiresData && data == null) {
-          EmbedBuilder embed = EmbedBuilder()
+          final embed = EmbedBuilder()
             ..color = DiscordColor.red
             ..title = 'Missing required data'
             ..description = 'The setting `${setting.value}` requires the `data` argument to be specified.'
@@ -64,7 +64,7 @@ ChatGroup settings = ChatGroup(
       'list',
       'List all enabled features in this guild',
       id('settings-list', (IChatContext context) async {
-        EmbedBuilder embed = EmbedBuilder()
+        final embed = EmbedBuilder()
           ..color = getRandomColor()
           ..title = 'Enabled features';
 

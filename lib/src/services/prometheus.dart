@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:logging/logging.dart';
@@ -86,7 +85,7 @@ class PrometheusService {
       }
     });
 
-    Counter totalCommandsFailed = Counter(name: 'nyxx_total_commands_failed', help: 'The number of commands that failed', labelNames: ['error', 'name'])
+    final totalCommandsFailed = Counter(name: 'nyxx_total_commands_failed', help: 'The number of commands that failed', labelNames: ['error', 'name'])
       ..register();
 
     commands.onCommandError.listen((error) {
@@ -98,7 +97,7 @@ class PrometheusService {
       }
     });
 
-    Histogram commandExecutionTime = Histogram.exponential(
+    final commandExecutionTime = Histogram.exponential(
       name: 'nyxx_command_execution_time',
       help: 'The time each command took to execute',
       start: 1,

@@ -27,7 +27,7 @@ final github = ChatCommand.textOnly(
           @Description('The package to fetch issues for') PackageDocs? package,
           @Description('Whether to include closed issues in the result') bool includeClosed = false,
         ]) async {
-          List<Issue> issues = await GitHubService.instance
+          final issues = await GitHubService.instance
               .fetchIssues(
                 packageName: package?.packageName,
                 includeClosed: includeClosed,
@@ -64,19 +64,19 @@ final github = ChatCommand.textOnly(
             return a.source.number.compareTo(b.source.number);
           }));
 
-          int pageCount = 1;
+          var pageCount = 1;
 
-          EmbedComponentPagination paginator = EmbedComponentPagination(
+          final paginator = EmbedComponentPagination(
             context.commands.interactions,
             issues
                 .fold<List<List<String>>>(
                   [[]],
                   (pages, issue) {
-                    String issuePrefix = package == null ? '${issue.repo.name} #' : '#';
+                    final issuePrefix = package == null ? '${issue.repo.name} #' : '#';
 
                     String content = '$issuePrefix${issue.source.number} - [${issue.source.title}](${issue.source.htmlUrl})';
 
-                    List<String> badges = [
+                    final badges = [
                       if (issue.isClosed) '(Closed)',
                       if (issue.isHelpWanted) '(Help Wanted)',
                       if (issue.isBlocked) '(Blocked)',
@@ -89,7 +89,7 @@ final github = ChatCommand.textOnly(
                     }
 
                     // +1 for newline
-                    int wouldBeLength = pages.last.join('\n').length + content.length + 1;
+                    final wouldBeLength = pages.last.join('\n').length + content.length + 1;
 
                     if (wouldBeLength > 1024 || pages.last.length >= 10) {
                       pages.add([]);
@@ -133,7 +133,7 @@ final github = ChatCommand.textOnly(
           @Description('The package to fetch docs for') PackageDocs? package,
           @Description('Whether to include closed pull requests in the result') bool includeClosed = false,
         ]) async {
-          List<PullRequest> pulls = await GitHubService.instance
+          final pulls = await GitHubService.instance
               .fetchPullRequests(
                 packageName: package?.packageName,
                 includeClosed: includeClosed,
@@ -178,19 +178,19 @@ final github = ChatCommand.textOnly(
             return a.source.number?.compareTo(b.source.number ?? 0) ?? 1;
           }));
 
-          int pageCount = 1;
+          var pageCount = 1;
 
-          EmbedComponentPagination paginator = EmbedComponentPagination(
+          final paginator = EmbedComponentPagination(
             context.commands.interactions,
             pulls
                 .fold<List<List<String>>>(
                   [[]],
                   (pages, pull) {
-                    String pullPrefix = package != null ? '${package.packageName} #' : '#';
+                    final pullPrefix = package != null ? '${package.packageName} #' : '#';
 
                     String content = '$pullPrefix${pull.source.number} - [${pull.source.title}](${pull.source.htmlUrl})';
 
-                    List<String> badges = [
+                    final badges = [
                       if (pull.isClosed) '(Closed)',
                       if (pull.isDraft) '(Draft)',
                       if (pull.needsReview) '([Needs Review](${pull.reviewUrl}))',
@@ -202,7 +202,7 @@ final github = ChatCommand.textOnly(
                     }
 
                     // +1 for newline
-                    int wouldBeLength = pages.last.join('\n').length + content.length + 1;
+                    final wouldBeLength = pages.last.join('\n').length + content.length + 1;
 
                     if (wouldBeLength > 1024 || pages.last.length >= 10) {
                       pages.add([]);
@@ -245,7 +245,7 @@ final github = ChatCommand.textOnly(
           IChatContext context, [
           @Description('The name of the account to get stats for') String? accountName,
         ]) async {
-          GitHubStats? stats = await GitHubService.instance.fetchStats(accountName);
+          final stats = await GitHubService.instance.fetchStats(accountName);
 
           if (stats == null) {
             await context.respond(MessageBuilder.embed(

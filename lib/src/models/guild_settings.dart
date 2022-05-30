@@ -76,7 +76,7 @@ class GuildSetting<T> {
 
   /// Create an instance of [GuildSetting] from a database row.
   factory GuildSetting.fromRow(PostgreSQLResultRow row) {
-    Map<String, dynamic> mappedRow = row.toColumnMap();
+    final mappedRow = row.toColumnMap();
 
     return GuildSetting.withData(
       setting: Setting.values.singleWhere((setting) => setting.value == mappedRow['name']) as Setting<T>,

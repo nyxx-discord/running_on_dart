@@ -17,7 +17,7 @@ ChatCommand avatar = ChatCommand(
     // Try to fetch the guild profile
     if (showGuildProfile) {
       try {
-        IMember? member = context.guild?.members[target.id];
+        var member = context.guild?.members[target.id];
         // Fetch the member if it was not cached
         member ??= await context.guild?.fetchMember(target.id);
 

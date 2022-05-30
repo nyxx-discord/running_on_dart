@@ -31,7 +31,7 @@ class PackageDocs {
   Future<void> update() async {
     _logger.fine('Updating docs for package "$packageName"');
 
-    http.Response response = await http.get(Uri.parse(urlToDocs));
+    final response = await http.get(Uri.parse(urlToDocs));
 
     if (response.statusCode != 200) {
       _logger.shout('Unable to update docs for package "$packageName": Error ${response.statusCode}');
@@ -39,12 +39,12 @@ class PackageDocs {
     }
 
     try {
-      List<Map<String, dynamic>> data = (jsonDecode(response.body) as List<dynamic>).cast<Map<String, dynamic>>();
+      final data = (jsonDecode(response.body) as List<dynamic>).cast<Map<String, dynamic>>();
 
       entries = {};
 
       for (final dataEntry in data) {
-        DocEntry entry = DocEntry.fromJson(dataEntry);
+        final entry = DocEntry.fromJson(dataEntry);
 
         entries[entry.qualifiedName] = entry;
       }

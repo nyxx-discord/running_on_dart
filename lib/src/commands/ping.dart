@@ -7,7 +7,7 @@ ChatCommand ping = ChatCommand(
   'ping',
   'Checks if the bot is online',
   id('ping', (IChatContext context) async {
-    DiscordColor color = getRandomColor();
+    final color = getRandomColor();
 
     // Get Gateway latency
     final gatewayLatency = (context.client as INyxxWebsocket).shardManager.gatewayLatency.inMilliseconds;
@@ -21,7 +21,7 @@ ChatCommand ping = ChatCommand(
     ));
     final restLatency = (restLatencyTimer..stop()).elapsedMilliseconds;
 
-    EmbedBuilder embed = EmbedBuilder()
+    final embed = EmbedBuilder()
       ..color = color
       ..addField(name: 'Gateway latency', content: '${gatewayLatency}ms', inline: true)
       ..addField(name: 'REST latency', content: '${restLatency}ms', inline: true)
