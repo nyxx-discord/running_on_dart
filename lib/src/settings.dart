@@ -35,16 +35,33 @@ final List<String> docsPackages = getEnv('ROD_DOCS_PACKAGES', 'nyxx nyxx_interac
 /// The default response for the docs command.
 final String defaultDocsResponse = getEnv('ROD_DEFAULT_DOCS_RESPONSE', '''
 __Guides, documentation and development documentation__:
-https://nyxx.l7ssha.xyz
+<https://nyxx.l7ssha.xyz>
 
 __Package documentation__:
-${docsPackages.map((packageName) => '- $packageName: https://pub.dev/documentation/$packageName/latest').join('\n')}
+${docsPackages.map((packageName) => '- $packageName: <https://pub.dev/documentation/$packageName/latest>').join('\n')}
 
 __Dart documentation__:
-- Main documentation: https://dart.dev/guides
-- API reference: https://api.dart.dev
-- Codelabs: https://dart.dev/codelabs
+- Main documentation: <https://dart.dev/guides>
+- API reference: <https://api.dart.dev>
+- Codelabs: <https://dart.dev/codelabs>
 ''');
+
+/// The default response for the github command.
+final String defaultGithubResponse = getEnv('ROD_DEFAULT_GITHUB_RESPONSE', '''
+nyxx is an open source project hosted on GitHub.
+
+__Roadmap__:
+<https://github.com/orgs/nyxx-discord/projects/2>
+
+__Package repositories__:
+${docsPackages.map((packageName) => '- $packageName: <https://github.com/nyxx-discord/$packageName>').join('\n')}
+''');
+
+/// The GitHub account to use when no other account is specified.
+final String githubAccount = getEnv('ROD_GITHUB_ACCOUNT', 'nyxx-discord');
+
+/// The GitHub Personal Access Token to use when authenticating with the GitHub API.
+final String githubToken = getEnv('ROD_GITHUB_TOKEN');
 
 /// Whether this instance should run in development mode.
 final bool dev = getEnvBool('ROD_DEV');

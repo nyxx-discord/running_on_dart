@@ -31,7 +31,7 @@ class JoinLogsService {
 
       final now = DateTime.now();
 
-      EmbedBuilder embed = EmbedBuilder()
+      final embed = EmbedBuilder()
         ..addAuthor((author) {
           author.iconUrl = event.user.avatarURL();
           author.name = event.user.tag;

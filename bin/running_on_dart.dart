@@ -23,7 +23,8 @@ void main() async {
     ..addCommand(reminder)
     ..addCommand(tag)
     ..addCommand(admin)
-    ..addCommand(settings);
+    ..addCommand(settings)
+    ..addCommand(github);
 
   // Add our error handler
   commands.onCommandError.listen(commandErrorHandler);

@@ -8,8 +8,8 @@ import 'package:running_on_dart/src/util.dart';
 import 'package:time_ago_provider/time_ago_provider.dart';
 
 String getCurrentMemoryString() {
-  String current = (ProcessInfo.currentRss / 1024 / 1024).toStringAsFixed(2);
-  String rss = (ProcessInfo.maxRss / 1024 / 1024).toStringAsFixed(2);
+  final current = (ProcessInfo.currentRss / 1024 / 1024).toStringAsFixed(2);
+  final rss = (ProcessInfo.maxRss / 1024 / 1024).toStringAsFixed(2);
   return '$current/$rss MB';
 }
 
@@ -19,7 +19,7 @@ ChatCommand info = ChatCommand(
   id('info', (IChatContext context) async {
     final color = getRandomColor();
 
-    EmbedBuilder embed = EmbedBuilder()
+    final embed = EmbedBuilder()
       ..color = color
       ..addAuthor((author) {
         author.name = (context.client as INyxxWebsocket).self.tag;

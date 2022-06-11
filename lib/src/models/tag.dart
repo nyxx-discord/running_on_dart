@@ -33,7 +33,7 @@ class Tag {
 
   /// Create a [Tag] from a database row.
   factory Tag.fromRow(PostgreSQLResultRow row) {
-    Map<String, dynamic> mappedRow = row.toColumnMap();
+    final mappedRow = row.toColumnMap();
 
     return Tag(
       name: mappedRow['name'] as String,
@@ -69,7 +69,7 @@ class TagUsedEvent {
       );
 
   factory TagUsedEvent.fromRow(PostgreSQLResultRow row) {
-    Map<String, dynamic> mappedRow = row.toColumnMap();
+    final mappedRow = row.toColumnMap();
 
     return TagUsedEvent(
       tagId: mappedRow['command_id'] as int,

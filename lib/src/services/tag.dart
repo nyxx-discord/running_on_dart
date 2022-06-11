@@ -1,4 +1,3 @@
-import 'package:fuzzy/data/result.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/running_on_dart.dart';
@@ -55,7 +54,7 @@ class TagService {
       allTags = getOwnedTags(guildId, userId);
     }
 
-    List<Result<Tag>> results = Fuzzy<Tag>(
+    final results = Fuzzy<Tag>(
       allTags.toList(),
       options: FuzzyOptions(
         keys: [

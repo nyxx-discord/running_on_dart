@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:fuzzy/data/result.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/docs.dart';
@@ -41,7 +40,7 @@ class DocsService {
   ///
   /// If [package] is provided, only elements from that package will be searched.
   Iterable<DocEntry> search(String query, [PackageDocs? package]) {
-    List<Result<DocEntry>> results = Fuzzy<DocEntry>(
+    final results = Fuzzy<DocEntry>(
       (package?.elements ?? getAllEntries()).toList(),
       options: FuzzyOptions(
         keys: [
@@ -73,7 +72,7 @@ class DocsService {
           return 10;
         }
 
-        List<String> priorities = [
+        final priorities = [
           'library',
           'class',
           'top-level constant',

@@ -17,7 +17,7 @@ ChatGroup reminder = ChatGroup(
         @Name('in') @Description('The amount of time after which the reminder should trigger') Duration offset,
         @Description('A short message to attach to the reminder') String message,
       ) async {
-        DateTime triggerAt = DateTime.now().add(offset);
+        final triggerAt = DateTime.now().add(offset);
 
         await ReminderService.instance.addReminder(Reminder(
           userId: context.user.id,
@@ -63,13 +63,13 @@ ChatGroup reminder = ChatGroup(
       'list',
       'List all your active reminders',
       id('reminder-list', (IChatContext context) async {
-        List<Reminder> reminders = ReminderService.instance.getUserReminders(context.user.id).toList()..sort((a, b) => a.triggerAt.compareTo(b.triggerAt));
+        final reminders = ReminderService.instance.getUserReminders(context.user.id).toList()..sort((a, b) => a.triggerAt.compareTo(b.triggerAt));
 
-        EmbedComponentPagination paginator = EmbedComponentPagination(
+        final paginator = EmbedComponentPagination(
           context.commands.interactions,
           reminders.asMap().entries.map((entry) {
-            int index = entry.key;
-            Reminder reminder = entry.value;
+            final index = entry.key;
+            final reminder = entry.value;
 
             return EmbedBuilder()
               ..color = getRandomColor()

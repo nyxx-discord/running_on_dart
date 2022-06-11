@@ -23,9 +23,9 @@ ChatCommand docs = ChatCommand.textOnly(
         IChatContext context,
         @Description('The element to get documentation for') DocEntry element,
       ) async {
-        DiscordColor color = getRandomColor();
+        final color = getRandomColor();
 
-        EmbedBuilder embed = EmbedBuilder()
+        final embed = EmbedBuilder()
           ..color = color
           ..title = '${element.displayName} ${element.type}'
           ..description = '''
@@ -48,7 +48,7 @@ Package: [${element.packageName}](https://pub.dev/packages/${element.packageName
         @Description('The query to search for') @Autocomplete(autocompleteQueryWithPackage) String query, [
         @Description('The package to search in') PackageDocs? package,
       ]) async {
-        Iterable<DocEntry> searchResults = DocsService.instance.search(query, package);
+        final searchResults = DocsService.instance.search(query, package);
 
         if (searchResults.isEmpty) {
           await context.respond(MessageBuilder.embed(EmbedBuilder()
@@ -59,12 +59,12 @@ Package: [${element.packageName}](https://pub.dev/packages/${element.packageName
 
         var pageCount = 1;
 
-        EmbedComponentPagination paginator = EmbedComponentPagination(
+        final paginator = EmbedComponentPagination(
           context.commands.interactions,
           // Chunk our results so we don't exceed 10 results per page or the 1024 field character limit
           searchResults
               .fold<List<List<String>>>([[]], (pages, entry) {
-                String entryContent = '[${entry.displayName} ${entry.type}](${entry.urlToDocs})';
+                final entryContent = '[${entry.displayName} ${entry.type}](${entry.urlToDocs})';
 
                 // +1 for newline
                 var wouldBeLength = pages.last.join('\n').length + entryContent.length + 1;
@@ -79,7 +79,7 @@ Package: [${element.packageName}](https://pub.dev/packages/${element.packageName
               .asMap()
               .entries
               .map((entry) {
-                DiscordColor color = getRandomColor();
+                final color = getRandomColor();
 
                 return EmbedBuilder()
                   ..color = color

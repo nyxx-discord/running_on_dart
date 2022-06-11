@@ -18,6 +18,9 @@ The following environment variables are required to be set for Running on Dart t
 - `POSTGRES_DB`: name of postgres db.
 - `DB_HOST` (optional, default `db`): host of postgres database
 - `DB_PORT` (optional, default `5432`): port of postgres database
+- `ROD_DEFAULT_GITHUB_RESPONSE` (optional, default can be found in `src/settings.dart`): The content of the message to seng when `!github` or `github info` is run.
+- `ROD_GITHUB_ACCOUNT` (optional, default `nyxx-discord`): The GitHub account to use as the base for respository searches.
+- `ROD_GITHUB_TOKEN`: The GitHub Personal Access Token used to access the GitHub API.
 
 Additionally, if `ROD_DEV` is `true`, the following environment variables must also be set:
 - `ROD_DEV_GUILD_ID`: The ID (snowflake) of the guild to register commands to when developing.
