@@ -77,7 +77,7 @@ ChatGroup music = ChatGroup(
       id('music-stop', (IChatContext context) async {
         final node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
         node.stop(context.guild!.id);
-        await respond(context, MessageBuilder.content("Player stopped!"));
+        await respond(context, MessageBuilder.content('Player stopped!'));
       })
     ),
     ChatCommand(
@@ -90,7 +90,7 @@ ChatGroup music = ChatGroup(
             .shards
             .singleWhere((shard) => shard.guilds.contains(context.guild!.id))
             .changeVoiceState(context.guild!.id, null);
-        await respond(context, MessageBuilder.content("Channel left"));
+        await respond(context, MessageBuilder.content('Channel left'));
       })
     ),
     ChatCommand(
@@ -100,7 +100,7 @@ ChatGroup music = ChatGroup(
       id('music-join', (IChatContext context) async {
         MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
         await connectIfNeeded(context);
-        await respond(context, MessageBuilder.content("Joined your voice channel"));
+        await respond(context, MessageBuilder.content('Joined your voice channel'));
       })
     ),
     ChatCommand(
@@ -113,7 +113,7 @@ ChatGroup music = ChatGroup(
         ) async {
         final node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
         node.volume(context.guild!.id, volume);
-        await respond(context, MessageBuilder.content("Volume changed to ${volume.clamp(0, 1000)}"));
+        await respond(context, MessageBuilder.content('Volume changed to ${volume.clamp(0, 1000)}'));
       })
     ),
     ChatCommand(
@@ -122,7 +122,7 @@ ChatGroup music = ChatGroup(
       id('music-pause', (IChatContext context) async {
         final node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
         node.pause(context.guild!.id);
-        await respond(context, MessageBuilder.content("Player paused"));
+        await respond(context, MessageBuilder.content('Player paused'));
       })
     ),
     ChatCommand(
@@ -131,7 +131,7 @@ ChatGroup music = ChatGroup(
       id('music-resume', (IChatContext context) async {
         final node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
         node.resume(context.guild!.id);
-        await respond(context, MessageBuilder.content("Player resumed"));
+        await respond(context, MessageBuilder.content('Player resumed'));
       })
     )
   ]

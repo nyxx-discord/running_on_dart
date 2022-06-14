@@ -9,7 +9,7 @@ final connectedToAVoiceChannelCheck = Check((IContext context) async {
   final selfMember = await context.guild!.selfMember.getOrDownload();
 
   if (selfMember.voiceState == null || selfMember.voiceState!.channel == null) {
-    throw MusicCheckException(context, "I have to be in a voice channel to use this command");
+    throw MusicCheckException(context, 'I have to be in a voice channel to use this command');
   }
   return true;
 });
@@ -34,7 +34,7 @@ final sameVoiceChannelOrDisconnectedCheck = Check((IContext context) async {
   final memberVoiceState = context.member!.voiceState;
 
   if (memberVoiceState == null || memberVoiceState.channel == null) {
-    throw MusicCheckException(context, "You need to be connected to a voice channel to use this command");
+    throw MusicCheckException(context, 'You need to be connected to a voice channel to use this command');
   }
 
   if (selfMemberVoiceState == null || selfMemberVoiceState.channel == null) {
