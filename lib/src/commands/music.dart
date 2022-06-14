@@ -58,8 +58,8 @@ ChatGroup music = ChatGroup(
       'Skips the currently playing track',
       checks: [connectedToAVoiceChannelCheck],
       id('music-skip', (IChatContext context) async {
-        var node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
-        var player = node.players[context.guild!.id]!;
+        final node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
+        final player = node.players[context.guild!.id]!;
 
         if (player.queue.isEmpty) {
           await respond(context, MessageBuilder.content('The queue is clear!'));
@@ -75,7 +75,7 @@ ChatGroup music = ChatGroup(
       'Clears the current player',
       checks: [connectedToAVoiceChannelCheck],
       id('music-clear', (IChatContext context) async {
-        var node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
+        final node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
         node.stop(context.guild!.id);
         await respond(context, MessageBuilder.content("Player cleared!"));
       })
