@@ -14,6 +14,15 @@ final connectedToAVoiceChannelCheck = Check((IContext context) async {
   return true;
 });
 
+final notConnectedToAVoiceChannelCheck = Check((IContext context) async {
+  final selfMember = await context.guild!.selfMember.getOrDownload();
+
+  if (selfMember.voiceState == null || selfMember.voiceState!.channel == null) {
+    return true;
+  }
+  throw MusicCheckException(context, "I'm already connected to a voice channel");
+});
+
 final sameVoiceChannelOrDisconnectedCheck = Check((IContext context) async {
   // If this is an interaction, acknowledge it just in case the check
   // takes too long to run.

@@ -96,6 +96,7 @@ ChatGroup music = ChatGroup(
     ChatCommand(
       'join',
       'Joins the voice channel you are in',
+      checks: [notConnectedToAVoiceChannelCheck],
       id('music-join', (IChatContext context) async {
         MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
         await connectIfNeeded(context);
