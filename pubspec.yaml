@@ -24,6 +24,7 @@ dependencies:
   nyxx_commands: ^4.2.0
   nyxx_interactions: ^4.1.0
   nyxx_pagination: ^2.2.0
+  nyxx_lavalink: ^3.0.1
   postgres: ^2.4.3
   prometheus_client: ^1.0.0
   prometheus_client_shelf: ^1.0.0

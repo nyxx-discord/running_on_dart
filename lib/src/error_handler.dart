@@ -2,6 +2,7 @@ import 'package:duration/duration.dart';
 import 'package:logging/logging.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
+import 'package:running_on_dart/src/services/music.dart';
 
 final _logger = Logger('ROD.CommandErrors');
 
@@ -46,6 +47,14 @@ void commandErrorHandler(CommandsException error) async {
       ..timestamp = DateTime.now();
 
     await context.respond(MessageBuilder.embed(embed));
+    return;
+  } else if (error is MusicCheckException) {
+    // It is safe to send directly the message as it doesn't contain any sensitive information.
+    if (error.context is InteractionChatContext) {
+      await (error.context as InteractionChatContext).interactionEvent.editOriginalResponse(MessageBuilder.content(error.message));
+    } else {
+      await error.context.respond(MessageBuilder.content(error.message));
+    }
     return;
   }
 

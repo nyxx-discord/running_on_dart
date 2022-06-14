@@ -1,6 +1,8 @@
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:running_on_dart/running_on_dart.dart';
+import 'package:running_on_dart/src/commands/music.dart';
+import 'package:running_on_dart/src/services/music.dart';
 import 'package:running_on_dart/src/services/reminder.dart';
 
 void main() async {
@@ -24,7 +26,8 @@ void main() async {
     ..addCommand(tag)
     ..addCommand(admin)
     ..addCommand(settings)
-    ..addCommand(github);
+    ..addCommand(github)
+    ..addCommand(music);
 
   // Add our error handler
   commands.onCommandError.listen(commandErrorHandler);
@@ -51,6 +54,7 @@ void main() async {
   JoinLogsService.init(client);
   TagService.init();
   PrometheusService.init(client, commands);
+  MusicService.init(client);
 
   // Connect
   await client.connect();
