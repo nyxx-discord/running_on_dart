@@ -71,13 +71,13 @@ ChatGroup music = ChatGroup(
       })
     ),
     ChatCommand(
-      'clear',
-      'Clears the current player',
+      'stop',
+      'Stops the current player and clears its track queue',
       checks: [connectedToAVoiceChannelCheck],
-      id('music-clear', (IChatContext context) async {
+      id('music-stop', (IChatContext context) async {
         final node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
         node.stop(context.guild!.id);
-        await respond(context, MessageBuilder.content("Player cleared!"));
+        await respond(context, MessageBuilder.content("Player stopped!"));
       })
     ),
     ChatCommand(
@@ -113,7 +113,7 @@ ChatGroup music = ChatGroup(
         ) async {
         final node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
         node.volume(context.guild!.id, volume);
-        await respond(context, MessageBuilder.content("Volume changed"));
+        await respond(context, MessageBuilder.content("Volume changed to ${volume.clamp(0, 1000)}"));
       })
     ),
     ChatCommand(
