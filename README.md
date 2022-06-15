@@ -21,6 +21,10 @@ The following environment variables are required to be set for Running on Dart t
 - `ROD_DEFAULT_GITHUB_RESPONSE` (optional, default can be found in `src/settings.dart`): The content of the message to seng when `!github` or `github info` is run.
 - `ROD_GITHUB_ACCOUNT` (optional, default `nyxx-discord`): The GitHub account to use as the base for respository searches.
 - `ROD_GITHUB_TOKEN`: The GitHub Personal Access Token used to access the GitHub API.
+- `LAVALINK_ADDRESS` (optional, default `localhost`): The address of the lavalink server to connect to.
+- `LAVALINK_PORT` (optional, default `2333`): The port to use to connect to lavalink server.
+- `LAVALINK_PASSWORD` (optional, default `youshallnotpass`): The password to use when connecting to lavalink server.
+- `LAVALINK_USE_SSL` (optional, default `false`): Whether to use or not ssl to connect to lavalink server.
 
 Additionally, if `ROD_DEV` is `true`, the following environment variables must also be set:
 - `ROD_DEV_GUILD_ID`: The ID (snowflake) of the guild to register commands to when developing.
