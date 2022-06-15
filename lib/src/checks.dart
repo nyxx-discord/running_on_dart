@@ -9,10 +9,11 @@ final connectedToAVoiceChannelCheck = Check((IContext context) async {
   final selfMember = await context.guild!.selfMember.getOrDownload();
 
   if (selfMember.voiceState == null || selfMember.voiceState!.channel == null) {
-    throw MusicCheckException(context, 'I have to be in a voice channel to use this command');
+    await context.respond(MessageBuilder.content('I have to be in a voice channel to use this command'));
+    return false;
   }
   return true;
-});
+}, "musicConnectedToVC");
 
 final notConnectedToAVoiceChannelCheck = Check((IContext context) async {
   final selfMember = await context.guild!.selfMember.getOrDownload();
@@ -20,8 +21,9 @@ final notConnectedToAVoiceChannelCheck = Check((IContext context) async {
   if (selfMember.voiceState == null || selfMember.voiceState!.channel == null) {
     return true;
   }
-  throw MusicCheckException(context, "I'm already connected to a voice channel");
-});
+  await context.respond(MessageBuilder.content("I'm already connected to a voice channel"));
+  return false;
+}, "musicNotConnectedToVC");
 
 final sameVoiceChannelOrDisconnectedCheck = Check((IContext context) async {
   // If this is an interaction, acknowledge it just in case the check
@@ -34,7 +36,8 @@ final sameVoiceChannelOrDisconnectedCheck = Check((IContext context) async {
   final memberVoiceState = context.member!.voiceState;
 
   if (memberVoiceState == null || memberVoiceState.channel == null) {
-    throw MusicCheckException(context, 'You need to be connected to a voice channel to use this command');
+    await context.respond(MessageBuilder.content('You need to be connected to a voice channel to use this command'));
+    return false;
   }
 
   if (selfMemberVoiceState == null || selfMemberVoiceState.channel == null) {
@@ -42,7 +45,8 @@ final sameVoiceChannelOrDisconnectedCheck = Check((IContext context) async {
   }
 
   if (selfMemberVoiceState.channel!.id != memberVoiceState.channel!.id) {
-    throw MusicCheckException(context, "I'm already being used on other voice channel");
+    await context.respond(MessageBuilder.content("I'm already being used on other voice channel"));
+    return false;
   }
   return true;
-});
+}, "musicSameVC");

@@ -14,6 +14,10 @@ void commandErrorHandler(CommandsException error) async {
     String? description;
 
     if (error is CheckFailedException) {
+      if (error.failed.name.contains("music")) {
+        return;
+      }
+
       final failed = error.failed;
 
       if (failed is CooldownCheck) {
@@ -47,14 +51,6 @@ void commandErrorHandler(CommandsException error) async {
       ..timestamp = DateTime.now();
 
     await context.respond(MessageBuilder.embed(embed));
-    return;
-  } else if (error is MusicCheckException) {
-    // It is safe to send directly the message as it doesn't contain any sensitive information.
-    if (error.context is InteractionChatContext) {
-      await (error.context as InteractionChatContext).interactionEvent.editOriginalResponse(MessageBuilder.content(error.message));
-    } else {
-      await error.context.respond(MessageBuilder.content(error.message));
-    }
     return;
   }
 

@@ -53,10 +53,3 @@ class MusicService {
     _instance = MusicService._(client);
   }
 }
-
-/// This exception is thrown when a check related to music commands fails
-/// and it's used to notify about the error to the user.
-class MusicCheckException extends CommandsException {
-  final IContext context;
-  MusicCheckException(this.context, super.message);
-}
