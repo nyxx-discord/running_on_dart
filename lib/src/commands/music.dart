@@ -109,11 +109,11 @@ ChatGroup music = ChatGroup(
       checks: [connectedToAVoiceChannelCheck],
       id('music-volume', (
           IChatContext context,
-          @Description('The new volume, this value must be contained between 0 and 1000') int volume
+          @Description('The new volume, this value must be contained between 0 and 1000') @UseConverter(IntConverter(min: 0, max: 1000)) int volume
         ) async {
         final node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
         node.volume(context.guild!.id, volume);
-        await respond(context, MessageBuilder.content('Volume changed to ${volume.clamp(0, 1000)}'));
+        await respond(context, MessageBuilder.content('Volume changed to $volume'));
       })
     ),
     ChatCommand(
