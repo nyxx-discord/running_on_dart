@@ -86,6 +86,8 @@ ChatGroup music = ChatGroup(
       'Leaves the current voice channel',
       checks: [connectedToAVoiceChannelCheck],
       id('music-leave', (IChatContext context) async {
+        final node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
+        node.destroy(context.guild!.id);
         context.guild!.shard.changeVoiceState(context.guild!.id, null);
         await context.respond(MessageBuilder.content('Channel left'));
       })
