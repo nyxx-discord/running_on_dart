@@ -23,7 +23,7 @@ ChatGroup music = ChatGroup(
         final result = await node.autoSearch(query);
 
         if (result.tracks.isEmpty) {
-          await respond(context, MessageBuilder.content('No results were found'));
+          await context.respond(MessageBuilder.content('No results were found'));
           return;
         }
 
@@ -37,7 +37,7 @@ ChatGroup music = ChatGroup(
             ).queue();
           }
 
-          await respond(context, MessageBuilder.content(
+          await context.respond(MessageBuilder.content(
               'Playlist `${result.playlistInfo.name}`($query) enqueued'
           ));
 
@@ -48,7 +48,7 @@ ChatGroup music = ChatGroup(
             requester: context.member!.id,
             channelId: context.channel.id
           ).queue();
-          await respond(context, MessageBuilder.content(
+          await context.respond(MessageBuilder.content(
               'Track `${result.tracks[0].info?.title}` enqueued'
           ));
         }
@@ -63,12 +63,12 @@ ChatGroup music = ChatGroup(
         final player = node.players[context.guild!.id]!;
 
         if (player.queue.isEmpty) {
-          await respond(context, MessageBuilder.content('The queue is clear!'));
+          await context.respond(MessageBuilder.content('The queue is clear!'));
           return;
         }
 
         node.skip(context.guild!.id);
-        await respond(context, MessageBuilder.content('Skipped current track'));
+        await context.respond(MessageBuilder.content('Skipped current track'));
       })
     ),
     ChatCommand(
@@ -78,7 +78,7 @@ ChatGroup music = ChatGroup(
       id('music-stop', (IChatContext context) async {
         final node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
         node.stop(context.guild!.id);
-        await respond(context, MessageBuilder.content('Player stopped!'));
+        await context.respond(MessageBuilder.content('Player stopped!'));
       })
     ),
     ChatCommand(
@@ -87,7 +87,7 @@ ChatGroup music = ChatGroup(
       checks: [connectedToAVoiceChannelCheck],
       id('music-leave', (IChatContext context) async {
         context.guild!.shard.changeVoiceState(context.guild!.id, null);
-        await respond(context, MessageBuilder.content('Channel left'));
+        await context.respond(MessageBuilder.content('Channel left'));
       })
     ),
     ChatCommand(
@@ -97,7 +97,7 @@ ChatGroup music = ChatGroup(
       id('music-join', (IChatContext context) async {
         MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
         await connectIfNeeded(context);
-        await respond(context, MessageBuilder.content('Joined your voice channel'));
+        await context.respond(MessageBuilder.content('Joined your voice channel'));
       })
     ),
     ChatCommand(
@@ -110,7 +110,7 @@ ChatGroup music = ChatGroup(
         ) async {
         final node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
         node.volume(context.guild!.id, volume);
-        await respond(context, MessageBuilder.content('Volume changed to $volume'));
+        await context.respond(MessageBuilder.content('Volume changed to $volume'));
       })
     ),
     ChatCommand(
@@ -119,7 +119,7 @@ ChatGroup music = ChatGroup(
       id('music-pause', (IChatContext context) async {
         final node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
         node.pause(context.guild!.id);
-        await respond(context, MessageBuilder.content('Player paused'));
+        await context.respond(MessageBuilder.content('Player paused'));
       })
     ),
     ChatCommand(
@@ -128,7 +128,7 @@ ChatGroup music = ChatGroup(
       id('music-resume', (IChatContext context) async {
         final node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
         node.resume(context.guild!.id);
-        await respond(context, MessageBuilder.content('Player resumed'));
+        await context.respond(MessageBuilder.content('Player resumed'));
       })
     )
   ]
@@ -142,13 +142,5 @@ Future<void> connectIfNeeded(IChatContext context) async {
     (context.member!.voiceState != null && context.member!.voiceState!.channel != null)
   ) {
     context.guild!.shard.changeVoiceState(context.guild!.id, context.member!.voiceState!.channel!.id);
-  }
-}
-
-Future<void> respond(IChatContext context, MessageBuilder builder) async {
-  if (context is InteractionChatContext) {
-    await context.interactionEvent.editOriginalResponse(builder);
-  } else {
-    await context.respond(builder);
   }
 }
