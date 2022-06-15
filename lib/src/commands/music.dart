@@ -86,11 +86,7 @@ ChatGroup music = ChatGroup(
       'Leaves the current voice channel',
       checks: [connectedToAVoiceChannelCheck],
       id('music-leave', (IChatContext context) async {
-        (context.client as INyxxWebsocket)
-            .shardManager
-            .shards
-            .singleWhere((shard) => shard.guilds.contains(context.guild!.id))
-            .changeVoiceState(context.guild!.id, null);
+        context.guild!.shard.changeVoiceState(context.guild!.id, null);
         await respond(context, MessageBuilder.content('Channel left'));
       })
     ),
@@ -145,11 +141,7 @@ Future<void> connectIfNeeded(IChatContext context) async {
     (selfMember.voiceState == null || selfMember.voiceState!.channel == null) &&
     (context.member!.voiceState != null && context.member!.voiceState!.channel != null)
   ) {
-    (context.client as INyxxWebsocket)
-        .shardManager
-        .shards
-        .singleWhere((shard) => shard.guilds.contains(context.guild!.id))
-        .changeVoiceState(context.guild!.id, context.member!.voiceState!.channel!.id);
+    context.guild!.shard.changeVoiceState(context.guild!.id, context.member!.voiceState!.channel!.id);
   }
 }
 
