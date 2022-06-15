@@ -77,7 +77,7 @@ String serverAddress = getEnv('LAVALINK_ADDRESS', 'localhost');
 int serverPort = int.parse(getEnv('LAVALINK_PORT', '2333'));
 
 /// The password used to connect to the lavalink server.
-String serverPassword = getEnv('LAVALINK_PASSWORD', 'testing');
+String serverPassword = getEnv('LAVALINK_PASSWORD', 'youshallnotpass');
 
 /// Whether to use or not ssl to establish a connection.
 bool useSSL = getEnvBool('LAVALINK_USE_SSL', false);
