@@ -12,7 +12,7 @@ void main() async {
   final commands = CommandsPlugin(
     prefix: mentionOr((_) => prefix),
     guild: devGuildId,
-    options: CommandsOptions(logErrors: false),
+    options: CommandsOptions(logErrors: false, hideOriginalResponse: false),
   );
 
   // Register our commands
