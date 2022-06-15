@@ -4,18 +4,6 @@ import 'package:nyxx_lavalink/nyxx_lavalink.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/util.dart';
 
-/// The address of the lavalink running server to connect to.
-String serverAddress = getEnv('LAVALINK_ADDRESS', 'localhost');
-
-/// The port of the lavalink running server to use to connect.
-int serverPort = int.parse(getEnv('LAVALINK_PORT', '2333'));
-
-/// The password used to connect to the lavalink server.
-String serverPassword = getEnv('LAVALINK_PASSWORD', 'testing');
-
-/// Whether to use or not ssl to establish a connection.
-bool useSSL = getEnvBool('LAVALINK_USE_SSL', false);
-
 class MusicService {
   static MusicService get instance => _instance ?? (throw Exception('Music service must be initialised with MusicService.init'));
   static MusicService? _instance;
