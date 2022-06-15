@@ -24,6 +24,7 @@ ChatGroup music = ChatGroup(
 
         if (result.tracks.isEmpty) {
           await respond(context, MessageBuilder.content('No results were found'));
+          return;
         }
 
         if (result.playlistInfo.name != null) {
