@@ -10,7 +10,6 @@ export 'src/commands/ping.dart';
 export 'src/commands/reminder.dart';
 export 'src/commands/settings.dart';
 export 'src/commands/tag.dart';
-export 'src/commands/voice.dart';
 export 'src/converters.dart';
 export 'src/error_handler.dart';
 export 'src/services/db.dart';

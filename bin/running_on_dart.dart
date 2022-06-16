@@ -17,7 +17,6 @@ void main() async {
     ..addCommand(ping)
     ..addCommand(info)
     ..addCommand(avatar)
-    ..addCommand(voice)
     ..addCommand(docs)
     ..addCommand(reminder)
     ..addCommand(tag)
