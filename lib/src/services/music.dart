@@ -1,5 +1,4 @@
 import 'package:nyxx/nyxx.dart';
-import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_lavalink/nyxx_lavalink.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/util.dart';

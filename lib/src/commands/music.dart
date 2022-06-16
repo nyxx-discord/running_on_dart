@@ -1,7 +1,7 @@
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:running_on_dart/src/checks.dart';
-import 'package:running_on_dart/src/services/music.dart';
+import 'package:running_on_dart/running_on_dart.dart';
 
 ChatGroup music = ChatGroup(
   'music',
