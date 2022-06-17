@@ -12,7 +12,7 @@ final connectedToAVoiceChannelCheck = Check((IContext context) async {
     return false;
   }
   return true;
-}, "musicConnectedToVC");
+}, 'musicConnectedToVC');
 
 final notConnectedToAVoiceChannelCheck = Check((IContext context) async {
   final selfMember = await context.guild!.selfMember.getOrDownload();
@@ -22,7 +22,7 @@ final notConnectedToAVoiceChannelCheck = Check((IContext context) async {
   }
   await context.respond(MessageBuilder.content("I'm already connected to a voice channel"));
   return false;
-}, "musicNotConnectedToVC");
+}, 'musicNotConnectedToVC');
 
 final sameVoiceChannelOrDisconnectedCheck = Check((IContext context) async {
   // If this is an interaction, acknowledge it just in case the check
@@ -45,7 +45,7 @@ final sameVoiceChannelOrDisconnectedCheck = Check((IContext context) async {
     return false;
   }
   return true;
-}, "musicSameVC");
+}, 'musicSameVC');
 
 final userConnectedToVoiceChannelCheck = Check((IContext context) async {
   final memberVoiceState = context.member!.voiceState;
