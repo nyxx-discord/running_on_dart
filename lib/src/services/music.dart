@@ -20,12 +20,14 @@ class MusicService {
         _cluster = ICluster.createCluster(_client, _client.appId);
 
         await cluster.addNode(NodeOptions(
-            host: serverAddress,
-            port: serverPort,
-            password: serverPassword,
-            ssl: useSSL,
-            clientName: "RunningOnDart",
-            shards: _client.shardManager.totalNumShards
+          host: serverAddress,
+          port: serverPort,
+          password: serverPassword,
+          ssl: useSSL,
+          clientName: "RunningOnDart",
+          shards: _client.shardManager.totalNumShards,
+          // Bump up connection attempts to avoid timeouts in Docker
+          maxConnectAttempts: 10,
         ));
 
         cluster.eventDispatcher.onTrackStart.listen(_trackStarted);

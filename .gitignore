@@ -22,3 +22,6 @@ doc/api/
 # Build files
 *.exe
 *.db
+
+# Configuration files
+lavalink.yml
