@@ -32,12 +32,9 @@ final sameVoiceChannelOrDisconnectedCheck = Check((IContext context) async {
   }
 
   final selfMemberVoiceState = (await context.guild!.selfMember.getOrDownload()).voiceState;
-  final memberVoiceState = context.member!.voiceState;
-
-  if (memberVoiceState == null || memberVoiceState.channel == null) {
-    await context.respond(MessageBuilder.content('You need to be connected to a voice channel to use this command'));
-    return false;
-  }
+  // The upper check should be executed before, so its okay to assume the voice
+  // state exists
+  final memberVoiceState = context.member!.voiceState!;
 
   if (selfMemberVoiceState == null || selfMemberVoiceState.channel == null) {
     return true;
@@ -49,3 +46,11 @@ final sameVoiceChannelOrDisconnectedCheck = Check((IContext context) async {
   }
   return true;
 }, "musicSameVC");
+
+final userConnectedToVoiceChannelCheck = Check((IContext context) async {
+  final memberVoiceState = context.member!.voiceState;
+
+  if (memberVoiceState == null || memberVoiceState.channel == null) {
+    return false;
+  }
+}, 'musicUserConnectedToVC');

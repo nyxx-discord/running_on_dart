@@ -15,6 +15,23 @@ void commandErrorHandler(CommandsException error) async {
 
     if (error is CheckFailedException) {
       if (error.failed.name.contains("music")) {
+        switch (error.failed.name) {
+          case 'musicConnectedToVC':
+            await context.respond(MessageBuilder.content('I have to be in a voice channel to use this command'));
+            break;
+          case 'musicNotConnectedToVC':
+            await context.respond(MessageBuilder.content("I'm already connected to a voice channel"));
+            break;
+          case 'musicSameVC':
+            await context.respond(MessageBuilder.content("I'm already being used on other voice channel"));
+            break;
+          case 'musicUserConnectedToVC':
+            await context.respond(MessageBuilder.content('You need to be connected to a voice channel to use this command'));
+            break;
+          default:
+            break;
+        }
+
         return;
       }
 
