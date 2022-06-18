@@ -53,4 +53,5 @@ final userConnectedToVoiceChannelCheck = Check((IContext context) async {
   if (memberVoiceState == null || memberVoiceState.channel == null) {
     return false;
   }
+  return true;
 }, 'musicUserConnectedToVC');
