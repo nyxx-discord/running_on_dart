@@ -22,7 +22,7 @@ final notConnectedToAVoiceChannelCheck = Check((IContext context) async {
   return false;
 }, 'musicNotConnectedToVC');
 
-final userConnectedToVoiceChannelCheck = Check((IContext context) async {
+final userConnectedToVoiceChannelCheck = Check((IContext context) {
   final memberVoiceState = context.member!.voiceState;
 
   if (memberVoiceState == null || memberVoiceState.channel == null) {
