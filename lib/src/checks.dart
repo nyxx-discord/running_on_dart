@@ -22,6 +22,15 @@ final notConnectedToAVoiceChannelCheck = Check((IContext context) async {
   return false;
 }, 'musicNotConnectedToVC');
 
+final userConnectedToVoiceChannelCheck = Check((IContext context) async {
+  final memberVoiceState = context.member!.voiceState;
+
+  if (memberVoiceState == null || memberVoiceState.channel == null) {
+    return false;
+  }
+  return true;
+}, 'musicUserConnectedToVC');
+
 final sameVoiceChannelOrDisconnectedCheck = Check((IContext context) async {
   // If this is an interaction, acknowledge it just in case the check
   // takes too long to run.
@@ -43,12 +52,3 @@ final sameVoiceChannelOrDisconnectedCheck = Check((IContext context) async {
   }
   return true;
 }, 'musicSameVC');
-
-final userConnectedToVoiceChannelCheck = Check((IContext context) async {
-  final memberVoiceState = context.member!.voiceState;
-
-  if (memberVoiceState == null || memberVoiceState.channel == null) {
-    return false;
-  }
-  return true;
-}, 'musicUserConnectedToVC');
