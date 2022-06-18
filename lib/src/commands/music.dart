@@ -8,6 +8,7 @@ ChatGroup music = ChatGroup(
   'Music related commands',
   checks: [
     GuildCheck.all(),
+    userConnectedToVoiceChannelCheck,
     sameVoiceChannelOrDisconnectedCheck,
   ],
   children: [
