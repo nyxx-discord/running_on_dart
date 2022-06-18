@@ -8,7 +8,6 @@ final connectedToAVoiceChannelCheck = Check((IContext context) async {
   final selfMember = await context.guild!.selfMember.getOrDownload();
 
   if (selfMember.voiceState == null || selfMember.voiceState!.channel == null) {
-    await context.respond(MessageBuilder.content('I have to be in a voice channel to use this command'));
     return false;
   }
   return true;
@@ -20,7 +19,6 @@ final notConnectedToAVoiceChannelCheck = Check((IContext context) async {
   if (selfMember.voiceState == null || selfMember.voiceState!.channel == null) {
     return true;
   }
-  await context.respond(MessageBuilder.content("I'm already connected to a voice channel"));
   return false;
 }, 'musicNotConnectedToVC');
 
@@ -41,7 +39,6 @@ final sameVoiceChannelOrDisconnectedCheck = Check((IContext context) async {
   }
 
   if (selfMemberVoiceState.channel!.id != memberVoiceState.channel!.id) {
-    await context.respond(MessageBuilder.content("I'm already being used on other voice channel"));
     return false;
   }
   return true;
