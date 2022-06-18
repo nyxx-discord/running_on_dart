@@ -2,7 +2,6 @@ import 'package:duration/duration.dart';
 import 'package:logging/logging.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
-import 'package:running_on_dart/src/services/music.dart';
 
 final _logger = Logger('ROD.CommandErrors');
 
