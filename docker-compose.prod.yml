@@ -28,35 +28,6 @@ services:
     volumes:
      - ./lavalink.yml:/opt/Lavalink/application.yml
 
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: running_on_dart_prometheus
-    volumes:
-      - ./prometheus.prod.yml:/etc/prometheus/prometheus.yml
-      - prometheus-data:/prometheus
-    restart: unless-stopped
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-    links:
-      - running_on_dart
-
-  grafana:
-    image: grafana/grafana:latest
-    container_name: running_on_dart_grafana
-    ports:
-      - "127.0.0.1:9191:3000"
-    volumes:
-      - grafana-data:/var/lib/grafana
-    restart: unless-stopped
-    links:
-      - prometheus
-    depends_on:
-      - prometheus
-
 volumes:
   rod_db:
-    driver: local
-  prometheus-data:
-    driver: local
-  grafana-data:
     driver: local
