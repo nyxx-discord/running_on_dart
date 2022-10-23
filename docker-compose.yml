@@ -25,6 +25,8 @@ services:
     image: fredboat/lavalink:master
     container_name: running_on_dart_lavalink
     restart: always
+    expose:
+      - 2333
     volumes:
      - ./lavalink.yml:/opt/Lavalink/application.yml
 
