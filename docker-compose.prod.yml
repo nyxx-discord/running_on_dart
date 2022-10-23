@@ -28,7 +28,7 @@ services:
     expose:
       - 2333
     volumes:
-     - ./lavalink.yml:/opt/Lavalink/application.yml
+     - /services/rod-lavalink.yml:/opt/Lavalink/application.yml:ro
 
 volumes:
   rod-new_rod_db:
