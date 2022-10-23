@@ -133,7 +133,10 @@ class DatabaseService {
     ''')
       ..enqueueMigration('2.1', '''
       ALTER TABLE feature_settings ADD CONSTRAINT settings_name_guild_id_unique UNIQUE (name, guild_id);
-    ''');
+    ''')
+      ..enqueueMigration('2.2', '''
+      TRUNCATE TABLE reminders;
+      ''');
 
     await migrator.runMigrations();
 

@@ -68,6 +68,7 @@ class ReminderService {
     }
 
     reminders.remove(reminder);
+    await removeReminder(reminder);
   }
 
   /// Add a new reminder to the database and schedule its execution.

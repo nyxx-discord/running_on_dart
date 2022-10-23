@@ -1,3 +1,7 @@
+## 3.0.1
+
+- Fixup reminder execution
+
 ## 3.0.0
 
 - Update docker image to Dart 2.18.0
