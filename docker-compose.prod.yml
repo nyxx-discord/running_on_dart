@@ -19,7 +19,7 @@ services:
     env_file:
      - .env
     volumes:
-      - "rod_db:/var/lib/postgresql/data"
+      - "rod-new_rod_db:/var/lib/postgresql/data"
 
   lavalink:
     image: fredboat/lavalink:master
@@ -27,7 +27,3 @@ services:
     restart: always
     volumes:
      - ./lavalink.yml:/opt/Lavalink/application.yml
-
-volumes:
-  rod_db:
-    driver: local
