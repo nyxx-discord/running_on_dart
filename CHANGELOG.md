@@ -1,3 +1,11 @@
+## 3.0.0
+
+- Update docker image to Dart 2.18.0
+- Complete rewrite of existing bot features
+- Add music bot features
+- Add github command
+- Improve stability of reminder feature
+
 ## 2.7.0
 
 - Update docker image to full version
