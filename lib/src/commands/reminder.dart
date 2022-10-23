@@ -19,23 +19,23 @@ ChatGroup reminder = ChatGroup(
       ) async {
         final triggerAt = DateTime.now().add(offset);
 
+        final replyMessage = await context.respond(
+            MessageBuilder.content('Alright ')
+              ..appendMention(context.user)
+              ..append(', ')
+              ..appendTimestamp(triggerAt, style: TimeStampStyle.relativeTime)
+              ..append(': ')
+              ..append(message)
+        );
+
         await ReminderService.instance.addReminder(Reminder(
           userId: context.user.id,
           channelId: context.channel.id,
-          messageId: context is MessageChatContext ? context.message.id : null,
+          messageId: replyMessage.id,
           triggerAt: triggerAt,
           addedAt: DateTime.now(),
           message: message,
         ));
-
-        await context.respond(
-          MessageBuilder.content('Alright ')
-            ..appendMention(context.user)
-            ..append(', ')
-            ..appendTimestamp(triggerAt, style: TimeStampStyle.relativeTime)
-            ..append(': ')
-            ..append(message),
-        );
       }),
     ),
     ChatCommand(
