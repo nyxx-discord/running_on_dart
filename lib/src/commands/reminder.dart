@@ -22,7 +22,7 @@ ChatGroup reminder = ChatGroup(
         final replyMessage = await context.respond(
             MessageBuilder.content('Alright ')
               ..appendMention(context.user)
-              ..append(', ')
+              ..append(', Creating reminder: ')
               ..appendTimestamp(triggerAt, style: TimeStampStyle.relativeTime)
               ..append(': ')
               ..append(message)
@@ -36,6 +36,15 @@ ChatGroup reminder = ChatGroup(
           addedAt: DateTime.now(),
           message: message,
         ));
+
+        await replyMessage.edit(
+            MessageBuilder.content('Alright ')
+              ..appendMention(context.user)
+              ..append(', ')
+              ..appendTimestamp(triggerAt, style: TimeStampStyle.relativeTime)
+              ..append(': ')
+              ..append(message)
+        );
       }),
     ),
     ChatCommand(
