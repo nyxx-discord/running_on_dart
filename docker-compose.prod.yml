@@ -27,3 +27,7 @@ services:
     restart: always
     volumes:
      - ./lavalink.yml:/opt/Lavalink/application.yml
+
+volumes:
+  rod-new_rod_db:
+    external: true
