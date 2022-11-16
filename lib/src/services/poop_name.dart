@@ -27,8 +27,9 @@ class PoopNameService {
       return;
     }
 
-    if ((member.nickname ?? (await member.user.getOrDownload()).username).startsWith(_poopRegexp)) {
-      _logger.fine("Changing ${member.id} (${member.nickname ?? member.user.getFromCache()?.username})'s nickname to poop emoji");
+    final memberUser = await member.user.getOrDownload();
+    if ((member.nickname ?? memberUser.username).startsWith(_poopRegexp)) {
+      _logger.fine("Changing ${member.id} (${member.nickname ?? memberUser.username})'s nickname to poop emoji");
 
       await member.edit(builder: MemberBuilder()..nick = _poopEmoji);
     }

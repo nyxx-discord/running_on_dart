@@ -145,7 +145,7 @@ class DatabaseService {
     _readyCompleter.complete();
   }
 
-  /// Fetch all reminders currrently in the database.
+  /// Fetch all reminders currently in the database.
   Future<Iterable<Reminder>> fetchReminders() async {
     await _ready;
 
@@ -211,7 +211,7 @@ class DatabaseService {
     await _ready;
 
     final result = await _connection.query('''
-      SELECT * FROM tags;
+      SELECT * FROM tags WHERE enabled = TRUE;
     ''');
 
     return result.map(Tag.fromRow);
@@ -228,7 +228,7 @@ class DatabaseService {
     await _ready;
 
     await _connection.execute('''
-      DELETE FROM tags WHERE id = @id;
+      UPDATE tags SET enabled = FALSE WHERE id = @id;
     ''', substitutionValues: {
       'id': id,
     });
@@ -299,7 +299,7 @@ class DatabaseService {
     await _ready;
 
     final result = await _connection.query('''
-      SELECT * FROM tag_usage;
+      SELECT tu.* FROM tag_usage tu JOIN tags t ON t.id = tu.tag_id AND t.enabled = TRUE;
     ''');
 
     return result.map(TagUsedEvent.fromRow);
