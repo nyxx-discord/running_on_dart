@@ -28,8 +28,9 @@ ChatCommand info = ChatCommand(
       })
       ..addFooter((footer) {
         footer.text = 'nyxx ${Constants.version}'
+            ' | $version'
             ' | Shard ${(context.guild?.shard.id ?? 0) + 1} of ${(context.client as INyxxWebsocket).shards}'
-            ' | Dart SDK version ${Platform.version.split('(').first}';
+            ' | Dart SDK ${Platform.version.split('(').first}';
       })
       ..addField(name: 'Cached guilds', content: context.client.guilds.length, inline: true)
       ..addField(name: 'Cached users', content: context.client.users.length, inline: true)

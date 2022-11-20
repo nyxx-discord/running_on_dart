@@ -1,3 +1,8 @@
+## 3.1.0
+
+- Fixup tag deleting (invalid column in db)
+- Add bot version to /info command 
+
 ## 3.0.2
 
 - Fixup tag deleting

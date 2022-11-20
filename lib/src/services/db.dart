@@ -299,7 +299,7 @@ class DatabaseService {
     await _ready;
 
     final result = await _connection.query('''
-      SELECT tu.* FROM tag_usage tu JOIN tags t ON t.id = tu.tag_id AND t.enabled = TRUE;
+      SELECT tu.* FROM tag_usage tu JOIN tags t ON t.id = tu.command_id AND t.enabled = TRUE;
     ''');
 
     return result.map(TagUsedEvent.fromRow);

@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:nyxx/nyxx.dart';
 
+String get version => '3.1.0';
+
 /// Get a [String] from an environment variable, throwing an exception if it is not set.
 ///
 /// If [def] is provided and the environment variable [key] is not set, [def] will be returned
