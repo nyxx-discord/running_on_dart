@@ -28,7 +28,7 @@ ChatCommand info = ChatCommand(
       })
       ..addFooter((footer) {
         footer.text = 'nyxx ${Constants.version}'
-            ' | $version'
+            ' | ROD v$version'
             ' | Shard ${(context.guild?.shard.id ?? 0) + 1} of ${(context.client as INyxxWebsocket).shards}'
             ' | Dart SDK ${Platform.version.split('(').first}';
       })

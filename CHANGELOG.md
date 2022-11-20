@@ -1,3 +1,7 @@
+## 3.2.0
+
+- Update nyxx to 4.3.0
+
 ## 3.1.0
 
 - Fixup tag deleting (invalid column in db)

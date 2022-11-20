@@ -1,7 +1,10 @@
+import 'dart:html';
+
 import 'package:duration/duration.dart';
 import 'package:logging/logging.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
+import 'package:running_on_dart/src/exception.dart';
 
 final _logger = Logger('ROD.CommandErrors');
 
@@ -53,7 +56,13 @@ void commandErrorHandler(CommandsException error) async {
       description = "Your command couldn't be executed because we were unable to understand your input."
           " Please try again with different inputs or contact a developer for more information.";
     } else if (error is UncaughtException) {
-      _logger.severe('Uncaught exception in command: ${error.exception}');
+      final exception = error.exception;
+      if (exception is CheckedBotException) {
+        title = "Cannot process invoked command";
+        description = exception.message;
+      }
+
+      _logger.severe('Uncaught exception in command: $exception)');
     }
 
     // Send a generic "an error occurred" response

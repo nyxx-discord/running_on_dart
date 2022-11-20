@@ -1,6 +1,7 @@
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:running_on_dart/src/checks.dart';
+import 'package:running_on_dart/src/exception.dart';
 
 ChatGroup admin = ChatGroup(
   'admin',
@@ -40,10 +41,14 @@ ChatGroup admin = ChatGroup(
             toRemove = channelMessages.where((message) => message.author.id == user.id);
           }
 
-          if (toRemove.length == 1) {
-            await toRemove.first.delete();
-          } else {
-            await context.channel.bulkRemoveMessages(toRemove);
+          try {
+            if (toRemove.length == 1) {
+              await toRemove.first.delete();
+            } else {
+              await context.channel.bulkRemoveMessages(toRemove);
+            }
+          } on IHttpResponseError catch (e) {
+            throw CheckedBotException(e.message);
           }
 
           count -= toRemove.length;

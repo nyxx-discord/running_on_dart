@@ -22,3 +22,4 @@ export 'src/services/prometheus.dart';
 export 'src/services/reminder.dart';
 export 'src/services/tag.dart';
 export 'src/settings.dart';
+export 'src/exception.dart';
