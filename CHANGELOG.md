@@ -1,3 +1,7 @@
+## 3.2.1
+
+- Fixup build
+
 ## 3.2.0
 
 - Update nyxx to 4.3.0

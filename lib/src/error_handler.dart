@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:duration/duration.dart';
 import 'package:logging/logging.dart';
 import 'package:nyxx/nyxx.dart';
