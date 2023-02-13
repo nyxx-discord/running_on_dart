@@ -1,3 +1,7 @@
+## 3.2.2
+
+- Fixup build
+
 ## 3.2.1
 
 - Fixup build
