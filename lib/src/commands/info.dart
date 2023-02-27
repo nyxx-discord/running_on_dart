@@ -5,7 +5,6 @@ import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_interactions/nyxx_interactions.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/util.dart';
-import 'package:time_ago_provider/time_ago_provider.dart';
 
 String getCurrentMemoryString() {
   final current = (ProcessInfo.currentRss / 1024 / 1024).toStringAsFixed(2);
@@ -37,19 +36,19 @@ ChatCommand info = ChatCommand(
       ..addField(name: 'Cached channels', content: context.client.channels.length, inline: true)
       ..addField(
         name: 'Cached voice states',
-        content: context.client.guilds.values.map((g) => g.voiceStates.length).reduce((value, element) => value + element),
+        content: context.client.guilds.values.map((g) => g.voiceStates.length).fold<num>(0, (value, element) => value + element),
         inline: true,
       )
       ..addField(name: 'Shard count', content: (context.client as INyxxWebsocket).shards, inline: true)
       ..addField(
         name: 'Cached messages',
-        content: context.client.channels.values.whereType<ITextChannel>().map((c) => c.messageCache.length).reduce((value, element) => value + element),
+        content: context.client.channels.values.whereType<ITextChannel>().map((c) => c.messageCache.length).fold<num>(0, (value, element) => value + element),
         inline: true,
       )
       ..addField(name: 'Memory usage (current/RSS)', content: getCurrentMemoryString(), inline: true)
-      ..addField(name: 'Uptime', content: formatFull(context.client.startTime))
+      ..addField(name: 'Uptime', content: TimeStampStyle.relativeTime.format(context.client.startTime))
       ..addField(
-          name: 'Last documentation cache update', content: DocsService.instance.lastUpdate == null ? 'never' : formatFull(DocsService.instance.lastUpdate!));
+          name: 'Last documentation cache update', content: DocsService.instance.lastUpdate == null ? 'never' : TimeStampStyle.relativeTime.format(DocsService.instance.lastUpdate!));
 
     await context.respond(ComponentMessageBuilder()
       ..embeds = [embed]

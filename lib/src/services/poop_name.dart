@@ -3,8 +3,9 @@ import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/guild_settings.dart';
 
-const _poopEmoji = "💩";
-final _poopRegexp = RegExp(r"[!#@^%&-*\.+']");
+const poopEmoji = "💩";
+final poopCharacters = ['!', '#', '@', '^', '%', '&', '-', '*', '.' '+', '\''];
+final poopRegexp = RegExp("[${poopCharacters.join()}]");
 
 class PoopNameService {
   static PoopNameService get instance => _instance ?? (throw Exception('PoopNameService must be initialised with PoopNameService.init'));
@@ -28,10 +29,10 @@ class PoopNameService {
     }
 
     final memberUser = await member.user.getOrDownload();
-    if ((member.nickname ?? memberUser.username).startsWith(_poopRegexp)) {
+    if ((member.nickname ?? memberUser.username).startsWith(poopRegexp)) {
       _logger.fine("Changing ${member.id} (${member.nickname ?? memberUser.username})'s nickname to poop emoji");
 
-      await member.edit(builder: MemberBuilder()..nick = _poopEmoji);
+      await member.edit(builder: MemberBuilder()..nick = poopEmoji);
     }
   }
 }

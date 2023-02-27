@@ -1,17 +1,11 @@
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
-import 'package:running_on_dart/src/checks.dart';
+import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/exception.dart';
 
 ChatGroup admin = ChatGroup(
   'admin',
   'Administrative commands',
-  checks: [
-    administratorCheck,
-  ],
-  options: CommandsOptions(
-    hideOriginalResponse: true,
-  ),
   children: [
     ChatCommand(
       'cleanup',
@@ -60,6 +54,53 @@ ChatGroup admin = ChatGroup(
           await context.respond(MessageBuilder.content('Successfully deleted messages!'));
         }
       }),
+      checks: [PermissionsCheck(PermissionsConstants.manageMessages)],
+      options: CommandsOptions(
+        hideOriginalResponse: true,
+      ),
     ),
+    ChatCommand(
+        "perform-nickname-pooping",
+        "Perform pooping of usernames in current guild",
+        id('perform-nickname-pooping', (IChatContext context, [bool dryRun = true, int batchSize = 100]) async {
+          if (context is InteractionChatContext) {
+            await context.acknowledge();
+          }
+
+          var nickNamesToRemove = <String>[];
+          for(final disallowedChar in poopCharacters) {
+            await for(final member in context.guild!.searchMembersGateway(disallowedChar, limit: batchSize)) {
+              nickNamesToRemove.add(member.nickname ?? member.user.getFromCache()?.username ?? "");
+
+              if (!dryRun) {
+                await member.edit(builder: MemberBuilder()..nick = poopEmoji);
+              }
+            }
+          }
+
+          var outputMessage = "Pooping nicknames" + (dryRun ? "[DRY RUN]" : "") + ":\n";
+          outputMessage += "```";
+          if (nickNamesToRemove.isNotEmpty) {
+            for(final nick in nickNamesToRemove) {
+              outputMessage += "$nick,";
+
+              if (outputMessage.length > 1950) {
+                outputMessage += " ...";
+                break;
+              }
+            }
+            outputMessage.replaceRange(outputMessage.length, null, "");
+          } else {
+            outputMessage += "-/-";
+          }
+          outputMessage += "```";
+
+          context.respond(MessageBuilder.content(outputMessage));
+        }),
+        checks: [
+          GuildCheck.all(),
+          PermissionsCheck(PermissionsConstants.manageNicknames),
+        ]
+    )
   ],
 );

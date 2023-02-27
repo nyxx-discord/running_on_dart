@@ -25,6 +25,8 @@ final bool intentFeaturesEnabled = getEnvBool('ROD_INTENT_FEATURES_ENABLE');
 /// The prefix to use for text commands for this instance.
 final String prefix = getEnv('ROD_PREFIX');
 
+final Snowflake adminGuildId = Snowflake(getEnv('ROD_ADMIN_GUILD'));
+
 /// The IDs of the users that are allowed to use administrator commands
 final List<Snowflake> adminIds = getEnv('ROD_ADMIN_IDS').split(RegExp(r'\s+')).map(Snowflake.new).toList();
 
@@ -88,7 +90,7 @@ bool useSSL = getEnvBool('LAVALINK_USE_SSL', false);
 final int _baseIntents = GatewayIntents.directMessages | GatewayIntents.guilds | GatewayIntents.guildVoiceState;
 
 /// Privileged intents that can be enabled to add additional features to Running on Dart.
-final int _privilegedIntents = _baseIntents | GatewayIntents.guildMessages | GatewayIntents.guildMembers;
+final int _privilegedIntents = _baseIntents | GatewayIntents.guildMessages | GatewayIntents.guildMembers | GatewayIntents.messageContent;
 
 /// The intents to use for this instance.
 final int intents = intentFeaturesEnabled ? _privilegedIntents : _baseIntents;
