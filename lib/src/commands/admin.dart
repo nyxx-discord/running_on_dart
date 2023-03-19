@@ -63,10 +63,6 @@ ChatGroup admin = ChatGroup(
         "perform-nickname-pooping",
         "Perform pooping of usernames in current guild",
         id('perform-nickname-pooping', (IChatContext context, [bool dryRun = true, int batchSize = 100]) async {
-          if (context is InteractionChatContext) {
-            await context.acknowledge();
-          }
-
           var nickNamesToRemove = <String>[];
           for(final disallowedChar in poopCharacters) {
             await for(final member in context.guild!.searchMembersGateway(disallowedChar, limit: batchSize)) {
@@ -78,29 +74,28 @@ ChatGroup admin = ChatGroup(
             }
           }
 
-          var outputMessage = "Pooping nicknames" + (dryRun ? "[DRY RUN]" : "") + ":\n";
-          outputMessage += "```";
-          if (nickNamesToRemove.isNotEmpty) {
-            for(final nick in nickNamesToRemove) {
-              outputMessage += "$nick,";
-
-              if (outputMessage.length > 1950) {
-                outputMessage += " ...";
-                break;
-              }
-            }
-            outputMessage.replaceRange(outputMessage.length, null, "");
-          } else {
-            outputMessage += "-/-";
+          final outPutMessageHeader = "Pooping nicknames" + (dryRun ? "[DRY RUN]" : "");
+          var nickString = nickNamesToRemove.where((element) => element.isNotEmpty).join(",");
+          if (nickString.length > 1950) {
+            nickString = nickString.substring(0, 1950) + " ...";
+          } else if (nickString.isEmpty) {
+            nickString = "-/-";
           }
-          outputMessage += "```";
 
-          context.respond(MessageBuilder.content(outputMessage));
+          var outputMessage = """
+            $outPutMessageHeader:\n
+            ```
+            $nickString
+            ```
+          """;
+
+          await context.respond(MessageBuilder.content(outputMessage));
         }),
         checks: [
           GuildCheck.all(),
           PermissionsCheck(PermissionsConstants.manageNicknames),
-        ]
+        ],
+        options: CommandOptions(autoAcknowledgeInteractions: true)
     )
   ],
 );
