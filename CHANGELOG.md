@@ -1,3 +1,7 @@
+## 3.2.3
+
+- Fix `/reminder list` command
+
 ## 3.2.2
 
 - Fixup build
