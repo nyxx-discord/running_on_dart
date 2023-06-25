@@ -19,14 +19,12 @@ ChatGroup reminder = ChatGroup(
       ) async {
         final triggerAt = DateTime.now().add(offset);
 
-        final replyMessage = await context.respond(
-            MessageBuilder.content('Alright ')
-              ..appendMention(context.user)
-              ..append(', Creating reminder: ')
-              ..appendTimestamp(triggerAt, style: TimeStampStyle.relativeTime)
-              ..append(': ')
-              ..append(message)
-        );
+        final replyMessage = await context.respond(MessageBuilder.content('Alright ')
+          ..appendMention(context.user)
+          ..append(', Creating reminder: ')
+          ..appendTimestamp(triggerAt, style: TimeStampStyle.relativeTime)
+          ..append(': ')
+          ..append(message));
 
         await ReminderService.instance.addReminder(Reminder(
           userId: context.user.id,
@@ -37,14 +35,12 @@ ChatGroup reminder = ChatGroup(
           message: message,
         ));
 
-        await replyMessage.edit(
-            MessageBuilder.content('Alright ')
-              ..appendMention(context.user)
-              ..append(', ')
-              ..appendTimestamp(triggerAt, style: TimeStampStyle.relativeTime)
-              ..append(': ')
-              ..append(message)
-        );
+        await replyMessage.edit(MessageBuilder.content('Alright ')
+          ..appendMention(context.user)
+          ..append(', ')
+          ..appendTimestamp(triggerAt, style: TimeStampStyle.relativeTime)
+          ..append(': ')
+          ..append(message));
       }),
     ),
     ChatCommand(
@@ -74,21 +70,28 @@ ChatGroup reminder = ChatGroup(
       id('reminder-list', (IChatContext context) async {
         final reminders = ReminderService.instance.getUserReminders(context.user.id).toList()..sort((a, b) => a.triggerAt.compareTo(b.triggerAt));
 
+        final entries = reminders.asMap().entries.map((entry) {
+          final index = entry.key;
+          final reminder = entry.value;
+
+          return EmbedBuilder()
+            ..color = getRandomColor()
+            ..title = 'Reminder ${index + 1} of ${reminders.length}'
+            ..addField(
+              name: 'Triggers at',
+              content: '${TimeStampStyle.longDateTime.format(reminder.triggerAt)} (${TimeStampStyle.relativeTime.format(reminder.triggerAt)})',
+            )
+            ..addField(name: 'Content', content: reminder.message.length > 2048 ? reminder.message.substring(0, 2045) + '...' : reminder.message);
+        }).toList();
+
+        if (entries.isEmpty) {
+          await context.respond(MessageBuilder.content("No reminders!"));
+          return;
+        }
+
         final paginator = EmbedComponentPagination(
           context.commands.interactions,
-          reminders.asMap().entries.map((entry) {
-            final index = entry.key;
-            final reminder = entry.value;
-
-            return EmbedBuilder()
-              ..color = getRandomColor()
-              ..title = 'Reminder ${index + 1} of ${reminders.length}'
-              ..addField(
-                name: 'Triggers at',
-                content: '${TimeStampStyle.longDateTime.format(reminder.triggerAt)} (${TimeStampStyle.relativeTime.format(reminder.triggerAt)})',
-              )
-              ..addField(name: 'Content', content: reminder.message.length > 2048 ? reminder.message.substring(0, 2045) + '...' : reminder.message);
-          }).toList(),
+          entries,
         );
 
         await context.respond(paginator.initMessageBuilder());
