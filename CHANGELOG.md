@@ -1,3 +1,7 @@
+## 3.3.0
+
+- Implement new `/admin perform-nickname-pooping` and `/system clear-cache` command 
+
 ## 3.2.3
 
 - Fix `/reminder list` command

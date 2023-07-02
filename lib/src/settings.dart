@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:nyxx/nyxx.dart';
 
-String get version => '3.2.3';
+String get version => '3.3.0';
 
 /// Get a [String] from an environment variable, throwing an exception if it is not set.
 ///
