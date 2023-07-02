@@ -28,11 +28,22 @@ class PoopNameService {
       return;
     }
 
-    final memberUser = await member.user.getOrDownload();
-    if ((member.nickname ?? memberUser.username).startsWith(poopRegexp)) {
-      _logger.fine("Changing ${member.id} (${member.nickname ?? memberUser.username})'s nickname to poop emoji");
+    poopUser(member);
+  }
 
+  /// Returns null if user should be pooped. Returns pooped user username otherwise
+  Future<String?> poopUser(IMember member, {bool dryRun = false}) async {
+    final memberUser = await member.user.getOrDownload();
+    final memberName = member.nickname ?? memberUser.username;
+    if (!memberName.startsWith(poopRegexp)) {
+      return null;
+    }
+
+    if(!dryRun) {
+      _logger.fine("Changing ${member.id} ($memberName) nickname to poop emoji");
       await member.edit(builder: MemberBuilder()..nick = poopEmoji);
     }
+
+    return memberName;
   }
 }

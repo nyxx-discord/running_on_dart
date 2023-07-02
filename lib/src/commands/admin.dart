@@ -1,7 +1,7 @@
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
-import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/exception.dart';
+import 'package:running_on_dart/src/services/poop_name.dart';
 
 ChatGroup admin = ChatGroup(
   'admin',
@@ -66,10 +66,9 @@ ChatGroup admin = ChatGroup(
           var nickNamesToRemove = <String>[];
           for(final disallowedChar in poopCharacters) {
             await for(final member in context.guild!.searchMembersGateway(disallowedChar, limit: batchSize)) {
-              nickNamesToRemove.add(member.nickname ?? member.user.getFromCache()?.username ?? "");
-
-              if (!dryRun) {
-                await member.edit(builder: MemberBuilder()..nick = poopEmoji);
+              final nick = await PoopNameService.instance.poopUser(member, dryRun: dryRun);
+              if (nick != null) {
+                nickNamesToRemove.add(nick);
               }
             }
           }
