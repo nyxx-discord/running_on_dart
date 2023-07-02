@@ -1,17 +1,11 @@
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
-import 'package:running_on_dart/src/checks.dart';
 import 'package:running_on_dart/src/exception.dart';
+import 'package:running_on_dart/src/services/poop_name.dart';
 
 ChatGroup admin = ChatGroup(
   'admin',
   'Administrative commands',
-  checks: [
-    administratorCheck,
-  ],
-  options: CommandsOptions(
-    hideOriginalResponse: true,
-  ),
   children: [
     ChatCommand(
       'cleanup',
@@ -60,6 +54,47 @@ ChatGroup admin = ChatGroup(
           await context.respond(MessageBuilder.content('Successfully deleted messages!'));
         }
       }),
+      checks: [PermissionsCheck(PermissionsConstants.manageMessages)],
+      options: CommandsOptions(
+        hideOriginalResponse: true,
+      ),
     ),
+    ChatCommand(
+        "perform-nickname-pooping",
+        "Perform pooping of usernames in current guild",
+        id('perform-nickname-pooping', (IChatContext context, [bool dryRun = true, int batchSize = 100]) async {
+          var nickNamesToRemove = <String>[];
+          for(final disallowedChar in poopCharacters) {
+            await for(final member in context.guild!.searchMembersGateway(disallowedChar, limit: batchSize)) {
+              final nick = await PoopNameService.instance.poopUser(member, dryRun: dryRun);
+              if (nick != null) {
+                nickNamesToRemove.add(nick);
+              }
+            }
+          }
+
+          final outPutMessageHeader = "Pooping nicknames" + (dryRun ? "[DRY RUN]" : "");
+          var nickString = nickNamesToRemove.where((element) => element.isNotEmpty).join(",");
+          if (nickString.length > 1950) {
+            nickString = nickString.substring(0, 1950) + " ...";
+          } else if (nickString.isEmpty) {
+            nickString = "-/-";
+          }
+
+          var outputMessage = """
+            $outPutMessageHeader:\n
+            ```
+            $nickString
+            ```
+          """;
+
+          await context.respond(MessageBuilder.content(outputMessage));
+        }),
+        checks: [
+          GuildCheck.all(),
+          PermissionsCheck(PermissionsConstants.manageNicknames),
+        ],
+        options: CommandOptions(autoAcknowledgeInteractions: true)
+    )
   ],
 );

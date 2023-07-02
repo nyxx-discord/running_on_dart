@@ -1,6 +1,7 @@
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:running_on_dart/running_on_dart.dart';
+import 'package:running_on_dart/src/commands/system.dart';
 
 void main() async {
   // Create nyxx client and nyxx_commands plugin
@@ -23,7 +24,8 @@ void main() async {
     ..addCommand(admin)
     ..addCommand(settings)
     ..addCommand(github)
-    ..addCommand(music);
+    ..addCommand(music)
+    ..addCommand(system);
 
   // Add our error handler
   commands.onCommandError.listen(commandErrorHandler);

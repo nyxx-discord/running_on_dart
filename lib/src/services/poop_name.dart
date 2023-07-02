@@ -3,8 +3,9 @@ import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/guild_settings.dart';
 
-const _poopEmoji = "💩";
-final _poopRegexp = RegExp(r"[!#@^%&-*\.+']");
+const poopEmoji = "💩";
+final poopCharacters = ['!', '#', '@', '^', '%', '&', '-', '*', '.' '+', '\''];
+final poopRegexp = RegExp("[${poopCharacters.join()}]");
 
 class PoopNameService {
   static PoopNameService get instance => _instance ?? (throw Exception('PoopNameService must be initialised with PoopNameService.init'));
@@ -27,11 +28,22 @@ class PoopNameService {
       return;
     }
 
-    final memberUser = await member.user.getOrDownload();
-    if ((member.nickname ?? memberUser.username).startsWith(_poopRegexp)) {
-      _logger.fine("Changing ${member.id} (${member.nickname ?? memberUser.username})'s nickname to poop emoji");
+    poopUser(member);
+  }
 
-      await member.edit(builder: MemberBuilder()..nick = _poopEmoji);
+  /// Returns null if user should be pooped. Returns pooped user username otherwise
+  Future<String?> poopUser(IMember member, {bool dryRun = false}) async {
+    final memberUser = await member.user.getOrDownload();
+    final memberName = member.nickname ?? memberUser.username;
+    if (!memberName.startsWith(poopRegexp)) {
+      return null;
     }
+
+    if(!dryRun) {
+      _logger.fine("Changing ${member.id} ($memberName) nickname to poop emoji");
+      await member.edit(builder: MemberBuilder()..nick = poopEmoji);
+    }
+
+    return memberName;
   }
 }
