@@ -58,7 +58,7 @@ ChatGroup music = ChatGroup('music', 'Music related commands', checks: [
       'Seek the currently playing track ',
       checks: [connectedToAVoiceChannelCheck],
       id('music-seek', (IChatContext context,
-          @Description('Seek seconds forward in format \'10s\' (default 30s)') String seconds) async {
+          @Description('Seek seconds forward in format \'10s\' (default 30s)') String? seconds) async {
         final node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
         final player = node.players[context.guild!.id]!;
 
@@ -68,11 +68,13 @@ ChatGroup music = ChatGroup('music', 'Music related commands', checks: [
         }
 
         Duration? customSeekDuration;
-        try {
-          parseDuration(seconds);
-        } catch (e) {
-          await context.respond(MessageBuilder.content('Seek time format wrong!'));
-          return;
+        if (seconds != null) {
+          try {
+            parseDuration('${seconds}s');
+          } catch (e) {
+            await context.respond(MessageBuilder.content('Seek time format wrong!'));
+            return;
+          }
         }
         final seekTime = customSeekDuration ?? const Duration(seconds: 30);
 
