@@ -33,8 +33,12 @@ ChatGroup music = ChatGroup('music', 'Music related commands', checks: [
           node
               .play(context.guild!.id, result.tracks[0], requester: context.member!.id, channelId: context.channel.id)
               .queue();
+
           await context.respond(MessageBuilder.content('Track `${result.tracks[0].info?.title}` enqueued'));
         }
+        // self deaf after connecting
+        final guild = context.guild!;
+        guild.shard.changeVoiceState(guild.id, node.players.keys.first, selfDeafen: true);
       })),
   ChatCommand(
       'skip',
