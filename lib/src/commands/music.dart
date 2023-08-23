@@ -1,3 +1,4 @@
+import 'package:duration/duration.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:running_on_dart/src/checks.dart';
@@ -11,7 +12,8 @@ ChatGroup music = ChatGroup('music', 'Music related commands', checks: [
   ChatCommand(
       'play',
       'Plays music based on the given query',
-      id('music-play', (IChatContext context, @Description('The name/url of the song/playlist to play') String query) async {
+      id('music-play',
+          (IChatContext context, @Description('The name/url of the song/playlist to play') String query) async {
         final node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
         connectIfNeeded(context);
         final result = await node.autoSearch(query);
@@ -28,7 +30,9 @@ ChatGroup music = ChatGroup('music', 'Music related commands', checks: [
 
           await context.respond(MessageBuilder.content('Playlist `${result.playlistInfo.name}`($query) enqueued'));
         } else {
-          node.play(context.guild!.id, result.tracks[0], requester: context.member!.id, channelId: context.channel.id).queue();
+          node
+              .play(context.guild!.id, result.tracks[0], requester: context.member!.id, channelId: context.channel.id)
+              .queue();
           await context.respond(MessageBuilder.content('Track `${result.tracks[0].info?.title}` enqueued'));
         }
       })),
@@ -36,7 +40,8 @@ ChatGroup music = ChatGroup('music', 'Music related commands', checks: [
       'skip',
       'Skips the currently playing track',
       checks: [connectedToAVoiceChannelCheck],
-      id('music-skip', (IChatContext context) async {
+      id('music-skip',
+          (IChatContext context, @Description('The name/url of the song/playlist to play') String query) async {
         final node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
         final player = node.players[context.guild!.id]!;
 
@@ -46,6 +51,32 @@ ChatGroup music = ChatGroup('music', 'Music related commands', checks: [
         }
 
         node.skip(context.guild!.id);
+        await context.respond(MessageBuilder.content('Skipped current track'));
+      })),
+  ChatCommand(
+      'seek',
+      'Seek the currently playing track ',
+      checks: [connectedToAVoiceChannelCheck],
+      id('music-seek', (IChatContext context,
+          @Description('Seek seconds forward in format \'10s\' (default 30s)') String seconds) async {
+        final node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
+        final player = node.players[context.guild!.id]!;
+
+        if (player.queue.isEmpty) {
+          await context.respond(MessageBuilder.content('The queue is clear!'));
+          return;
+        }
+
+        Duration? customSeekDuration;
+        try {
+          parseDuration(seconds);
+        } catch (e) {
+          await context.respond(MessageBuilder.content('Seek time format wrong!'));
+          return;
+        }
+        final seekTime = customSeekDuration ?? const Duration(seconds: 30);
+
+        node.seek(context.guild!.id, seekTime);
         await context.respond(MessageBuilder.content('Skipped current track'));
       })),
   ChatCommand(
@@ -81,7 +112,9 @@ ChatGroup music = ChatGroup('music', 'Music related commands', checks: [
       'Sets the volume for the player',
       checks: [connectedToAVoiceChannelCheck],
       id('music-volume', (IChatContext context,
-          @Description('The new volume, this value must be contained between 0 and 1000') @UseConverter(IntConverter(min: 0, max: 1000)) int volume) async {
+          @Description('The new volume, this value must be contained between 0 and 1000')
+          @UseConverter(IntConverter(min: 0, max: 1000))
+          int volume) async {
         final node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
         node.volume(context.guild!.id, volume);
         await context.respond(MessageBuilder.content('Volume changed to $volume'));
