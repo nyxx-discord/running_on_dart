@@ -57,8 +57,7 @@ ChatGroup music = ChatGroup('music', 'Music related commands', checks: [
       'seek',
       'Seek the currently playing track ',
       checks: [connectedToAVoiceChannelCheck],
-      id('music-seek', (IChatContext context,
-          @Description('Seek seconds forward in format \'10s\' (default 30s)') String? seconds) async {
+      id('music-seek', (IChatContext context, @Description('Seek seconds forward') String seconds) async {
         final node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
         final player = node.players[context.guild!.id]!;
 
@@ -67,19 +66,16 @@ ChatGroup music = ChatGroup('music', 'Music related commands', checks: [
           return;
         }
 
-        Duration? customSeekDuration;
-        if (seconds != null) {
-          try {
-            parseDuration('${seconds}s');
-          } catch (e) {
-            await context.respond(MessageBuilder.content('Seek time format wrong!'));
-            return;
-          }
-        }
-        final seekTime = customSeekDuration ?? const Duration(seconds: 30);
+        try {
+          Duration customSeekDuration = parseDuration('${seconds}s');
+          final seekTime = customSeekDuration;
 
-        node.seek(context.guild!.id, seekTime);
-        await context.respond(MessageBuilder.content('Skipped current track'));
+          node.seek(context.guild!.id, seekTime);
+          await context.respond(MessageBuilder.content('Seek ${customSeekDuration.inSeconds}s forward'));
+        } catch (e) {
+          await context.respond(MessageBuilder.content('Seek time format wrong!'));
+          return;
+        }
       })),
   ChatCommand(
       'stop',
