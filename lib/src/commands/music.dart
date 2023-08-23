@@ -36,9 +36,6 @@ ChatGroup music = ChatGroup('music', 'Music related commands', checks: [
 
           await context.respond(MessageBuilder.content('Track `${result.tracks[0].info?.title}` enqueued'));
         }
-        // self deaf after connecting
-        final guild = context.guild!;
-        guild.shard.changeVoiceState(guild.id, node.players.keys.first, selfDeafen: true);
       })),
   ChatCommand(
       'skip',
@@ -144,6 +141,6 @@ Future<void> connectIfNeeded(IChatContext context) async {
 
   if ((selfMember.voiceState == null || selfMember.voiceState!.channel == null) &&
       (context.member!.voiceState != null && context.member!.voiceState!.channel != null)) {
-    context.guild!.shard.changeVoiceState(context.guild!.id, context.member!.voiceState!.channel!.id);
+    context.guild!.shard.changeVoiceState(context.guild!.id, context.member!.voiceState!.channel!.id, selfDeafen: true);
   }
 }
