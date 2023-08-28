@@ -8,7 +8,6 @@ import 'package:running_on_dart/src/models/docs.dart';
 import 'package:running_on_dart/src/models/guild_settings.dart';
 import 'package:running_on_dart/src/models/reminder.dart';
 import 'package:running_on_dart/src/models/tag.dart';
-import 'package:running_on_dart/src/services/reminder.dart';
 
 final docEntryConverter = Converter<DocEntry>(
   (view, context) => DocsService.instance.getByQuery(view.getQuotedWord()),
