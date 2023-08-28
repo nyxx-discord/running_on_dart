@@ -56,9 +56,9 @@ ChatGroup music = ChatGroup('music', 'Music related commands', checks: [
       })),
   ChatCommand(
       'seek',
-      'Seek the currently playing track ',
+      'Seek forward the currently playing track',
       checks: [connectedToAVoiceChannelCheck],
-      id('music-seek', (IChatContext context, [@Description('Seek seconds forward') int seconds = 30]) async {
+      id('music-seek', (IChatContext context, [@Description('Default: 30 seconds') int seconds = 30]) async {
         final node = MusicService.instance.cluster.getOrCreatePlayerNode(context.guild!.id);
         final player = node.players[context.guild!.id]!;
 
