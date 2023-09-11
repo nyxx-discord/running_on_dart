@@ -31,24 +31,50 @@ ChatCommand info = ChatCommand(
             ' | Shard ${(context.guild?.shard.id ?? 0) + 1} of ${(context.client as INyxxWebsocket).shards}'
             ' | Dart SDK ${Platform.version.split('(').first}';
       })
-      ..addField(name: 'Cached guilds', content: context.client.guilds.length, inline: true)
-      ..addField(name: 'Cached users', content: context.client.users.length, inline: true)
-      ..addField(name: 'Cached channels', content: context.client.channels.length, inline: true)
+      ..addField(
+          name: 'Cached guilds',
+          content: context.client.guilds.length,
+          inline: true)
+      ..addField(
+          name: 'Cached users',
+          content: context.client.users.length,
+          inline: true)
+      ..addField(
+          name: 'Cached channels',
+          content: context.client.channels.length,
+          inline: true)
       ..addField(
         name: 'Cached voice states',
-        content: context.client.guilds.values.map((g) => g.voiceStates.length).fold<num>(0, (value, element) => value + element),
+        content: context.client.guilds.values
+            .map((g) => g.voiceStates.length)
+            .fold<num>(0, (value, element) => value + element),
         inline: true,
       )
-      ..addField(name: 'Shard count', content: (context.client as INyxxWebsocket).shards, inline: true)
+      ..addField(
+          name: 'Shard count',
+          content: (context.client as INyxxWebsocket).shards,
+          inline: true)
       ..addField(
         name: 'Cached messages',
-        content: context.client.channels.values.whereType<ITextChannel>().map((c) => c.messageCache.length).fold<num>(0, (value, element) => value + element),
+        content: context.client.channels.values
+            .whereType<ITextChannel>()
+            .map((c) => c.messageCache.length)
+            .fold<num>(0, (value, element) => value + element),
         inline: true,
       )
-      ..addField(name: 'Memory usage (current/RSS)', content: getCurrentMemoryString(), inline: true)
-      ..addField(name: 'Uptime', content: TimeStampStyle.relativeTime.format(context.client.startTime))
       ..addField(
-          name: 'Last documentation cache update', content: DocsService.instance.lastUpdate == null ? 'never' : TimeStampStyle.relativeTime.format(DocsService.instance.lastUpdate!));
+          name: 'Memory usage (current/RSS)',
+          content: getCurrentMemoryString(),
+          inline: true)
+      ..addField(
+          name: 'Uptime',
+          content: TimeStampStyle.relativeTime.format(context.client.startTime))
+      ..addField(
+          name: 'Last documentation cache update',
+          content: DocsService.instance.lastUpdate == null
+              ? 'never'
+              : TimeStampStyle.relativeTime
+                  .format(DocsService.instance.lastUpdate!));
 
     await context.respond(ComponentMessageBuilder()
       ..embeds = [embed]

@@ -28,13 +28,15 @@ class DocsService {
   PackageDocs? getPackageDocs(String packageName) => _cache[packageName];
 
   /// Get all documentation entries across all packages.
-  Iterable<DocEntry> getAllEntries() => _cache.values.fold(Iterable.empty(), (previousValue, element) => previousValue.followedBy(element.elements));
+  Iterable<DocEntry> getAllEntries() => _cache.values.fold(Iterable.empty(),
+      (previousValue, element) => previousValue.followedBy(element.elements));
 
   /// Get a documentation entry by its qualified name. Returns `null` if no entry was found.
   DocEntry? getByQualifiedName(String qualifiedName) => getAllEntries()
       // Cast to DocEntry? so we can return null in orElse
       .cast<DocEntry?>()
-      .firstWhere((element) => element?.qualifiedName == qualifiedName, orElse: () => null);
+      .firstWhere((element) => element?.qualifiedName == qualifiedName,
+          orElse: () => null);
 
   /// Searches for a specific element across all documentation using fuzzy search.
   ///
@@ -67,7 +69,8 @@ class DocsService {
 
     results.sort((a, b) {
       num getWeight(DocEntry entry) {
-        if (entry.type == 'method' && (entry.name.startsWith('operator ') || entry.name == 'hashCode')) {
+        if (entry.type == 'method' &&
+            (entry.name.startsWith('operator ') || entry.name == 'hashCode')) {
           // We don't want operators or hashCodes polluting our results
           return 10;
         }
@@ -126,6 +129,9 @@ class DocsService {
   DocEntry? getByQuery(String query) =>
       getByQualifiedName(query) ??
       search(query)
-          .cast<DocEntry?>() // Cast to DocEntry? so we can return null in orElse
-          .firstWhere((element) => true, orElse: () => null); // Return the top result, or `null` if the list is empty
+          .cast<
+              DocEntry?>() // Cast to DocEntry? so we can return null in orElse
+          .firstWhere((element) => true,
+              orElse: () =>
+                  null); // Return the top result, or `null` if the list is empty
 }

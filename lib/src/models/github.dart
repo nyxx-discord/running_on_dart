@@ -8,10 +8,12 @@ class Issue {
   Issue(this.repo, this.source);
 
   bool get hasPullRequest => source.pullRequest != null;
-  bool get hasAssignee => source.assignee != null || (source.assignees?.isNotEmpty ?? false);
+  bool get hasAssignee =>
+      source.assignee != null || (source.assignees?.isNotEmpty ?? false);
 
   bool get isBlocked => source.labels.any((label) => label.name == 'blocked');
-  bool get isHelpWanted => source.labels.any((label) => label.name == 'help wanted');
+  bool get isHelpWanted =>
+      source.labels.any((label) => label.name == 'help wanted');
 
   bool get isClosed => source.isClosed;
 }
@@ -22,17 +24,21 @@ class PullRequest {
 
   final bool _needsReview;
 
-  PullRequest(this.repo, this.source, {required bool needsReview}) : _needsReview = needsReview;
+  PullRequest(this.repo, this.source, {required bool needsReview})
+      : _needsReview = needsReview;
 
   bool get isClosed => source.closedAt != null;
   bool get isDraft => source.draft ?? false;
 
   bool get needsReview => !isDraft && !isClosed && _needsReview;
-  String get reviewUrl => 'https://github.com/$githubAccount/${repo.name}/pull/${source.number}/files';
+  String get reviewUrl =>
+      'https://github.com/$githubAccount/${repo.name}/pull/${source.number}/files';
 
   bool get hasMilestone => source.milestone != null;
   String? get milestoneName => source.milestone?.title;
-  String? get milestoneUrl => source.milestone != null ? 'https://github.com/$githubAccount/${repo.name}/milestone/${source.milestone!.number}' : null;
+  String? get milestoneUrl => source.milestone != null
+      ? 'https://github.com/$githubAccount/${repo.name}/milestone/${source.milestone!.number}'
+      : null;
 }
 
 class GitHubStats {

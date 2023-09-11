@@ -4,12 +4,17 @@ import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/util.dart';
 
 class MusicService {
-  static MusicService get instance => _instance ?? (throw Exception('Music service must be initialised with MusicService.init'));
+  static MusicService get instance =>
+      _instance ??
+      (throw Exception(
+          'Music service must be initialised with MusicService.init'));
   static MusicService? _instance;
 
   final INyxxWebsocket _client;
 
-  ICluster get cluster => _cluster ?? (throw Exception('Cluster must be accessed after `on_ready` event'));
+  ICluster get cluster =>
+      _cluster ??
+      (throw Exception('Cluster must be accessed after `on_ready` event'));
 
   /// The cluster used to interact with lavalink
   ICluster? _cluster;
@@ -43,10 +48,13 @@ class MusicService {
       final embed = EmbedBuilder()
         ..color = getRandomColor()
         ..title = "Track started"
-        ..description = "Track [${track.track.info?.title}](${track.track.info?.uri}) started playing.\n\nRequested by <@${track.requester!}>"
-        ..thumbnailUrl = "https://img.youtube.com/vi/${track.track.info?.identifier}/hqdefault.jpg";
+        ..description =
+            "Track [${track.track.info?.title}](${track.track.info?.uri}) started playing.\n\nRequested by <@${track.requester!}>"
+        ..thumbnailUrl =
+            "https://img.youtube.com/vi/${track.track.info?.identifier}/hqdefault.jpg";
 
-      await _client.httpEndpoints.sendMessage(track.channelId!, MessageBuilder.embed(embed));
+      await _client.httpEndpoints
+          .sendMessage(track.channelId!, MessageBuilder.embed(embed));
     }
   }
 

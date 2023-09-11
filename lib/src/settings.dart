@@ -8,13 +8,17 @@ String get version => '3.3.0';
 ///
 /// If [def] is provided and the environment variable [key] is not set, [def] will be returned
 /// instead of throwing an exception.
-String getEnv(String key, [String? def]) => Platform.environment[key] ?? def ?? (throw Exception('Missing `$key` environment variable'));
+String getEnv(String key, [String? def]) =>
+    Platform.environment[key] ??
+    def ??
+    (throw Exception('Missing `$key` environment variable'));
 
 /// Get a [bool] from an environment variable, throwing an exception if it is not set.
 ///
 /// If [def] is provided and the environment variable [key] is not set, [def] will be returned
 /// instead of throwing an exception.
-bool getEnvBool(String key, [bool? def]) => ['true', '1'].contains(getEnv(key, def?.toString()).toLowerCase());
+bool getEnvBool(String key, [bool? def]) =>
+    ['true', '1'].contains(getEnv(key, def?.toString()).toLowerCase());
 
 /// The token to use for this instance.
 final String token = getEnv('ROD_TOKEN');
@@ -28,13 +32,17 @@ final String prefix = getEnv('ROD_PREFIX');
 final Snowflake adminGuildId = Snowflake(getEnv('ROD_ADMIN_GUILD'));
 
 /// The IDs of the users that are allowed to use administrator commands
-final List<Snowflake> adminIds = getEnv('ROD_ADMIN_IDS').split(RegExp(r'\s+')).map(Snowflake.new).toList();
+final List<Snowflake> adminIds =
+    getEnv('ROD_ADMIN_IDS').split(RegExp(r'\s+')).map(Snowflake.new).toList();
 
 /// The interval at which to update the docs cache.
-final Duration docsUpdateInterval = Duration(seconds: int.parse(getEnv('ROD_DOCS_UPDATE_INTERVAL', '900')));
+final Duration docsUpdateInterval =
+    Duration(seconds: int.parse(getEnv('ROD_DOCS_UPDATE_INTERVAL', '900')));
 
 /// The packages to cache documentation for.
-final List<String> docsPackages = getEnv('ROD_DOCS_PACKAGES', 'nyxx nyxx_interactions nyxx_commands nyxx_lavalink nyxx_extensions').split(RegExp(r'\s+'));
+final List<String> docsPackages = getEnv('ROD_DOCS_PACKAGES',
+        'nyxx nyxx_interactions nyxx_commands nyxx_lavalink nyxx_extensions')
+    .split(RegExp(r'\s+'));
 
 /// The default response for the docs command.
 final String defaultDocsResponse = getEnv('ROD_DEFAULT_DOCS_RESPONSE', '''
@@ -72,7 +80,8 @@ final bool dev = getEnvBool('ROD_DEV');
 
 /// If this instance is in development mode, the ID of the guild to register commands to, else
 /// `null`.
-final Snowflake? devGuildId = dev ? Snowflake(getEnv('ROD_DEV_GUILD_ID')) : null;
+final Snowflake? devGuildId =
+    dev ? Snowflake(getEnv('ROD_DEV_GUILD_ID')) : null;
 
 /// The address of the lavalink running server to connect to.
 String serverAddress = getEnv('LAVALINK_ADDRESS', 'lavalink');
@@ -87,10 +96,15 @@ String serverPassword = getEnv('LAVALINK_PASSWORD', 'youshallnotpass');
 bool useSSL = getEnvBool('LAVALINK_USE_SSL', false);
 
 /// The basic intents needed to run Running on Dart without privileged intents.
-final int _baseIntents = GatewayIntents.directMessages | GatewayIntents.guilds | GatewayIntents.guildVoiceState;
+final int _baseIntents = GatewayIntents.directMessages |
+    GatewayIntents.guilds |
+    GatewayIntents.guildVoiceState;
 
 /// Privileged intents that can be enabled to add additional features to Running on Dart.
-final int _privilegedIntents = _baseIntents | GatewayIntents.guildMessages | GatewayIntents.guildMembers | GatewayIntents.messageContent;
+final int _privilegedIntents = _baseIntents |
+    GatewayIntents.guildMessages |
+    GatewayIntents.guildMembers |
+    GatewayIntents.messageContent;
 
 /// The intents to use for this instance.
 final int intents = intentFeaturesEnabled ? _privilegedIntents : _baseIntents;

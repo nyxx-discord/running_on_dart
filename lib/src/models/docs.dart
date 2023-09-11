@@ -20,7 +20,8 @@ class PackageDocs {
   Iterable<String> get elementNames => elements.map((e) => e.name);
 
   /// The URL to this package's documentation index on [pub.dev](https://pub.dev).
-  String get urlToDocs => 'https://pub.dev/documentation/$packageName/latest/index.json';
+  String get urlToDocs =>
+      'https://pub.dev/documentation/$packageName/latest/index.json';
 
   /// Create a new [PackageDocs] for a given package.
   PackageDocs({
@@ -34,12 +35,14 @@ class PackageDocs {
     final response = await http.get(Uri.parse(urlToDocs));
 
     if (response.statusCode != 200) {
-      _logger.shout('Unable to update docs for package "$packageName": Error ${response.statusCode}');
+      _logger.shout(
+          'Unable to update docs for package "$packageName": Error ${response.statusCode}');
       return;
     }
 
     try {
-      final data = (jsonDecode(response.body) as List<dynamic>).cast<Map<String, dynamic>>();
+      final data = (jsonDecode(response.body) as List<dynamic>)
+          .cast<Map<String, dynamic>>();
 
       entries = {};
 
@@ -49,7 +52,8 @@ class PackageDocs {
         entries[entry.qualifiedName] = entry;
       }
     } on FormatException {
-      _logger.shout('Unable to update docs for package "$packageName": Malformed JSON in response');
+      _logger.shout(
+          'Unable to update docs for package "$packageName": Malformed JSON in response');
     }
   }
 }
@@ -93,13 +97,16 @@ class DocEntry {
       case 'constant':
       case 'property':
       case 'method':
-        displayName = '${json['enclosedBy']['name'] as String}.${json['name'] as String}';
+        displayName =
+            '${json['enclosedBy']['name'] as String}.${json['name'] as String}';
         break;
       case 'library':
-        displayName = '${json['packageName'] != json['name'] ? '${json['packageName'] as String}.' : ''}${json['name'] as String}';
+        displayName =
+            '${json['packageName'] != json['name'] ? '${json['packageName'] as String}.' : ''}${json['name'] as String}';
         break;
       case 'constructor':
-        displayName = '${json['name'] == json['enclosedBy']['name'] ? '(new) ' : ''}${json['name'] as String}';
+        displayName =
+            '${json['name'] == json['enclosedBy']['name'] ? '(new) ' : ''}${json['name'] as String}';
         break;
       default:
         displayName = json['name'] as String;
@@ -112,7 +119,8 @@ class DocEntry {
       qualifiedName: json['qualifiedName'] as String,
       packageName: json['packageName'] as String,
       type: json['type'] as String,
-      urlToDocs: 'https://pub.dev/documentation/${json['packageName'] as String}/latest/${json['href'] as String}',
+      urlToDocs:
+          'https://pub.dev/documentation/${json['packageName'] as String}/latest/${json['href'] as String}',
     );
   }
 }

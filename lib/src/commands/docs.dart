@@ -9,12 +9,18 @@ import 'package:running_on_dart/src/util.dart';
 ChatCommand docs = ChatCommand.textOnly(
   'docs',
   'Search and get documentation for various packages',
-  id('docs', (IChatContext context) => context.respond(MessageBuilder.content(defaultDocsResponse.trim()))),
+  id(
+      'docs',
+      (IChatContext context) =>
+          context.respond(MessageBuilder.content(defaultDocsResponse.trim()))),
   children: [
     ChatCommand(
       'info',
       'Get generic documentation information',
-      id('docs-info', (IChatContext context) => context.respond(MessageBuilder.content(defaultDocsResponse.trim()))),
+      id(
+          'docs-info',
+          (IChatContext context) => context
+              .respond(MessageBuilder.content(defaultDocsResponse.trim()))),
     ),
     ChatCommand(
       'get',
@@ -45,7 +51,9 @@ Package: [${element.packageName}](https://pub.dev/packages/${element.packageName
       'Search for documentation',
       id('docs-search', (
         IChatContext context,
-        @Description('The query to search for') @Autocomplete(autocompleteQueryWithPackage) String query, [
+        @Description('The query to search for')
+        @Autocomplete(autocompleteQueryWithPackage)
+        String query, [
         @Description('The package to search in') PackageDocs? package,
       ]) async {
         final searchResults = DocsService.instance.search(query, package);
@@ -64,10 +72,12 @@ Package: [${element.packageName}](https://pub.dev/packages/${element.packageName
           // Chunk our results so we don't exceed 10 results per page or the 1024 field character limit
           searchResults
               .fold<List<List<String>>>([[]], (pages, entry) {
-                final entryContent = '[${entry.displayName} ${entry.type}](${entry.urlToDocs})';
+                final entryContent =
+                    '[${entry.displayName} ${entry.type}](${entry.urlToDocs})';
 
                 // +1 for newline
-                var wouldBeLength = pages.last.join('\n').length + entryContent.length + 1;
+                var wouldBeLength =
+                    pages.last.join('\n').length + entryContent.length + 1;
 
                 if (wouldBeLength > 1024 || pages.last.length >= 10) {
                   pages.add([]);
@@ -85,7 +95,8 @@ Package: [${element.packageName}](https://pub.dev/packages/${element.packageName
                   ..color = color
                   ..title = 'Search results - $query'
                   ..addField(
-                    name: 'Results in ${package != null ? 'package ${package.packageName}' : 'all packages'}',
+                    name:
+                        'Results in ${package != null ? 'package ${package.packageName}' : 'all packages'}',
                     content: entry.value.join('\n'),
                   )
                   ..addFooter((footer) {
@@ -102,9 +113,11 @@ Package: [${element.packageName}](https://pub.dev/packages/${element.packageName
 );
 
 /// Search autocomplete, but only include elements from a given package (if there is one selected).
-Iterable<ArgChoiceBuilder> autocompleteQueryWithPackage(AutocompleteContext context) {
+Iterable<ArgChoiceBuilder> autocompleteQueryWithPackage(
+    AutocompleteContext context) {
   final selectedPackageName = context.interactionEvent.options
-      .cast<IInteractionOption?>() // Cast to IInteractionOption? so we can return `null` in orElse
+      .cast<
+          IInteractionOption?>() // Cast to IInteractionOption? so we can return `null` in orElse
       .firstWhere((element) => element?.name == 'package', orElse: () => null)
       ?.value
       ?.toString();
@@ -116,7 +129,8 @@ Iterable<ArgChoiceBuilder> autocompleteQueryWithPackage(AutocompleteContext cont
 
   return [
     // Allow the user to select their current value
-    if (context.currentValue.isNotEmpty) ArgChoiceBuilder(context.currentValue, context.currentValue),
+    if (context.currentValue.isNotEmpty)
+      ArgChoiceBuilder(context.currentValue, context.currentValue),
     ...DocsService.instance
         .search(context.currentValue, selectedPackage)
         .take(context.currentValue.isEmpty ? 25 : 24)
