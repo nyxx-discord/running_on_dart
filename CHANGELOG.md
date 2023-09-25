@@ -1,3 +1,7 @@
+## 3.3.3
+
+- Fix docs command
+
 ## 3.3.2
 
 - Fix docs command

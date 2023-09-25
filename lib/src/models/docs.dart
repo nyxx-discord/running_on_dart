@@ -47,6 +47,10 @@ class PackageDocs {
       entries = {};
 
       for (final dataEntry in data) {
+        if (dataEntry['__PACKAGE_ORDER__'] != null) {
+          continue;
+        }
+
         final entry = DocEntry.fromJson(dataEntry);
 
         entries[entry.qualifiedName] = entry;
@@ -92,24 +96,49 @@ class DocEntry {
   /// Create a [DocEntry] from a documentation entry object received from a dartdoc `index.json` file.
   factory DocEntry.fromJson(Map<String, dynamic> json) {
     String displayName;
+    String type;
 
-    switch (json['type']) {
-      case 'constant':
-      case 'property':
-      case 'method':
-        displayName =
-            '${json['enclosedBy']['name'] as String}.${json['name'] as String}';
+    switch (json['kind'] as int) {
+      case 1:
+      case 16:
+      case 10:
+        displayName = '${json['enclosedBy']['name'] as String}.${json['name'] as String}';
         break;
-      case 'library':
+      case 9:
         displayName =
             '${json['packageName'] != json['name'] ? '${json['packageName'] as String}.' : ''}${json['name'] as String}';
         break;
-      case 'constructor':
+      case 2:
         displayName =
             '${json['name'] == json['enclosedBy']['name'] ? '(new) ' : ''}${json['name'] as String}';
         break;
       default:
-        displayName = json['name'] as String? ?? '[Unknown]';
+        displayName = json['name'] as String? ?? '';
+        break;
+    }
+
+    switch (json['kind'] as int) {
+      case 1:
+      case 18:
+        type = 'constant';
+        break;
+      case 16:
+        type = 'property';
+        break;
+      case 10:
+        type = 'method';
+        break;
+      case 9:
+        type = 'library';
+        break;
+      case 2:
+        type = 'constructor';
+        break;
+      case 3:
+        type = 'class';
+        break;
+      default:
+        type = '';
         break;
     }
 
@@ -118,7 +147,7 @@ class DocEntry {
       displayName: displayName,
       qualifiedName: json['qualifiedName'] as String,
       packageName: json['packageName'] as String,
-      type: json['type'] as String,
+      type: type,
       urlToDocs:
           'https://pub.dev/documentation/${json['packageName'] as String}/latest/${json['href'] as String}',
     );
