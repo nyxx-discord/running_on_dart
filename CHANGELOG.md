@@ -1,3 +1,7 @@
+## 3.3.1
+
+- Fix docs command
+
 ## 3.3.0
 
 - Implement new `/admin perform-nickname-pooping` and `/system clear-cache` command 
