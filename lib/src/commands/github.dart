@@ -7,13 +7,9 @@ import 'package:running_on_dart/src/models/github.dart';
 import 'package:running_on_dart/src/services/github.dart';
 import 'package:running_on_dart/src/util.dart';
 
-final github = ChatCommand(
+final github = ChatGroup(
   'github',
   'Get information about nyxx on GitHub',
-  id(
-      'github',
-      (MessageChatContext context) => context
-          .respond(MessageBuilder.content(defaultGithubResponse.trim()))),
   children: [
     ChatCommand(
       'info',

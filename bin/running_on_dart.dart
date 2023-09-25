@@ -51,7 +51,6 @@ void main() async {
   PoopNameService.init(client);
   JoinLogsService.init(client);
   TagService.init();
-  PrometheusService.init(client, commands);
   MusicService.init(client);
 
   // Connect

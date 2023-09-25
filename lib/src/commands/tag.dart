@@ -4,13 +4,9 @@ import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/tag.dart';
 import 'package:running_on_dart/src/util.dart';
 
-ChatCommand tag = ChatCommand.textOnly(
+final tag = ChatGroup(
   'tag',
   'Create and manage tags',
-  id(
-      'tag',
-      (IChatContext context, Tag tag) =>
-          context.respond(MessageBuilder.content(tag.content))),
   children: [
     ChatCommand(
       'create',

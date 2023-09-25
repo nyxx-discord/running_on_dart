@@ -18,7 +18,6 @@ export 'src/services/guild_settings.dart';
 export 'src/services/join_logs.dart';
 export 'src/services/music.dart';
 export 'src/services/poop_name.dart';
-export 'src/services/prometheus.dart';
 export 'src/services/reminder.dart';
 export 'src/services/tag.dart';
 export 'src/settings.dart';

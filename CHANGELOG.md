@@ -1,3 +1,8 @@
+## 3.3.2
+
+- Fix docs command
+- Remove prometheus
+
 ## 3.3.1
 
 - Fix docs command
