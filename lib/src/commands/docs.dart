@@ -6,7 +6,7 @@ import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/docs.dart';
 import 'package:running_on_dart/src/util.dart';
 
-ChatCommand docs = ChatCommand.textOnly(
+ChatCommand docs = ChatCommand(
   'docs',
   'Search and get documentation for various packages',
   id('docs', (IChatContext context) => context.respond(MessageBuilder.content(defaultDocsResponse.trim()))),

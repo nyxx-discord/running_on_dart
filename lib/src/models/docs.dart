@@ -102,7 +102,7 @@ class DocEntry {
         displayName = '${json['name'] == json['enclosedBy']['name'] ? '(new) ' : ''}${json['name'] as String}';
         break;
       default:
-        displayName = json['name'] as String;
+        displayName = json['name'] as String? ?? '[Unknown]';
         break;
     }
 
