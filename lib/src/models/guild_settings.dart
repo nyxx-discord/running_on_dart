@@ -4,10 +4,14 @@ import 'package:postgres/postgres.dart';
 /// A setting identifier, used outside of a guild.
 class Setting<T> extends IEnum<String> {
   /// The poop_name feature flag.
-  static const Setting<void> poopName = Setting._('poop_name', 'Replace nickname of a member with poop emoji if the member tries to hoist', false);
+  static const Setting<void> poopName = Setting._(
+      'poop_name',
+      'Replace nickname of a member with poop emoji if the member tries to hoist',
+      false);
 
   /// The join_logs feature flag.
-  static const Setting<Snowflake> joinLogs = Setting._('join_logs', 'Logs member join events into specified channel');
+  static const Setting<Snowflake> joinLogs =
+      Setting._('join_logs', 'Logs member join events into specified channel');
 
   /// A list of all available settings.
   static const List<Setting<dynamic>> values = [poopName, joinLogs];
@@ -18,7 +22,8 @@ class Setting<T> extends IEnum<String> {
   /// Whether this setting requires extra data (beyond being enabled or not).
   final bool requiresData;
 
-  const Setting._(String value, this.description, [this.requiresData = true]) : super(value);
+  const Setting._(String value, this.description, [this.requiresData = true])
+      : super(value);
 }
 
 /// The value of a setting within a guild.
@@ -79,7 +84,9 @@ class GuildSetting<T> {
     final mappedRow = row.toColumnMap();
 
     return GuildSetting.withData(
-      setting: Setting.values.singleWhere((setting) => setting.value == mappedRow['name']) as Setting<T>,
+      setting: Setting.values
+              .singleWhere((setting) => setting.value == mappedRow['name'])
+          as Setting<T>,
       guildId: Snowflake(mappedRow['guild_id']),
       whoEnabled: Snowflake(mappedRow['who_enabled']),
       addedAt: mappedRow['add_date'] as DateTime,

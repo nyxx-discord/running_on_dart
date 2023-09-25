@@ -7,7 +7,10 @@ import 'package:running_on_dart/src/util.dart';
 ChatCommand tag = ChatCommand.textOnly(
   'tag',
   'Create and manage tags',
-  id('tag', (IChatContext context, Tag tag) => context.respond(MessageBuilder.content(tag.content))),
+  id(
+      'tag',
+      (IChatContext context, Tag tag) =>
+          context.respond(MessageBuilder.content(tag.content))),
   children: [
     ChatCommand(
       'create',
@@ -16,14 +19,18 @@ ChatCommand tag = ChatCommand.textOnly(
         IChatContext context,
         @Description('The name of the tag') String name,
         @Description('The content of the tag') String content, [
-        @Description('Whether to enable the tag by default') bool enabled = true,
+        @Description('Whether to enable the tag by default')
+        bool enabled = true,
       ]) async {
-        if (TagService.instance.getByName(context.guild?.id ?? Snowflake.zero(), name) != null) {
+        if (TagService.instance
+                .getByName(context.guild?.id ?? Snowflake.zero(), name) !=
+            null) {
           await context.respond(MessageBuilder.embed(
             EmbedBuilder()
               ..color = DiscordColor.red
               ..title = "Couldn't create tag"
-              ..description = 'A tag with that name already exists in this server',
+              ..description =
+                  'A tag with that name already exists in this server',
           ));
           return;
         }
@@ -38,7 +45,8 @@ ChatCommand tag = ChatCommand.textOnly(
 
         await TagService.instance.createTag(tag);
 
-        await context.respond(MessageBuilder.content('Tag created successfully!'));
+        await context
+            .respond(MessageBuilder.content('Tag created successfully!'));
       }),
     ),
     ChatCommand(
@@ -64,7 +72,8 @@ ChatCommand tag = ChatCommand.textOnly(
         IChatContext context,
         @Description('The tag to preview') Tag tag,
       ) async {
-        await context.respond(MessageBuilder.content(tag.content), private: true);
+        await context.respond(MessageBuilder.content(tag.content),
+            private: true);
 
         await TagService.instance.registerTagUsedEvent(TagUsedEvent.fromTag(
           tag: tag,
@@ -78,17 +87,21 @@ ChatCommand tag = ChatCommand.textOnly(
       'Enable a tag',
       id('tag-enable', (
         IChatContext context,
-        @UseConverter(manageableTagConverter) @Description('The tag to enable') Tag tag,
+        @UseConverter(manageableTagConverter)
+        @Description('The tag to enable')
+        Tag tag,
       ) async {
         if (tag.enabled) {
-          await context.respond(MessageBuilder.content('That tag is already enabled!'));
+          await context
+              .respond(MessageBuilder.content('That tag is already enabled!'));
           return;
         }
 
         tag.enabled = true;
         await TagService.instance.updateTag(tag);
 
-        await context.respond(MessageBuilder.content('Successfully enabled tag!'));
+        await context
+            .respond(MessageBuilder.content('Successfully enabled tag!'));
       }),
     ),
     ChatCommand(
@@ -96,17 +109,21 @@ ChatCommand tag = ChatCommand.textOnly(
       'Disable a tag',
       id('tag-disable', (
         IChatContext context,
-        @UseConverter(manageableTagConverter) @Description('The tag to disable') Tag tag,
+        @UseConverter(manageableTagConverter)
+        @Description('The tag to disable')
+        Tag tag,
       ) async {
         if (!tag.enabled) {
-          await context.respond(MessageBuilder.content('That tag is already disabled!'));
+          await context
+              .respond(MessageBuilder.content('That tag is already disabled!'));
           return;
         }
 
         tag.enabled = false;
         await TagService.instance.updateTag(tag);
 
-        await context.respond(MessageBuilder.content('Successfully disabled tag!'));
+        await context
+            .respond(MessageBuilder.content('Successfully disabled tag!'));
       }),
     ),
     ChatCommand(
@@ -114,11 +131,14 @@ ChatCommand tag = ChatCommand.textOnly(
       'Delete an existing tag',
       id('tag-delete', (
         IChatContext context,
-        @UseConverter(manageableTagConverter) @Description('The tag to delete') Tag tag,
+        @UseConverter(manageableTagConverter)
+        @Description('The tag to delete')
+        Tag tag,
       ) async {
         await TagService.instance.deleteTag(tag);
 
-        await context.respond(MessageBuilder.content('Successfully deleted tag!'));
+        await context
+            .respond(MessageBuilder.content('Successfully deleted tag!'));
       }),
     ),
     ChatCommand(
@@ -128,26 +148,34 @@ ChatCommand tag = ChatCommand.textOnly(
         IChatContext context, [
         @Description('The tag to show stats for') Tag? tag,
       ]) async {
-        final events = TagService.instance.getTagUsage(context.guild?.id ?? Snowflake.zero(), tag).toList();
+        final events = TagService.instance
+            .getTagUsage(context.guild?.id ?? Snowflake.zero(), tag)
+            .toList();
 
         final totalUses = events.length;
         final totalHiddenUses = events.where((event) => event.hidden).length;
 
         final threeDaysAgo = DateTime.now().add(Duration(days: -3));
-        final usesLastThreeDays = events.where((event) => event.usedAt.isAfter(threeDaysAgo)).length;
-        final hiddenUsesLastThreeDays = events.where((event) => event.usedAt.isAfter(threeDaysAgo) && event.hidden).length;
+        final usesLastThreeDays =
+            events.where((event) => event.usedAt.isAfter(threeDaysAgo)).length;
+        final hiddenUsesLastThreeDays = events
+            .where(
+                (event) => event.usedAt.isAfter(threeDaysAgo) && event.hidden)
+            .length;
 
         final embed = EmbedBuilder()
           ..color = getRandomColor()
           ..title = 'Tag stats${tag != null ? ': ${tag.name}' : ''}'
           ..addField(
             name: 'Total usage',
-            content: '- Tag${tag == null ? 's' : ''} shown ${totalUses - totalHiddenUses} times\n'
+            content:
+                '- Tag${tag == null ? 's' : ''} shown ${totalUses - totalHiddenUses} times\n'
                 '- Tag${tag == null ? 's' : ''} previewed $totalHiddenUses times',
           )
           ..addField(
             name: 'Usage in the last 3 days',
-            content: '- Tag${tag == null ? 's' : ''} shown ${usesLastThreeDays - hiddenUsesLastThreeDays} times\n'
+            content:
+                '- Tag${tag == null ? 's' : ''} shown ${usesLastThreeDays - hiddenUsesLastThreeDays} times\n'
                 '- Tag${tag == null ? 's' : ''} previewed $hiddenUsesLastThreeDays times',
           );
 
@@ -165,11 +193,16 @@ ChatCommand tag = ChatCommand.textOnly(
           }
 
           if (useCount.isNotEmpty) {
-            final top5 = (useCount.entries.toList()..sort((a, b) => b.value.compareTo(a.value))).map((entry) => entry.key).take(5);
+            final top5 = (useCount.entries.toList()
+                  ..sort((a, b) => b.value.compareTo(a.value)))
+                .map((entry) => entry.key)
+                .take(5);
 
             embed.addField(
               name: 'Top tags',
-              content: top5.map((tag) => '- **${tag.name}** (${useCount[tag]})').join('\n'),
+              content: top5
+                  .map((tag) => '- **${tag.name}** (${useCount[tag]})')
+                  .join('\n'),
             );
           }
         }

@@ -10,7 +10,10 @@ ChatCommand ping = ChatCommand(
     final color = getRandomColor();
 
     // Get Gateway latency
-    final gatewayLatency = (context.client as INyxxWebsocket).shardManager.gatewayLatency.inMilliseconds;
+    final gatewayLatency = (context.client as INyxxWebsocket)
+        .shardManager
+        .gatewayLatency
+        .inMilliseconds;
 
     // Get REST API latency
     final restLatencyTimer = Stopwatch()..start();
@@ -23,16 +26,20 @@ ChatCommand ping = ChatCommand(
 
     final embed = EmbedBuilder()
       ..color = color
-      ..addField(name: 'Gateway latency', content: '${gatewayLatency}ms', inline: true)
-      ..addField(name: 'REST latency', content: '${restLatency}ms', inline: true)
-      ..addField(name: 'Message round-trip', content: 'Pending...', inline: true);
+      ..addField(
+          name: 'Gateway latency', content: '${gatewayLatency}ms', inline: true)
+      ..addField(
+          name: 'REST latency', content: '${restLatency}ms', inline: true)
+      ..addField(
+          name: 'Message round-trip', content: 'Pending...', inline: true);
 
     // Get round-trip time
     final roundTripTimer = Stopwatch()..start();
     final response = await context.respond(MessageBuilder.embed(embed));
     final roundTrip = (roundTripTimer..stop()).elapsedMilliseconds;
 
-    embed.replaceField(name: 'Message round-trip', content: '${roundTrip}ms', inline: true);
+    embed.replaceField(
+        name: 'Message round-trip', content: '${roundTrip}ms', inline: true);
 
     await response.edit(MessageBuilder.embed(embed));
   }),

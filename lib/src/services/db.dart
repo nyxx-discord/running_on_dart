@@ -56,7 +56,8 @@ class DatabaseService {
 
     _logger.info('Running database migrations');
 
-    final migrator = MigentMigrationRunner(_connection, databaseName, MemoryMigrationAccess())
+    final migrator = MigentMigrationRunner(
+        _connection, databaseName, MemoryMigrationAccess())
       ..enqueueMigration('1', '''
       CREATE TABLE tags (
         id SERIAL PRIMARY KEY,
@@ -164,7 +165,8 @@ class DatabaseService {
 
     await _ready;
 
-    await _connection.execute('DELETE FROM reminders WHERE id = @id', substitutionValues: {
+    await _connection
+        .execute('DELETE FROM reminders WHERE id = @id', substitutionValues: {
       'id': id,
     });
   }
@@ -172,7 +174,8 @@ class DatabaseService {
   /// Add a reminder to the database.
   Future<void> addReminder(Reminder reminder) async {
     if (reminder.id != null) {
-      _logger.warning('Attempting to add reminder with id ${reminder.id} twice, ignoring');
+      _logger.warning(
+          'Attempting to add reminder with id ${reminder.id} twice, ignoring');
       return;
     }
 
@@ -237,7 +240,8 @@ class DatabaseService {
   /// Add a tag to the database.
   Future<void> addTag(Tag tag) async {
     if (tag.id != null) {
-      _logger.warning('Attempting to add tag with id ${tag.id} twice, ignoring');
+      _logger
+          .warning('Attempting to add tag with id ${tag.id} twice, ignoring');
       return;
     }
 

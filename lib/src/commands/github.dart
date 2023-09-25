@@ -10,12 +10,18 @@ import 'package:running_on_dart/src/util.dart';
 final github = ChatCommand(
   'github',
   'Get information about nyxx on GitHub',
-  id('github', (MessageChatContext context) => context.respond(MessageBuilder.content(defaultGithubResponse.trim()))),
+  id(
+      'github',
+      (MessageChatContext context) => context
+          .respond(MessageBuilder.content(defaultGithubResponse.trim()))),
   children: [
     ChatCommand(
       'info',
       "General information about nyxx's GitHub",
-      id('github-info', (IChatContext context) => context.respond(MessageBuilder.content(defaultGithubResponse.trim()))),
+      id(
+          'github-info',
+          (IChatContext context) => context
+              .respond(MessageBuilder.content(defaultGithubResponse.trim()))),
     ),
     ChatCommand(
       'issues',
@@ -25,7 +31,8 @@ final github = ChatCommand(
         (
           IChatContext context, [
           @Description('The package to fetch issues for') PackageDocs? package,
-          @Description('Whether to include closed issues in the result') bool includeClosed = false,
+          @Description('Whether to include closed issues in the result')
+          bool includeClosed = false,
         ]) async {
           final issues = await GitHubService.instance
               .fetchIssues(
@@ -39,7 +46,8 @@ final github = ChatCommand(
               EmbedBuilder()
                 ..title = 'No issues'
                 ..color = DiscordColor.red
-                ..description = 'There are currently no issues open${package == null ? '' : ' for `${package.packageName}`'}.',
+                ..description =
+                    'There are currently no issues open${package == null ? '' : ' for `${package.packageName}`'}.',
             ));
             return;
           }
@@ -72,16 +80,19 @@ final github = ChatCommand(
                 .fold<List<List<String>>>(
                   [[]],
                   (pages, issue) {
-                    final issuePrefix = package == null ? '${issue.repo.name} #' : '#';
+                    final issuePrefix =
+                        package == null ? '${issue.repo.name} #' : '#';
 
-                    String content = '$issuePrefix${issue.source.number} - [${issue.source.title}](${issue.source.htmlUrl})';
+                    String content =
+                        '$issuePrefix${issue.source.number} - [${issue.source.title}](${issue.source.htmlUrl})';
 
                     final badges = [
                       if (issue.isClosed) '(Closed)',
                       if (issue.isHelpWanted) '(Help Wanted)',
                       if (issue.isBlocked) '(Blocked)',
                       if (issue.hasAssignee) '(Has Assignee)',
-                      if (issue.hasPullRequest) '([Has Pull Request](${issue.source.pullRequest?.htmlUrl}))',
+                      if (issue.hasPullRequest)
+                        '([Has Pull Request](${issue.source.pullRequest?.htmlUrl}))',
                     ];
 
                     if (badges.isNotEmpty) {
@@ -89,7 +100,8 @@ final github = ChatCommand(
                     }
 
                     // +1 for newline
-                    final wouldBeLength = pages.last.join('\n').length + content.length + 1;
+                    final wouldBeLength =
+                        pages.last.join('\n').length + content.length + 1;
 
                     if (wouldBeLength > 1024 || pages.last.length >= 10) {
                       pages.add([]);
@@ -106,8 +118,9 @@ final github = ChatCommand(
 
                   return EmbedBuilder()
                     ..color = color
-                    ..description = 'Showing the top 100 issues from ${package == null ? 'all repositories' : '`${package.packageName}`'}.'
-                        '${package != null ? ' Go to <https://github.com/$githubAccount/${package.packageName}/issues> for more.' : ''}'
+                    ..description =
+                        'Showing the top 100 issues from ${package == null ? 'all repositories' : '`${package.packageName}`'}.'
+                            '${package != null ? ' Go to <https://github.com/$githubAccount/${package.packageName}/issues> for more.' : ''}'
                     ..addField(
                       name: 'Issues',
                       content: entry.value.join('\n'),
@@ -131,7 +144,8 @@ final github = ChatCommand(
         (
           IChatContext context, [
           @Description('The package to fetch docs for') PackageDocs? package,
-          @Description('Whether to include closed pull requests in the result') bool includeClosed = false,
+          @Description('Whether to include closed pull requests in the result')
+          bool includeClosed = false,
         ]) async {
           final pulls = await GitHubService.instance
               .fetchPullRequests(
@@ -145,7 +159,8 @@ final github = ChatCommand(
               EmbedBuilder()
                 ..title = 'No pull requests'
                 ..color = DiscordColor.red
-                ..description = 'There are currently no pull requests open${package == null ? '' : ' for `${package.packageName}`'}.',
+                ..description =
+                    'There are currently no pull requests open${package == null ? '' : ' for `${package.packageName}`'}.',
             ));
             return;
           }
@@ -186,15 +201,19 @@ final github = ChatCommand(
                 .fold<List<List<String>>>(
                   [[]],
                   (pages, pull) {
-                    final pullPrefix = package != null ? '${package.packageName} #' : '#';
+                    final pullPrefix =
+                        package != null ? '${package.packageName} #' : '#';
 
-                    String content = '$pullPrefix${pull.source.number} - [${pull.source.title}](${pull.source.htmlUrl})';
+                    String content =
+                        '$pullPrefix${pull.source.number} - [${pull.source.title}](${pull.source.htmlUrl})';
 
                     final badges = [
                       if (pull.isClosed) '(Closed)',
                       if (pull.isDraft) '(Draft)',
-                      if (pull.needsReview) '([Needs Review](${pull.reviewUrl}))',
-                      if (pull.hasMilestone) '([${pull.milestoneName}](${pull.milestoneUrl}))',
+                      if (pull.needsReview)
+                        '([Needs Review](${pull.reviewUrl}))',
+                      if (pull.hasMilestone)
+                        '([${pull.milestoneName}](${pull.milestoneUrl}))',
                     ];
 
                     if (badges.isNotEmpty) {
@@ -202,7 +221,8 @@ final github = ChatCommand(
                     }
 
                     // +1 for newline
-                    final wouldBeLength = pages.last.join('\n').length + content.length + 1;
+                    final wouldBeLength =
+                        pages.last.join('\n').length + content.length + 1;
 
                     if (wouldBeLength > 1024 || pages.last.length >= 10) {
                       pages.add([]);
@@ -219,8 +239,9 @@ final github = ChatCommand(
 
                   return EmbedBuilder()
                     ..color = color
-                    ..description = 'Showing the top 100 pull requests from ${package == null ? 'all repositories' : '`${package.packageName}`'}.'
-                        '${package != null ? ' Go to <https://github.com/$githubAccount/${package.packageName}/pulls> for more.' : ''}'
+                    ..description =
+                        'Showing the top 100 pull requests from ${package == null ? 'all repositories' : '`${package.packageName}`'}.'
+                            '${package != null ? ' Go to <https://github.com/$githubAccount/${package.packageName}/pulls> for more.' : ''}'
                     ..addField(
                       name: 'Pull requests',
                       content: entry.value.join('\n'),
@@ -243,7 +264,8 @@ final github = ChatCommand(
         'github-stats',
         (
           IChatContext context, [
-          @Description('The name of the account to get stats for') String? accountName,
+          @Description('The name of the account to get stats for')
+          String? accountName,
         ]) async {
           final stats = await GitHubService.instance.fetchStats(accountName);
 
@@ -251,7 +273,8 @@ final github = ChatCommand(
             await context.respond(MessageBuilder.embed(
               EmbedBuilder()
                 ..title = 'Account not found'
-                ..description = "Couldn't fetch statistics for account $accountName"
+                ..description =
+                    "Couldn't fetch statistics for account $accountName"
                 ..color = DiscordColor.red,
             ));
             return;

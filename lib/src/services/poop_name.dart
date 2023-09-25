@@ -8,7 +8,10 @@ final poopCharacters = ['!', '#', '@', '^', '%', '&', '-', '*', '.' '+', '\''];
 final poopRegexp = RegExp("[${poopCharacters.join()}]");
 
 class PoopNameService {
-  static PoopNameService get instance => _instance ?? (throw Exception('PoopNameService must be initialised with PoopNameService.init'));
+  static PoopNameService get instance =>
+      _instance ??
+      (throw Exception(
+          'PoopNameService must be initialised with PoopNameService.init'));
   static PoopNameService? _instance;
 
   static void init(INyxxWebsocket client) {
@@ -20,11 +23,14 @@ class PoopNameService {
 
   PoopNameService._(this._client) {
     _client.eventsWs.onGuildMemberAdd.listen((event) => _handle(event.member));
-    _client.eventsWs.onGuildMemberUpdate.listen((event) async => _handle(await event.member.getOrDownload()));
+    _client.eventsWs.onGuildMemberUpdate
+        .listen((event) async => _handle(await event.member.getOrDownload()));
   }
 
   void _handle(IMember member) async {
-    if (!await GuildSettingsService.instance.isEnabled(Setting.poopName, member.guild.id) || !intentFeaturesEnabled) {
+    if (!await GuildSettingsService.instance
+            .isEnabled(Setting.poopName, member.guild.id) ||
+        !intentFeaturesEnabled) {
       return;
     }
 
@@ -39,8 +45,9 @@ class PoopNameService {
       return null;
     }
 
-    if(!dryRun) {
-      _logger.fine("Changing ${member.id} ($memberName) nickname to poop emoji");
+    if (!dryRun) {
+      _logger
+          .fine("Changing ${member.id} ($memberName) nickname to poop emoji");
       await member.edit(builder: MemberBuilder()..nick = poopEmoji);
     }
 

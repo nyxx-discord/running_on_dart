@@ -43,7 +43,9 @@ class Reminder {
     return Reminder(
       userId: Snowflake(mappedRow['user_id'] as String),
       channelId: Snowflake(mappedRow['channel_id'] as String),
-      messageId: mappedRow['message_id'] != null ? Snowflake(mappedRow['message_id'] as String) : null,
+      messageId: mappedRow['message_id'] != null
+          ? Snowflake(mappedRow['message_id'] as String)
+          : null,
       triggerAt: mappedRow['trigger_date'] as DateTime,
       addedAt: mappedRow['add_date'] as DateTime,
       message: mappedRow['message'] as String,

@@ -17,16 +17,20 @@ void commandErrorHandler(CommandsException error) async {
       if (error.failed.name.contains("music")) {
         switch (error.failed.name) {
           case 'musicConnectedToVC':
-            await context.respond(MessageBuilder.content('I have to be in a voice channel to use this command'));
+            await context.respond(MessageBuilder.content(
+                'I have to be in a voice channel to use this command'));
             break;
           case 'musicNotConnectedToVC':
-            await context.respond(MessageBuilder.content("I'm already connected to a voice channel"));
+            await context.respond(MessageBuilder.content(
+                "I'm already connected to a voice channel"));
             break;
           case 'musicSameVC':
-            await context.respond(MessageBuilder.content("I'm already being used on other voice channel"));
+            await context.respond(MessageBuilder.content(
+                "I'm already being used on other voice channel"));
             break;
           case 'musicUserConnectedToVC':
-            await context.respond(MessageBuilder.content('You need to be connected to a voice channel to use this command'));
+            await context.respond(MessageBuilder.content(
+                'You need to be connected to a voice channel to use this command'));
             break;
           default:
             break;
@@ -39,10 +43,12 @@ void commandErrorHandler(CommandsException error) async {
 
       if (failed is CooldownCheck) {
         title = 'Command on cooldown';
-        description = "You can't use this command right now because it is on cooldown. Please wait ${prettyDuration(failed.remaining(context))} and try again.";
+        description =
+            "You can't use this command right now because it is on cooldown. Please wait ${prettyDuration(failed.remaining(context))} and try again.";
       } else {
         title = "You can't use this command!";
-        description = 'This command can only be used by certain users in certain contexts.'
+        description =
+            'This command can only be used by certain users in certain contexts.'
             ' Check that you have permission to execute the command, or contact a developer for more information.';
       }
     } else if (error is NotEnoughArgumentsException) {
@@ -51,7 +57,8 @@ void commandErrorHandler(CommandsException error) async {
           " Please try again and use the Slash Command menu for help, or contact a developer for more information.";
     } else if (error is BadInputException) {
       title = "Couldn't parse input";
-      description = "Your command couldn't be executed because we were unable to understand your input."
+      description =
+          "Your command couldn't be executed because we were unable to understand your input."
           " Please try again with different inputs or contact a developer for more information.";
     } else if (error is UncaughtException) {
       final exception = error.exception;
@@ -67,7 +74,8 @@ void commandErrorHandler(CommandsException error) async {
     final embed = EmbedBuilder()
       ..color = DiscordColor.red
       ..title = title ?? 'An error has occurred'
-      ..description = description ?? "Your command couldn't be executed because of an error. Please contact a developer for more information."
+      ..description = description ??
+          "Your command couldn't be executed because of an error. Please contact a developer for more information."
       ..addFooter((footer) {
         footer.text = error.runtimeType.toString();
       })

@@ -7,7 +7,8 @@ ChatCommand avatar = ChatCommand(
   id('avatar', (
     IChatContext context, [
     @Description('The user to fetch the avatar for') IUser? target,
-    @Description("Whether to show the user's guild profile, if they have one") bool showGuildProfile = true,
+    @Description("Whether to show the user's guild profile, if they have one")
+    bool showGuildProfile = true,
   ]) async {
     // Default to the user who invoked the command
     target ??= context.user;

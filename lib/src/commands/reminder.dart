@@ -14,17 +14,22 @@ ChatGroup reminder = ChatGroup(
       'Create a new reminder',
       id('reminder-create', (
         IChatContext context,
-        @Name('in') @Description('The amount of time after which the reminder should trigger') Duration offset,
-        @Description('A short message to attach to the reminder') String message,
+        @Name('in')
+        @Description(
+            'The amount of time after which the reminder should trigger')
+        Duration offset,
+        @Description('A short message to attach to the reminder')
+        String message,
       ) async {
         final triggerAt = DateTime.now().add(offset);
 
-        final replyMessage = await context.respond(MessageBuilder.content('Alright ')
-          ..appendMention(context.user)
-          ..append(', Creating reminder: ')
-          ..appendTimestamp(triggerAt, style: TimeStampStyle.relativeTime)
-          ..append(': ')
-          ..append(message));
+        final replyMessage =
+            await context.respond(MessageBuilder.content('Alright ')
+              ..appendMention(context.user)
+              ..append(', Creating reminder: ')
+              ..appendTimestamp(triggerAt, style: TimeStampStyle.relativeTime)
+              ..append(': ')
+              ..append(message));
 
         await ReminderService.instance.addReminder(Reminder(
           userId: context.user.id,
@@ -47,9 +52,13 @@ ChatGroup reminder = ChatGroup(
       'clear',
       'Remove all your reminders',
       id('reminder-clear', (IChatContext context) async {
-        await Future.wait(ReminderService.instance.getUserReminders(context.user.id).map((reminder) => ReminderService.instance.removeReminder(reminder)));
+        await Future.wait(ReminderService.instance
+            .getUserReminders(context.user.id)
+            .map((reminder) =>
+                ReminderService.instance.removeReminder(reminder)));
 
-        await context.respond(MessageBuilder.content('Successfully cleared all your reminders.'));
+        await context.respond(
+            MessageBuilder.content('Successfully cleared all your reminders.'));
       }),
     ),
     ChatCommand(
@@ -61,14 +70,18 @@ ChatGroup reminder = ChatGroup(
       ) async {
         await ReminderService.instance.removeReminder(reminder);
 
-        await context.respond(MessageBuilder.content('Successfully removed your reminder.'));
+        await context.respond(
+            MessageBuilder.content('Successfully removed your reminder.'));
       }),
     ),
     ChatCommand(
       'list',
       'List all your active reminders',
       id('reminder-list', (IChatContext context) async {
-        final reminders = ReminderService.instance.getUserReminders(context.user.id).toList()..sort((a, b) => a.triggerAt.compareTo(b.triggerAt));
+        final reminders = ReminderService.instance
+            .getUserReminders(context.user.id)
+            .toList()
+          ..sort((a, b) => a.triggerAt.compareTo(b.triggerAt));
 
         final entries = reminders.asMap().entries.map((entry) {
           final index = entry.key;
@@ -79,9 +92,14 @@ ChatGroup reminder = ChatGroup(
             ..title = 'Reminder ${index + 1} of ${reminders.length}'
             ..addField(
               name: 'Triggers at',
-              content: '${TimeStampStyle.longDateTime.format(reminder.triggerAt)} (${TimeStampStyle.relativeTime.format(reminder.triggerAt)})',
+              content:
+                  '${TimeStampStyle.longDateTime.format(reminder.triggerAt)} (${TimeStampStyle.relativeTime.format(reminder.triggerAt)})',
             )
-            ..addField(name: 'Content', content: reminder.message.length > 2048 ? reminder.message.substring(0, 2045) + '...' : reminder.message);
+            ..addField(
+                name: 'Content',
+                content: reminder.message.length > 2048
+                    ? reminder.message.substring(0, 2045) + '...'
+                    : reminder.message);
         }).toList();
 
         if (entries.isEmpty) {

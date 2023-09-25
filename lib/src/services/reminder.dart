@@ -7,7 +7,10 @@ import 'package:running_on_dart/src/models/reminder.dart';
 import 'package:running_on_dart/src/services/db.dart';
 
 class ReminderService {
-  static ReminderService get instance => _instance ?? (throw Exception('Reminder service must be initialised with Reminder.init'));
+  static ReminderService get instance =>
+      _instance ??
+      (throw Exception(
+          'Reminder service must be initialised with Reminder.init'));
   static ReminderService? _instance;
 
   final List<Reminder> reminders = [];
@@ -16,7 +19,9 @@ class ReminderService {
   final INyxxWebsocket _client;
 
   ReminderService._(this._client) {
-    DatabaseService.instance.fetchReminders().then((reminders) => this.reminders.addAll(reminders));
+    DatabaseService.instance
+        .fetchReminders()
+        .then((reminders) => this.reminders.addAll(reminders));
 
     _processCurrent();
   }
@@ -39,7 +44,9 @@ class ReminderService {
     final executionResults = <Future<void>>[];
 
     // Convert reminders we are running to a separate list to avoid a concurrent modification exception
-    for (final reminder in reminders.where((reminder) => reminder.triggerAt.isBefore(now)).toList()) {
+    for (final reminder in reminders
+        .where((reminder) => reminder.triggerAt.isBefore(now))
+        .toList()) {
       executionResults.add(_execute(reminder));
     }
 
@@ -49,17 +56,23 @@ class ReminderService {
   Future<void> _execute(Reminder reminder) async {
     _logger.fine('Executing reminder ${reminder.id}');
 
-    final channel = _client.channels.values.whereType<ITextChannel?>().firstWhere((channel) => channel?.id == reminder.channelId, orElse: () => null);
+    final channel = _client.channels.values
+        .whereType<ITextChannel?>()
+        .firstWhere((channel) => channel?.id == reminder.channelId,
+            orElse: () => null);
 
     if (channel != null) {
       try {
         await channel.sendMessage(
           MessageBuilder()
             ..append('<@!${reminder.userId}> Reminder ')
-            ..appendTimestamp(reminder.addedAt, style: TimeStampStyle.relativeTime)
+            ..appendTimestamp(reminder.addedAt,
+                style: TimeStampStyle.relativeTime)
             ..append(': ')
             ..append(reminder.message)
-            ..replyBuilder = reminder.messageId != null ? ReplyBuilder(reminder.messageId!, false) : null,
+            ..replyBuilder = reminder.messageId != null
+                ? ReplyBuilder(reminder.messageId!, false)
+                : null,
         );
       } on IHttpResponseError {
         // Message was too long to be sent.
@@ -90,7 +103,8 @@ class ReminderService {
   }
 
   /// Get all the reminders for a specific user.
-  Iterable<Reminder> getUserReminders(Snowflake userId) => reminders.where((reminder) => reminder.userId == userId);
+  Iterable<Reminder> getUserReminders(Snowflake userId) =>
+      reminders.where((reminder) => reminder.userId == userId);
 
   /// Search reminders for a specific user
   Iterable<Reminder> search(Snowflake userId, String query) {
@@ -100,7 +114,9 @@ class ReminderService {
         keys: [
           WeightedKey(
             name: 'message',
-            getter: (reminder) => reminder.message.length < 50 ? reminder.message : reminder.message.substring(0, 50) + '...',
+            getter: (reminder) => reminder.message.length < 50
+                ? reminder.message
+                : reminder.message.substring(0, 50) + '...',
             weight: 1,
           ),
           WeightedKey(
