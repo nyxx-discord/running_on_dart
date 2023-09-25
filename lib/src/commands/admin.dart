@@ -12,13 +12,16 @@ ChatGroup admin = ChatGroup(
       'Bulk deletes messages in a channel',
       id('admin-cleanup', (
         IChatContext context,
-        @UseConverter(IntConverter(min: 1)) @Description('The number of messages to delete') int count, [
+        @UseConverter(IntConverter(min: 1))
+        @Description('The number of messages to delete')
+        int count, [
         @Description('The user from whom to delete messages') IUser? user,
       ]) async {
         List<IMessage>? channelMessages;
         Snowflake? last;
 
-        while (count > 0 && (channelMessages == null || channelMessages.isNotEmpty)) {
+        while (count > 0 &&
+            (channelMessages == null || channelMessages.isNotEmpty)) {
           channelMessages = await context.channel
               .downloadMessages(
                 limit: 100,
@@ -32,7 +35,8 @@ ChatGroup admin = ChatGroup(
           if (user == null) {
             toRemove = channelMessages.take(count);
           } else {
-            toRemove = channelMessages.where((message) => message.author.id == user.id);
+            toRemove = channelMessages
+                .where((message) => message.author.id == user.id);
           }
 
           try {
@@ -49,9 +53,12 @@ ChatGroup admin = ChatGroup(
         }
 
         if (context is InteractionChatContext) {
-          await context.respond(MessageBuilder.content('Successfully deleted messages!'), hidden: true);
+          await context.respond(
+              MessageBuilder.content('Successfully deleted messages!'),
+              hidden: true);
         } else {
-          await context.respond(MessageBuilder.content('Successfully deleted messages!'));
+          await context.respond(
+              MessageBuilder.content('Successfully deleted messages!'));
         }
       }),
       checks: [PermissionsCheck(PermissionsConstants.manageMessages)],
@@ -62,19 +69,25 @@ ChatGroup admin = ChatGroup(
     ChatCommand(
         "perform-nickname-pooping",
         "Perform pooping of usernames in current guild",
-        id('perform-nickname-pooping', (IChatContext context, [bool dryRun = true, int batchSize = 100]) async {
+        id('perform-nickname-pooping', (IChatContext context,
+            [bool dryRun = true, int batchSize = 100]) async {
           var nickNamesToRemove = <String>[];
-          for(final disallowedChar in poopCharacters) {
-            await for(final member in context.guild!.searchMembersGateway(disallowedChar, limit: batchSize)) {
-              final nick = await PoopNameService.instance.poopUser(member, dryRun: dryRun);
+          for (final disallowedChar in poopCharacters) {
+            await for (final member in context.guild!
+                .searchMembersGateway(disallowedChar, limit: batchSize)) {
+              final nick = await PoopNameService.instance
+                  .poopUser(member, dryRun: dryRun);
               if (nick != null) {
                 nickNamesToRemove.add(nick);
               }
             }
           }
 
-          final outPutMessageHeader = "Pooping nicknames" + (dryRun ? "[DRY RUN]" : "");
-          var nickString = nickNamesToRemove.where((element) => element.isNotEmpty).join(",");
+          final outPutMessageHeader =
+              "Pooping nicknames" + (dryRun ? "[DRY RUN]" : "");
+          var nickString = nickNamesToRemove
+              .where((element) => element.isNotEmpty)
+              .join(",");
           if (nickString.length > 1950) {
             nickString = nickString.substring(0, 1950) + " ...";
           } else if (nickString.isEmpty) {
@@ -94,7 +107,6 @@ ChatGroup admin = ChatGroup(
           GuildCheck.all(),
           PermissionsCheck(PermissionsConstants.manageNicknames),
         ],
-        options: CommandOptions(autoAcknowledgeInteractions: true)
-    )
+        options: CommandOptions(autoAcknowledgeInteractions: true))
   ],
 );

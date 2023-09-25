@@ -37,7 +37,8 @@ final sameVoiceChannelOrDisconnectedCheck = Check((IContext context) async {
     await context.acknowledge();
   }
 
-  final selfMemberVoiceState = (await context.guild!.selfMember.getOrDownload()).voiceState;
+  final selfMemberVoiceState =
+      (await context.guild!.selfMember.getOrDownload()).voiceState;
   // The upper check should be executed before, so its okay to assume the voice
   // state exists.
   final memberVoiceState = context.member!.voiceState!;

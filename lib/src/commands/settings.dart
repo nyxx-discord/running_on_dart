@@ -18,14 +18,16 @@ ChatGroup settings = ChatGroup(
       id('settings-enable', <T>(
         IChatContext context,
         @Description('The setting to enable') Setting<T> setting, [
-        @Description('Additional data for features that require it') String? data,
+        @Description('Additional data for features that require it')
+        String? data,
       ]) async {
         if (setting.requiresData && data == null) {
           final embed = EmbedBuilder()
             ..color = DiscordColor.red
             ..title = 'Missing required data'
-            ..description = 'The setting `${setting.value}` requires the `data` argument to be specified.'
-                ' Please re-run the command and specify the additional data required, or contact a developer for more details.';
+            ..description =
+                'The setting `${setting.value}` requires the `data` argument to be specified.'
+                    ' Please re-run the command and specify the additional data required, or contact a developer for more details.';
 
           await context.respond(MessageBuilder.embed(embed));
           return;
@@ -41,7 +43,8 @@ ChatGroup settings = ChatGroup(
 
         await GuildSettingsService.instance.enable(guildSetting);
 
-        await context.respond(MessageBuilder.content('Successfully enabled setting!'));
+        await context
+            .respond(MessageBuilder.content('Successfully enabled setting!'));
       }),
     ),
     ChatCommand(
@@ -51,13 +54,15 @@ ChatGroup settings = ChatGroup(
         IChatContext context,
         @Description('The setting to disable') Setting<T> setting,
       ) async {
-        final guildSetting = await GuildSettingsService.instance.getSetting(setting, context.guild!.id);
+        final guildSetting = await GuildSettingsService.instance
+            .getSetting(setting, context.guild!.id);
 
         if (guildSetting != null) {
           await GuildSettingsService.instance.disable(guildSetting);
         }
 
-        await context.respond(MessageBuilder.content('Successfully disabled setting!'));
+        await context
+            .respond(MessageBuilder.content('Successfully disabled setting!'));
       }),
     ),
     ChatCommand(
@@ -71,15 +76,18 @@ ChatGroup settings = ChatGroup(
         final guildSettings = <GuildSetting<dynamic>>[];
 
         for (final setting in Setting.values) {
-          final guildSetting = await GuildSettingsService.instance.getSetting(setting, context.guild!.id);
+          final guildSetting = await GuildSettingsService.instance
+              .getSetting(setting, context.guild!.id);
 
           if (guildSetting != null) {
             guildSettings.add(guildSetting);
           }
         }
 
-        embed.description =
-            guildSettings.map((setting) => '- **${setting.setting.value}** ${setting.setting.requiresData ? ' (`${setting.data}`)' : ''}').join('\n');
+        embed.description = guildSettings
+            .map((setting) =>
+                '- **${setting.setting.value}** ${setting.setting.requiresData ? ' (`${setting.data}`)' : ''}')
+            .join('\n');
 
         await context.respond(MessageBuilder.embed(embed));
       }),

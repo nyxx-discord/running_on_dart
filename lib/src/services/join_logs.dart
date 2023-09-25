@@ -4,7 +4,10 @@ import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/guild_settings.dart';
 
 class JoinLogsService {
-  static JoinLogsService get instance => _instance ?? (throw Exception('JoinLogsService must be initialised with JoinLogsService.init()'));
+  static JoinLogsService get instance =>
+      _instance ??
+      (throw Exception(
+          'JoinLogsService must be initialised with JoinLogsService.init()'));
   static JoinLogsService? _instance;
 
   static void init(INyxxWebsocket client) {
@@ -19,15 +22,20 @@ class JoinLogsService {
   }
 
   void _handle(IGuildMemberAddEvent event) async {
-    if (!await GuildSettingsService.instance.isEnabled(Setting.joinLogs, event.guild.id) || !intentFeaturesEnabled) {
+    if (!await GuildSettingsService.instance
+            .isEnabled(Setting.joinLogs, event.guild.id) ||
+        !intentFeaturesEnabled) {
       return;
     }
 
-    final channelId = (await GuildSettingsService.instance.getSetting(Setting.joinLogs, event.guild.id))!.data;
+    final channelId = (await GuildSettingsService.instance
+            .getSetting(Setting.joinLogs, event.guild.id))!
+        .data;
     final channel = _client.channels[channelId];
 
     if (channel is ITextChannel) {
-      _logger.fine('Sending join message for member ${event.member.id} in channel $channelId');
+      _logger.fine(
+          'Sending join message for member ${event.member.id} in channel $channelId');
 
       final now = DateTime.now();
 
@@ -40,12 +48,14 @@ class JoinLogsService {
         ..addField(name: 'ID', content: event.user.id, inline: true)
         ..addField(
           name: 'Joined',
-          content: '${TimeStampStyle.shortDate.format(now)} (${TimeStampStyle.relativeTime.format(now)})',
+          content:
+              '${TimeStampStyle.shortDate.format(now)} (${TimeStampStyle.relativeTime.format(now)})',
           inline: true,
         )
         ..addField(
           name: 'Account created',
-          content: '${TimeStampStyle.shortDate.format(event.user.id.timestamp)} (${TimeStampStyle.relativeTime.format(event.user.id.timestamp)})',
+          content:
+              '${TimeStampStyle.shortDate.format(event.user.id.timestamp)} (${TimeStampStyle.relativeTime.format(event.user.id.timestamp)})',
         );
 
       await channel.sendMessage(MessageBuilder.embed(embed));

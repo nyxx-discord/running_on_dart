@@ -5,7 +5,8 @@ import 'package:running_on_dart/src/models/github.dart';
 class GitHubService {
   static final GitHubService instance = GitHubService._();
 
-  final github.GitHub client = github.GitHub(auth: github.Authentication.withToken(githubToken));
+  final github.GitHub client =
+      github.GitHub(auth: github.Authentication.withToken(githubToken));
 
   GitHubService._();
 
@@ -24,12 +25,14 @@ class GitHubService {
             state: includeClosed ? 'all' : null,
           )
           .map(
-            (issue) => Issue(github.RepositorySlug(githubAccount, package), issue),
+            (issue) =>
+                Issue(github.RepositorySlug(githubAccount, package), issue),
           ),
     );
   }
 
-  Stream<PullRequest> fetchPullRequests({String? packageName, bool includeClosed = false}) {
+  Stream<PullRequest> fetchPullRequests(
+      {String? packageName, bool includeClosed = false}) {
     List<String> packages = docsPackages;
 
     if (packageName != null) {
@@ -46,7 +49,10 @@ class GitHubService {
             (pullRequest) async => PullRequest(
               github.RepositorySlug(githubAccount, package),
               pullRequest,
-              needsReview: await client.pullRequests.listReviews(github.RepositorySlug(githubAccount, package), pullRequest.number!).isEmpty,
+              needsReview: await client.pullRequests
+                  .listReviews(github.RepositorySlug(githubAccount, package),
+                      pullRequest.number!)
+                  .isEmpty,
             ),
           ),
     );
@@ -55,7 +61,9 @@ class GitHubService {
   Future<GitHubStats?> fetchStats([String? accountName]) async {
     accountName ??= githubAccount;
 
-    final starCount = await client.repositories.listUserRepositories(accountName).fold<int>(0, (acc, repo) => acc + repo.stargazersCount);
+    final starCount = await client.repositories
+        .listUserRepositories(accountName)
+        .fold<int>(0, (acc, repo) => acc + repo.stargazersCount);
 
     try {
       final organization = await client.organizations.get(accountName);
