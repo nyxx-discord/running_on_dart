@@ -41,7 +41,7 @@ final Duration docsUpdateInterval =
 
 /// The packages to cache documentation for.
 final List<String> docsPackages = getEnv('ROD_DOCS_PACKAGES',
-        'nyxx nyxx_interactions nyxx_commands nyxx_lavalink nyxx_extensions')
+        'nyxx nyxx_commands nyxx_lavalink nyxx_extensions')
     .split(RegExp(r'\s+'));
 
 /// The default response for the docs command.
