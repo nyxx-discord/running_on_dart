@@ -1,7 +1,6 @@
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:running_on_dart/running_on_dart.dart';
-import 'package:running_on_dart/src/commands/info.dart';
 
 void main() async {
   final commands = CommandsPlugin(
@@ -13,16 +12,18 @@ void main() async {
   commands
     ..addCommand(info)
     ..addCommand(featureSettings)
+    ..addCommand(ping)
     ..addConverter(settingsConverter);
 
-  final client = await Nyxx.connectGateway(token, intents, options: GatewayClientOptions(
-    plugins: [
-      Logging(),
-      CliIntegration(),
-      IgnoreExceptions(),
-      commands,
-    ],
-  ));
+  final client = await Nyxx.connectGateway(token, intents,
+      options: GatewayClientOptions(
+        plugins: [
+          Logging(),
+          CliIntegration(),
+          IgnoreExceptions(),
+          commands,
+        ],
+      ));
 
   await DatabaseService.instance.awaitReady();
 

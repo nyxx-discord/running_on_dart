@@ -14,9 +14,9 @@ enum Setting {
   final bool requiresData;
 
   const Setting(
-      this.name,
-      this.description,
-      this.requiresData,
+    this.name,
+    this.description,
+    this.requiresData,
   );
 }
 

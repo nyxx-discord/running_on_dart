@@ -1,4 +1,3 @@
-
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
@@ -16,29 +15,25 @@ final featureSettings = ChatGroup(
     ChatCommand(
       'enable',
       'Enable or update a setting for this guild',
-      id('settings-enable', (
-          ChatContext context,
-          @Description('The setting to enable') Setting setting,
-          [@Description('Additional data for features that require it') String? data]
-      ) async {
+      id('settings-enable', (ChatContext context, @Description('The setting to enable') Setting setting,
+          [@Description('Additional data for features that require it') String? data]) async {
         if (setting.requiresData && data == null) {
           final embed = EmbedBuilder(
-            title: 'Missing required data',
-            color: DiscordColor.parseHexString("#FF0000"),
-            description:  'The setting `${setting.name}` requires the `data` argument to be specified.'
-                ' Please re-run the command and specify the additional data required, or contact a developer for more details.'
-          );
+              title: 'Missing required data',
+              color: DiscordColor.parseHexString("#FF0000"),
+              description: 'The setting `${setting.name}` requires the `data` argument to be specified.'
+                  ' Please re-run the command and specify the additional data required, or contact a developer for more details.');
 
           await context.respond(MessageBuilder(embeds: [embed]));
           return;
         }
 
         final featureSetting = FeatureSetting(
-            setting: setting,
-            guildId: context.guild!.id,
-            whoEnabled: context.user.id,
-            addedAt: DateTime.now(),
-            data: data,
+          setting: setting,
+          guildId: context.guild!.id,
+          whoEnabled: context.user.id,
+          addedAt: DateTime.now(),
+          data: data,
         );
 
         await FeatureSettingsService.instance.enable(featureSetting);
@@ -50,8 +45,8 @@ final featureSettings = ChatGroup(
       'disable',
       'Disable a setting for this guild',
       id('settings-disable', (
-          ChatContext context,
-          @Description('The setting to enable') Setting setting,
+        ChatContext context,
+        @Description('The setting to enable') Setting setting,
       ) async {
         final featureSetting = await FeatureSettingsRepository.instance.fetchSetting(setting, context.guild!.id);
 

@@ -6,8 +6,7 @@ import 'package:nyxx/nyxx.dart';
 final random = Random();
 
 DiscordColor getRandomColor() {
-  return DiscordColor.fromRgb(
-      random.nextInt(255), random.nextInt(255), random.nextInt(255));
+  return DiscordColor.fromRgb(random.nextInt(255), random.nextInt(255), random.nextInt(255));
 }
 
 String getCurrentMemoryString() {

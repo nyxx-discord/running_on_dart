@@ -1,4 +1,3 @@
-
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
 import 'package:running_on_dart/src/services/db.dart';
@@ -11,10 +10,9 @@ class FeatureSettingsRepository {
   Future<bool> isEnabled(Setting setting, Snowflake guildId) async {
     final result = await DatabaseService.instance.getConnection().query('''
       SELECT name FROM feature_settings WHERE name = @name AND guild_id = @guild_id
-    ''',
-      substitutionValues: {
-        'name': setting.name,
-        'guild_id': guildId.toString(),
+    ''', substitutionValues: {
+      'name': setting.name,
+      'guild_id': guildId.toString(),
     });
 
     return result.isNotEmpty;
@@ -23,11 +21,10 @@ class FeatureSettingsRepository {
   Future<FeatureSetting?> fetchSetting(Setting setting, Snowflake guildId) async {
     final result = await DatabaseService.instance.getConnection().query('''
       SELECT * FROM feature_settings WHERE name = @name AND guild_id = @guild_id
-    ''',
-        substitutionValues: {
-          'name': setting.name,
-          'guild_id': guildId.toString(),
-        });
+    ''', substitutionValues: {
+      'name': setting.name,
+      'guild_id': guildId.toString(),
+    });
 
     if (result.isEmpty) {
       return null;

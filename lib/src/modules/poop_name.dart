@@ -1,4 +1,3 @@
-
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
 import 'package:running_on_dart/src/services/feature_settings.dart';
@@ -10,9 +9,7 @@ final poopRegexp = RegExp("[${poopCharacters.join()}]");
 
 class PoopNameModule {
   static PoopNameModule get instance =>
-      _instance ??
-          (throw Exception(
-              'PoopNameModule must be initialised with PoopNameModule.init()'));
+      _instance ?? (throw Exception('PoopNameModule must be initialised with PoopNameModule.init()'));
   static PoopNameModule? _instance;
 
   static void init(NyxxGateway client) {

@@ -1,4 +1,3 @@
-
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
@@ -8,9 +7,7 @@ import 'package:running_on_dart/src/settings.dart';
 
 class JoinLogsModule {
   static JoinLogsModule get instance =>
-      _instance ??
-          (throw Exception(
-              'JoinLogsService must be initialised with JoinLogsService.init()'));
+      _instance ?? (throw Exception('JoinLogsService must be initialised with JoinLogsService.init()'));
   static JoinLogsModule? _instance;
 
   static void init(NyxxGateway client) {
@@ -47,19 +44,19 @@ class JoinLogsModule {
     final now = DateTime.now();
 
     final embed = EmbedBuilder(
-      description: '**Member joined**',
-      author: EmbedAuthorBuilder(name: event.member.user!.username, iconUrl: event.member.user!.avatar.url),
-      fields: [
-        EmbedFieldBuilder(name: 'ID', value: event.member.id.toString(), isInline: true),
-        EmbedFieldBuilder(name: 'Joined At', value: _formatDateTimeString(now), isInline: true),
-        EmbedFieldBuilder(name: 'Account created at', value: formatDate(event.member.id.timestamp), isInline: true)
-      ]
-    );
+        description: '**Member joined**',
+        author: EmbedAuthorBuilder(name: event.member.user!.username, iconUrl: event.member.user!.avatar.url),
+        fields: [
+          EmbedFieldBuilder(name: 'ID', value: event.member.id.toString(), isInline: true),
+          EmbedFieldBuilder(name: 'Joined At', value: _formatDateTimeString(now), isInline: true),
+          EmbedFieldBuilder(name: 'Account created at', value: formatDate(event.member.id.timestamp), isInline: true)
+        ]);
 
     channel.sendMessage(MessageBuilder(embeds: [embed]));
   }
 
-  String _formatDateTimeString(DateTime dateTime) => '${dateTime.format(TimestampStyle.shortDate)}, (${dateTime.format(TimestampStyle.relativeTime)})';
+  String _formatDateTimeString(DateTime dateTime) =>
+      '${dateTime.format(TimestampStyle.shortDate)}, (${dateTime.format(TimestampStyle.relativeTime)})';
 
   Future<bool> _isEnabledForGuild(Snowflake guildId) async {
     if (!intentFeaturesEnabled) {

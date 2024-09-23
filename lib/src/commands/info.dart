@@ -17,30 +17,31 @@ final info = ChatCommand(
         iconUrl: currentUser.avatar.url,
         url: Uri.parse(ApiOptions.nyxxRepositoryUrl),
       ),
-      footer: EmbedFooterBuilder(text: 'nyxx ${ApiOptions.nyxxVersion}'
-          ' | ROD $version'
-          ' | Dart SDK ${getDartPlatform()}'
-      ),
+      footer: EmbedFooterBuilder(
+          text: 'nyxx ${ApiOptions.nyxxVersion}'
+              ' | ROD $version'
+              ' | Dart SDK ${getDartPlatform()}'),
       fields: [
         EmbedFieldBuilder(name: 'Cached guilds', value: context.client.guilds.cache.length.toString(), isInline: true),
         EmbedFieldBuilder(name: 'Cached users', value: context.client.users.cache.length.toString(), isInline: true),
-        EmbedFieldBuilder(name: 'Cached channels', value: context.client.channels.cache.length.toString(), isInline: true),
+        EmbedFieldBuilder(
+            name: 'Cached channels', value: context.client.channels.cache.length.toString(), isInline: true),
         EmbedFieldBuilder(
             name: 'Cached voice states',
             value: context.client.guilds.cache.values
                 .map((g) => g.voiceStates.length)
-                .fold<num>(0, (value, element) => value + element).toString(),
-            isInline: true
-        ),
+                .fold<num>(0, (value, element) => value + element)
+                .toString(),
+            isInline: true),
         EmbedFieldBuilder(name: 'Shard count', value: context.client.gateway.shards.length.toString(), isInline: true),
         EmbedFieldBuilder(
             name: 'Cached messages',
             value: context.client.channels.cache.values
                 .whereType<TextChannel>()
                 .map((c) => c.messages.cache.length)
-                .fold<num>(0, (value, element) => value + element).toString(),
-          isInline: true
-        ),
+                .fold<num>(0, (value, element) => value + element)
+                .toString(),
+            isInline: true),
         EmbedFieldBuilder(name: 'Memory usage (current/RSS)', value: getCurrentMemoryString(), isInline: true),
         EmbedFieldBuilder(name: 'Uptime', value: 'TODO: ', isInline: true),
       ],
@@ -51,7 +52,8 @@ final info = ChatCommand(
         embeds: [embed],
         components: [
           ActionRowBuilder(components: [
-            ButtonBuilder.link(url: Uri.parse('https://www.youtube.com/watch?v=dQw4w9WgXcQ'), label: 'Add ROD to guild')
+            ButtonBuilder.link(
+                url: Uri.parse('https://www.youtube.com/watch?v=dQw4w9WgXcQ'), label: 'Add ROD to your guild')
           ]),
         ],
       ),
