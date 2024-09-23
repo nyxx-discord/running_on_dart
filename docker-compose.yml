@@ -1,16 +1,16 @@
 version: '3.9'
 services:
   running_on_dart:
-    build: .
+    build:
+      context: .
+      target: dev
     container_name: running_on_dart
     env_file:
      - .env
     links:
       - db
-      - lavalink
     depends_on:
       - db
-      - lavalink
 
   db:
     image: postgres:13.5
@@ -20,15 +20,6 @@ services:
      - .env
     volumes:
       - "rod_db:/var/lib/postgresql/data"
-
-  lavalink:
-    image: fredboat/lavalink:master
-    container_name: running_on_dart_lavalink
-    restart: always
-    expose:
-      - 2333
-    volumes:
-     - ./lavalink.yml:/opt/Lavalink/application.yml
 
 volumes:
   rod_db:

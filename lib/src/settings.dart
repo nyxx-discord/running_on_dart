@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:nyxx/nyxx.dart';
 
-String get version => '3.3.3';
+String get version => '4.0';
 
 /// Get a [String] from an environment variable, throwing an exception if it is not set.
 ///
@@ -29,11 +29,11 @@ final bool intentFeaturesEnabled = getEnvBool('ROD_INTENT_FEATURES_ENABLE');
 /// The prefix to use for text commands for this instance.
 final String prefix = getEnv('ROD_PREFIX');
 
-final Snowflake adminGuildId = Snowflake(getEnv('ROD_ADMIN_GUILD'));
+final Snowflake adminGuildId = Snowflake.parse(getEnv('ROD_ADMIN_GUILD'));
 
 /// The IDs of the users that are allowed to use administrator commands
 final List<Snowflake> adminIds =
-    getEnv('ROD_ADMIN_IDS').split(RegExp(r'\s+')).map(Snowflake.new).toList();
+    getEnv('ROD_ADMIN_IDS').split(RegExp(r'\s+')).map(Snowflake.parse).toList();
 
 /// The interval at which to update the docs cache.
 final Duration docsUpdateInterval =
@@ -81,7 +81,7 @@ final bool dev = getEnvBool('ROD_DEV');
 /// If this instance is in development mode, the ID of the guild to register commands to, else
 /// `null`.
 final Snowflake? devGuildId =
-    dev ? Snowflake(getEnv('ROD_DEV_GUILD_ID')) : null;
+    dev ? Snowflake.parse(getEnv('ROD_DEV_GUILD_ID')) : null;
 
 /// The address of the lavalink running server to connect to.
 String serverAddress = getEnv('LAVALINK_ADDRESS', 'lavalink');
@@ -96,15 +96,16 @@ String serverPassword = getEnv('LAVALINK_PASSWORD', 'youshallnotpass');
 bool useSSL = getEnvBool('LAVALINK_USE_SSL', false);
 
 /// The basic intents needed to run Running on Dart without privileged intents.
-final int _baseIntents = GatewayIntents.directMessages |
+final Flags<GatewayIntents> _baseIntents =
+    GatewayIntents.directMessages |
     GatewayIntents.guilds |
-    GatewayIntents.guildVoiceState;
+    GatewayIntents.guildVoiceStates;
 
 /// Privileged intents that can be enabled to add additional features to Running on Dart.
-final int _privilegedIntents = _baseIntents |
+final Flags<GatewayIntents> _privilegedIntents = _baseIntents |
     GatewayIntents.guildMessages |
     GatewayIntents.guildMembers |
     GatewayIntents.messageContent;
 
 /// The intents to use for this instance.
-final int intents = intentFeaturesEnabled ? _privilegedIntents : _baseIntents;
+final Flags<GatewayIntents> intents = intentFeaturesEnabled ? _privilegedIntents : _baseIntents;

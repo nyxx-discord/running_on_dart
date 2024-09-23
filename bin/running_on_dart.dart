@@ -1,58 +1,30 @@
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:running_on_dart/running_on_dart.dart';
-import 'package:running_on_dart/src/commands/system.dart';
+import 'package:running_on_dart/src/commands/info.dart';
 
 void main() async {
-  // Create nyxx client and nyxx_commands plugin
-  final client = NyxxFactory.createNyxxWebsocket(token, intents);
-
   final commands = CommandsPlugin(
     prefix: mentionOr((_) => prefix),
     guild: devGuildId,
-    options: CommandsOptions(logErrors: false, hideOriginalResponse: false),
+    options: CommandsOptions(logErrors: true, type: CommandType.slashOnly),
   );
 
-  // Register our commands
   commands
-    ..addCommand(ping)
     ..addCommand(info)
-    ..addCommand(avatar)
-    ..addCommand(docs)
-    ..addCommand(reminder)
-    ..addCommand(tag)
-    ..addCommand(admin)
-    ..addCommand(settings)
-    ..addCommand(github)
-    ..addCommand(music)
-    ..addCommand(system);
+    ..addCommand(featureSettings);
 
-  // Add our error handler
-  commands.onCommandError.listen(commandErrorHandler);
+  final client = await Nyxx.connectGateway(token, intents, options: GatewayClientOptions(
+    plugins: [
+      Logging(),
+      CliIntegration(),
+      IgnoreExceptions(),
+      commands,
+    ],
+  ));
 
-  // Add our custom converters
-  commands
-    ..addConverter(docEntryConverter)
-    ..addConverter(packageDocsConverter)
-    ..addConverter(durationConverter)
-    ..addConverter(reminderConverter)
-    ..addConverter(tagConverter)
-    ..addConverter(settingsConverter);
+  await DatabaseService.instance.awaitReady();
 
-  // Add logging, CLI, exceptions and commands plugin to our client
-  client
-    ..registerPlugin(Logging())
-    ..registerPlugin(CliIntegration())
-    ..registerPlugin(IgnoreExceptions())
-    ..registerPlugin(commands);
-
-  // Initialise our services
-  ReminderService.init(client);
-  PoopNameService.init(client);
-  JoinLogsService.init(client);
-  TagService.init();
-  MusicService.init(client);
-
-  // Connect
-  await client.connect();
+  PoopNameModule.init(client);
+  JoinLogsModule.init(client);
 }

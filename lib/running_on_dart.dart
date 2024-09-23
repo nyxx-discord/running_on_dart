@@ -1,24 +1,9 @@
-library running_on_dart;
 
-export 'src/commands/admin.dart';
-export 'src/commands/avatar.dart';
-export 'src/commands/docs.dart';
-export 'src/commands/github.dart';
-export 'src/commands/info.dart';
-export 'src/commands/music.dart';
-export 'src/commands/ping.dart';
-export 'src/commands/reminder.dart';
-export 'src/commands/settings.dart';
-export 'src/commands/tag.dart';
-export 'src/converters.dart';
-export 'src/error_handler.dart';
+export 'src/commands/feature_settings.dart';
+
+export 'src/modules/join_logs.dart';
+export 'src/modules/poop_name.dart';
+
 export 'src/services/db.dart';
-export 'src/services/docs.dart';
-export 'src/services/guild_settings.dart';
-export 'src/services/join_logs.dart';
-export 'src/services/music.dart';
-export 'src/services/poop_name.dart';
-export 'src/services/reminder.dart';
-export 'src/services/tag.dart';
+
 export 'src/settings.dart';
-export 'src/exception.dart';
