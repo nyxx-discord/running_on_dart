@@ -14,7 +14,7 @@ class FeatureSettingsRepository {
     ''',
       substitutionValues: {
         'name': setting.name,
-        'guild_id': guildId,
+        'guild_id': guildId.toString(),
     });
 
     return result.isNotEmpty;
@@ -26,7 +26,7 @@ class FeatureSettingsRepository {
     ''',
         substitutionValues: {
           'name': setting.name,
-          'guild_id': guildId,
+          'guild_id': guildId.toString(),
         });
 
     if (result.isEmpty) {

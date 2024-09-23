@@ -12,7 +12,8 @@ void main() async {
 
   commands
     ..addCommand(info)
-    ..addCommand(featureSettings);
+    ..addCommand(featureSettings)
+    ..addConverter(settingsConverter);
 
   final client = await Nyxx.connectGateway(token, intents, options: GatewayClientOptions(
     plugins: [

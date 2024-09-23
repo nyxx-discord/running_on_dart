@@ -26,3 +26,9 @@ dependencies:
 
 dev_dependencies:
   lints: ^4.0.0
+
+dependency_overrides:
+  nyxx_commands:
+    git:
+      url: https://github.com/nyxx-discord/nyxx_commands.git
+      ref: dev

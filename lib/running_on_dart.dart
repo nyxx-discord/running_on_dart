@@ -7,3 +7,4 @@ export 'src/modules/poop_name.dart';
 export 'src/services/db.dart';
 
 export 'src/settings.dart';
+export 'src/converter.dart';
