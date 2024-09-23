@@ -76,18 +76,6 @@ final bool dev = getEnvBool('ROD_DEV');
 /// `null`.
 final Snowflake? devGuildId = dev ? Snowflake.parse(getEnv('ROD_DEV_GUILD_ID')) : null;
 
-/// The address of the lavalink running server to connect to.
-String serverAddress = getEnv('LAVALINK_ADDRESS', 'lavalink');
-
-/// The port of the lavalink running server to use to connect.
-int serverPort = int.parse(getEnv('LAVALINK_PORT', '2333'));
-
-/// The password used to connect to the lavalink server.
-String serverPassword = getEnv('LAVALINK_PASSWORD', 'youshallnotpass');
-
-/// Whether to use or not ssl to establish a connection.
-bool useSSL = getEnvBool('LAVALINK_USE_SSL', false);
-
 /// The basic intents needed to run Running on Dart without privileged intents.
 final Flags<GatewayIntents> _baseIntents =
     GatewayIntents.directMessages | GatewayIntents.guilds | GatewayIntents.guildVoiceStates;

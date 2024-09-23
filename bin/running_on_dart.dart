@@ -13,6 +13,7 @@ void main() async {
     ..addCommand(info)
     ..addCommand(featureSettings)
     ..addCommand(ping)
+    ..addCommand(avatar)
     ..addConverter(settingsConverter);
 
   final client = await Nyxx.connectGateway(token, intents,

@@ -11,26 +11,12 @@ extension ReplaceEmbedFieldExtension on EmbedBuilder {
   }
 }
 
-int calculateGatewayLatencyInMilliseconds(NyxxGateway client) {
-  return client.gateway.shards.fold(0, (value, shard) => shard.latency.inMilliseconds) ~/ client.gateway.shards.length;
-}
-
-Future<int> calculateRestApiLatencyInMilliseconds(NyxxGateway client) async {
-  final restLatencyTimer = Stopwatch()..start();
-  await http.head(Uri(
-    scheme: 'https',
-    host: client.apiOptions.host,
-    path: client.apiOptions.baseUri,
-  ));
-  return (restLatencyTimer..stop()).elapsedMilliseconds;
-}
-
 final ping = ChatCommand(
   'ping',
   'Checks if the bot is online',
   id('ping', (ChatContext context) async {
-    final gatewayLatency = calculateGatewayLatencyInMilliseconds(context.client);
-    final restLatency = await calculateRestApiLatencyInMilliseconds(context.client);
+    final gatewayLatency = context.client.gateway.latency;
+    final restLatency = context.client.httpHandler.latency;
 
     final embed = EmbedBuilder(color: getRandomColor(), fields: [
       EmbedFieldBuilder(name: 'Gateway latency', value: '${gatewayLatency}ms', isInline: true),
