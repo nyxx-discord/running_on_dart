@@ -30,4 +30,5 @@ void main() async {
 
   PoopNameModule.init(client);
   JoinLogsModule.init(client);
+  ReminderModule.init(client);
 }
