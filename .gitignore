@@ -22,3 +22,5 @@ doc/api/
 # Build files
 *.exe
 *.db
+
+lib_old/
