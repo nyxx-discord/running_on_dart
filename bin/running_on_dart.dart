@@ -1,5 +1,6 @@
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
+import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 
 void main() async {
@@ -23,6 +24,7 @@ void main() async {
           CliIntegration(),
           IgnoreExceptions(),
           commands,
+          pagination,
         ],
       ));
 
@@ -31,4 +33,5 @@ void main() async {
   PoopNameModule.init(client);
   JoinLogsModule.init(client);
   ReminderModule.init(client);
+  DocsModule.init();
 }

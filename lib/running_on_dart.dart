@@ -6,6 +6,7 @@ export 'src/commands/avatar.dart';
 export 'src/modules/join_logs.dart';
 export 'src/modules/poop_name.dart';
 export 'src/modules/reminder.dart';
+export 'src/modules/docs.dart';
 
 export 'src/services/db.dart';
 
