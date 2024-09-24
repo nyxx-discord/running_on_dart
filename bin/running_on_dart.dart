@@ -20,6 +20,7 @@ void main() async {
     ..addCommand(ping)
     ..addCommand(tag)
     ..addCommand(reminder)
+    ..addCommand(admin)
     ..addConverter(settingsConverter)
     ..addConverter(manageableTagConverter)
     ..addConverter(durationConverter)

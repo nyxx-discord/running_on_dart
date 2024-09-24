@@ -5,6 +5,7 @@ export 'src/commands/github.dart';
 export 'src/commands/avatar.dart';
 export 'src/commands/docs.dart';
 export 'src/commands/reminder.dart';
+export 'src/commands/admin.dart';
 
 export 'src/modules/join_logs.dart';
 export 'src/modules/poop_name.dart';

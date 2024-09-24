@@ -79,11 +79,7 @@ Iterable<CommandOptionChoiceBuilder<dynamic>> autocompleteManageableTag(Autocomp
 
 /// Search autocomplete, but only include elements from a given package (if there is one selected).
 Iterable<CommandOptionChoiceBuilder<dynamic>> autocompleteQueryWithPackage(AutocompleteContext context) {
-  final selectedPackageName = (context.option.options ?? [])
-      .cast<InteractionOption?>() // Cast to IInteractionOption? so we can return `null` in orElse
-      .firstWhere((element) => element?.name == 'package', orElse: () => null)
-      ?.value
-      ?.toString();
+  final selectedPackageName = context.arguments['package'];
 
   PackageDocs? selectedPackage;
   if (selectedPackageName != null) {

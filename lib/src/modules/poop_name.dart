@@ -17,7 +17,6 @@ class PoopNameModule {
   }
 
   final NyxxGateway _client;
-  final Logger _logger = Logger('ROD.PoopName');
 
   PoopNameModule._(this._client) {
     _client.onGuildMemberAdd.listen((event) => _handle(event.member));
@@ -30,13 +29,26 @@ class PoopNameModule {
       return;
     }
 
+    poopMember(member, dryRun: false);
+  }
+
+  Future<(bool, String?)> poopMember(Member member, {bool dryRun = true}) async {
     final memberName = member.nick ?? member.user?.globalName ?? '';
-    if (!memberName.startsWith(poopRegexp)) {
-      return;
+    if (!_shouldPoopName(memberName)) {
+      return (false, null);
     }
 
-    member.update(MemberUpdateBuilder(nick: poopEmoji), auditLogReason: 'ROD PoopNameModule moderation');
+    if (!dryRun) {
+      _updateMemberWithPoopEmoji(member);
+    }
+
+    return (true, memberName);
   }
+
+  bool _shouldPoopName(String name) => name.startsWith(poopRegexp);
+
+  Future<void> _updateMemberWithPoopEmoji(Member member) =>
+      member.update(MemberUpdateBuilder(nick: poopEmoji), auditLogReason: 'ROD PoopNameModule moderation');
 
   Future<bool> _isEnabledForGuild(Snowflake guildId) async {
     if (!intentFeaturesEnabled) {
