@@ -2,6 +2,7 @@ import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/running_on_dart.dart';
+import 'package:running_on_dart/src/commands/tag.dart';
 
 void main() async {
   final commands = CommandsPlugin(
@@ -11,11 +12,15 @@ void main() async {
   );
 
   commands
-    ..addCommand(info)
-    ..addCommand(featureSettings)
-    ..addCommand(ping)
     ..addCommand(avatar)
-    ..addConverter(settingsConverter);
+    ..addCommand(docs)
+    ..addCommand(featureSettings)
+    ..addCommand(github)
+    ..addCommand(info)
+    ..addCommand(ping)
+    ..addCommand(tag)
+    ..addConverter(settingsConverter)
+    ..addConverter(manageableTagConverter);
 
   final client = await Nyxx.connectGateway(token, intents,
       options: GatewayClientOptions(
