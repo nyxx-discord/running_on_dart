@@ -22,7 +22,7 @@ dependencies:
   nyxx: ^6.3.0
   nyxx_commands: ^6.0.0
   nyxx_extensions: ^4.1.0
-  postgres: ^2.4.3
+  postgres: ^2.6.4
   fuzzy: ^0.5.1
 
 dev_dependencies:

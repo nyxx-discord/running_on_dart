@@ -21,7 +21,9 @@ void main() async {
     ..addCommand(tag)
     ..addCommand(reminder)
     ..addConverter(settingsConverter)
-    ..addConverter(manageableTagConverter);
+    ..addConverter(manageableTagConverter)
+    ..addConverter(durationConverter)
+    ..addConverter(reminderConverter);
 
   final client = await Nyxx.connectGateway(token, intents,
       options: GatewayClientOptions(
