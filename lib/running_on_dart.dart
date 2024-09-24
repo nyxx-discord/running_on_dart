@@ -4,11 +4,13 @@ export 'src/commands/info.dart';
 export 'src/commands/github.dart';
 export 'src/commands/avatar.dart';
 export 'src/commands/docs.dart';
+export 'src/commands/reminder.dart';
 
 export 'src/modules/join_logs.dart';
 export 'src/modules/poop_name.dart';
 export 'src/modules/reminder.dart';
 export 'src/modules/docs.dart';
+export 'src/modules/tag.dart';
 
 export 'src/services/db.dart';
 

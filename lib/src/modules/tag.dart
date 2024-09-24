@@ -4,19 +4,19 @@ import 'package:running_on_dart/src/models/tag.dart';
 import 'package:running_on_dart/src/repository/tag.dart';
 import 'package:running_on_dart/src/settings.dart';
 
-class TagService {
-  static TagService get instance =>
+class TagModule {
+  static TagModule get instance =>
       _instance ?? (throw Exception('TagService must be initialised with TagService.init()'));
-  static TagService? _instance;
+  static TagModule? _instance;
 
   static void init() {
-    _instance = TagService._();
+    _instance = TagModule._();
   }
 
   final List<Tag> tags = [];
   final List<TagUsedEvent> usedEvents = [];
 
-  TagService._() {
+  TagModule._() {
     TagRepository.instance.fetchAllActiveTags().then((tags) => this.tags.addAll(tags));
     TagRepository.instance.fetchTagUsage().then((events) => usedEvents.addAll(events));
   }

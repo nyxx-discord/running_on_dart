@@ -1,7 +1,7 @@
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:running_on_dart/src/models/tag.dart';
-import 'package:running_on_dart/src/services/tag.dart';
+import 'package:running_on_dart/src/modules/tag.dart';
 import 'package:running_on_dart/src/util/util.dart';
 
 import '../converter.dart';
@@ -19,7 +19,7 @@ final tag = ChatGroup(
         @Description('The content of the tag') String content, [
         @Description('Whether to enable the tag by default') bool enabled = true,
       ]) async {
-        if (TagService.instance.getByName(context.guild?.id ?? Snowflake.zero, name) != null) {
+        if (TagModule.instance.getByName(context.guild?.id ?? Snowflake.zero, name) != null) {
           await context.respond(MessageBuilder(embeds: [
             EmbedBuilder(
                 color: DiscordColor.parseHexString("#FF0000"),
@@ -38,7 +38,7 @@ final tag = ChatGroup(
           name: name,
         );
 
-        await TagService.instance.createTag(tag);
+        await TagModule.instance.createTag(tag);
 
         await context.respond(MessageBuilder(content: 'Tag created successfully!'));
       }),
@@ -52,7 +52,7 @@ final tag = ChatGroup(
       ) async {
         await context.respond(MessageBuilder(content: tag.content));
 
-        await TagService.instance.registerTagUsedEvent(TagUsedEvent.fromTag(
+        await TagModule.instance.registerTagUsedEvent(TagUsedEvent.fromTag(
           tag: tag,
           hidden: false,
         ));
@@ -67,7 +67,7 @@ final tag = ChatGroup(
         ) async {
           await context.respond(MessageBuilder(content: tag.content));
 
-          await TagService.instance.registerTagUsedEvent(TagUsedEvent.fromTag(
+          await TagModule.instance.registerTagUsedEvent(TagUsedEvent.fromTag(
             tag: tag,
             hidden: true,
           ));
@@ -86,7 +86,7 @@ final tag = ChatGroup(
         }
 
         tag.enabled = true;
-        await TagService.instance.updateTag(tag);
+        await TagModule.instance.updateTag(tag);
 
         await context.respond(MessageBuilder(content: 'Successfully enabled tag!'));
       }),
@@ -104,7 +104,7 @@ final tag = ChatGroup(
         }
 
         tag.enabled = false;
-        await TagService.instance.updateTag(tag);
+        await TagModule.instance.updateTag(tag);
 
         await context.respond(MessageBuilder(content: 'Successfully disabled tag!'));
       }),
@@ -116,7 +116,7 @@ final tag = ChatGroup(
         ChatContext context,
         @UseConverter(manageableTagConverter) @Description('The tag to delete') Tag tag,
       ) async {
-        await TagService.instance.deleteTag(tag);
+        await TagModule.instance.deleteTag(tag);
 
         await context.respond(MessageBuilder(content: 'Successfully deleted tag!'));
       }),
@@ -128,7 +128,7 @@ final tag = ChatGroup(
         ChatContext context, [
         @Description('The tag to show stats for') Tag? tag,
       ]) async {
-        final events = TagService.instance.getTagUsage(context.guild?.id ?? Snowflake.zero, tag).toList();
+        final events = TagModule.instance.getTagUsage(context.guild?.id ?? Snowflake.zero, tag).toList();
 
         final totalUses = events.length;
         final totalHiddenUses = events.where((event) => event.hidden).length;
@@ -155,7 +155,7 @@ final tag = ChatGroup(
           final useCount = <Tag, int>{};
 
           for (final event in events) {
-            final tag = TagService.instance.getById(event.tagId);
+            final tag = TagModule.instance.getById(event.tagId);
 
             if (tag == null) {
               continue;

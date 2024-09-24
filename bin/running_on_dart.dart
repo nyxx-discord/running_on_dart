@@ -19,6 +19,7 @@ void main() async {
     ..addCommand(info)
     ..addCommand(ping)
     ..addCommand(tag)
+    ..addCommand(reminder)
     ..addConverter(settingsConverter)
     ..addConverter(manageableTagConverter);
 
@@ -38,5 +39,6 @@ void main() async {
   PoopNameModule.init(client);
   JoinLogsModule.init(client);
   ReminderModule.init(client);
+  TagModule.init();
   DocsModule.init();
 }
