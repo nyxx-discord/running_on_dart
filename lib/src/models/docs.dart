@@ -20,7 +20,7 @@ class PackageDocs {
   Iterable<String> get elementNames => elements.map((e) => e.name);
 
   /// The URL to this package's documentation index on [pub.dev](https://pub.dev).
-  String get urlToDocs => Uri.encodeFull('https://pub.dev/documentation/$packageName/latest/index.json');
+  String get urlToDocs => 'https://pub.dev/documentation/$packageName/latest/index.json';
 
   /// Create a new [PackageDocs] for a given package.
   PackageDocs({
@@ -48,7 +48,7 @@ class PackageDocs {
           continue;
         }
 
-        final entry = DocEntry.fromJson(dataEntry);
+        final entry = DocEntry.fromJson(dataEntry, packageName);
 
         entries[entry.qualifiedName] = entry;
       }
@@ -90,7 +90,7 @@ class DocEntry {
   });
 
   /// Create a [DocEntry] from a documentation entry object received from a dartdoc `index.json` file.
-  factory DocEntry.fromJson(Map<String, dynamic> json) {
+  factory DocEntry.fromJson(Map<String, dynamic> json, String packageName) {
     final displayName = switch (json['kind'] as int) {
       1 || 16 || 19 => '${json['enclosedBy']['name'] as String}.${json['name'] as String}',
       9 =>
@@ -109,15 +109,13 @@ class DocEntry {
       _ => '',
     };
 
-    final packageName = json['packageName'] as String? ?? json['qualifiedName'] as String;
-
     return DocEntry(
       name: json['name'] as String,
       displayName: displayName,
       qualifiedName: json['qualifiedName'] as String,
       packageName: packageName,
       type: type,
-      urlToDocs: Uri.encodeFull('https://pub.dev/documentation/$packageName/latest/${json['href'] as String}'),
+      urlToDocs: 'https://pub.dev/documentation/$packageName/latest/${json['href'] as String}',
     );
   }
 }
