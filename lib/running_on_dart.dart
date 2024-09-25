@@ -12,6 +12,7 @@ export 'src/modules/poop_name.dart';
 export 'src/modules/reminder.dart';
 export 'src/modules/docs.dart';
 export 'src/modules/tag.dart';
+export 'src/modules/mod_log.dart';
 
 export 'src/services/db.dart';
 

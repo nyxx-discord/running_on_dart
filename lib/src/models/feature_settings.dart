@@ -2,7 +2,8 @@ import 'package:nyxx/nyxx.dart';
 
 enum Setting {
   poopName('poop_name', 'Replace nickname of a member with poop emoji if the member tries to hoist itself', false),
-  joinLogs('join_logs', 'Logs member join events into specified channel', true);
+  joinLogs('join_logs', 'Logs member join events into specified channel', true),
+  modLogs('mod_logs', 'Logs administration event into specified channel', true);
 
   /// name of setting
   final String name;
@@ -49,8 +50,8 @@ class FeatureSetting {
   factory FeatureSetting.fromRow(Map<String, dynamic> row) {
     return FeatureSetting(
       setting: Setting.values.singleWhere((setting) => setting.name == row['name']),
-      guildId: Snowflake(row['guild_id']),
-      whoEnabled: Snowflake(row['who_enabled']),
+      guildId: Snowflake.parse(row['guild_id']),
+      whoEnabled: Snowflake.parse(row['who_enabled']),
       addedAt: row['add_date'] as DateTime,
       data: row['additional_data'] as String?,
     );

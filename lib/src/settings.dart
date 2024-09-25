@@ -81,8 +81,11 @@ final Flags<GatewayIntents> _baseIntents =
     GatewayIntents.directMessages | GatewayIntents.guilds | GatewayIntents.guildVoiceStates;
 
 /// Privileged intents that can be enabled to add additional features to Running on Dart.
-final Flags<GatewayIntents> _privilegedIntents =
-    _baseIntents | GatewayIntents.guildMessages | GatewayIntents.guildMembers | GatewayIntents.messageContent;
+final Flags<GatewayIntents> _privilegedIntents = _baseIntents |
+    GatewayIntents.guildMessages |
+    GatewayIntents.guildMembers |
+    GatewayIntents.messageContent |
+    GatewayIntents.guildModeration;
 
 /// The intents to use for this instance.
 final Flags<GatewayIntents> intents = intentFeaturesEnabled ? _privilegedIntents : _baseIntents;
