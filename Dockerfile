@@ -15,6 +15,4 @@ FROM build as prod
 
 RUN dart run nyxx_commands:compile bin/running_on_dart.dart -o bot.exe
 
-RUN chmod +x bot.exe
-
 CMD [ "./bot.exe" ]

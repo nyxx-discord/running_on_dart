@@ -12,8 +12,7 @@ import 'package:running_on_dart/src/modules/tag.dart';
 import 'models/tag.dart';
 
 final reminderConverter = Converter<Reminder>(
-  (view, context) =>
-      ReminderModule.instance.search(context.user.id, view.getQuotedWord()).cast<Reminder?>().followedBy([null]).first,
+  (view, context) => ReminderModule.instance.search(context.user.id, view.getQuotedWord()).firstOrNull,
   autocompleteCallback: (context) => ReminderModule.instance
       .search(context.user.id, context.currentValue)
       .take(25)
@@ -38,18 +37,7 @@ final durationConverter = Converter<Duration>(
   autocompleteCallback: autocompleteDuration,
 );
 
-final settingsConverter = Converter<Setting>(
-  (view, context) {
-    final word = view.getQuotedWord();
-
-    try {
-      return Setting.values.firstWhere((setting) => setting.name == word);
-    } on StateError {
-      return null;
-    }
-  },
-  choices: Setting.values.map((setting) => CommandOptionChoiceBuilder(name: setting.name, value: setting.name)),
-);
+final settingsConverter = SimpleConverter.fixed(elements: Setting.values, stringify: (setting) => setting.name);
 
 // Needs to be const so we can use @UseConverter
 const manageableTagConverter = Converter<Tag>(

@@ -130,9 +130,5 @@ class DocsModule {
   /// Gets a documentation entry from a query string.
   ///
   /// This first attempts to find the element by qualified name, then returns the most prevalent search result.
-  DocEntry? getByQuery(String query) =>
-      getByQualifiedName(query) ??
-      search(query)
-          .cast<DocEntry?>() // Cast to DocEntry? so we can return null in orElse
-          .firstWhere((element) => true, orElse: () => null); // Return the top result, or `null` if the list is empty
+  DocEntry? getByQuery(String query) => getByQualifiedName(query) ?? search(query).firstOrNull;
 }

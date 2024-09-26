@@ -6,9 +6,9 @@ import 'package:running_on_dart/src/commands/tag.dart';
 
 void main() async {
   final commands = CommandsPlugin(
-    prefix: mentionOr((_) => prefix),
+    prefix: null,
     guild: devGuildId,
-    options: CommandsOptions(logErrors: true, type: CommandType.slashOnly),
+    options: CommandsOptions(logErrors: true),
   );
 
   commands

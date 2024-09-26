@@ -12,17 +12,17 @@ final avatar = ChatCommand(
     // Default to the user who invoked the command
     target ??= context.member;
 
-    String? avatarUrl;
+    Uri? avatarUrl;
 
     // Try to fetch the guild profile
     if (showGuildProfile) {
-      avatarUrl = target?.avatar?.toString();
+      avatarUrl = target?.avatar?.url;
     }
 
     // Default to the user avatar
-    avatarUrl ??= target?.user?.avatar.toString();
-    avatarUrl ??= "Cannot obtain avatar Url";
+    avatarUrl ??= target?.user?.avatar.url;
 
-    await context.respond(MessageBuilder(content: avatarUrl));
+    final content = avatarUrl?.toString() ?? "Cannot obtain avatar Url";
+    await context.respond(MessageBuilder(content: content));
   }),
 );
