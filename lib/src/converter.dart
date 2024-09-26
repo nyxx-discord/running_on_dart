@@ -40,30 +40,14 @@ final durationConverter = Converter<Duration>(
 String stringifySetting(Setting setting) => setting.name;
 const settingsConverter = SimpleConverter.fixed(elements: Setting.values, stringify: stringifySetting);
 
-const manageableTagConverter = Converter<Tag>(
-  getManageableTag,
-  autocompleteCallback: autocompleteManageableTag,
+Iterable<Tag> getManageableTags(ContextData context) =>
+    TagModule.instance.findAll(context.guild?.id ?? Snowflake.zero, context.user.id);
+String stringifyTag(Tag tag) => tag.name;
+
+const manageableTagConverter = SimpleConverter<Tag>(
+  provider: getManageableTags,
+  stringify: stringifyTag,
 );
-
-Tag? getManageableTag(StringView view, ContextData context) => TagModule.instance
-    .search(
-      view.getQuotedWord(),
-      context.guild?.id ?? Snowflake.zero,
-      context.user.id,
-    )
-    .cast<Tag?>()
-    .followedBy([null]).first;
-
-Iterable<CommandOptionChoiceBuilder<dynamic>> autocompleteManageableTag(AutocompleteContext context) =>
-    TagModule.instance
-        .search(
-          context.currentValue,
-          context.guild?.id ?? Snowflake.zero,
-          context.user.id,
-        )
-        .take(25)
-        .map((e) => e.name)
-        .map((e) => CommandOptionChoiceBuilder(name: e, value: e));
 
 /// Search autocomplete, but only include elements from a given package (if there is one selected).
 Iterable<CommandOptionChoiceBuilder<dynamic>> autocompleteQueryWithPackage(AutocompleteContext context) {

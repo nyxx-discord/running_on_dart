@@ -47,6 +47,14 @@ class TagModule {
   Iterable<Tag> getOwnedTags(Snowflake guildId, Snowflake userId) =>
       tags.where((tag) => tag.guildId == guildId && (tag.authorId == userId || adminIds.contains(userId)));
 
+  Iterable<Tag> findAll(Snowflake guildId, [Snowflake? userId]) {
+    if (userId == null) {
+      return getGuildTags(guildId);
+    }
+
+    return getOwnedTags(guildId, userId);
+  }
+
   /// Search the tags in a guild, or the tags a user can manage if [userId] is set.
   Iterable<Tag> search(String query, Snowflake guildId, [Snowflake? userId]) {
     Iterable<Tag> allTags;
