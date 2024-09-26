@@ -37,9 +37,9 @@ final durationConverter = Converter<Duration>(
   autocompleteCallback: autocompleteDuration,
 );
 
-final settingsConverter = SimpleConverter.fixed(elements: Setting.values, stringify: (setting) => setting.name);
+String stringifySetting(Setting setting) => setting.name;
+const settingsConverter = SimpleConverter.fixed(elements: Setting.values, stringify: stringifySetting);
 
-// Needs to be const so we can use @UseConverter
 const manageableTagConverter = Converter<Tag>(
   getManageableTag,
   autocompleteCallback: autocompleteManageableTag,

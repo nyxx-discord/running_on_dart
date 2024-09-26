@@ -51,11 +51,9 @@ class ReminderModule {
   Future<void> _execute(Reminder reminder) async {
     _logger.fine('Executing reminder ${reminder.id}');
 
-    final channel = _client.channels.cache.values
-        .whereType<TextChannel?>()
-        .firstWhere((channel) => channel?.id == reminder.channelId, orElse: () => null);
+    final channel = await _client.channels[reminder.channelId].getOrNull();
 
-    if (channel != null) {
+    if (channel != null && channel is TextChannel) {
       await _sendReminderMessage(reminder, channel);
     }
 

@@ -1,5 +1,7 @@
+import 'package:collection/collection.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
+import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/src/modules/poop_name.dart';
 
 final admin = ChatGroup(
@@ -14,33 +16,23 @@ final admin = ChatGroup(
         @UseConverter(IntConverter(min: 1)) @Description('The number of messages to delete') int count, [
         @Description('The user from whom to delete messages') User? user,
       ]) async {
-        List<Message>? channelMessages;
-        Snowflake? last;
+        final messagesToDelete = await context.channel.messages
+            .stream()
+            .where((m) => user == null || user.id == m.author.id)
+            .take(count)
+            .toList();
 
-        while (count > 0 && (channelMessages == null || channelMessages.isNotEmpty)) {
-          channelMessages = await context.channel.messages.fetchMany(
-            limit: 100,
-            after: last,
-          );
+        await Future.wait(
+          messagesToDelete
+              .where((m) => m.id.isBefore(Snowflake.firstBulk()))
+              .map((m) => m.id)
+              .slices(200)
+              .map((m) => context.channel.messages.bulkDelete(m)),
+        );
 
-          last = channelMessages.last.id;
-
-          Iterable<Message> toRemove;
-
-          if (user == null) {
-            toRemove = channelMessages.take(count);
-          } else {
-            toRemove = channelMessages.where((message) => message.author.id == user.id);
-          }
-
-          if (toRemove.length == 1) {
-            await toRemove.first.delete();
-          } else {
-            await context.channel.messages.bulkDelete(toRemove.map((m) => m.id));
-          }
-
-          count -= toRemove.length;
-        }
+        await Future.wait(
+          messagesToDelete.where((m) => !m.id.isBefore(Snowflake.firstBulk())).map((m) => m.delete()),
+        );
 
         await context.respond(MessageBuilder(content: 'Successfully deleted messages!'));
       }),
@@ -64,36 +56,28 @@ final admin = ChatGroup(
           }
 
           final outPutMessageHeader = "Pooping nicknames ${dryRun ? "[DRY RUN]" : ""}";
-          var nickString = nickNamesToRemove.join(",");
-          nickString = trimMessageString(nickString);
+          final messageBuilder = await createMessageBuilder(nickNamesToRemove.join(","), outPutMessageHeader);
 
-          var outputMessage = """
-$outPutMessageHeader:
-```
-$nickString
-```
-""";
-
-          await context.respond(MessageBuilder(content: outputMessage.trim()));
+          await context.respond(messageBuilder);
         }),
         checks: [
           GuildCheck.all(),
           PermissionsCheck(Permissions.manageNicknames),
-        ],
-        options: CommandOptions(autoAcknowledgeInteractions: true))
+        ])
   ],
 );
 
-String trimMessageString(String messageString) {
+Future<MessageBuilder> createMessageBuilder(String messageString, String messageHeader) async {
   if (messageString.isEmpty) {
-    return "-/-";
+    return MessageBuilder(content: "-/-");
   }
 
-  if (messageString.length > 1950) {
-    messageString = "${messageString.substring(0, 1950)} ...";
-  }
-
-  return messageString;
+  return pagination.split(messageString, buildChunk: (String chunk) => MessageBuilder(content: """
+$messageHeader:
+```
+$chunk
+```
+"""));
 }
 
 Stream<Member> searchMembers(String disallowedChar, int batchSize, Guild guild) {

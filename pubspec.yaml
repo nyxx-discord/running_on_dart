@@ -24,6 +24,7 @@ dependencies:
   nyxx_extensions: ^4.1.0
   postgres: ^2.6.4
   fuzzy: ^0.5.1
+  collection: ^1.19.0
 
 dev_dependencies:
   lints: ^4.0.0
@@ -32,4 +33,8 @@ dependency_overrides:
   nyxx_commands:
     git:
       url: https://github.com/nyxx-discord/nyxx_commands.git
+      ref: dev
+  nyxx_extensions:
+    git:
+      url: https://github.com/nyxx-discord/nyxx_extensions.git
       ref: dev
