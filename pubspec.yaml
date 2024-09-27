@@ -25,6 +25,8 @@ dependencies:
   postgres: ^2.6.4
   fuzzy: ^0.5.1
   collection: ^1.19.0
+  tentacle:
+    git: https://github.com/TentacleOrg/Tentacle.git
 
 dev_dependencies:
   lints: ^4.0.0

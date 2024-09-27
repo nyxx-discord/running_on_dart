@@ -134,6 +134,18 @@ class DatabaseService {
     ''')
       ..enqueueMigration('2.2', '''
       TRUNCATE TABLE reminders;
+      ''')
+      ..enqueueMigration("2.3", '''
+      CREATE TABLE jellyfin_configs (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR NOT NULL,
+        base_path VARCHAR NOT NULL,
+        token VARCHAR NOT NULL,
+        is_default BOOLEAN NOT NULL DEFAULT FALSE,
+        guild_id VARCHAR NOT NULL
+      );
+      CREATE UNIQUE INDEX idx_jellyfin_configs_unique_name ON jellyfin_configs(name, guild_id);
+      CREATE UNIQUE INDEX idx_jellyfin_configs_unique_default ON jellyfin_configs(guild_id, is_default) WHERE is_default = TRUE;
       ''');
 
     await migrator.runMigrations();
