@@ -7,10 +7,20 @@ class JellyfinConfigRepository {
 
   JellyfinConfigRepository._();
 
+  Future<void> deleteConfig(int id) async {
+    await DatabaseService.instance.getConnection().query('DELETE FROM jellyfin_configs WHERE id = @id', substitutionValues: {'id': id});
+  }
+
   Future<Iterable<JellyfinConfig>> getDefaultConfigs() async {
+    final result = await DatabaseService.instance.getConnection().query('SELECT * FROM jellyfin_configs WHERE is_default = 1::bool');
+
+    return result.map((row) => row.toColumnMap()).map(JellyfinConfig.fromDatabaseRow);
+  }
+
+  Future<Iterable<JellyfinConfig>> getConfigsForGuild(Snowflake guildId) async {
     final result = await DatabaseService.instance
         .getConnection()
-        .query('SELECT * FROM jellyfin_configs WHERE is_default = 1::bool');
+        .query('SELECT * FROM jellyfin_configs WHERE guild_id = @guildId', substitutionValues: {'guildId': guildId.toString()});
 
     return result.map((row) => row.toColumnMap()).map(JellyfinConfig.fromDatabaseRow);
   }
@@ -27,8 +37,7 @@ class JellyfinConfigRepository {
     return JellyfinConfig.fromDatabaseRow(result.first.toColumnMap());
   }
 
-  Future<JellyfinConfig> createJellyfinConfig(
-      String name, String basePath, String token, bool isDefault, Snowflake guildId) async {
+  Future<JellyfinConfig> createJellyfinConfig(String name, String basePath, String token, bool isDefault, Snowflake guildId) async {
     final config = JellyfinConfig(name: name, basePath: basePath, token: token, isDefault: isDefault, guildId: guildId);
 
     final result = await DatabaseService.instance.getConnection().query('''

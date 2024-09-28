@@ -8,8 +8,7 @@ String get version => '4.0.0';
 ///
 /// If [def] is provided and the environment variable [key] is not set, [def] will be returned
 /// instead of throwing an exception.
-String getEnv(String key, [String? def]) =>
-    Platform.environment[key] ?? def ?? (throw Exception('Missing `$key` environment variable'));
+String getEnv(String key, [String? def]) => Platform.environment[key] ?? def ?? (throw Exception('Missing `$key` environment variable'));
 
 /// Get a [bool] from an environment variable, throwing an exception if it is not set.
 ///
@@ -35,8 +34,7 @@ final List<Snowflake> adminIds = getEnv('ROD_ADMIN_IDS').split(RegExp(r'\s+')).m
 final Duration docsUpdateInterval = Duration(seconds: int.parse(getEnv('ROD_DOCS_UPDATE_INTERVAL', '900')));
 
 /// The packages to cache documentation for.
-final List<String> docsPackages =
-    getEnv('ROD_DOCS_PACKAGES', 'nyxx nyxx_commands nyxx_lavalink nyxx_extensions').split(RegExp(r'\s+'));
+final List<String> docsPackages = getEnv('ROD_DOCS_PACKAGES', 'nyxx nyxx_commands nyxx_lavalink nyxx_extensions').split(RegExp(r'\s+'));
 
 /// The default response for the docs command.
 final String defaultDocsResponse = getEnv('ROD_DEFAULT_DOCS_RESPONSE', '''
@@ -77,8 +75,7 @@ final bool dev = getEnvBool('ROD_DEV');
 final Snowflake? devGuildId = dev ? Snowflake.parse(getEnv('ROD_DEV_GUILD_ID')) : null;
 
 /// The basic intents needed to run Running on Dart without privileged intents.
-final Flags<GatewayIntents> _baseIntents =
-    GatewayIntents.directMessages | GatewayIntents.guilds | GatewayIntents.guildVoiceStates;
+final Flags<GatewayIntents> _baseIntents = GatewayIntents.directMessages | GatewayIntents.guilds | GatewayIntents.guildVoiceStates;
 
 /// Privileged intents that can be enabled to add additional features to Running on Dart.
 final Flags<GatewayIntents> _privilegedIntents = _baseIntents |

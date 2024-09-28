@@ -46,8 +46,7 @@ Package: [${element.packageName}](https://pub.dev/packages/${element.packageName
         final searchResults = DocsModule.instance.search(query, package);
 
         if (searchResults.isEmpty) {
-          await context.respond(MessageBuilder(
-              embeds: [EmbedBuilder(title: 'No results', color: DiscordColor.parseHexString("#FF0000"))]));
+          await context.respond(MessageBuilder(embeds: [EmbedBuilder(title: 'No results', color: DiscordColor.parseHexString("#FF0000"))]));
           return;
         }
 

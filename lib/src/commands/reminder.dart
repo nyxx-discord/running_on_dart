@@ -51,9 +51,8 @@ final reminder = ChatGroup(
       'clear',
       'Remove all your reminders',
       id('reminder-clear', (ChatContext context) async {
-        await Future.wait(ReminderModule.instance
-            .getUserReminders(context.user.id)
-            .map((reminder) => ReminderModule.instance.removeReminder(reminder)));
+        await Future.wait(
+            ReminderModule.instance.getUserReminders(context.user.id).map((reminder) => ReminderModule.instance.removeReminder(reminder)));
 
         await context.respond(MessageBuilder(content: 'Successfully cleared all your reminders.'));
       }),
@@ -81,8 +80,7 @@ final reminder = ChatGroup(
           final index = entry.key;
           final reminder = entry.value;
 
-          final embed =
-              EmbedBuilder(color: getRandomColor(), title: 'Reminder ${index + 1} of ${reminders.length}', fields: [
+          final embed = EmbedBuilder(color: getRandomColor(), title: 'Reminder ${index + 1} of ${reminders.length}', fields: [
             EmbedFieldBuilder(
                 name: 'Triggers at',
                 value:

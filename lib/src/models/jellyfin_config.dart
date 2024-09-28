@@ -10,12 +10,7 @@ class JellyfinConfig {
   /// The ID of this config, or `null` if this config has not yet been added to the database.
   int? id;
 
-  JellyfinConfig(
-      {required this.name,
-      required this.basePath,
-      required this.token,
-      required this.isDefault,
-      required this.guildId});
+  JellyfinConfig({required this.name, required this.basePath, required this.token, required this.isDefault, required this.guildId});
 
   factory JellyfinConfig.fromDatabaseRow(Map<String, dynamic> row) {
     return JellyfinConfig(

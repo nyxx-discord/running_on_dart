@@ -8,8 +8,7 @@ final poopCharacters = ['!', '#', '@', '^', '%', '&', '-', '*', '.' '+', '\''];
 final poopRegexp = RegExp("[${poopCharacters.join()}]");
 
 class PoopNameModule {
-  static PoopNameModule get instance =>
-      _instance ?? (throw Exception('PoopNameModule must be initialised with PoopNameModule.init()'));
+  static PoopNameModule get instance => _instance ?? (throw Exception('PoopNameModule must be initialised with PoopNameModule.init()'));
   static PoopNameModule? _instance;
 
   static void init(NyxxGateway client) {

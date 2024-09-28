@@ -41,8 +41,7 @@ class JellyfinClientWrapper {
 }
 
 class JellyfinModule {
-  static JellyfinModule get instance =>
-      _instance ?? (throw Exception('JellyfinModule must be initialised with JellyfinModule.init()'));
+  static JellyfinModule get instance => _instance ?? (throw Exception('JellyfinModule must be initialised with JellyfinModule.init()'));
   static JellyfinModule? _instance;
 
   static final Map<String, JellyfinClientWrapper> _jellyfinClients = {};
@@ -56,6 +55,14 @@ class JellyfinModule {
   }
 
   JellyfinModule._();
+
+  Future<void> deleteJellyfinConfig(JellyfinConfig config) async {
+    _jellyfinClients.remove(
+      _getClientCacheIdentifier(config.guildId.toString(), config.name, config.isDefault),
+    );
+
+    await JellyfinConfigRepository.instance.deleteConfig(config.id!);
+  }
 
   Future<JellyfinClientWrapper?> getClient(JellyfinIdentificationModel sConfig) async {
     final cachedClientConfig = _getCachedClientConfig(sConfig);
@@ -71,16 +78,13 @@ class JellyfinModule {
     return _createClientConfig(config);
   }
 
-  Future<JellyfinConfig> createJellyfinConfig(
-      String name, String basePath, String token, bool isDefault, Snowflake guildId) async {
-    final config =
-        await JellyfinConfigRepository.instance.createJellyfinConfig(name, basePath, token, isDefault, guildId);
+  Future<JellyfinConfig> createJellyfinConfig(String name, String basePath, String token, bool isDefault, Snowflake guildId) async {
+    final config = await JellyfinConfigRepository.instance.createJellyfinConfig(name, basePath, token, isDefault, guildId);
     if (config.id == null) {
       throw Error();
     }
 
-    _jellyfinClients[_getClientCacheIdentifier(config.guildId.toString(), config.name, config.isDefault)] =
-        _createClientConfig(config);
+    _jellyfinClients[_getClientCacheIdentifier(config.guildId.toString(), config.name, config.isDefault)] = _createClientConfig(config);
 
     return config;
   }
@@ -93,8 +97,7 @@ class JellyfinModule {
 
     final clientConfig = JellyfinClientWrapper(client, config.basePath, config.name);
 
-    _jellyfinClients[_getClientCacheIdentifier(config.guildId.toString(), config.name, config.isDefault)] =
-        clientConfig;
+    _jellyfinClients[_getClientCacheIdentifier(config.guildId.toString(), config.name, config.isDefault)] = clientConfig;
 
     return clientConfig;
   }

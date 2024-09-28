@@ -6,8 +6,7 @@ import 'package:running_on_dart/src/services/feature_settings.dart';
 import 'package:running_on_dart/src/settings.dart';
 
 class JoinLogsModule {
-  static JoinLogsModule get instance =>
-      _instance ?? (throw Exception('JoinLogsService must be initialised with JoinLogsService.init()'));
+  static JoinLogsModule get instance => _instance ?? (throw Exception('JoinLogsService must be initialised with JoinLogsService.init()'));
   static JoinLogsModule? _instance;
 
   static void init(NyxxGateway client) {
