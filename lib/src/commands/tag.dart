@@ -135,7 +135,8 @@ final tag = ChatGroup(
 
         final threeDaysAgo = DateTime.now().add(Duration(days: -3));
         final usesLastThreeDays = events.where((event) => event.usedAt.isAfter(threeDaysAgo)).length;
-        final hiddenUsesLastThreeDays = events.where((event) => event.usedAt.isAfter(threeDaysAgo) && event.hidden).length;
+        final hiddenUsesLastThreeDays =
+            events.where((event) => event.usedAt.isAfter(threeDaysAgo) && event.hidden).length;
 
         final fields = [
           EmbedFieldBuilder(
@@ -164,10 +165,14 @@ final tag = ChatGroup(
           }
 
           if (useCount.isNotEmpty) {
-            final top5 = (useCount.entries.toList()..sort((a, b) => b.value.compareTo(a.value))).map((entry) => entry.key).take(5);
+            final top5 = (useCount.entries.toList()..sort((a, b) => b.value.compareTo(a.value)))
+                .map((entry) => entry.key)
+                .take(5);
 
             fields.add(EmbedFieldBuilder(
-                name: 'Top tags', value: top5.map((tag) => '- **${tag.name}** (${useCount[tag]})').join('\n'), isInline: false));
+                name: 'Top tags',
+                value: top5.map((tag) => '- **${tag.name}** (${useCount[tag]})').join('\n'),
+                isInline: false));
           }
         }
 

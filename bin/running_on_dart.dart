@@ -9,7 +9,7 @@ void main() async {
   final commands = CommandsPlugin(
     prefix: null,
     guild: devGuildId,
-    options: CommandsOptions(logErrors: true),
+    options: CommandsOptions(logErrors: dev),
   );
 
   commands
@@ -27,6 +27,12 @@ void main() async {
     ..addConverter(manageableTagConverter)
     ..addConverter(durationConverter)
     ..addConverter(reminderConverter);
+
+  commands.onCommandError.listen((error) {
+    if (error is CheckFailedException) {
+      error.context.respond(MessageBuilder(content: "Sorry, you can't use that command!"));
+    }
+  });
 
   final client = await Nyxx.connectGateway(token, intents,
       options: GatewayClientOptions(

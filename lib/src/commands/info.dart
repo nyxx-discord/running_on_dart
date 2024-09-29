@@ -24,7 +24,8 @@ final info = ChatCommand(
       fields: [
         EmbedFieldBuilder(name: 'Cached guilds', value: context.client.guilds.cache.length.toString(), isInline: true),
         EmbedFieldBuilder(name: 'Cached users', value: context.client.users.cache.length.toString(), isInline: true),
-        EmbedFieldBuilder(name: 'Cached channels', value: context.client.channels.cache.length.toString(), isInline: true),
+        EmbedFieldBuilder(
+            name: 'Cached channels', value: context.client.channels.cache.length.toString(), isInline: true),
         EmbedFieldBuilder(
             name: 'Cached voice states',
             value: context.client.guilds.cache.values
@@ -51,7 +52,8 @@ final info = ChatCommand(
         embeds: [embed],
         components: [
           ActionRowBuilder(components: [
-            ButtonBuilder.link(url: Uri.parse('https://www.youtube.com/watch?v=dQw4w9WgXcQ'), label: 'Add ROD to your guild')
+            ButtonBuilder.link(
+                url: Uri.parse('https://www.youtube.com/watch?v=dQw4w9WgXcQ'), label: 'Add ROD to your guild')
           ]),
         ],
       ),

@@ -16,8 +16,11 @@ final admin = ChatGroup(
         @UseConverter(IntConverter(min: 1)) @Description('The number of messages to delete') int count, [
         @Description('The user from whom to delete messages') User? user,
       ]) async {
-        final messagesToDelete =
-            await context.channel.messages.stream().where((m) => user == null || user.id == m.author.id).take(count).toList();
+        final messagesToDelete = await context.channel.messages
+            .stream()
+            .where((m) => user == null || user.id == m.author.id)
+            .take(count)
+            .toList();
 
         await Future.wait(
           messagesToDelete
@@ -78,5 +81,7 @@ $chunk
 }
 
 Stream<Member> searchMembers(String disallowedChar, int batchSize, Guild guild) {
-  return (guild.manager.client as NyxxGateway).gateway.listGuildMembers(guild.id, query: disallowedChar, limit: batchSize);
+  return (guild.manager.client as NyxxGateway)
+      .gateway
+      .listGuildMembers(guild.id, query: disallowedChar, limit: batchSize);
 }

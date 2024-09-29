@@ -8,7 +8,8 @@ class FeatureSettingsService {
   FeatureSettingsService._();
 
   /// Returns whether a setting is enabled in a particular guild.
-  Future<bool> isEnabled(Setting setting, Snowflake guildId) async => await FeatureSettingsRepository.instance.isEnabled(setting, guildId);
+  Future<bool> isEnabled(Setting setting, Snowflake guildId) async =>
+      await FeatureSettingsRepository.instance.isEnabled(setting, guildId);
 
   /// Enable a setting in a guild.
   Future<void> enable(FeatureSetting setting) async {

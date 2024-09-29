@@ -6,7 +6,8 @@ import 'package:running_on_dart/src/repository/feature_settings.dart';
 import 'package:running_on_dart/src/services/feature_settings.dart';
 
 class ModLogsModule {
-  static ModLogsModule get instance => _instance ?? (throw Exception('ModLogsModule must be initialised with JoinLogsService.init()'));
+  static ModLogsModule get instance =>
+      _instance ?? (throw Exception('ModLogsModule must be initialised with JoinLogsService.init()'));
   static ModLogsModule? _instance;
 
   static void init(NyxxGateway client) {
@@ -66,7 +67,8 @@ class ModLogsModule {
 
     var timeoutUntilMessage = "";
     final auditLogChange = auditLogEntry.changes?.first;
-    if (auditLogEntry.actionType == AuditLogEvent.memberUpdate && auditLogChange?.key == 'communication_disabled_until') {
+    if (auditLogEntry.actionType == AuditLogEvent.memberUpdate &&
+        auditLogChange?.key == 'communication_disabled_until') {
       final timeoutUntil = DateTime.parse(auditLogChange!.newValue as String);
       timeoutUntilMessage = "\nUntil: ${timeoutUntil.format(TimestampStyle.relativeTime)}";
     }

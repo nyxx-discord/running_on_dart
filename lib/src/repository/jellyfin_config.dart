@@ -8,19 +8,23 @@ class JellyfinConfigRepository {
   JellyfinConfigRepository._();
 
   Future<void> deleteConfig(int id) async {
-    await DatabaseService.instance.getConnection().query('DELETE FROM jellyfin_configs WHERE id = @id', substitutionValues: {'id': id});
+    await DatabaseService.instance
+        .getConnection()
+        .query('DELETE FROM jellyfin_configs WHERE id = @id', substitutionValues: {'id': id});
   }
 
   Future<Iterable<JellyfinConfig>> getDefaultConfigs() async {
-    final result = await DatabaseService.instance.getConnection().query('SELECT * FROM jellyfin_configs WHERE is_default = 1::bool');
+    final result = await DatabaseService.instance
+        .getConnection()
+        .query('SELECT * FROM jellyfin_configs WHERE is_default = 1::bool');
 
     return result.map((row) => row.toColumnMap()).map(JellyfinConfig.fromDatabaseRow);
   }
 
   Future<Iterable<JellyfinConfig>> getConfigsForGuild(Snowflake guildId) async {
-    final result = await DatabaseService.instance
-        .getConnection()
-        .query('SELECT * FROM jellyfin_configs WHERE guild_id = @guildId', substitutionValues: {'guildId': guildId.toString()});
+    final result = await DatabaseService.instance.getConnection().query(
+        'SELECT * FROM jellyfin_configs WHERE guild_id = @guildId',
+        substitutionValues: {'guildId': guildId.toString()});
 
     return result.map((row) => row.toColumnMap()).map(JellyfinConfig.fromDatabaseRow);
   }
@@ -37,8 +41,10 @@ class JellyfinConfigRepository {
     return JellyfinConfig.fromDatabaseRow(result.first.toColumnMap());
   }
 
-  Future<JellyfinConfig> createJellyfinConfig(String name, String basePath, String token, bool isDefault, Snowflake guildId) async {
-    final config = JellyfinConfig(name: name, basePath: basePath, token: token, isDefault: isDefault, guildId: guildId);
+  Future<JellyfinConfig> createJellyfinConfig(
+      String name, String basePath, String token, bool isDefault, Snowflake guildId) async {
+    final config =
+        JellyfinConfig(name: name, basePath: basePath, token: token, isDefault: isDefault, parentId: guildId);
 
     final result = await DatabaseService.instance.getConnection().query('''
     INSERT INTO jellyfin_configs (
@@ -59,7 +65,7 @@ class JellyfinConfigRepository {
       'base_path': config.basePath,
       'token': config.token,
       'is_default': config.isDefault,
-      'guild_id': config.guildId.toString(),
+      'guild_id': config.parentId.toString(),
     });
 
     config.id = result.first.first as int;

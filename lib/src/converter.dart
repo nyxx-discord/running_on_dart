@@ -18,7 +18,8 @@ final reminderConverter = Converter<Reminder>(
   autocompleteCallback: (context) => ReminderModule.instance
       .search(context.user.id, context.currentValue)
       .take(25)
-      .map((e) => '${reminderDateFormat.format(e.triggerAt)}: ${e.message.length > 50 ? '${e.message.substring(0, 50)}...' : e.message}')
+      .map((e) =>
+          '${reminderDateFormat.format(e.triggerAt)}: ${e.message.length > 50 ? '${e.message.substring(0, 50)}...' : e.message}')
       .map((e) => CommandOptionChoiceBuilder(name: e, value: e)),
 );
 
@@ -41,7 +42,8 @@ final durationConverter = Converter<Duration>(
 String stringifySetting(Setting setting) => setting.name;
 const settingsConverter = SimpleConverter.fixed(elements: Setting.values, stringify: stringifySetting);
 
-Iterable<Tag> getManageableTags(ContextData context) => TagModule.instance.findAll(context.guild?.id ?? Snowflake.zero, context.user.id);
+Iterable<Tag> getManageableTags(ContextData context) =>
+    TagModule.instance.findAll(context.guild?.id ?? Snowflake.zero, context.user.id);
 String stringifyTag(Tag tag) => tag.name;
 
 const manageableTagConverter = SimpleConverter<Tag>(
@@ -54,7 +56,8 @@ Future<Iterable<JellyfinConfig>> getJellyfinConfigs(ContextData context) =>
 
 String stringifyJellyfinConfig(JellyfinConfig config) => config.name;
 
-const jellyfinConfigConverter = SimpleConverter<JellyfinConfig>(provider: getJellyfinConfigs, stringify: stringifyJellyfinConfig);
+const jellyfinConfigConverter =
+    SimpleConverter<JellyfinConfig>(provider: getJellyfinConfigs, stringify: stringifyJellyfinConfig);
 
 /// Search autocomplete, but only include elements from a given package (if there is one selected).
 Iterable<CommandOptionChoiceBuilder<dynamic>> autocompleteQueryWithPackage(AutocompleteContext context) {
@@ -67,7 +70,8 @@ Iterable<CommandOptionChoiceBuilder<dynamic>> autocompleteQueryWithPackage(Autoc
 
   return [
     // Allow the user to select their current value
-    if (context.currentValue.isNotEmpty) CommandOptionChoiceBuilder(name: context.currentValue, value: context.currentValue),
+    if (context.currentValue.isNotEmpty)
+      CommandOptionChoiceBuilder(name: context.currentValue, value: context.currentValue),
     ...DocsModule.instance
         .search(context.currentValue, selectedPackage)
         .take(context.currentValue.isEmpty ? 25 : 24)
@@ -115,7 +119,9 @@ Iterable<CommandOptionChoiceBuilder<dynamic>> autocompleteDuration(AutocompleteC
             ));
   }
 
-  final result = correct(clustersSoFar.first, clustersSoFar.skip(1)).take(25).map((e) => CommandOptionChoiceBuilder(name: e, value: e));
+  final result = correct(clustersSoFar.first, clustersSoFar.skip(1))
+      .take(25)
+      .map((e) => CommandOptionChoiceBuilder(name: e, value: e));
 
   if (result.isNotEmpty) {
     return result;

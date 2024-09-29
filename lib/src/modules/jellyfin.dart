@@ -27,10 +27,12 @@ class JellyfinIdentificationModel {
 
 class JellyfinClientWrapper {
   final Tentacle client;
-  final String basePath;
-  final String name;
+  final JellyfinConfig config;
 
-  JellyfinClientWrapper(this.client, this.basePath, this.name);
+  String get basePath => config.basePath;
+  String get name => config.name;
+
+  JellyfinClientWrapper(this.client, this.config);
 
   Future<Iterable<SessionInfo>> getCurrentSessions() async {
     final response = await client.getSessionApi().getSessions(activeWithinSeconds: 15);
@@ -41,7 +43,8 @@ class JellyfinClientWrapper {
 }
 
 class JellyfinModule {
-  static JellyfinModule get instance => _instance ?? (throw Exception('JellyfinModule must be initialised with JellyfinModule.init()'));
+  static JellyfinModule get instance =>
+      _instance ?? (throw Exception('JellyfinModule must be initialised with JellyfinModule.init()'));
   static JellyfinModule? _instance;
 
   static final Map<String, JellyfinClientWrapper> _jellyfinClients = {};
@@ -58,7 +61,7 @@ class JellyfinModule {
 
   Future<void> deleteJellyfinConfig(JellyfinConfig config) async {
     _jellyfinClients.remove(
-      _getClientCacheIdentifier(config.guildId.toString(), config.name, config.isDefault),
+      _getClientCacheIdentifier(config.parentId.toString(), config.name, config.isDefault),
     );
 
     await JellyfinConfigRepository.instance.deleteConfig(config.id!);
@@ -78,13 +81,16 @@ class JellyfinModule {
     return _createClientConfig(config);
   }
 
-  Future<JellyfinConfig> createJellyfinConfig(String name, String basePath, String token, bool isDefault, Snowflake guildId) async {
-    final config = await JellyfinConfigRepository.instance.createJellyfinConfig(name, basePath, token, isDefault, guildId);
+  Future<JellyfinConfig> createJellyfinConfig(
+      String name, String basePath, String token, bool isDefault, Snowflake guildId) async {
+    final config =
+        await JellyfinConfigRepository.instance.createJellyfinConfig(name, basePath, token, isDefault, guildId);
     if (config.id == null) {
       throw Error();
     }
 
-    _jellyfinClients[_getClientCacheIdentifier(config.guildId.toString(), config.name, config.isDefault)] = _createClientConfig(config);
+    _jellyfinClients[_getClientCacheIdentifier(config.parentId.toString(), config.name, config.isDefault)] =
+        _createClientConfig(config);
 
     return config;
   }
@@ -95,9 +101,10 @@ class JellyfinModule {
   static JellyfinClientWrapper _createClientConfig(JellyfinConfig config) {
     final client = Tentacle(basePathOverride: config.basePath, interceptors: [CustomAuthInterceptor(config.token)]);
 
-    final clientConfig = JellyfinClientWrapper(client, config.basePath, config.name);
+    final clientConfig = JellyfinClientWrapper(client, config);
 
-    _jellyfinClients[_getClientCacheIdentifier(config.guildId.toString(), config.name, config.isDefault)] = clientConfig;
+    _jellyfinClients[_getClientCacheIdentifier(config.parentId.toString(), config.name, config.isDefault)] =
+        clientConfig;
 
     return clientConfig;
   }

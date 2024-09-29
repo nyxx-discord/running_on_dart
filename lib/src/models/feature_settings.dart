@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:nyxx/nyxx.dart';
 
 enum Setting {
   poopName('poop_name', 'Replace nickname of a member with poop emoji if the member tries to hoist itself', false),
   joinLogs('join_logs', 'Logs member join events into specified channel', true),
-  modLogs('mod_logs', 'Logs administration event into specified channel', true);
+  modLogs('mod_logs', 'Logs administration event into specified channel', true),
+  jellyfin('jellyfin', 'Allows usage of jellyfin commands', true);
 
   /// name of setting
   final String name;
@@ -37,6 +40,8 @@ class FeatureSetting {
 
   /// The time this feature was enabled or updated.
   final DateTime addedAt;
+
+  Map<String, dynamic>? get dataAsJson => data != null ? jsonDecode(data!) : null;
 
   FeatureSetting({
     required this.setting,

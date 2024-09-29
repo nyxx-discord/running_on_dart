@@ -8,7 +8,8 @@ import 'package:running_on_dart/src/models/reminder.dart';
 import 'package:running_on_dart/src/repository/reminder.dart';
 
 class ReminderModule {
-  static ReminderModule get instance => _instance ?? (throw Exception('Reminder service must be initialised with Reminder.init'));
+  static ReminderModule get instance =>
+      _instance ?? (throw Exception('Reminder service must be initialised with Reminder.init'));
   static ReminderModule? _instance;
 
   final List<Reminder> reminders = [];
@@ -100,7 +101,8 @@ class ReminderModule {
         keys: [
           WeightedKey(
             name: 'message',
-            getter: (reminder) => reminder.message.length < 50 ? reminder.message : '${reminder.message.substring(0, 50)}...',
+            getter: (reminder) =>
+                reminder.message.length < 50 ? reminder.message : '${reminder.message.substring(0, 50)}...',
             weight: 1,
           ),
           WeightedKey(

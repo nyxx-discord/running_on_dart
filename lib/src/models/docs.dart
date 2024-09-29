@@ -93,7 +93,8 @@ class DocEntry {
   factory DocEntry.fromJson(Map<String, dynamic> json, String packageName) {
     final displayName = switch (json['kind'] as int) {
       1 || 16 || 19 => '${json['enclosedBy']['name'] as String}.${json['name'] as String}',
-      9 => '${json['qualifiedName'] != json['name'] ? '${json['qualifiedName'] as String}.' : ''}${json['name'] as String}',
+      9 =>
+        '${json['qualifiedName'] != json['name'] ? '${json['qualifiedName'] as String}.' : ''}${json['name'] as String}',
       2 => '${json['name'] == json['enclosedBy']['name'] ? '(new) ' : ''}${json['name'] as String}',
       _ => json['name'] as String? ?? '',
     };
