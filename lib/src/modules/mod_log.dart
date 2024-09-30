@@ -7,7 +7,7 @@ import 'package:running_on_dart/src/services/feature_settings.dart';
 
 class ModLogsModule {
   static ModLogsModule get instance =>
-      _instance ?? (throw Exception('ModLogsModule must be initialised with JoinLogsService.init()'));
+      _instance ?? (throw Exception('ModLogsModule must be initialised with ModLogsModule.init()'));
   static ModLogsModule? _instance;
 
   static void init(NyxxGateway client) {
@@ -24,10 +24,10 @@ class ModLogsModule {
   ];
 
   ModLogsModule._(this._client) {
-    _client.onGuildAuditLogCreate.listen(_handleGuildBanAdd);
+    _client.onGuildAuditLogCreate.listen(_handleAuditLogAdd);
   }
 
-  Future<void> _handleGuildBanAdd(GuildAuditLogCreateEvent event) async {
+  Future<void> _handleAuditLogAdd(GuildAuditLogCreateEvent event) async {
     final isEnabled = await _isEnabledForGuild(event.guildId);
     if (!isEnabled) {
       return;
