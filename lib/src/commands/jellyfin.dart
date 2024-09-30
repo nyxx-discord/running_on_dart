@@ -149,7 +149,7 @@ final jellyfin = ChatGroup(
     ChatCommand(
         'add-instance',
         "Add new instance to config",
-        id("jellyfin-current-sessions", (InteractionChatContext context) async {
+        id("jellyfin-new-instance", (InteractionChatContext context) async {
           final modalResponse = await context.getModal(title: "New Instance Configuration", components: [
             TextInputBuilder(customId: "name", style: TextInputStyle.short, label: "Instance Name"),
             TextInputBuilder(customId: "base_url", style: TextInputStyle.short, label: "Base Url"),

@@ -11,8 +11,6 @@ environment:
   sdk: '^3.5.0'
 
 dependencies:
-#  duration: ^3.0.11
-#  github: ^9.2.0
   http: ^1.0.0
   human_duration_parser: ^3.0.0
   intl: ^0.19.0

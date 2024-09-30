@@ -1,3 +1,7 @@
+## 4.0.0
+
+- Complete rewrite to nyxx 6.x and nyxx_commands 6.x
+
 ## 3.3.3
 
 - Fix docs command
