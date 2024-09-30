@@ -1,10 +1,11 @@
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
-import 'package:nyxx_interactions/nyxx_interactions.dart';
-import 'package:nyxx_pagination/nyxx_pagination.dart';
-import 'package:running_on_dart/running_on_dart.dart';
+import 'package:nyxx_extensions/nyxx_extensions.dart';
+import 'package:running_on_dart/src/converter.dart';
 import 'package:running_on_dart/src/models/docs.dart';
-import 'package:running_on_dart/src/util.dart';
+import 'package:running_on_dart/src/modules/docs.dart';
+import 'package:running_on_dart/src/settings.dart';
+import 'package:running_on_dart/src/util/util.dart';
 
 final docs = ChatGroup(
   'docs',
@@ -13,123 +14,80 @@ final docs = ChatGroup(
     ChatCommand(
       'info',
       'Get generic documentation information',
-      id(
-          'docs-info',
-          (IChatContext context) => context
-              .respond(MessageBuilder.content(defaultDocsResponse.trim()))),
+      id('docs-info', (ChatContext context) => context.respond(MessageBuilder(content: defaultDocsResponse.trim()))),
     ),
     ChatCommand(
       'get',
       'Get documentation for a specific API element',
       id('docs-get', (
-        IChatContext context,
+        ChatContext context,
         @Description('The element to get documentation for') DocEntry element,
       ) async {
-        final color = getRandomColor();
-
-        final embed = EmbedBuilder()
-          ..color = color
-          ..title = '${element.displayName} ${element.type}'
-          ..description = '''
+        final embed = EmbedBuilder(
+            color: getRandomColor(),
+            title: '${element.displayName} ${element.type}',
+            description: '''
 Documentation: [${element.name}](${element.urlToDocs})
 Package: [${element.packageName}](https://pub.dev/packages/${element.packageName})
-'''
-              .trim()
-          ..addFooter((footer) {
-            footer.text = element.qualifiedName;
-          });
+''',
+            footer: EmbedFooterBuilder(text: element.qualifiedName));
 
-        await context.respond(MessageBuilder.embed(embed));
+        await context.respond(MessageBuilder(embeds: [embed]));
       }),
     ),
     ChatCommand(
       'search',
       'Search for documentation',
       id('docs-search', (
-        IChatContext context,
-        @Description('The query to search for')
-        @Autocomplete(autocompleteQueryWithPackage)
-        String query, [
+        ChatContext context,
+        @Description('The query to search for') @Autocomplete(autocompleteQueryWithPackage) String query, [
         @Description('The package to search in') PackageDocs? package,
       ]) async {
-        final searchResults = DocsService.instance.search(query, package);
+        final searchResults = DocsModule.instance.search(query, package);
 
         if (searchResults.isEmpty) {
-          await context.respond(MessageBuilder.embed(EmbedBuilder()
-            ..title = 'No results'
-            ..color = DiscordColor.red));
+          await context.respond(MessageBuilder(
+              embeds: [EmbedBuilder(title: 'No results', color: DiscordColor.parseHexString("#FF0000"))]));
           return;
         }
 
-        var pageCount = 1;
+        final paginator = await pagination.builders(_getPaginationBuilders(searchResults, query, package));
 
-        final paginator = EmbedComponentPagination(
-          context.commands.interactions,
-          // Chunk our results so we don't exceed 10 results per page or the 1024 field character limit
-          searchResults
-              .fold<List<List<String>>>([[]], (pages, entry) {
-                final entryContent =
-                    '[${entry.displayName} ${entry.type}](${entry.urlToDocs})';
-
-                // +1 for newline
-                var wouldBeLength =
-                    pages.last.join('\n').length + entryContent.length + 1;
-
-                if (wouldBeLength > 1024 || pages.last.length >= 10) {
-                  pages.add([]);
-                  pageCount++;
-                }
-
-                return pages..last.add(entryContent);
-              })
-              .asMap()
-              .entries
-              .map((entry) {
-                final color = getRandomColor();
-
-                return EmbedBuilder()
-                  ..color = color
-                  ..title = 'Search results - $query'
-                  ..addField(
-                    name:
-                        'Results in ${package != null ? 'package ${package.packageName}' : 'all packages'}',
-                    content: entry.value.join('\n'),
-                  )
-                  ..addFooter((footer) {
-                    footer.text = 'Page ${entry.key + 1} of $pageCount';
-                  });
-              })
-              .toList(),
-        );
-
-        await context.respond(paginator.initMessageBuilder());
+        await context.respond(paginator);
       }),
     ),
   ],
 );
 
-/// Search autocomplete, but only include elements from a given package (if there is one selected).
-Iterable<ArgChoiceBuilder> autocompleteQueryWithPackage(
-    AutocompleteContext context) {
-  final selectedPackageName = context.interactionEvent.options
-      .cast<
-          IInteractionOption?>() // Cast to IInteractionOption? so we can return `null` in orElse
-      .firstWhere((element) => element?.name == 'package', orElse: () => null)
-      ?.value
-      ?.toString();
+List<MessageBuilder> _getPaginationBuilders(Iterable<DocEntry> searchResults, String query, PackageDocs? package) {
+  var pageCount = 1;
 
-  PackageDocs? selectedPackage;
-  if (selectedPackageName != null) {
-    selectedPackage = DocsService.instance.getPackageDocs(selectedPackageName);
-  }
+  final foldedResults = searchResults.fold<List<List<String>>>([[]], (pages, entry) {
+    final entryContent = '[${entry.displayName} ${entry.type}](${entry.urlToDocs})';
 
-  return [
-    // Allow the user to select their current value
-    if (context.currentValue.isNotEmpty)
-      ArgChoiceBuilder(context.currentValue, context.currentValue),
-    ...DocsService.instance
-        .search(context.currentValue, selectedPackage)
-        .take(context.currentValue.isEmpty ? 25 : 24)
-        .map((e) => ArgChoiceBuilder(e.displayName, e.qualifiedName)),
-  ];
+    // +1 for newline
+    var wouldBeLength = pages.last.join('\n').length + entryContent.length + 1;
+
+    if (wouldBeLength > 1024 || pages.last.length >= 10) {
+      pages.add([]);
+      pageCount++;
+    }
+
+    return pages..last.add(entryContent);
+  });
+
+  return foldedResults.asMap().entries.map((entry) {
+    final embed = EmbedBuilder(
+        color: getRandomColor(),
+        title: 'Search results - $query',
+        fields: [
+          EmbedFieldBuilder(
+              name: 'Results in ${package != null ? 'package ${package.packageName}' : 'all packages'}',
+              value: entry.value.join('\n'),
+              isInline: false),
+        ],
+        footer: EmbedFooterBuilder(text: 'Page ${entry.key + 1} of $pageCount'));
+
+    return MessageBuilder(embeds: [embed]);
+  }).toList();
 }

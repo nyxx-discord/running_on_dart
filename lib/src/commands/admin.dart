@@ -1,9 +1,10 @@
+import 'package:collection/collection.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
-import 'package:running_on_dart/src/exception.dart';
-import 'package:running_on_dart/src/services/poop_name.dart';
+import 'package:nyxx_extensions/nyxx_extensions.dart';
+import 'package:running_on_dart/src/modules/poop_name.dart';
 
-ChatGroup admin = ChatGroup(
+final admin = ChatGroup(
   'admin',
   'Administrative commands',
   children: [
@@ -11,102 +12,76 @@ ChatGroup admin = ChatGroup(
       'cleanup',
       'Bulk deletes messages in a channel',
       id('admin-cleanup', (
-        IChatContext context,
-        @UseConverter(IntConverter(min: 1))
-        @Description('The number of messages to delete')
-        int count, [
-        @Description('The user from whom to delete messages') IUser? user,
+        ChatContext context,
+        @UseConverter(IntConverter(min: 1)) @Description('The number of messages to delete') int count, [
+        @Description('The user from whom to delete messages') User? user,
       ]) async {
-        List<IMessage>? channelMessages;
-        Snowflake? last;
+        final messagesToDelete = await context.channel.messages
+            .stream()
+            .where((m) => user == null || user.id == m.author.id)
+            .take(count)
+            .toList();
 
-        while (count > 0 &&
-            (channelMessages == null || channelMessages.isNotEmpty)) {
-          channelMessages = await context.channel
-              .downloadMessages(
-                limit: 100,
-                after: last,
-              )
-              .toList();
-          last = channelMessages.last.id;
+        await Future.wait(
+          messagesToDelete
+              .where((m) => m.id.isBefore(Snowflake.firstBulk()))
+              .map((m) => m.id)
+              .slices(200)
+              .map((m) => context.channel.messages.bulkDelete(m)),
+        );
 
-          Iterable<IMessage> toRemove;
+        await Future.wait(
+          messagesToDelete.where((m) => !m.id.isBefore(Snowflake.firstBulk())).map((m) => m.delete()),
+        );
 
-          if (user == null) {
-            toRemove = channelMessages.take(count);
-          } else {
-            toRemove = channelMessages
-                .where((message) => message.author.id == user.id);
-          }
-
-          try {
-            if (toRemove.length == 1) {
-              await toRemove.first.delete();
-            } else {
-              await context.channel.bulkRemoveMessages(toRemove);
-            }
-          } on IHttpResponseError catch (e) {
-            throw CheckedBotException(e.message);
-          }
-
-          count -= toRemove.length;
-        }
-
-        if (context is InteractionChatContext) {
-          await context.respond(
-              MessageBuilder.content('Successfully deleted messages!'),
-              hidden: true);
-        } else {
-          await context.respond(
-              MessageBuilder.content('Successfully deleted messages!'));
-        }
+        await context.respond(MessageBuilder(content: 'Successfully deleted messages!'));
       }),
-      checks: [PermissionsCheck(PermissionsConstants.manageMessages)],
+      checks: [PermissionsCheck(Permissions.manageMessages)],
       options: CommandsOptions(
-        hideOriginalResponse: true,
+        defaultResponseLevel: ResponseLevel.private,
       ),
     ),
     ChatCommand(
         "perform-nickname-pooping",
         "Perform pooping of usernames in current guild",
-        id('perform-nickname-pooping', (IChatContext context,
-            [bool dryRun = true, int batchSize = 100]) async {
+        id('perform-nickname-pooping', (ChatContext context, [bool dryRun = true, int batchSize = 100]) async {
           var nickNamesToRemove = <String>[];
           for (final disallowedChar in poopCharacters) {
-            await for (final member in context.guild!
-                .searchMembersGateway(disallowedChar, limit: batchSize)) {
-              final nick = await PoopNameService.instance
-                  .poopUser(member, dryRun: dryRun);
-              if (nick != null) {
-                nickNamesToRemove.add(nick);
+            await for (final member in searchMembers(disallowedChar, batchSize, context.guild!)) {
+              final (performed, nick) = await PoopNameModule.instance.poopMember(member, dryRun: dryRun);
+              if (performed && (nick ?? '').isNotEmpty) {
+                nickNamesToRemove.add(nick!);
               }
             }
           }
 
-          final outPutMessageHeader =
-              "Pooping nicknames" + (dryRun ? "[DRY RUN]" : "");
-          var nickString = nickNamesToRemove
-              .where((element) => element.isNotEmpty)
-              .join(",");
-          if (nickString.length > 1950) {
-            nickString = nickString.substring(0, 1950) + " ...";
-          } else if (nickString.isEmpty) {
-            nickString = "-/-";
-          }
+          final outPutMessageHeader = "Pooping nicknames ${dryRun ? "[DRY RUN]" : ""}";
+          final messageBuilder = await createMessageBuilder(nickNamesToRemove.join(","), outPutMessageHeader);
 
-          var outputMessage = """
-            $outPutMessageHeader:\n
-            ```
-            $nickString
-            ```
-          """;
-
-          await context.respond(MessageBuilder.content(outputMessage));
+          await context.respond(messageBuilder);
         }),
         checks: [
           GuildCheck.all(),
-          PermissionsCheck(PermissionsConstants.manageNicknames),
-        ],
-        options: CommandOptions(autoAcknowledgeInteractions: true))
+          PermissionsCheck(Permissions.manageNicknames),
+        ])
   ],
 );
+
+Future<MessageBuilder> createMessageBuilder(String messageString, String messageHeader) async {
+  if (messageString.isEmpty) {
+    return MessageBuilder(content: "-/-");
+  }
+
+  return pagination.split(messageString, buildChunk: (String chunk) => MessageBuilder(content: """
+$messageHeader:
+```
+$chunk
+```
+"""));
+}
+
+Stream<Member> searchMembers(String disallowedChar, int batchSize, Guild guild) {
+  return (guild.manager.client as NyxxGateway)
+      .gateway
+      .listGuildMembers(guild.id, query: disallowedChar, limit: batchSize);
+}

@@ -1,57 +1,59 @@
 import 'package:fuzzy/fuzzy.dart';
 import 'package:nyxx/nyxx.dart';
-import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/tag.dart';
+import 'package:running_on_dart/src/repository/tag.dart';
+import 'package:running_on_dart/src/settings.dart';
 
-class TagService {
-  static TagService get instance =>
-      _instance ??
-      (throw Exception(
-          'TagService must be initialised with TagService.init()'));
-  static TagService? _instance;
+class TagModule {
+  static TagModule get instance =>
+      _instance ?? (throw Exception('TagService must be initialised with TagService.init()'));
+  static TagModule? _instance;
+
+  static void init() {
+    _instance = TagModule._();
+  }
 
   final List<Tag> tags = [];
   final List<TagUsedEvent> usedEvents = [];
 
-  static void init() {
-    _instance = TagService._();
-  }
-
-  TagService._() {
-    DatabaseService.instance.fetchTags().then((tags) => this.tags.addAll(tags));
-    DatabaseService.instance
-        .fetchTagUsage()
-        .then((events) => usedEvents.addAll(events));
+  TagModule._() {
+    TagRepository.instance.fetchAllActiveTags().then((tags) => this.tags.addAll(tags));
+    TagRepository.instance.fetchTagUsage().then((events) => usedEvents.addAll(events));
   }
 
   /// Create a new tag.
   Future<void> createTag(Tag tag) async {
-    await DatabaseService.instance.addTag(tag);
+    await TagRepository.instance.addTag(tag);
 
     tags.add(tag);
   }
 
   /// Update an existing tag.
   Future<void> updateTag(Tag tag) async {
-    await DatabaseService.instance.updateTag(tag);
+    await TagRepository.instance.updateTag(tag);
   }
 
   /// Delete a tag.
   Future<void> deleteTag(Tag tag) async {
-    await DatabaseService.instance.deleteTag(tag);
+    await TagRepository.instance.deleteTag(tag);
 
     tags.remove(tag);
   }
 
   /// Get all the enabled tags in a guild.
-  Iterable<Tag> getGuildTags(Snowflake guildId) =>
-      tags.where((tag) => tag.guildId == guildId && tag.enabled);
+  Iterable<Tag> getGuildTags(Snowflake guildId) => tags.where((tag) => tag.guildId == guildId && tag.enabled);
 
   /// Get all the tags a user owns or can manage.
   Iterable<Tag> getOwnedTags(Snowflake guildId, Snowflake userId) =>
-      tags.where((tag) =>
-          tag.guildId == guildId &&
-          (tag.authorId == userId || adminIds.contains(userId)));
+      tags.where((tag) => tag.guildId == guildId && (tag.authorId == userId || adminIds.contains(userId)));
+
+  Iterable<Tag> findAll(Snowflake guildId, [Snowflake? userId]) {
+    if (userId == null) {
+      return getGuildTags(guildId);
+    }
+
+    return getOwnedTags(guildId, userId);
+  }
 
   /// Search the tags in a guild, or the tags a user can manage if [userId] is set.
   Iterable<Tag> search(String query, Snowflake guildId, [Snowflake? userId]) {
@@ -84,13 +86,10 @@ class TagService {
   }
 
   /// Get a tag by name.
-  Tag? getByName(Snowflake guildId, String name) => tags
-      .where((tag) => tag.guildId == guildId && tag.name == name)
-      .cast<Tag?>()
-      .followedBy([null]).first;
+  Tag? getByName(Snowflake guildId, String name) =>
+      tags.where((tag) => tag.guildId == guildId && tag.name == name).cast<Tag?>().followedBy([null]).first;
 
-  Tag? getById(int id) =>
-      tags.where((tag) => tag.id == id).cast<Tag?>().followedBy([null]).first;
+  Tag? getById(int id) => tags.where((tag) => tag.id == id).cast<Tag?>().followedBy([null]).first;
 
   Iterable<TagUsedEvent> getTagUsage(Snowflake guildId, [Tag? tag]) {
     return usedEvents.where((event) {
@@ -105,7 +104,7 @@ class TagService {
   }
 
   Future<void> registerTagUsedEvent(TagUsedEvent event) async {
-    await DatabaseService.instance.registerTagUsedEvent(event);
+    await TagRepository.instance.registerTagUsedEvent(event);
 
     usedEvents.add(event);
   }

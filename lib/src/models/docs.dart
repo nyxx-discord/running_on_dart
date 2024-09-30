@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
-final Logger _logger = Logger('ROD.Packages');
+final Logger _logger = Logger('ROD.PackageDocs');
 
 /// Documentation for an entire package.
 class PackageDocs {
@@ -20,8 +20,7 @@ class PackageDocs {
   Iterable<String> get elementNames => elements.map((e) => e.name);
 
   /// The URL to this package's documentation index on [pub.dev](https://pub.dev).
-  String get urlToDocs =>
-      'https://pub.dev/documentation/$packageName/latest/index.json';
+  String get urlToDocs => 'https://pub.dev/documentation/$packageName/latest/index.json';
 
   /// Create a new [PackageDocs] for a given package.
   PackageDocs({
@@ -35,14 +34,12 @@ class PackageDocs {
     final response = await http.get(Uri.parse(urlToDocs));
 
     if (response.statusCode != 200) {
-      _logger.shout(
-          'Unable to update docs for package "$packageName": Error ${response.statusCode}');
+      _logger.shout('Unable to update docs for package "$packageName": Error ${response.statusCode}');
       return;
     }
 
     try {
-      final data = (jsonDecode(response.body) as List<dynamic>)
-          .cast<Map<String, dynamic>>();
+      final data = (jsonDecode(response.body) as List<dynamic>).cast<Map<String, dynamic>>();
 
       entries = {};
 
@@ -51,13 +48,12 @@ class PackageDocs {
           continue;
         }
 
-        final entry = DocEntry.fromJson(dataEntry);
+        final entry = DocEntry.fromJson(dataEntry, packageName);
 
         entries[entry.qualifiedName] = entry;
       }
     } on FormatException {
-      _logger.shout(
-          'Unable to update docs for package "$packageName": Malformed JSON in response');
+      _logger.shout('Unable to update docs for package "$packageName": Malformed JSON in response');
     }
   }
 }
@@ -94,62 +90,32 @@ class DocEntry {
   });
 
   /// Create a [DocEntry] from a documentation entry object received from a dartdoc `index.json` file.
-  factory DocEntry.fromJson(Map<String, dynamic> json) {
-    String displayName;
-    String type;
+  factory DocEntry.fromJson(Map<String, dynamic> json, String packageName) {
+    final displayName = switch (json['kind'] as int) {
+      1 || 16 || 19 => '${json['enclosedBy']['name'] as String}.${json['name'] as String}',
+      9 =>
+        '${json['qualifiedName'] != json['name'] ? '${json['qualifiedName'] as String}.' : ''}${json['name'] as String}',
+      2 => '${json['name'] == json['enclosedBy']['name'] ? '(new) ' : ''}${json['name'] as String}',
+      _ => json['name'] as String? ?? '',
+    };
 
-    switch (json['kind'] as int) {
-      case 1:
-      case 16:
-      case 10:
-        displayName = '${json['enclosedBy']['name'] as String}.${json['name'] as String}';
-        break;
-      case 9:
-        displayName =
-            '${json['packageName'] != json['name'] ? '${json['packageName'] as String}.' : ''}${json['name'] as String}';
-        break;
-      case 2:
-        displayName =
-            '${json['name'] == json['enclosedBy']['name'] ? '(new) ' : ''}${json['name'] as String}';
-        break;
-      default:
-        displayName = json['name'] as String? ?? '';
-        break;
-    }
-
-    switch (json['kind'] as int) {
-      case 1:
-      case 18:
-        type = 'constant';
-        break;
-      case 16:
-        type = 'property';
-        break;
-      case 10:
-        type = 'method';
-        break;
-      case 9:
-        type = 'library';
-        break;
-      case 2:
-        type = 'constructor';
-        break;
-      case 3:
-        type = 'class';
-        break;
-      default:
-        type = '';
-        break;
-    }
+    final type = switch (json['kind'] as int) {
+      1 || 18 => 'constant',
+      16 => 'property',
+      10 => 'method',
+      9 => 'library',
+      2 => 'constructor',
+      3 => 'class',
+      _ => '',
+    };
 
     return DocEntry(
       name: json['name'] as String,
       displayName: displayName,
       qualifiedName: json['qualifiedName'] as String,
-      packageName: json['packageName'] as String,
+      packageName: packageName,
       type: type,
-      urlToDocs:
-          'https://pub.dev/documentation/${json['packageName'] as String}/latest/${json['href'] as String}',
+      urlToDocs: 'https://pub.dev/documentation/$packageName/latest/${json['href'] as String}',
     );
   }
 }

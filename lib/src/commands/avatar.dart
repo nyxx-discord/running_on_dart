@@ -1,39 +1,28 @@
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 
-ChatCommand avatar = ChatCommand(
+final avatar = ChatCommand(
   'avatar',
   "Get a user's avatar",
   id('avatar', (
-    IChatContext context, [
-    @Description('The user to fetch the avatar for') IUser? target,
-    @Description("Whether to show the user's guild profile, if they have one")
-    bool showGuildProfile = true,
+    ChatContext context, [
+    @Description('The user to fetch the avatar for') Member? target,
+    @Description("Whether to show the user's guild profile, if they have one") bool showGuildProfile = true,
   ]) async {
     // Default to the user who invoked the command
-    target ??= context.user;
+    target ??= context.member;
 
-    String? avatarUrl;
+    Uri? avatarUrl;
 
     // Try to fetch the guild profile
     if (showGuildProfile) {
-      try {
-        var member = context.guild?.members[target.id];
-        // Fetch the member if it was not cached
-        member ??= await context.guild?.fetchMember(target.id);
-
-        avatarUrl = member?.avatarURL();
-      } on IHttpResponseError catch (e) {
-        if (e.statusCode != 404) {
-          rethrow;
-        }
-        // Ignore: member was not found
-      }
+      avatarUrl = target?.avatar?.url;
     }
 
     // Default to the user avatar
-    avatarUrl ??= target.avatarURL(size: 512);
+    avatarUrl ??= target?.user?.avatar.url;
 
-    await context.respond(MessageBuilder.content(avatarUrl));
+    final content = avatarUrl?.toString() ?? "Cannot obtain avatar Url";
+    await context.respond(MessageBuilder(content: content));
   }),
 );

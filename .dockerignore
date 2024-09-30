@@ -17,3 +17,5 @@ build/
 # IDE configuration folders
 .vscode/
 .idea/
+
+lib_old/

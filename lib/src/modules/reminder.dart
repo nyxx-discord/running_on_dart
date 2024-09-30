@@ -3,31 +3,28 @@ import 'dart:async';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:logging/logging.dart';
 import 'package:nyxx/nyxx.dart';
+import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/src/models/reminder.dart';
-import 'package:running_on_dart/src/services/db.dart';
+import 'package:running_on_dart/src/repository/reminder.dart';
 
-class ReminderService {
-  static ReminderService get instance =>
-      _instance ??
-      (throw Exception(
-          'Reminder service must be initialised with Reminder.init'));
-  static ReminderService? _instance;
+class ReminderModule {
+  static ReminderModule get instance =>
+      _instance ?? (throw Exception('Reminder service must be initialised with Reminder.init'));
+  static ReminderModule? _instance;
 
   final List<Reminder> reminders = [];
 
-  final Logger _logger = Logger('ROD.Reminders');
-  final INyxxWebsocket _client;
+  final Logger _logger = Logger('ROD.ReminderService');
+  final NyxxGateway _client;
 
-  ReminderService._(this._client) {
-    DatabaseService.instance
-        .fetchReminders()
-        .then((reminders) => this.reminders.addAll(reminders));
+  ReminderModule._(this._client) {
+    ReminderRepository.instance.fetchReminders().then((reminders) => this.reminders.addAll(reminders));
 
     _processCurrent();
   }
 
-  static void init(INyxxWebsocket client) {
-    _instance = ReminderService._(client);
+  static void init(NyxxGateway client) {
+    _instance = ReminderModule._(client);
   }
 
   Future<void> _processCurrent() async {
@@ -44,9 +41,7 @@ class ReminderService {
     final executionResults = <Future<void>>[];
 
     // Convert reminders we are running to a separate list to avoid a concurrent modification exception
-    for (final reminder in reminders
-        .where((reminder) => reminder.triggerAt.isBefore(now))
-        .toList()) {
+    for (final reminder in reminders.where((reminder) => reminder.triggerAt.isBefore(now)).toList()) {
       executionResults.add(_execute(reminder));
     }
 
@@ -56,37 +51,30 @@ class ReminderService {
   Future<void> _execute(Reminder reminder) async {
     _logger.fine('Executing reminder ${reminder.id}');
 
-    final channel = _client.channels.values
-        .whereType<ITextChannel?>()
-        .firstWhere((channel) => channel?.id == reminder.channelId,
-            orElse: () => null);
+    final channel = await _client.channels[reminder.channelId].getOrNull();
 
-    if (channel != null) {
-      try {
-        await channel.sendMessage(
-          MessageBuilder()
-            ..append('<@!${reminder.userId}> Reminder ')
-            ..appendTimestamp(reminder.addedAt,
-                style: TimeStampStyle.relativeTime)
-            ..append(': ')
-            ..append(reminder.message)
-            ..replyBuilder = reminder.messageId != null
-                ? ReplyBuilder(reminder.messageId!, false)
-                : null,
-        );
-      } on IHttpResponseError {
-        // Message was too long to be sent.
-        _logger.warning('Reminder ${reminder.id} exceeded message length');
-      }
+    if (channel != null && channel is TextChannel) {
+      await _sendReminderMessage(reminder, channel);
     }
 
     reminders.remove(reminder);
     await removeReminder(reminder);
   }
 
+  Future<void> _sendReminderMessage(Reminder reminder, TextChannel channel) async {
+    final content = StringBuffer('<@!${reminder.userId}> Reminder ')
+      ..write(reminder.addedAt.format(TimestampStyle.relativeTime))
+      ..write(": ")
+      ..write(reminder.message);
+
+    final messageBuilder = MessageBuilder(content: content.toString(), replyId: reminder.messageId);
+
+    await channel.sendMessage(messageBuilder);
+  }
+
   /// Add a new reminder to the database and schedule its execution.
   Future<void> addReminder(Reminder reminder) async {
-    await DatabaseService.instance.addReminder(reminder);
+    await ReminderRepository.instance.addReminder(reminder);
 
     _logger.fine('Added reminder ${reminder.id} to the database');
 
@@ -95,7 +83,7 @@ class ReminderService {
 
   /// Delete a reminder from the database and cancel its execution.
   Future<void> removeReminder(Reminder reminder) async {
-    await DatabaseService.instance.deleteReminder(reminder);
+    await ReminderRepository.instance.deleteReminder(reminder);
 
     _logger.fine('Removed reminder ${reminder.id} from the database');
 
@@ -103,8 +91,7 @@ class ReminderService {
   }
 
   /// Get all the reminders for a specific user.
-  Iterable<Reminder> getUserReminders(Snowflake userId) =>
-      reminders.where((reminder) => reminder.userId == userId);
+  Iterable<Reminder> getUserReminders(Snowflake userId) => reminders.where((reminder) => reminder.userId == userId);
 
   /// Search reminders for a specific user
   Iterable<Reminder> search(Snowflake userId, String query) {
@@ -114,9 +101,8 @@ class ReminderService {
         keys: [
           WeightedKey(
             name: 'message',
-            getter: (reminder) => reminder.message.length < 50
-                ? reminder.message
-                : reminder.message.substring(0, 50) + '...',
+            getter: (reminder) =>
+                reminder.message.length < 50 ? reminder.message : '${reminder.message.substring(0, 50)}...',
             weight: 1,
           ),
           WeightedKey(
@@ -127,7 +113,7 @@ class ReminderService {
           WeightedKey(
             name: 'Perfect match',
             getter: (reminder) =>
-                '${reminderDateFormat.format(reminder.triggerAt)}  ${reminder.message.length < 50 ? reminder.message : reminder.message.substring(0, 50) + '...'}',
+                '${reminderDateFormat.format(reminder.triggerAt)}  ${reminder.message.length < 50 ? reminder.message : '${reminder.message.substring(0, 50)}...'}',
             weight: 2,
           ),
         ],

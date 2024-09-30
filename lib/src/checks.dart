@@ -1,54 +1,74 @@
+import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
+import 'package:running_on_dart/src/models/feature_settings.dart';
+import 'package:running_on_dart/src/repository/feature_settings.dart';
+import 'package:running_on_dart/src/services/feature_settings.dart';
 import 'package:running_on_dart/src/settings.dart';
 
-final administratorCheck = UserCheck.anyId(adminIds, 'Administrator check');
+final administratorCheck = UserCheck.anyId(adminIds, name: 'Administrator check');
 
-final connectedToAVoiceChannelCheck = Check((IContext context) async {
-  final selfMember = await context.guild!.selfMember.getOrDownload();
+final jellyfinFeatureEnabledCheck = Check(
+  (CommandContext context) {
+    if (context.guild == null) {
+      return true;
+    }
 
-  if (selfMember.voiceState == null || selfMember.voiceState!.channel == null) {
-    return false;
-  }
-  return true;
-}, 'musicConnectedToVC');
+    return FeatureSettingsService.instance.isEnabled(Setting.jellyfin, context.guild!.id);
+  },
+);
 
-final notConnectedToAVoiceChannelCheck = Check((IContext context) async {
-  final selfMember = await context.guild!.selfMember.getOrDownload();
-
-  if (selfMember.voiceState == null || selfMember.voiceState!.channel == null) {
-    return true;
-  }
-  return false;
-}, 'musicNotConnectedToVC');
-
-final userConnectedToVoiceChannelCheck = Check((IContext context) {
-  final memberVoiceState = context.member!.voiceState;
-
-  if (memberVoiceState == null || memberVoiceState.channel == null) {
-    return false;
-  }
-  return true;
-}, 'musicUserConnectedToVC');
-
-final sameVoiceChannelOrDisconnectedCheck = Check((IContext context) async {
-  // If this is an interaction, acknowledge it just in case the check
-  // takes too long to run.
-  if (context is InteractionChatContext) {
-    await context.acknowledge();
+Future<(bool?, FeatureSetting?)> fetchAndCheckSetting(CommandContext context) async {
+  if (context.guild == null) {
+    return (true, null);
   }
 
-  final selfMemberVoiceState =
-      (await context.guild!.selfMember.getOrDownload()).voiceState;
-  // The upper check should be executed before, so its okay to assume the voice
-  // state exists.
-  final memberVoiceState = context.member!.voiceState!;
-
-  if (selfMemberVoiceState == null || selfMemberVoiceState.channel == null) {
-    return true;
+  final setting = await FeatureSettingsRepository.instance.fetchSetting(Setting.jellyfin, context.guild!.id);
+  if (setting == null) {
+    return (false, null);
   }
 
-  if (selfMemberVoiceState.channel!.id != memberVoiceState.channel!.id) {
-    return false;
+  if (setting.dataAsJson == null) {
+    return (false, null);
   }
-  return true;
-}, 'musicSameVC');
+
+  return (null, setting);
+}
+
+final jellyfinFeatureUserCommandCheck = Check(
+  (CommandContext context) async {
+    final (checkResult, setting) = await fetchAndCheckSetting(context);
+    if (checkResult != null) {
+      return checkResult;
+    }
+
+    final roleId = Snowflake.parse(setting!.dataAsJson!['user_commands_role']);
+
+    return context.member!.roleIds.contains(roleId);
+  },
+);
+
+final jellyfinFeatureAdminCommandCheck = Check(
+  (CommandContext context) async {
+    final (checkResult, setting) = await fetchAndCheckSetting(context);
+    if (checkResult != null) {
+      return checkResult;
+    }
+
+    final roleId = Snowflake.parse(setting!.dataAsJson!['admin_commands_role']);
+
+    return context.member!.roleIds.contains(roleId);
+  },
+);
+
+final jellyfinFeatureCreateInstanceCommandCheck = Check(
+  (CommandContext context) async {
+    final (checkResult, setting) = await fetchAndCheckSetting(context);
+    if (checkResult != null) {
+      return checkResult;
+    }
+
+    final roleId = Snowflake.parse(setting!.dataAsJson!['create_instance_role']);
+
+    return context.member!.roleIds.contains(roleId);
+  },
+);

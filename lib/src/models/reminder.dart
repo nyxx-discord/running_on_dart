@@ -1,6 +1,8 @@
 import 'package:intl/intl.dart';
 import 'package:nyxx/nyxx.dart';
-import 'package:postgres/postgres.dart';
+
+/// A [DateFormat] used to format the trigger times of reminders
+final reminderDateFormat = DateFormat.yMd()..add_Hm();
 
 /// A reminder created by a user.
 class Reminder {
@@ -37,22 +39,15 @@ class Reminder {
   });
 
   /// Create a [Reminder] from a database row.
-  factory Reminder.fromRow(PostgreSQLResultRow row) {
-    final mappedRow = row.toColumnMap();
-
+  factory Reminder.fromRow(Map<String, dynamic> row) {
     return Reminder(
-      userId: Snowflake(mappedRow['user_id'] as String),
-      channelId: Snowflake(mappedRow['channel_id'] as String),
-      messageId: mappedRow['message_id'] != null
-          ? Snowflake(mappedRow['message_id'] as String)
-          : null,
-      triggerAt: mappedRow['trigger_date'] as DateTime,
-      addedAt: mappedRow['add_date'] as DateTime,
-      message: mappedRow['message'] as String,
-      id: mappedRow['id'] as int,
+      userId: Snowflake.parse(row['user_id'] as String),
+      channelId: Snowflake.parse(row['channel_id'] as String),
+      messageId: row['message_id'] != null ? Snowflake.parse(row['message_id'] as String) : null,
+      triggerAt: row['trigger_date'] as DateTime,
+      addedAt: row['add_date'] as DateTime,
+      message: row['message'] as String,
+      id: row['id'] as int,
     );
   }
 }
-
-/// A [DateFormat] used to format the trigger times of reminders
-DateFormat reminderDateFormat = DateFormat.yMd()..add_Hm();

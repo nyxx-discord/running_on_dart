@@ -7,10 +7,8 @@ services:
      - .env
     links:
       - db
-      - lavalink
     depends_on:
       - db
-      - lavalink
 
   db:
     image: postgres:13.5
@@ -20,15 +18,6 @@ services:
      - .env
     volumes:
       - "rod-new_rod_db:/var/lib/postgresql/data"
-
-  lavalink:
-    image: fredboat/lavalink:master
-    container_name: running_on_dart_lavalink
-    restart: always
-    expose:
-      - 2333
-    volumes:
-     - /services/rod-lavalink.yml:/opt/Lavalink/application.yml:ro
 
 volumes:
   rod-new_rod_db:

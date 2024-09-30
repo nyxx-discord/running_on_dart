@@ -1,5 +1,4 @@
 import 'package:nyxx/nyxx.dart';
-import 'package:postgres/postgres.dart';
 
 /// A simple tag with name and content.
 class Tag {
@@ -32,16 +31,14 @@ class Tag {
   });
 
   /// Create a [Tag] from a database row.
-  factory Tag.fromRow(PostgreSQLResultRow row) {
-    final mappedRow = row.toColumnMap();
-
+  factory Tag.fromRow(Map<String, dynamic> row) {
     return Tag(
-      name: mappedRow['name'] as String,
-      content: mappedRow['content'] as String,
-      enabled: mappedRow['enabled'] as bool,
-      guildId: Snowflake(mappedRow['guild_id'] as String),
-      authorId: Snowflake(mappedRow['author_id'] as String),
-      id: mappedRow['id'] as int,
+      name: row['name'] as String,
+      content: row['content'] as String,
+      enabled: row['enabled'] as bool,
+      guildId: Snowflake.parse(row['guild_id'] as String),
+      authorId: Snowflake.parse(row['author_id'] as String),
+      id: row['id'] as int,
     );
   }
 }
@@ -59,22 +56,19 @@ class TagUsedEvent {
 
   factory TagUsedEvent.fromTag({
     required Tag tag,
-    required DateTime usedAt,
     required bool hidden,
   }) =>
       TagUsedEvent(
         tagId: tag.id!,
-        usedAt: usedAt,
+        usedAt: DateTime.now(),
         hidden: hidden,
       );
 
-  factory TagUsedEvent.fromRow(PostgreSQLResultRow row) {
-    final mappedRow = row.toColumnMap();
-
+  factory TagUsedEvent.fromRow(Map<String, dynamic> row) {
     return TagUsedEvent(
-      tagId: mappedRow['command_id'] as int,
-      usedAt: mappedRow['use_date'] as DateTime,
-      hidden: mappedRow['hidden'] as bool,
+      tagId: row['command_id'] as int,
+      usedAt: row['use_date'] as DateTime,
+      hidden: row['hidden'] as bool,
     );
   }
 }
