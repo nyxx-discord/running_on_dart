@@ -1,4 +1,3 @@
-version: '3.9'
 services:
   running_on_dart:
     build:

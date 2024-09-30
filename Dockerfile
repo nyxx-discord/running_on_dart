@@ -13,6 +13,6 @@ CMD [ "dart", "run", "bin/running_on_dart.dart" ]
 
 FROM build as prod
 
-RUN dart run nyxx_commands:compile bin/running_on_dart.dart -o bot.exe
+RUN dart run nyxx_commands:compile bin/running_on_dart.dart -o bot
 
 CMD [ "./bot.exe" ]
