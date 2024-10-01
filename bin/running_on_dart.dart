@@ -2,8 +2,8 @@ import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/running_on_dart.dart';
+import 'package:running_on_dart/src/commands/reminder.dart';
 import 'package:running_on_dart/src/commands/tag.dart';
-import 'package:running_on_dart/src/modules/jellyfin.dart';
 
 void main() async {
   final commands = CommandsPlugin(
@@ -23,6 +23,7 @@ void main() async {
     ..addCommand(reminder)
     ..addCommand(admin)
     ..addCommand(jellyfin)
+    ..addCommand(reminderMessageCommand)
     ..addConverter(settingsConverter)
     ..addConverter(manageableTagConverter)
     ..addConverter(durationConverter)

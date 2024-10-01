@@ -46,7 +46,7 @@ class Reminder {
       messageId: row['message_id'] != null ? Snowflake.parse(row['message_id'] as String) : null,
       triggerAt: row['trigger_date'] as DateTime,
       addedAt: row['add_date'] as DateTime,
-      message: row['message'] as String,
+      message: row['message'] as String? ?? '[EMPTY]',
       id: row['id'] as int,
     );
   }
