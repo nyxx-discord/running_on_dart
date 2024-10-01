@@ -1,6 +1,7 @@
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
+import 'package:running_on_dart/src/checks.dart';
 import 'package:running_on_dart/src/converter.dart';
 import 'package:running_on_dart/src/models/docs.dart';
 import 'package:running_on_dart/src/modules/docs.dart';
@@ -11,6 +12,19 @@ final docs = ChatGroup(
   'docs',
   'Search and get documentation for various packages',
   children: [
+    ChatCommand(
+      "refresh",
+      "Refresh docs manually",
+      id("docs-refresh", (ChatContext context) {
+        DocsModule.instance.updateCache();
+
+        context.respond(MessageBuilder(content: 'Manual docs refresh executed!'));
+      }),
+      checks: [
+        administratorCheck,
+        administratorGuildCheck,
+      ],
+    ),
     ChatCommand(
       'info',
       'Get generic documentation information',

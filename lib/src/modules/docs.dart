@@ -21,11 +21,11 @@ class DocsModule {
       _cache[package] = PackageDocs(packageName: package);
     }
 
-    _updateCache();
-    Timer.periodic(docsUpdateInterval, (timer) => _updateCache());
+    updateCache();
+    Timer.periodic(docsUpdateInterval, (timer) => updateCache());
   }
 
-  Future<void> _updateCache() async {
+  Future<void> updateCache() async {
     await Future.wait(_cache.values.map((e) => e.update()));
     lastUpdate = DateTime.now();
   }
@@ -38,10 +38,7 @@ class DocsModule {
       _cache.values.fold(Iterable.empty(), (previousValue, element) => previousValue.followedBy(element.elements));
 
   /// Get a documentation entry by its qualified name. Returns `null` if no entry was found.
-  DocEntry? getByQualifiedName(String qualifiedName) => getAllEntries()
-      // Cast to DocEntry? so we can return null in orElse
-      .cast<DocEntry?>()
-      .firstWhere((element) => element?.qualifiedName == qualifiedName, orElse: () => null);
+  DocEntry? getByQualifiedName(String qualifiedName) => getAllEntries().firstOrNull;
 
   /// Searches for a specific element across all documentation using fuzzy search.
   ///

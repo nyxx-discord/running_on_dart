@@ -6,6 +6,7 @@ import 'package:running_on_dart/src/services/feature_settings.dart';
 import 'package:running_on_dart/src/settings.dart';
 
 final administratorCheck = UserCheck.anyId(adminIds, name: 'Administrator check');
+final administratorGuildCheck = GuildCheck.id(adminGuildId, name: 'Administrator Guild check');
 
 final jellyfinFeatureEnabledCheck = Check(
   (CommandContext context) {

@@ -4,6 +4,7 @@ import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/commands/reminder.dart';
 import 'package:running_on_dart/src/commands/tag.dart';
+import 'package:running_on_dart/src/modules/bot_start_duration.dart';
 
 void main() async {
   final commands = CommandsPlugin(
@@ -55,4 +56,5 @@ void main() async {
   TagModule.init();
   DocsModule.init();
   JellyfinModule.init();
+  BotStartDuration.init();
 }

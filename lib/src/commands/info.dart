@@ -1,5 +1,8 @@
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
+import 'package:nyxx_extensions/nyxx_extensions.dart';
+import 'package:running_on_dart/src/modules/bot_start_duration.dart';
+import 'package:running_on_dart/src/modules/docs.dart';
 import 'package:running_on_dart/src/settings.dart';
 import 'package:running_on_dart/src/util/util.dart';
 
@@ -9,6 +12,15 @@ final info = ChatCommand(
   id('info', (ChatContext context) async {
     final color = getRandomColor();
     final currentUser = await context.client.user.get();
+
+    final startDate = BotStartDuration.instance.startDate;
+    final startDateStr =
+        "${startDate.format(TimestampStyle.longDateTime)} (${startDate.format(TimestampStyle.relativeTime)})";
+
+    final docsUpdatedDate = DocsModule.instance.lastUpdate;
+    final docsUpdateStr = docsUpdatedDate != null
+        ? "${docsUpdatedDate.format(TimestampStyle.longDateTime)} (${docsUpdatedDate.format(TimestampStyle.relativeTime)})"
+        : "Never";
 
     final embed = EmbedBuilder(
       color: color,
@@ -43,7 +55,8 @@ final info = ChatCommand(
                 .toString(),
             isInline: true),
         EmbedFieldBuilder(name: 'Memory usage (current/RSS)', value: getCurrentMemoryString(), isInline: true),
-        EmbedFieldBuilder(name: 'Uptime', value: 'TODO: ', isInline: true),
+        EmbedFieldBuilder(name: 'Uptime', value: startDateStr, isInline: false),
+        EmbedFieldBuilder(name: 'Docs Update', value: docsUpdateStr, isInline: false),
       ],
     );
 
