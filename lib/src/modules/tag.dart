@@ -40,6 +40,8 @@ class TagModule {
     tags.remove(tag);
   }
 
+  int countCachedTags(Snowflake targetId) => tags.where((tag) => tag.guildId == targetId).length;
+
   /// Get all the enabled tags in a guild.
   Iterable<Tag> getGuildTags(Snowflake guildId) => tags.where((tag) => tag.guildId == guildId && tag.enabled);
 

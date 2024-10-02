@@ -65,7 +65,7 @@ Package: [${element.packageName}](https://pub.dev/packages/${element.packageName
           return;
         }
 
-        final paginator = await pagination.builders(_getPaginationBuilders(searchResults, query, package));
+        final paginator = await pagination.builders(_getPaginationBuilders(searchResults, query, package), userId: context.user.id);
 
         await context.respond(paginator);
       }),

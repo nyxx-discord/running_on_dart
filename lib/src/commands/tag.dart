@@ -19,7 +19,7 @@ final tag = ChatGroup(
         @Description('The content of the tag') String content, [
         @Description('Whether to enable the tag by default') bool enabled = true,
       ]) async {
-        if (TagModule.instance.getByName(context.guild?.id ?? Snowflake.zero, name) != null) {
+        if (TagModule.instance.getByName(context.guild?.id ?? context.user.id, name) != null) {
           await context.respond(MessageBuilder(embeds: [
             EmbedBuilder(
                 color: DiscordColor.parseHexString("#FF0000"),
@@ -32,7 +32,7 @@ final tag = ChatGroup(
 
         final tag = Tag(
           authorId: context.user.id,
-          guildId: context.guild?.id ?? Snowflake.zero,
+          guildId: context.guild?.id ?? context.user.id,
           content: content,
           enabled: enabled,
           name: name,
@@ -128,7 +128,7 @@ final tag = ChatGroup(
         ChatContext context, [
         @Description('The tag to show stats for') Tag? tag,
       ]) async {
-        final events = TagModule.instance.getTagUsage(context.guild?.id ?? Snowflake.zero, tag).toList();
+        final events = TagModule.instance.getTagUsage(context.guild?.id ?? context.user.id, tag).toList();
 
         final totalUses = events.length;
         final totalHiddenUses = events.where((event) => event.hidden).length;
