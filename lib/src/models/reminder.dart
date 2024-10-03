@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 import 'package:nyxx/nyxx.dart';
+import 'package:tentacle/tentacle.dart';
 
 /// A [DateFormat] used to format the trigger times of reminders
 final reminderDateFormat = DateFormat.yMd()..add_Hm();
@@ -49,5 +50,15 @@ class Reminder {
       message: row['message'] as String? ?? '[EMPTY]',
       id: row['id'] as int,
     );
+  }
+
+  factory Reminder.fromOther(Reminder reminder, DateTime triggerAt) {
+    return Reminder(
+        userId: reminder.userId,
+        channelId: reminder.channelId,
+        messageId: reminder.messageId,
+        triggerAt: triggerAt,
+        addedAt: DateTime.now(),
+        message: reminder.message);
   }
 }

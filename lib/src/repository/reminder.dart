@@ -9,9 +9,21 @@ class ReminderRepository {
 
   ReminderRepository._();
 
+  Future<Reminder?> fetchReminder(int id) async {
+    final result = await DatabaseService.instance
+        .getConnection()
+        .query('SELECT * FROM reminders WHERE id = @id', substitutionValues: {'id': id});
+    if (result.isEmpty || result.length > 1) {
+      throw Exception("Empty or multiple reminder with same id");
+    }
+
+    return Reminder.fromRow(result.first.toColumnMap());
+  }
+
   /// Fetch all reminders currently in the database.
   Future<Iterable<Reminder>> fetchReminders() async {
-    final result = await DatabaseService.instance.getConnection().query('SELECT * FROM reminders');
+    final result =
+        await DatabaseService.instance.getConnection().query('SELECT * FROM reminders WHERE trigger_date > now()');
 
     return result.map((row) => row.toColumnMap()).map(Reminder.fromRow);
   }
