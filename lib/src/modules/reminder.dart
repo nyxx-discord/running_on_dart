@@ -34,12 +34,12 @@ class ReminderModuleComponentId {
 
 class ReminderModule {
   static ReminderModule get instance =>
-      _instance ?? (throw Exception('Reminder service must be initialised with Reminder.init'));
+      _instance ?? (throw Exception('ReminderModule must be initialised with ReminderModule.init'));
   static ReminderModule? _instance;
 
   final List<Reminder> reminders = [];
 
-  final Logger _logger = Logger('ROD.ReminderService');
+  final Logger _logger = Logger('ROD.ReminderModule');
   final NyxxGateway _client;
 
   ReminderModule._(this._client) {
