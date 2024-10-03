@@ -21,10 +21,6 @@ The following environment variables are required to be set for Running on Dart t
 - `ROD_DEFAULT_GITHUB_RESPONSE` (optional, default can be found in `src/settings.dart`): The content of the message to send when `!github` or `github info` is run.
 - `ROD_GITHUB_ACCOUNT` (optional, default `nyxx-discord`): The GitHub account to use as the base for repository searches.
 - `ROD_GITHUB_TOKEN`: The GitHub Personal Access Token used to access the GitHub API.
-- `LAVALINK_ADDRESS` (optional, default `lavalink`): The address of the lavalink server to connect to.
-- `LAVALINK_PORT` (optional, default `2333`): The port to use to connect to lavalink server.
-- `LAVALINK_PASSWORD` (optional, default `youshallnotpass`): The password to use when connecting to lavalink server.
-- `LAVALINK_USE_SSL` (optional, default `false`): Whether to use or not ssl to connect to lavalink server.
 
 Additionally, if `ROD_DEV` is `true`, the following environment variables must also be set:
 - `ROD_DEV_GUILD_ID`: The ID (snowflake) of the guild to register commands to when developing.
@@ -39,5 +35,4 @@ Additionally, if `ROD_DEV` is `true`, the following environment variables must a
 ### With Docker
 
 1. Set all the above environment variables in a `.env` file in the project root.
-2. Create a `lavalink.yml` file containing a valid [Lavalink configuration](https://github.com/freyacodes/Lavalink/blob/master/LavalinkServer/application.yml.example). Ensure that the port and password match the associated environment variable.
-3. Run `docker-compose up` to run the bot. If you want to run the bot with metrics, add the `-f docker-compose.prod.yaml` option.
+3. Run `docker-compose up` to run the bot.
