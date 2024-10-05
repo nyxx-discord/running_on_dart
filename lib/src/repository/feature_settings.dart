@@ -42,6 +42,15 @@ class FeatureSettingsRepository {
     return result.map((row) => row.toColumnMap()).map(FeatureSetting.fromRow);
   }
 
+  /// Fetch all settings for all guilds from the database.
+  Future<Iterable<FeatureSetting>> fetchSettingsForGuild(Snowflake guild) async {
+    final result = await DatabaseService.instance.getConnection().query('''
+      SELECT * FROM feature_settings WHERE guild_id = @guildId;
+    ''', substitutionValues: {'guildId': guild.toString()});
+
+    return result.map((row) => row.toColumnMap()).map(FeatureSetting.fromRow);
+  }
+
   /// Enable or update a setting in the database.
   Future<void> enableSetting(FeatureSetting setting) async {
     await DatabaseService.instance.getConnection().execute('''

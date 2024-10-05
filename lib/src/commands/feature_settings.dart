@@ -1,5 +1,6 @@
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
+import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
 import 'package:running_on_dart/src/repository/feature_settings.dart';
 import 'package:running_on_dart/src/services/feature_settings.dart';
@@ -56,6 +57,32 @@ final featureSettings = ChatGroup(
 
         await context.respond(MessageBuilder(content: 'Successfully disabled setting!'));
       }),
+    ),
+    ChatCommand(
+      "show-configuration",
+      "Show current configuration for settings",
+      id('settings-show-configuration', (ChatContext context) async {
+        final settings = await FeatureSettingsRepository.instance.fetchSettingsForGuild(context.guild!.id);
+
+        final messageBuilders = settings.map((setting) {
+          final embed = EmbedBuilder(
+            title: setting.setting.name,
+            description: setting.setting.description,
+            fields: [
+              EmbedFieldBuilder(name: 'Added at', value: setting.addedAt.format(TimestampStyle.shortDate), isInline: true),
+              EmbedFieldBuilder(name: 'Added by', value: userMention(setting.whoEnabled), isInline: true),
+              EmbedFieldBuilder(name: 'Additional data', value: setting.data ?? '[EMPTY]', isInline: false),
+            ]
+          );
+
+          return MessageBuilder(embeds: [embed]);
+        });
+
+        final paginator = await pagination.builders(messageBuilders.toList());
+        
+        return context.respond(paginator);
+      }),
+      options: CommandOptions(defaultResponseLevel: ResponseLevel.private)
     ),
   ],
 );
