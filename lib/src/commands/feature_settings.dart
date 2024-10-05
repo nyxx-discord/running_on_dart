@@ -65,11 +65,16 @@ final featureSettings = ChatGroup(
           final settings = await FeatureSettingsRepository.instance.fetchSettingsForGuild(context.guild!.id);
 
           final messageBuilders = settings.map((setting) {
+            final dataFieldValue = switch (setting.setting.type) {
+              DataType.channelMention => channelMention(Snowflake.parse(setting.data!)),
+              _ => setting.data ?? '[EMPTY]'
+            };
+
             final embed = EmbedBuilder(title: setting.setting.name, description: setting.setting.description, fields: [
               EmbedFieldBuilder(
                   name: 'Added at', value: setting.addedAt.format(TimestampStyle.shortDate), isInline: true),
               EmbedFieldBuilder(name: 'Added by', value: userMention(setting.whoEnabled), isInline: true),
-              EmbedFieldBuilder(name: 'Additional data', value: setting.data ?? '[EMPTY]', isInline: false),
+              EmbedFieldBuilder(name: 'Additional data', value: dataFieldValue, isInline: false),
             ]);
 
             return MessageBuilder(embeds: [embed]);
