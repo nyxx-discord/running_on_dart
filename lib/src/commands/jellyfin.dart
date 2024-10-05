@@ -1,4 +1,4 @@
-import 'package:intl/intl.dart';
+import 'package:http/http.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
@@ -6,114 +6,7 @@ import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/checks.dart';
 import 'package:running_on_dart/src/models/jellyfin_config.dart';
 import 'package:running_on_dart/src/repository/jellyfin_config.dart';
-import 'package:tentacle/tentacle.dart';
-
-final episodeSeriesNumberFormat = NumberFormat("00");
-
-Duration parseDurationFromTicks(int ticks) => Duration(microseconds: ticks ~/ 10);
-
-extension DurationFromTicks on Duration {
-  String formatShort() => toString().split('.').first.padLeft(8, "0");
-}
-
-String formatProgress(int currentPositionTicks, int totalTicks) {
-  final progressPercentage = currentPositionTicks / totalTicks * 100;
-
-  final currentPositionDuration = parseDurationFromTicks(currentPositionTicks);
-  final totalDuration = parseDurationFromTicks(totalTicks);
-
-  return "${currentPositionDuration.formatShort()}/${totalDuration.formatShort()} (${progressPercentage.toStringAsFixed(2)}%)";
-}
-
-Iterable<EmbedFieldBuilder> getMediaInfoEmbedFields(Iterable<MediaStream> mediaStreams) sync* {
-  for (final mediaStream in mediaStreams) {
-    final bitrate = ((mediaStream.bitRate ?? 0) / 1024 / 1024).toStringAsFixed(2);
-    final trackTitle = mediaStream.title ?? mediaStream.displayTitle;
-
-    yield EmbedFieldBuilder(
-        name: "Media Info (${mediaStream.type!.name})", value: "$trackTitle ($bitrate Mbps)", isInline: true);
-  }
-}
-
-EmbedFieldBuilder getExternalUrlsEmbedField(Iterable<ExternalUrl> externalUrls) {
-  final fieldValue = externalUrls.map((externalUrl) => '[${externalUrl.name}](${externalUrl.url})').join(' ');
-
-  return EmbedFieldBuilder(name: "External Urls", value: fieldValue.toString(), isInline: false);
-}
-
-EmbedBuilder? buildSessionEmbed(SessionInfo sessionInfo, JellyfinClientWrapper client) {
-  final nowPlayingItem = sessionInfo.nowPlayingItem;
-  if (nowPlayingItem == null) {
-    return null;
-  }
-
-  final progress = formatProgress(sessionInfo.playState!.positionTicks ?? 1, nowPlayingItem.runTimeTicks ?? 1);
-
-  final premiereDateString = nowPlayingItem.premiereDate!.format(TimestampStyle.shortDateTime);
-
-  final mediaStreams = (nowPlayingItem.mediaStreams as Iterable<MediaStream>? ?? []);
-  final primaryMediaStreams = [
-    ...mediaStreams.where((mediaStream) => mediaStream.type == MediaStreamType.video),
-    ...mediaStreams.where((mediaStream) =>
-        mediaStream.type == MediaStreamType.audio && mediaStream.index == sessionInfo.playState!.audioStreamIndex),
-  ];
-
-  final fields = [
-    EmbedFieldBuilder(name: 'Progress', value: progress, isInline: true),
-    EmbedFieldBuilder(name: "Premiere Date", value: premiereDateString, isInline: true),
-    getExternalUrlsEmbedField(nowPlayingItem.externalUrls?.toList() ?? []),
-    ...getMediaInfoEmbedFields(primaryMediaStreams),
-  ];
-
-  final footer = EmbedFooterBuilder(text: "Jellyfin instance: ${client.name}");
-  final author = EmbedAuthorBuilder(
-    name: '${sessionInfo.userName} on ${sessionInfo.deviceName}',
-    iconUrl: sessionInfo.userPrimaryImageTag != null ? client.getItemPrimaryImage(sessionInfo.userId!) : null,
-  );
-
-  if (nowPlayingItem.type == BaseItemKind.episode) {
-    final episodeIndex =
-        'S${episodeSeriesNumberFormat.format(nowPlayingItem.parentIndexNumber)}E${episodeSeriesNumberFormat.format(nowPlayingItem.indexNumber)}';
-
-    return EmbedBuilder(
-      author: author,
-      thumbnail: EmbedThumbnailBuilder(url: client.getItemPrimaryImage(nowPlayingItem.id!)),
-      title: '${nowPlayingItem.seriesName!} - $episodeIndex - ${nowPlayingItem.name}',
-      description: nowPlayingItem.overview,
-      fields: fields,
-      footer: footer,
-    );
-  }
-
-  if (nowPlayingItem.type == BaseItemKind.movie) {
-    return EmbedBuilder(
-      author: author,
-      thumbnail: EmbedThumbnailBuilder(url: client.getItemPrimaryImage(nowPlayingItem.id!)),
-      title: nowPlayingItem.name,
-      description: nowPlayingItem.overview,
-      fields: fields,
-      footer: footer,
-    );
-  }
-
-  if (nowPlayingItem.type == BaseItemKind.audio) {
-    final artist = (nowPlayingItem.albumArtists as Iterable<NameGuidPair>? ?? []).first;
-
-    return EmbedBuilder(
-      author: author,
-      thumbnail: EmbedThumbnailBuilder(url: client.getItemPrimaryImage(nowPlayingItem.albumId!)),
-      title: '${artist.name!} - ${nowPlayingItem.name}',
-      fields: [
-        EmbedFieldBuilder(
-            name: 'Album', value: '${nowPlayingItem.album} (Track ${nowPlayingItem.indexNumber})', isInline: false),
-        ...fields
-      ],
-      footer: footer,
-    );
-  }
-
-  return null;
-}
+import 'package:running_on_dart/src/util/jellyfin.dart';
 
 final jellyfin = ChatGroup(
   "jellyfin",
@@ -122,6 +15,122 @@ final jellyfin = ChatGroup(
     jellyfinFeatureEnabledCheck,
   ],
   children: [
+    ChatGroup(
+      "user",
+      "Jellyfin user related commands",
+      children: [
+        ChatCommand(
+          "allow-registration",
+          "Allows user to register into jellyfin instance",
+          id('jellyfin-user-allow-registration',
+              (ChatContext context, @Description("User to allow registration to") User user,
+                  [@Description("Allowed libraries for user. Comma separated") String? allowedLibraries,
+                  @Description("Instance to use. Default selected if not provided")
+                  @UseConverter(jellyfinConfigConverter)
+                  JellyfinConfig? config]) async {
+            final client =
+                await JellyfinModule.instance.getClient(JellyfinIdentificationModel(context.guild!.id, config?.name));
+            if (client == null) {
+              return context.respond(MessageBuilder(content: "Invalid Jellyfin instance"));
+            }
+
+            final allowedLibrariesList =
+                allowedLibraries != null ? allowedLibraries.split(',').map((str) => str.trim()).toList() : <String>[];
+
+            JellyfinModule.instance.addUserToAllowedForRegistration(client.name, user.id, allowedLibrariesList);
+
+            return context.respond(MessageBuilder(
+                content: '${user.mention} can now create new jellyfin account using `/jellyfin user register`'));
+          }),
+          checks: [
+            jellyfinFeatureAdminCommandCheck,
+          ],
+        ),
+        ChatCommand(
+            "register",
+            "Allows to self register to jellyfin instance. Given administrator allowed action",
+            id('jellyfin-user-register', (InteractionChatContext context,
+                [@Description("Instance to use. Default selected if not provided")
+                @UseConverter(jellyfinConfigConverter)
+                JellyfinConfig? config]) async {
+              final client =
+                  await JellyfinModule.instance.getClient(JellyfinIdentificationModel(context.guild!.id, config?.name));
+              if (client == null) {
+                return context.respond(MessageBuilder(content: "Invalid Jellyfin instance"));
+              }
+
+              final (isAllowed, allowedLibraries) =
+                  JellyfinModule.instance.isUserAllowedForRegistration(client.name, context.user.id);
+              if (!isAllowed) {
+                return context.respond(MessageBuilder(
+                    content:
+                        'You have not been allowed to create new account on this jellyfin instance. Ask jellyfin administrator for permission.'));
+              }
+
+              final modal = await context.getModal(title: "New user Form", components: [
+                TextInputBuilder(
+                    style: TextInputStyle.short,
+                    customId: 'username',
+                    label: 'User name',
+                    minLength: 4,
+                    isRequired: true),
+                TextInputBuilder(
+                    style: TextInputStyle.short,
+                    customId: 'password',
+                    label: 'Password',
+                    minLength: 8,
+                    isRequired: true),
+              ]);
+
+              final user =
+                  await client.createUser(modal['username']!, modal['password']!, allowedLibraries: allowedLibraries);
+              if (user == null) {
+                return context.respond(MessageBuilder(content: 'Cannot create an user. Contact administrator'));
+              }
+
+              return context
+                  .respond(MessageBuilder(content: 'User created successfully. Login here: ${client.basePath}'));
+            }),
+            options: CommandOptions(defaultResponseLevel: ResponseLevel.private),
+            checks: [
+              jellyfinFeatureUserCommandCheck,
+            ]
+        ),
+      ],
+    ),
+    ChatCommand(
+        "search",
+        "Search instance for content",
+        id('jellyfin-search', (ChatContext context, @Description("Term to search jellyfin for") String searchTerm,
+            [@Description("Include episodes when searching") bool includeEpisodes = false,
+            @Description("Query limit") int limit = 15,
+            @Description("Instance to use. Default selected if not provided")
+            @UseConverter(jellyfinConfigConverter)
+            JellyfinConfig? config]) async {
+          final client =
+              await JellyfinModule.instance.getClient(JellyfinIdentificationModel(context.guild!.id, config?.name));
+          if (client == null) {
+            return context.respond(MessageBuilder(content: "Invalid Jellyfin instance"));
+          }
+
+          final resultsWithoutEpisodes =
+              await client.searchItems(searchTerm, includeEpisodes: includeEpisodes, limit: limit);
+          final results = [
+            ...resultsWithoutEpisodes,
+            if (resultsWithoutEpisodes.length < 4)
+              ...await client.searchItems(searchTerm,
+                  limit: limit - resultsWithoutEpisodes.length,
+                  includeEpisodes: true,
+                  includeMovies: false,
+                  includeSeries: false),
+          ];
+
+          final paginator = await pagination.builders(await buildMediaInfoBuilders(results, client).toList());
+          return context.respond(paginator);
+        }),
+        checks: [
+          jellyfinFeatureUserCommandCheck,
+        ]),
     ChatCommand(
         "current-sessions",
         "Displays current sessions",
