@@ -94,8 +94,7 @@ final jellyfin = ChatGroup(
             options: CommandOptions(defaultResponseLevel: ResponseLevel.private),
             checks: [
               jellyfinFeatureUserCommandCheck,
-            ]
-        ),
+            ]),
       ],
     ),
     ChatCommand(
