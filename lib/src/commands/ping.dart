@@ -1,7 +1,6 @@
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:running_on_dart/src/util/util.dart';
-import 'package:http/http.dart' as http;
 
 extension ReplaceEmbedFieldExtension on EmbedBuilder {
   void replaceField(EmbedFieldBuilder embedField) {

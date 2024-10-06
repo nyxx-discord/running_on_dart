@@ -1,6 +1,5 @@
 import 'package:intl/intl.dart';
 import 'package:nyxx/nyxx.dart';
-import 'package:tentacle/tentacle.dart';
 
 /// A [DateFormat] used to format the trigger times of reminders
 final reminderDateFormat = DateFormat.yMd()..add_Hm();
