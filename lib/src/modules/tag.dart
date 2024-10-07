@@ -6,7 +6,7 @@ import 'package:running_on_dart/src/settings.dart';
 
 class TagModule {
   static TagModule get instance =>
-      _instance ?? (throw Exception('TagService must be initialised with TagService.init()'));
+      _instance ?? (throw Exception('TagModule must be initialised with TagModule.init()'));
   static TagModule? _instance;
 
   static void init() {
