@@ -19,24 +19,19 @@ class CustomAuthInterceptor extends AuthInterceptor {
   }
 }
 
-class JellyfinIdentificationModel {
-  final String? instanceName;
-  final Snowflake guildId;
-
-  JellyfinIdentificationModel(this.guildId, this.instanceName);
-}
+typedef JellyfinInstanceIdentity = (String? instanceName, Snowflake guildId);
 
 class JellyfinClientWrapper {
-  final Tentacle client;
+  final Tentacle jellyfinClient;
   final JellyfinConfig config;
 
   String get basePath => config.basePath;
   String get name => config.name;
 
-  JellyfinClientWrapper(this.client, this.config);
+  JellyfinClientWrapper(this.jellyfinClient, this.config);
 
   Future<Iterable<SessionInfo>> getCurrentSessions() async {
-    final response = await client.getSessionApi().getSessions(activeWithinSeconds: 15);
+    final response = await jellyfinClient.getSessionApi().getSessions(activeWithinSeconds: 15);
     return response.data ?? [];
   }
 
@@ -52,7 +47,7 @@ class JellyfinClientWrapper {
       if (includeSeries) BaseItemKind.series,
     ];
 
-    final response = await client.getItemsApi().getItems(
+    final response = await jellyfinClient.getItemsApi().getItems(
           searchTerm: query,
           limit: limit,
           recursive: true,
@@ -65,7 +60,7 @@ class JellyfinClientWrapper {
   }
 
   Future<UserDto?> createUser(String username, String password, {List<String> allowedLibraries = const []}) async {
-    final response = await client.getUserApi().createUserByName(
+    final response = await jellyfinClient.getUserApi().createUserByName(
         createUserByName: CreateUserByName((b) => b
           ..name = username
           ..password = password));
@@ -76,13 +71,13 @@ class JellyfinClientWrapper {
     if (allowedLibraries.isNotEmpty) {
       final allowedLibrariesLoweredCase = allowedLibraries.map((str) => str.toLowerCase());
 
-      final mediaFoldersResponse = await client.getLibraryApi().getMediaFolders(isHidden: false);
+      final mediaFoldersResponse = await jellyfinClient.getLibraryApi().getMediaFolders(isHidden: false);
       final mediaFoldersIds = (mediaFoldersResponse.data?.items?.toList() ?? [])
           .where((item) => allowedLibrariesLoweredCase.contains(item.name?.toLowerCase()))
           .map((item) => item.id)
           .nonNulls;
 
-      await client.getUserApi().updateUserPolicy(
+      await jellyfinClient.getUserApi().updateUserPolicy(
           userId: response.data!.id!,
           userPolicy: UserPolicy((up) => up
             ..enabledFolders = ListBuilder(mediaFoldersIds)
@@ -93,6 +88,14 @@ class JellyfinClientWrapper {
 
     return response.data;
   }
+
+  Future<List<TaskInfo>> getScheduledTasks() async {
+    final response = await jellyfinClient.getScheduledTasksApi().getTasks(isHidden: false);
+
+    return response.data?.toList() ?? [];
+  }
+
+  Future<void> enableTask(String taskId) => jellyfinClient.getScheduledTasksApi().startTask(taskId: taskId);
 
   Uri getItemPrimaryImage(String itemId) => Uri.parse("$basePath/Items/$itemId/Images/Primary");
 
@@ -126,13 +129,13 @@ class JellyfinModule {
     await JellyfinConfigRepository.instance.deleteConfig(config.id!);
   }
 
-  Future<JellyfinClientWrapper?> getClient(JellyfinIdentificationModel sConfig) async {
-    final cachedClientConfig = _getCachedClientConfig(sConfig);
+  Future<JellyfinClientWrapper?> getClient(JellyfinInstanceIdentity identity) async {
+    final cachedClientConfig = _getCachedClientConfig(identity);
     if (cachedClientConfig != null) {
       return cachedClientConfig;
     }
 
-    final config = await JellyfinConfigRepository.instance.getByName(sConfig.instanceName!, sConfig.guildId.toString());
+    final config = await JellyfinConfigRepository.instance.getByName(identity.$1!, identity.$2.toString());
     if (config == null) {
       return null;
     }
@@ -170,8 +173,8 @@ class JellyfinModule {
     return config;
   }
 
-  static JellyfinClientWrapper? _getCachedClientConfig(JellyfinIdentificationModel sConfig) =>
-      _jellyfinClients[_getClientCacheIdentifier(sConfig.guildId.toString(), sConfig.instanceName)];
+  static JellyfinClientWrapper? _getCachedClientConfig(JellyfinInstanceIdentity identity) =>
+      _jellyfinClients[_getClientCacheIdentifier(identity.$2.toString(), identity.$1)];
 
   static JellyfinClientWrapper _createClientConfig(JellyfinConfig config) {
     final client = Tentacle(basePathOverride: config.basePath, interceptors: [CustomAuthInterceptor(config.token)]);

@@ -6,6 +6,7 @@ import 'package:running_on_dart/src/checks.dart';
 import 'package:running_on_dart/src/models/jellyfin_config.dart';
 import 'package:running_on_dart/src/repository/jellyfin_config.dart';
 import 'package:running_on_dart/src/util/jellyfin.dart';
+import 'package:tentacle/tentacle.dart';
 
 final jellyfin = ChatGroup(
   "jellyfin",
@@ -14,6 +15,41 @@ final jellyfin = ChatGroup(
     jellyfinFeatureEnabledCheck,
   ],
   children: [
+    ChatGroup(
+        "tasks",
+        "Run tasks on Jellyfin instance",
+        children: [
+          ChatCommand(
+            "run",
+            "Run given task",
+            id('jellyfin-tasks-run', (InteractionChatContext context, [@Description("Instance to use. Default selected if not provided") @UseConverter(jellyfinConfigConverter) JellyfinConfig? config]) async {
+              final client = await JellyfinModule.instance.getClient((config?.name, context.guild!.id));
+              if (client == null) {
+                return context.respond(MessageBuilder(content: "Invalid Jellyfin instance"));
+              }
+
+              final selectMenuResult = await context.getSelection(
+                await client.getScheduledTasks(),
+                MessageBuilder(content: 'Choose task to run!'),
+                toSelectMenuOption: (taskInfo) {
+                  final label = taskInfo.state != TaskState.idle
+                    ? "${taskInfo.name} [${taskInfo.state}]"
+                    : taskInfo.name.toString();
+
+                  final description = (taskInfo.description?.length ?? 0) >= 100
+                    ? "${taskInfo.description?.substring(0, 97)}..."
+                    : taskInfo.description;
+
+                  return SelectMenuOptionBuilder(label: label, value: taskInfo.id!, description: description);
+                },
+                authorOnly: true
+              );
+
+              return context.interaction.updateOriginalResponse(MessageUpdateBuilder(content: "Running `${selectMenuResult.name!}`...", components: []));
+            }),
+          ),
+        ]
+    ),
     ChatGroup(
       "user",
       "Jellyfin user related commands",
@@ -28,7 +64,7 @@ final jellyfin = ChatGroup(
                   @UseConverter(jellyfinConfigConverter)
                   JellyfinConfig? config]) async {
             final client =
-                await JellyfinModule.instance.getClient(JellyfinIdentificationModel(context.guild!.id, config?.name));
+                await JellyfinModule.instance.getClient((config?.name, context.guild!.id));
             if (client == null) {
               return context.respond(MessageBuilder(content: "Invalid Jellyfin instance"));
             }
@@ -53,7 +89,7 @@ final jellyfin = ChatGroup(
                 @UseConverter(jellyfinConfigConverter)
                 JellyfinConfig? config]) async {
               final client =
-                  await JellyfinModule.instance.getClient(JellyfinIdentificationModel(context.guild!.id, config?.name));
+                  await JellyfinModule.instance.getClient((config?.name, context.guild!.id));
               if (client == null) {
                 return context.respond(MessageBuilder(content: "Invalid Jellyfin instance"));
               }
@@ -106,7 +142,7 @@ final jellyfin = ChatGroup(
             @UseConverter(jellyfinConfigConverter)
             JellyfinConfig? config]) async {
           final client =
-              await JellyfinModule.instance.getClient(JellyfinIdentificationModel(context.guild!.id, config?.name));
+              await JellyfinModule.instance.getClient((config?.name, context.guild!.id));
           if (client == null) {
             return context.respond(MessageBuilder(content: "Invalid Jellyfin instance"));
           }
@@ -137,7 +173,7 @@ final jellyfin = ChatGroup(
             @UseConverter(jellyfinConfigConverter)
             JellyfinConfig? config]) async {
           final client =
-              await JellyfinModule.instance.getClient(JellyfinIdentificationModel(context.guild!.id, config?.name));
+              await JellyfinModule.instance.getClient((config?.name, context.guild!.id));
           if (client == null) {
             return context.respond(MessageBuilder(content: "Invalid Jellyfin instance"));
           }
@@ -207,6 +243,7 @@ final jellyfin = ChatGroup(
         }),
         checks: [
           jellyfinFeatureAdminCommandCheck,
-        ]),
+        ]
+    ),
   ],
 );
