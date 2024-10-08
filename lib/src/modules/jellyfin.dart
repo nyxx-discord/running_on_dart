@@ -95,7 +95,7 @@ class JellyfinClientWrapper {
     return response.data?.toList() ?? [];
   }
 
-  Future<void> enableTask(String taskId) => jellyfinClient.getScheduledTasksApi().startTask(taskId: taskId);
+  Future<void> startTask(String taskId) => jellyfinClient.getScheduledTasksApi().startTask(taskId: taskId);
 
   Uri getItemPrimaryImage(String itemId) => Uri.parse("$basePath/Items/$itemId/Images/Primary");
 

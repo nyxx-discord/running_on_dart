@@ -1,3 +1,5 @@
+import 'package:collection/collection.dart';
+import 'package:intl/intl.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
@@ -5,8 +7,11 @@ import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/checks.dart';
 import 'package:running_on_dart/src/models/jellyfin_config.dart';
 import 'package:running_on_dart/src/repository/jellyfin_config.dart';
+import 'package:running_on_dart/src/util/custom_task.dart';
 import 'package:running_on_dart/src/util/jellyfin.dart';
 import 'package:tentacle/tentacle.dart';
+
+final taskProgressFormat = NumberFormat("0.00");
 
 final jellyfin = ChatGroup(
   "jellyfin",
@@ -45,7 +50,22 @@ final jellyfin = ChatGroup(
                 authorOnly: true
               );
 
-              return context.interaction.updateOriginalResponse(MessageUpdateBuilder(content: "Running `${selectMenuResult.name!}`...", components: []));
+              client.startTask(selectMenuResult.id!);
+
+              CustomTask(
+                targetMessageCallback: () => context.interaction.updateOriginalResponse(MessageUpdateBuilder(content: "Running `${selectMenuResult.name!}`", components: [])),
+                updateCallback: (builder) async {
+                  final scheduledTask = (await client.getScheduledTasks()).firstWhereOrNull((taskInfo) => taskInfo.id == selectMenuResult.id);
+                  if (scheduledTask == null || scheduledTask.state == TaskState.idle) {
+                    builder.content = "Running `${selectMenuResult.name!}` - Done!";
+                    return true;
+                  }
+
+                  builder.content = "Running `${scheduledTask.name!}` - ${taskProgressFormat.format(scheduledTask.currentProgressPercentage!)}%";
+                  return false;
+                },
+                updateInterval: Duration(seconds: 2),
+              );
             }),
           ),
         ]
