@@ -8,7 +8,10 @@ typedef TargetMessageCallback = Future<Message> Function();
 class CustomTask {
   final UpdateCallback updateCallback;
 
-  CustomTask({required TargetMessageCallback targetMessageCallback, required this.updateCallback, required Duration updateInterval}) {
+  CustomTask(
+      {required TargetMessageCallback targetMessageCallback,
+      required this.updateCallback,
+      required Duration updateInterval}) {
     targetMessageCallback().then((message) {
       Timer.periodic(updateInterval, (timer) async {
         final builder = MessageUpdateBuilder();

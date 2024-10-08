@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:injector/injector.dart';
 import 'package:intl/intl.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
@@ -20,56 +21,54 @@ final jellyfin = ChatGroup(
     jellyfinFeatureEnabledCheck,
   ],
   children: [
-    ChatGroup(
-        "tasks",
-        "Run tasks on Jellyfin instance",
-        children: [
-          ChatCommand(
-            "run",
-            "Run given task",
-            id('jellyfin-tasks-run', (InteractionChatContext context, [@Description("Instance to use. Default selected if not provided") @UseConverter(jellyfinConfigConverter) JellyfinConfig? config]) async {
-              final client = await JellyfinModule.instance.getClient((config?.name, context.guild!.id));
-              if (client == null) {
-                return context.respond(MessageBuilder(content: "Invalid Jellyfin instance"));
+    ChatGroup("tasks", "Run tasks on Jellyfin instance", children: [
+      ChatCommand(
+        "run",
+        "Run given task",
+        id('jellyfin-tasks-run', (InteractionChatContext context,
+            [@Description("Instance to use. Default selected if not provided")
+            @UseConverter(jellyfinConfigConverter)
+            JellyfinConfig? config]) async {
+          final client = await Injector.appInstance.get<JellyfinModule>().getClient((config?.name, context.guild!.id));
+          if (client == null) {
+            return context.respond(MessageBuilder(content: "Invalid Jellyfin instance"));
+          }
+
+          final selectMenuResult = await context
+              .getSelection(await client.getScheduledTasks(), MessageBuilder(content: 'Choose task to run!'),
+                  toSelectMenuOption: (taskInfo) {
+            final label =
+                taskInfo.state != TaskState.idle ? "${taskInfo.name} [${taskInfo.state}]" : taskInfo.name.toString();
+
+            final description = (taskInfo.description?.length ?? 0) >= 100
+                ? "${taskInfo.description?.substring(0, 97)}..."
+                : taskInfo.description;
+
+            return SelectMenuOptionBuilder(label: label, value: taskInfo.id!, description: description);
+          }, authorOnly: true);
+
+          client.startTask(selectMenuResult.id!);
+
+          CustomTask(
+            targetMessageCallback: () => context.interaction.updateOriginalResponse(
+                MessageUpdateBuilder(content: "Running `${selectMenuResult.name!}`", components: [])),
+            updateCallback: (builder) async {
+              final scheduledTask =
+                  (await client.getScheduledTasks()).firstWhereOrNull((taskInfo) => taskInfo.id == selectMenuResult.id);
+              if (scheduledTask == null || scheduledTask.state == TaskState.idle) {
+                builder.content = "Running `${selectMenuResult.name!}` - Done!";
+                return true;
               }
 
-              final selectMenuResult = await context.getSelection(
-                await client.getScheduledTasks(),
-                MessageBuilder(content: 'Choose task to run!'),
-                toSelectMenuOption: (taskInfo) {
-                  final label = taskInfo.state != TaskState.idle
-                    ? "${taskInfo.name} [${taskInfo.state}]"
-                    : taskInfo.name.toString();
-
-                  final description = (taskInfo.description?.length ?? 0) >= 100
-                    ? "${taskInfo.description?.substring(0, 97)}..."
-                    : taskInfo.description;
-
-                  return SelectMenuOptionBuilder(label: label, value: taskInfo.id!, description: description);
-                },
-                authorOnly: true
-              );
-
-              client.startTask(selectMenuResult.id!);
-
-              CustomTask(
-                targetMessageCallback: () => context.interaction.updateOriginalResponse(MessageUpdateBuilder(content: "Running `${selectMenuResult.name!}`", components: [])),
-                updateCallback: (builder) async {
-                  final scheduledTask = (await client.getScheduledTasks()).firstWhereOrNull((taskInfo) => taskInfo.id == selectMenuResult.id);
-                  if (scheduledTask == null || scheduledTask.state == TaskState.idle) {
-                    builder.content = "Running `${selectMenuResult.name!}` - Done!";
-                    return true;
-                  }
-
-                  builder.content = "Running `${scheduledTask.name!}` - ${taskProgressFormat.format(scheduledTask.currentProgressPercentage!)}%";
-                  return false;
-                },
-                updateInterval: Duration(seconds: 2),
-              );
-            }),
-          ),
-        ]
-    ),
+              builder.content =
+                  "Running `${scheduledTask.name!}` - ${taskProgressFormat.format(scheduledTask.currentProgressPercentage!)}%";
+              return false;
+            },
+            updateInterval: Duration(seconds: 2),
+          );
+        }),
+      ),
+    ]),
     ChatGroup(
       "user",
       "Jellyfin user related commands",
@@ -84,7 +83,7 @@ final jellyfin = ChatGroup(
                   @UseConverter(jellyfinConfigConverter)
                   JellyfinConfig? config]) async {
             final client =
-                await JellyfinModule.instance.getClient((config?.name, context.guild!.id));
+                await Injector.appInstance.get<JellyfinModule>().getClient((config?.name, context.guild!.id));
             if (client == null) {
               return context.respond(MessageBuilder(content: "Invalid Jellyfin instance"));
             }
@@ -92,7 +91,9 @@ final jellyfin = ChatGroup(
             final allowedLibrariesList =
                 allowedLibraries != null ? allowedLibraries.split(',').map((str) => str.trim()).toList() : <String>[];
 
-            JellyfinModule.instance.addUserToAllowedForRegistration(client.name, user.id, allowedLibrariesList);
+            Injector.appInstance
+                .get<JellyfinModule>()
+                .addUserToAllowedForRegistration(client.name, user.id, allowedLibrariesList);
 
             return context.respond(MessageBuilder(
                 content: '${user.mention} can now create new jellyfin account using `/jellyfin user register`'));
@@ -109,13 +110,13 @@ final jellyfin = ChatGroup(
                 @UseConverter(jellyfinConfigConverter)
                 JellyfinConfig? config]) async {
               final client =
-                  await JellyfinModule.instance.getClient((config?.name, context.guild!.id));
+                  await Injector.appInstance.get<JellyfinModule>().getClient((config?.name, context.guild!.id));
               if (client == null) {
                 return context.respond(MessageBuilder(content: "Invalid Jellyfin instance"));
               }
 
               final (isAllowed, allowedLibraries) =
-                  JellyfinModule.instance.isUserAllowedForRegistration(client.name, context.user.id);
+                  Injector.appInstance.get<JellyfinModule>().isUserAllowedForRegistration(client.name, context.user.id);
               if (!isAllowed) {
                 return context.respond(MessageBuilder(
                     content:
@@ -161,8 +162,7 @@ final jellyfin = ChatGroup(
             @Description("Instance to use. Default selected if not provided")
             @UseConverter(jellyfinConfigConverter)
             JellyfinConfig? config]) async {
-          final client =
-              await JellyfinModule.instance.getClient((config?.name, context.guild!.id));
+          final client = await Injector.appInstance.get<JellyfinModule>().getClient((config?.name, context.guild!.id));
           if (client == null) {
             return context.respond(MessageBuilder(content: "Invalid Jellyfin instance"));
           }
@@ -192,8 +192,7 @@ final jellyfin = ChatGroup(
             [@Description("Instance to use. Default selected if not provided")
             @UseConverter(jellyfinConfigConverter)
             JellyfinConfig? config]) async {
-          final client =
-              await JellyfinModule.instance.getClient((config?.name, context.guild!.id));
+          final client = await Injector.appInstance.get<JellyfinModule>().getClient((config?.name, context.guild!.id));
           if (client == null) {
             return context.respond(MessageBuilder(content: "Invalid Jellyfin instance"));
           }
@@ -220,13 +219,13 @@ final jellyfin = ChatGroup(
             TextInputBuilder(customId: "is_default", style: TextInputStyle.short, label: "Is Default (True/False)"),
           ]);
 
-          final config = await JellyfinModule.instance.createJellyfinConfig(
-            modalResponse['name']!,
-            modalResponse['base_url']!,
-            modalResponse['api_token']!,
-            modalResponse['is_default']?.toLowerCase() == 'true',
-            modalResponse.guild?.id ?? modalResponse.user.id,
-          );
+          final config = await Injector.appInstance.get<JellyfinModule>().createJellyfinConfig(
+                modalResponse['name']!,
+                modalResponse['base_url']!,
+                modalResponse['api_token']!,
+                modalResponse['is_default']?.toLowerCase() == 'true',
+                modalResponse.guild?.id ?? modalResponse.user.id,
+              );
 
           modalResponse.respond(MessageBuilder(content: "Added new jellyfin instance with name: ${config.name}"));
         }),
@@ -243,8 +242,12 @@ final jellyfin = ChatGroup(
           @Description("Copy default flag?") bool copyDefaultFlag = false,
           @Description("New name for config. Copied from original if not provided") String? configName,
         ]) async {
-          final newConfig = await JellyfinConfigRepository.instance.createJellyfinConfig(configName ?? config.name,
-              config.basePath, config.token, copyDefaultFlag && config.isDefault, targetParentId);
+          final newConfig = await Injector.appInstance.get<JellyfinConfigRepository>().createJellyfinConfig(
+              configName ?? config.name,
+              config.basePath,
+              config.token,
+              copyDefaultFlag && config.isDefault,
+              targetParentId);
 
           context.respond(
               MessageBuilder(content: 'Copied config: "${newConfig.name}" to parent: "${newConfig.parentId}"'));
@@ -257,13 +260,12 @@ final jellyfin = ChatGroup(
         "Removes config from current guild",
         id("jellyfin-remove-config", (ChatContext context,
             @Description("Name of instance") @UseConverter(jellyfinConfigConverter) JellyfinConfig config) async {
-          await JellyfinModule.instance.deleteJellyfinConfig(config);
+          await Injector.appInstance.get<JellyfinModule>().deleteJellyfinConfig(config);
 
           context.respond(MessageBuilder(content: 'Delete config with name: "${config.name}"'));
         }),
         checks: [
           jellyfinFeatureAdminCommandCheck,
-        ]
-    ),
+        ]),
   ],
 );

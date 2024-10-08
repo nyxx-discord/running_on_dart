@@ -1,41 +1,36 @@
 import 'package:fuzzy/fuzzy.dart';
+import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/models/tag.dart';
 import 'package:running_on_dart/src/repository/tag.dart';
 import 'package:running_on_dart/src/settings.dart';
 
 class TagModule {
-  static TagModule get instance =>
-      _instance ?? (throw Exception('TagModule must be initialised with TagModule.init()'));
-  static TagModule? _instance;
-
-  static void init() {
-    _instance = TagModule._();
-  }
-
   final List<Tag> tags = [];
   final List<TagUsedEvent> usedEvents = [];
 
-  TagModule._() {
-    TagRepository.instance.fetchAllActiveTags().then((tags) => this.tags.addAll(tags));
-    TagRepository.instance.fetchTagUsage().then((events) => usedEvents.addAll(events));
+  final _tagRepository = Injector.appInstance.get<TagRepository>();
+
+  TagModule() {
+    _tagRepository.fetchAllActiveTags().then((tags) => this.tags.addAll(tags));
+    _tagRepository.fetchTagUsage().then((events) => usedEvents.addAll(events));
   }
 
   /// Create a new tag.
   Future<void> createTag(Tag tag) async {
-    await TagRepository.instance.addTag(tag);
+    await _tagRepository.addTag(tag);
 
     tags.add(tag);
   }
 
   /// Update an existing tag.
   Future<void> updateTag(Tag tag) async {
-    await TagRepository.instance.updateTag(tag);
+    await _tagRepository.updateTag(tag);
   }
 
   /// Delete a tag.
   Future<void> deleteTag(Tag tag) async {
-    await TagRepository.instance.deleteTag(tag);
+    await _tagRepository.deleteTag(tag);
 
     tags.remove(tag);
   }
@@ -106,7 +101,7 @@ class TagModule {
   }
 
   Future<void> registerTagUsedEvent(TagUsedEvent event) async {
-    await TagRepository.instance.registerTagUsedEvent(event);
+    await _tagRepository.registerTagUsedEvent(event);
 
     usedEvents.add(event);
   }

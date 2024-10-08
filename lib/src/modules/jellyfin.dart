@@ -1,3 +1,4 @@
+import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/models/jellyfin_config.dart';
 import 'package:running_on_dart/src/repository/jellyfin_config.dart';
@@ -103,30 +104,23 @@ class JellyfinClientWrapper {
 }
 
 class JellyfinModule {
-  static JellyfinModule get instance =>
-      _instance ?? (throw Exception('JellyfinModule must be initialised with JellyfinModule.init()'));
-  static JellyfinModule? _instance;
-
-  static final Map<String, JellyfinClientWrapper> _jellyfinClients = {};
-
+  final Map<String, JellyfinClientWrapper> _jellyfinClients = {};
   final Map<String, List<String>> _allowedUserRegistrations = {};
 
-  static void init() {
-    _instance = JellyfinModule._();
+  final JellyfinConfigRepository _jellyfinConfigRepository = Injector.appInstance.get();
 
-    JellyfinConfigRepository.instance
+  JellyfinModule() {
+    _jellyfinConfigRepository
         .getDefaultConfigs()
         .then((defaultConfigs) => defaultConfigs.forEach((config) => _createClientConfig(config)));
   }
-
-  JellyfinModule._();
 
   Future<void> deleteJellyfinConfig(JellyfinConfig config) async {
     _jellyfinClients.remove(
       _getClientCacheIdentifier(config.parentId.toString(), config.name, config.isDefault),
     );
 
-    await JellyfinConfigRepository.instance.deleteConfig(config.id!);
+    await _jellyfinConfigRepository.deleteConfig(config.id!);
   }
 
   Future<JellyfinClientWrapper?> getClient(JellyfinInstanceIdentity identity) async {
@@ -135,7 +129,7 @@ class JellyfinModule {
       return cachedClientConfig;
     }
 
-    final config = await JellyfinConfigRepository.instance.getByName(identity.$1!, identity.$2.toString());
+    final config = await _jellyfinConfigRepository.getByName(identity.$1!, identity.$2.toString());
     if (config == null) {
       return null;
     }
@@ -161,8 +155,7 @@ class JellyfinModule {
 
   Future<JellyfinConfig> createJellyfinConfig(
       String name, String basePath, String token, bool isDefault, Snowflake guildId) async {
-    final config =
-        await JellyfinConfigRepository.instance.createJellyfinConfig(name, basePath, token, isDefault, guildId);
+    final config = await _jellyfinConfigRepository.createJellyfinConfig(name, basePath, token, isDefault, guildId);
     if (config.id == null) {
       throw Error();
     }
@@ -173,10 +166,10 @@ class JellyfinModule {
     return config;
   }
 
-  static JellyfinClientWrapper? _getCachedClientConfig(JellyfinInstanceIdentity identity) =>
+  JellyfinClientWrapper? _getCachedClientConfig(JellyfinInstanceIdentity identity) =>
       _jellyfinClients[_getClientCacheIdentifier(identity.$2.toString(), identity.$1)];
 
-  static JellyfinClientWrapper _createClientConfig(JellyfinConfig config) {
+  JellyfinClientWrapper _createClientConfig(JellyfinConfig config) {
     final client = Tentacle(basePathOverride: config.basePath, interceptors: [CustomAuthInterceptor(config.token)]);
 
     final clientConfig = JellyfinClientWrapper(client, config);
@@ -187,7 +180,7 @@ class JellyfinModule {
     return clientConfig;
   }
 
-  static String _getClientCacheIdentifier(String guildId, String? instanceName, [bool isDefault = false]) {
+  String _getClientCacheIdentifier(String guildId, String? instanceName, [bool isDefault = false]) {
     if (instanceName != null && !isDefault) {
       return "$guildId|$instanceName";
     }

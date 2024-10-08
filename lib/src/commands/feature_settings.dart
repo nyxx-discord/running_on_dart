@@ -1,3 +1,4 @@
+import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
@@ -37,7 +38,7 @@ final featureSettings = ChatGroup(
           data: data,
         );
 
-        await FeatureSettingsService.instance.enable(featureSetting);
+        await Injector.appInstance.get<FeatureSettingsService>().enable(featureSetting);
 
         await context.respond(MessageBuilder(content: 'Successfully enabled setting!'));
       }),
@@ -49,10 +50,11 @@ final featureSettings = ChatGroup(
         ChatContext context,
         @Description('The setting to enable') Setting setting,
       ) async {
-        final featureSetting = await FeatureSettingsRepository.instance.fetchSetting(setting, context.guild!.id);
+        final featureSetting =
+            await Injector.appInstance.get<FeatureSettingsRepository>().fetchSetting(setting, context.guild!.id);
 
         if (featureSetting != null) {
-          FeatureSettingsService.instance.disable(featureSetting);
+          Injector.appInstance.get<FeatureSettingsService>().disable(featureSetting);
         }
 
         await context.respond(MessageBuilder(content: 'Successfully disabled setting!'));
@@ -62,7 +64,8 @@ final featureSettings = ChatGroup(
         "show-configuration",
         "Show current configuration for settings",
         id('settings-show-configuration', (ChatContext context) async {
-          final settings = await FeatureSettingsRepository.instance.fetchSettingsForGuild(context.guild!.id);
+          final settings =
+              await Injector.appInstance.get<FeatureSettingsRepository>().fetchSettingsForGuild(context.guild!.id);
 
           final messageBuilders = settings.map((setting) {
             final dataFieldValue = switch (setting.setting.type) {

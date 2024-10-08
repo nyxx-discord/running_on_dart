@@ -25,6 +25,7 @@ dependencies:
   collection: ^1.19.0
   tentacle:
     git: https://github.com/TentacleOrg/Tentacle.git
+  injector: ^4.0.0
 
 dev_dependencies:
   lints: ^4.0.0

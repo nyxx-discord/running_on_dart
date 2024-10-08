@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:fuzzy/fuzzy.dart';
+import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/src/models/reminder.dart';
@@ -33,27 +34,20 @@ class ReminderModuleComponentId {
 }
 
 class ReminderModule {
-  static ReminderModule get instance =>
-      _instance ?? (throw Exception('ReminderModule must be initialised with ReminderModule.init'));
-  static ReminderModule? _instance;
-
   final List<Reminder> reminders = [];
 
   final Logger _logger = Logger('ROD.ReminderModule');
-  final NyxxGateway _client;
+  final NyxxGateway _client = Injector.appInstance.get();
+  final ReminderRepository _reminderRepository = Injector.appInstance.get();
 
-  ReminderModule._(this._client) {
-    ReminderRepository.instance.fetchReminders().then((reminders) => this.reminders.addAll(reminders));
+  ReminderModule() {
+    _reminderRepository.fetchReminders().then((reminders) => this.reminders.addAll(reminders));
 
     _processCurrent();
 
     _client.onMessageComponentInteraction
         .where((event) => event.interaction.data.type == MessageComponentType.button)
         .listen(_listenForReminderButtonEvent);
-  }
-
-  static void init(NyxxGateway client) {
-    _instance = ReminderModule._(client);
   }
 
   Future<void> _processCurrent() async {
@@ -88,6 +82,7 @@ class ReminderModule {
   Future<void> _sendReminderMessage(Reminder reminder, TextChannel channel) async {
     final content = StringBuffer('<@!${reminder.userId}> Reminder ')
       ..write(reminder.addedAt.format(TimestampStyle.relativeTime))
+      ..write(" (${reminder.addedAt.format(TimestampStyle.shortDateTime)})")
       ..write(": ")
       ..write(reminder.message);
 
@@ -124,7 +119,7 @@ class ReminderModule {
       return event.interaction.respond(MessageBuilder(content: "You cannot use this button!"), isEphemeral: true);
     }
 
-    final reminder = await ReminderRepository.instance.fetchReminder(customId.reminderId);
+    final reminder = await _reminderRepository.fetchReminder(customId.reminderId);
     if (reminder == null) {
       return event.interaction
           .respond(MessageBuilder(content: "Given reminder is missing. Cannot extend reminder!"), isEphemeral: true);
@@ -141,7 +136,7 @@ class ReminderModule {
 
   /// Add a new reminder to the database and schedule its execution.
   Future<Reminder> addReminder(Reminder reminder) async {
-    await ReminderRepository.instance.addReminder(reminder);
+    await _reminderRepository.addReminder(reminder);
 
     _logger.fine('Added reminder ${reminder.id} to the database');
 

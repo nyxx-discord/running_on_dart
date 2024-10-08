@@ -1,18 +1,15 @@
+import 'package:injector/injector.dart';
 import 'package:logging/logging.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/reminder.dart';
 
 class ReminderRepository {
-  static final ReminderRepository instance = ReminderRepository._();
-
   final Logger _logger = Logger('ROD.ReminderRepository');
-
-  ReminderRepository._();
+  final _database = Injector.appInstance.get<DatabaseService>();
 
   Future<Reminder?> fetchReminder(int id) async {
-    final result = await DatabaseService.instance
-        .getConnection()
-        .query('SELECT * FROM reminders WHERE id = @id', substitutionValues: {'id': id});
+    final result =
+        await _database.getConnection().query('SELECT * FROM reminders WHERE id = @id', substitutionValues: {'id': id});
     if (result.isEmpty || result.length > 1) {
       throw Exception("Empty or multiple reminder with same id");
     }
@@ -22,8 +19,7 @@ class ReminderRepository {
 
   /// Fetch all reminders currently in the database.
   Future<Iterable<Reminder>> fetchReminders() async {
-    final result =
-        await DatabaseService.instance.getConnection().query('SELECT * FROM reminders WHERE trigger_date > now()');
+    final result = await _database.getConnection().query('SELECT * FROM reminders WHERE trigger_date > now()');
 
     return result.map((row) => row.toColumnMap()).map(Reminder.fromRow);
   }
@@ -36,7 +32,7 @@ class ReminderRepository {
       return;
     }
 
-    await DatabaseService.instance.getConnection().execute('DELETE FROM reminders WHERE id = @id', substitutionValues: {
+    await _database.getConnection().execute('DELETE FROM reminders WHERE id = @id', substitutionValues: {
       'id': id,
     });
   }
@@ -48,7 +44,7 @@ class ReminderRepository {
       return reminder;
     }
 
-    final result = await DatabaseService.instance.getConnection().query('''
+    final result = await _database.getConnection().query('''
     INSERT INTO reminders (
       user_id,
       channel_id,

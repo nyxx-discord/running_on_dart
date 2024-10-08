@@ -1,14 +1,13 @@
+import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
 import 'package:running_on_dart/src/services/db.dart';
 
 class FeatureSettingsRepository {
-  static final FeatureSettingsRepository instance = FeatureSettingsRepository._();
-
-  FeatureSettingsRepository._();
+  final _database = Injector.appInstance.get<DatabaseService>();
 
   Future<bool> isEnabled(Setting setting, Snowflake guildId) async {
-    final result = await DatabaseService.instance.getConnection().query('''
+    final result = await _database.getConnection().query('''
       SELECT name FROM feature_settings WHERE name = @name AND guild_id = @guild_id
     ''', substitutionValues: {
       'name': setting.name,
@@ -19,7 +18,7 @@ class FeatureSettingsRepository {
   }
 
   Future<FeatureSetting?> fetchSetting(Setting setting, Snowflake guildId) async {
-    final result = await DatabaseService.instance.getConnection().query('''
+    final result = await _database.getConnection().query('''
       SELECT * FROM feature_settings WHERE name = @name AND guild_id = @guild_id
     ''', substitutionValues: {
       'name': setting.name,
@@ -35,7 +34,7 @@ class FeatureSettingsRepository {
 
   /// Fetch all settings for all guilds from the database.
   Future<Iterable<FeatureSetting>> fetchSettings() async {
-    final result = await DatabaseService.instance.getConnection().query('''
+    final result = await _database.getConnection().query('''
       SELECT * FROM feature_settings;
     ''');
 
@@ -44,7 +43,7 @@ class FeatureSettingsRepository {
 
   /// Fetch all settings for all guilds from the database.
   Future<Iterable<FeatureSetting>> fetchSettingsForGuild(Snowflake guild) async {
-    final result = await DatabaseService.instance.getConnection().query('''
+    final result = await _database.getConnection().query('''
       SELECT * FROM feature_settings WHERE guild_id = @guildId;
     ''', substitutionValues: {'guildId': guild.toString()});
 
@@ -53,7 +52,7 @@ class FeatureSettingsRepository {
 
   /// Enable or update a setting in the database.
   Future<void> enableSetting(FeatureSetting setting) async {
-    await DatabaseService.instance.getConnection().execute('''
+    await _database.getConnection().execute('''
       INSERT INTO feature_settings (
         name,
         guild_id,
@@ -83,7 +82,7 @@ class FeatureSettingsRepository {
 
   /// Disable a setting in (remove it from) the database.
   Future<void> disableSetting(FeatureSetting setting) async {
-    await DatabaseService.instance.getConnection().execute('''
+    await _database.getConnection().execute('''
       DELETE FROM feature_settings WHERE name = @name AND guild_id = @guild_id
     ''', substitutionValues: {
       'name': setting.setting.name,

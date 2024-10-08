@@ -1,3 +1,4 @@
+import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
@@ -15,11 +16,11 @@ final info = ChatCommand(
     final color = getRandomColor();
     final currentUser = await context.client.user.get();
 
-    final startDate = BotStartDuration.instance.startDate;
+    final startDate = Injector.appInstance.get<BotStartDuration>().startDate;
     final startDateStr =
         "${startDate.format(TimestampStyle.longDateTime)} (${startDate.format(TimestampStyle.relativeTime)})";
 
-    final docsUpdatedDate = DocsModule.instance.lastUpdate;
+    final docsUpdatedDate = Injector.appInstance.get<DocsModule>().lastUpdate;
     final docsUpdateStr = docsUpdatedDate != null
         ? "${docsUpdatedDate.format(TimestampStyle.longDateTime)} (${docsUpdatedDate.format(TimestampStyle.relativeTime)})"
         : "Never";
@@ -59,10 +60,13 @@ final info = ChatCommand(
         EmbedFieldBuilder(name: 'Memory usage (current/RSS)', value: getCurrentMemoryString(), isInline: true),
         EmbedFieldBuilder(
             name: 'Tags in guild',
-            value: TagModule.instance.countCachedTags(context.guild?.id ?? context.user.id).toString(),
+            value:
+                Injector.appInstance.get<TagModule>().countCachedTags(context.guild?.id ?? context.user.id).toString(),
             isInline: true),
         EmbedFieldBuilder(
-            name: 'Current reminders', value: ReminderModule.instance.reminders.length.toString(), isInline: true),
+            name: 'Current reminders',
+            value: Injector.appInstance.get<ReminderModule>().reminders.length.toString(),
+            isInline: true),
         EmbedFieldBuilder(name: 'Uptime', value: startDateStr, isInline: false),
         EmbedFieldBuilder(name: 'Docs Update', value: docsUpdateStr, isInline: false),
       ],

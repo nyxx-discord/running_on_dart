@@ -6,6 +6,13 @@ import 'package:running_on_dart/src/commands/reminder.dart';
 import 'package:running_on_dart/src/commands/tag.dart';
 import 'package:running_on_dart/src/modules/bot_start_duration.dart';
 
+import 'package:injector/injector.dart';
+import 'package:running_on_dart/src/repository/feature_settings.dart';
+import 'package:running_on_dart/src/repository/jellyfin_config.dart';
+import 'package:running_on_dart/src/repository/reminder.dart';
+import 'package:running_on_dart/src/repository/tag.dart';
+import 'package:running_on_dart/src/services/feature_settings.dart';
+
 void main() async {
   final commands = CommandsPlugin(
     prefix: null,
@@ -47,14 +54,23 @@ void main() async {
         ],
       ));
 
-  await DatabaseService.instance.awaitReady();
+  final db = DatabaseService();
+  await db.awaitReady();
 
-  PoopNameModule.init(client);
-  JoinLogsModule.init(client);
-  ReminderModule.init(client);
-  ModLogsModule.init(client);
-  TagModule.init();
-  DocsModule.init();
-  JellyfinModule.init();
-  BotStartDuration.init();
+  Injector.appInstance
+    ..registerSingleton(() => client)
+    ..registerSingleton(() => db)
+    ..registerSingleton(() => FeatureSettingsRepository())
+    ..registerSingleton(() => JellyfinConfigRepository())
+    ..registerSingleton(() => ReminderRepository())
+    ..registerSingleton(() => TagRepository())
+    ..registerSingleton(() => FeatureSettingsService())
+    ..registerSingleton(() => BotStartDuration())
+    ..registerSingleton(() => PoopNameModule())
+    ..registerSingleton(() => JoinLogsModule())
+    ..registerSingleton(() => ReminderModule())
+    ..registerSingleton(() => ModLogsModule())
+    ..registerSingleton(() => TagModule())
+    ..registerSingleton(() => DocsModule())
+    ..registerSingleton(() => JellyfinModule());
 }

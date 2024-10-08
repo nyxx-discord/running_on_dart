@@ -1,3 +1,4 @@
+import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
@@ -14,7 +15,7 @@ final jellyfinFeatureEnabledCheck = Check(
       return true;
     }
 
-    return FeatureSettingsService.instance.isEnabled(Setting.jellyfin, context.guild!.id);
+    return Injector.appInstance.get<FeatureSettingsService>().isEnabled(Setting.jellyfin, context.guild!.id);
   },
 );
 
@@ -23,7 +24,8 @@ Future<(bool?, FeatureSetting?)> fetchAndCheckSetting(CommandContext context) as
     return (true, null);
   }
 
-  final setting = await FeatureSettingsRepository.instance.fetchSetting(Setting.jellyfin, context.guild!.id);
+  final setting =
+      await Injector.appInstance.get<FeatureSettingsRepository>().fetchSetting(Setting.jellyfin, context.guild!.id);
   if (setting == null) {
     return (false, null);
   }

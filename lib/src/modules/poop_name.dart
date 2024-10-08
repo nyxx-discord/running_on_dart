@@ -1,3 +1,4 @@
+import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
 import 'package:running_on_dart/src/services/feature_settings.dart';
@@ -8,17 +9,9 @@ final poopCharacters = ['!', '#', '@', '^', '%', '&', '-', '*', '.' '+', '\''];
 final poopRegexp = RegExp("[${poopCharacters.join()}]");
 
 class PoopNameModule {
-  static PoopNameModule get instance =>
-      _instance ?? (throw Exception('PoopNameModule must be initialised with PoopNameModule.init()'));
-  static PoopNameModule? _instance;
+  final NyxxGateway _client = Injector.appInstance.get();
 
-  static void init(NyxxGateway client) {
-    _instance = PoopNameModule._(client);
-  }
-
-  final NyxxGateway _client;
-
-  PoopNameModule._(this._client) {
+  PoopNameModule() {
     _client.onGuildMemberAdd.listen((event) => _handle(event.member));
     _client.onGuildMemberUpdate.listen((event) => _handle(event.member));
   }
@@ -55,6 +48,6 @@ class PoopNameModule {
       return false;
     }
 
-    return await FeatureSettingsService.instance.isEnabled(Setting.poopName, guildId);
+    return await Injector.appInstance.get<FeatureSettingsService>().isEnabled(Setting.poopName, guildId);
   }
 }

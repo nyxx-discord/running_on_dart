@@ -1,3 +1,4 @@
+import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
@@ -16,7 +17,7 @@ final docs = ChatGroup(
       "refresh",
       "Refresh docs manually",
       id("docs-refresh", (ChatContext context) {
-        DocsModule.instance.updateCache();
+        Injector.appInstance.get<DocsModule>().updateCache();
 
         context.respond(MessageBuilder(content: 'Manual docs refresh executed!'));
       }),
@@ -57,7 +58,7 @@ Package: [${element.packageName}](https://pub.dev/packages/${element.packageName
         @Description('The query to search for') @Autocomplete(autocompleteQueryWithPackage) String query, [
         @Description('The package to search in') PackageDocs? package,
       ]) async {
-        final searchResults = DocsModule.instance.search(query, package);
+        final searchResults = Injector.appInstance.get<DocsModule>().search(query, package);
 
         if (searchResults.isEmpty) {
           await context.respond(MessageBuilder(

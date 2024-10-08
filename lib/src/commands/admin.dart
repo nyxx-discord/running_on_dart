@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
@@ -45,10 +46,12 @@ final admin = ChatGroup(
         "perform-nickname-pooping",
         "Perform pooping of usernames in current guild",
         id('perform-nickname-pooping', (ChatContext context, [bool dryRun = true, int batchSize = 100]) async {
+          final poopModule = Injector.appInstance.get<PoopNameModule>();
+
           var nickNamesToRemove = <String>[];
           for (final disallowedChar in poopCharacters) {
             await for (final member in searchMembers(disallowedChar, batchSize, context.guild!)) {
-              final (performed, nick) = await PoopNameModule.instance.poopMember(member, dryRun: dryRun);
+              final (performed, nick) = await poopModule.poopMember(member, dryRun: dryRun);
               if (performed && (nick ?? '').isNotEmpty) {
                 nickNamesToRemove.add(nick!);
               }

@@ -1,36 +1,32 @@
+import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/models/jellyfin_config.dart';
 import 'package:running_on_dart/src/services/db.dart';
 
 class JellyfinConfigRepository {
-  static final JellyfinConfigRepository instance = JellyfinConfigRepository._();
-
-  JellyfinConfigRepository._();
+  final _database = Injector.appInstance.get<DatabaseService>();
 
   Future<void> deleteConfig(int id) async {
-    await DatabaseService.instance
+    await _database
         .getConnection()
         .query('DELETE FROM jellyfin_configs WHERE id = @id', substitutionValues: {'id': id});
   }
 
   Future<Iterable<JellyfinConfig>> getDefaultConfigs() async {
-    final result = await DatabaseService.instance
-        .getConnection()
-        .query('SELECT * FROM jellyfin_configs WHERE is_default = 1::bool');
+    final result = await _database.getConnection().query('SELECT * FROM jellyfin_configs WHERE is_default = 1::bool');
 
     return result.map((row) => row.toColumnMap()).map(JellyfinConfig.fromDatabaseRow);
   }
 
   Future<Iterable<JellyfinConfig>> getConfigsForGuild(Snowflake guildId) async {
-    final result = await DatabaseService.instance.getConnection().query(
-        'SELECT * FROM jellyfin_configs WHERE guild_id = @guildId',
+    final result = await _database.getConnection().query('SELECT * FROM jellyfin_configs WHERE guild_id = @guildId',
         substitutionValues: {'guildId': guildId.toString()});
 
     return result.map((row) => row.toColumnMap()).map(JellyfinConfig.fromDatabaseRow);
   }
 
   Future<JellyfinConfig?> getByName(String name, String guildId) async {
-    final result = await DatabaseService.instance.getConnection().query(
+    final result = await _database.getConnection().query(
         'SELECT * FROM jellyfin_configs WHERE name = @name AND guild_id = @guildId',
         substitutionValues: {'name': name, 'guildId': guildId});
 
@@ -46,7 +42,7 @@ class JellyfinConfigRepository {
     final config =
         JellyfinConfig(name: name, basePath: basePath, token: token, isDefault: isDefault, parentId: guildId);
 
-    final result = await DatabaseService.instance.getConnection().query('''
+    final result = await _database.getConnection().query('''
     INSERT INTO jellyfin_configs (
       name,
       base_path,

@@ -8,15 +8,7 @@ class DocsModule {
   final Map<String, PackageDocs> _cache = {};
   DateTime? lastUpdate;
 
-  static DocsModule get instance =>
-      _instance ?? (throw Exception('DocsModule must be initialised with DocsModule.init()'));
-  static DocsModule? _instance;
-
-  static void init() {
-    _instance = DocsModule._();
-  }
-
-  DocsModule._() {
+  DocsModule() {
     for (final package in docsPackages) {
       _cache[package] = PackageDocs(packageName: package);
     }
