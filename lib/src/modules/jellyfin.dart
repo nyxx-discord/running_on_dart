@@ -2,6 +2,7 @@ import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/models/jellyfin_config.dart';
 import 'package:running_on_dart/src/repository/jellyfin_config.dart';
+import 'package:running_on_dart/src/util/util.dart';
 import 'package:tentacle/tentacle.dart';
 import 'package:tentacle/src/auth/auth.dart' show AuthInterceptor;
 import 'package:dio/dio.dart' show RequestInterceptorHandler, RequestOptions;
@@ -103,16 +104,18 @@ class JellyfinClientWrapper {
   Uri getJellyfinItemUrl(String itemId) => Uri.parse("$basePath/#/details?id=$itemId");
 }
 
-class JellyfinModule {
+class JellyfinModule implements RequiresInitialization {
   final Map<String, JellyfinClientWrapper> _jellyfinClients = {};
   final Map<String, List<String>> _allowedUserRegistrations = {};
 
   final JellyfinConfigRepository _jellyfinConfigRepository = Injector.appInstance.get();
 
-  JellyfinModule() {
-    _jellyfinConfigRepository
-        .getDefaultConfigs()
-        .then((defaultConfigs) => defaultConfigs.forEach((config) => _createClientConfig(config)));
+  @override
+  Future<void> init() async {
+    final defaultConfigs = await _jellyfinConfigRepository.getDefaultConfigs();
+    for (final config in defaultConfigs) {
+      _createClientConfig(config);
+    }
   }
 
   Future<void> deleteJellyfinConfig(JellyfinConfig config) async {

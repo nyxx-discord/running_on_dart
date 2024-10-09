@@ -16,3 +16,11 @@ String getCurrentMemoryString() {
 }
 
 String getDartPlatform() => Platform.version.split('(').first;
+
+extension DurationFromTicks on Duration {
+  String formatShort() => toString().split('.').first.padLeft(8, "0");
+}
+
+abstract class RequiresInitialization {
+  Future<void> init();
+}

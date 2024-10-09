@@ -4,14 +4,16 @@ import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/models/tag.dart';
 import 'package:running_on_dart/src/repository/tag.dart';
 import 'package:running_on_dart/src/settings.dart';
+import 'package:running_on_dart/src/util/util.dart';
 
-class TagModule {
+class TagModule implements RequiresInitialization {
   final List<Tag> tags = [];
   final List<TagUsedEvent> usedEvents = [];
 
   final _tagRepository = Injector.appInstance.get<TagRepository>();
 
-  TagModule() {
+  @override
+  Future<void> init() async {
     _tagRepository.fetchAllActiveTags().then((tags) => this.tags.addAll(tags));
     _tagRepository.fetchTagUsage().then((events) => usedEvents.addAll(events));
   }

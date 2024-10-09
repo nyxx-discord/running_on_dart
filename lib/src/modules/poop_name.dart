@@ -3,15 +3,17 @@ import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
 import 'package:running_on_dart/src/services/feature_settings.dart';
 import 'package:running_on_dart/src/settings.dart';
+import 'package:running_on_dart/src/util/util.dart';
 
 const poopEmoji = "💩";
 final poopCharacters = ['!', '#', '@', '^', '%', '&', '-', '*', '.' '+', '\''];
 final poopRegexp = RegExp("[${poopCharacters.join()}]");
 
-class PoopNameModule {
+class PoopNameModule implements RequiresInitialization {
   final NyxxGateway _client = Injector.appInstance.get();
 
-  PoopNameModule() {
+  @override
+  Future<void> init() async {
     _client.onGuildMemberAdd.listen((event) => _handle(event.member));
     _client.onGuildMemberUpdate.listen((event) => _handle(event.member));
   }

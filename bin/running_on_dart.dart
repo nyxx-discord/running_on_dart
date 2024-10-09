@@ -55,12 +55,9 @@ void main() async {
         ],
       ));
 
-  final db = DatabaseService();
-  await db.awaitReady();
-
   Injector.appInstance
     ..registerSingleton(() => client)
-    ..registerSingleton(() => db)
+    ..registerSingleton(() => DatabaseService())
     ..registerSingleton(() => FeatureSettingsRepository())
     ..registerSingleton(() => JellyfinConfigRepository())
     ..registerSingleton(() => ReminderRepository())
@@ -74,4 +71,14 @@ void main() async {
     ..registerSingleton(() => TagModule())
     ..registerSingleton(() => DocsModule())
     ..registerSingleton(() => JellyfinModule());
+
+  await Injector.appInstance.get<DatabaseService>().init();
+  await Injector.appInstance.get<JellyfinModule>().init();
+  await Injector.appInstance.get<DocsModule>().init();
+  await Injector.appInstance.get<TagModule>().init();
+  await Injector.appInstance.get<ModLogsModule>().init();
+  await Injector.appInstance.get<ReminderModule>().init();
+  await Injector.appInstance.get<JoinLogsModule>().init();
+  await Injector.appInstance.get<PoopNameModule>().init();
+  await Injector.appInstance.get<BotStartDuration>().init();
 }

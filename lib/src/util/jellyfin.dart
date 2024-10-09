@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/src/modules/jellyfin.dart';
+import 'package:running_on_dart/src/util/util.dart';
 import 'package:tentacle/tentacle.dart';
 
 final episodeSeriesNumberFormat = NumberFormat("00");
@@ -10,10 +11,6 @@ final itemRatingNumberFormat = NumberFormat("0.0");
 final itemCriticRatingNumberFormat = NumberFormat("00");
 
 Duration parseDurationFromTicks(int ticks) => Duration(microseconds: ticks ~/ 10);
-
-extension DurationFromTicks on Duration {
-  String formatShort() => toString().split('.').first.padLeft(8, "0");
-}
 
 String formatProgress(int currentPositionTicks, int totalTicks) {
   final progressPercentage = currentPositionTicks / totalTicks * 100;

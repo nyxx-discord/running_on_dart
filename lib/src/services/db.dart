@@ -6,6 +6,7 @@ import 'package:migent/migent.dart';
 import 'package:postgres/postgres.dart';
 
 import 'package:running_on_dart/src/settings.dart';
+import 'package:running_on_dart/src/util/util.dart';
 
 /// The user to use when connecting to the database.
 String user = getEnv('POSTGRES_USER');
@@ -23,17 +24,13 @@ String host = getEnv('DB_HOST', 'db');
 /// The port to connect to the database on.
 int port = int.parse(getEnv('DB_PORT', '5432'));
 
-class DatabaseService {
-  /// The connection to the database.
+class DatabaseService implements RequiresInitialization {
   late PostgreSQLConnection _connection;
-
   final Logger _logger = Logger('ROD.Database');
 
-  final Completer<void> _readyCompleter = Completer();
-  late final Future<void> _ready = _readyCompleter.future;
-
-  DatabaseService() {
-    _connect();
+  @override
+  Future<void> init() async {
+    await _connect();
   }
 
   /// Connect to the database and ensure the schema is up to date.
@@ -149,11 +146,7 @@ class DatabaseService {
     await migrator.runMigrations();
 
     _logger.info('Connected to database');
-
-    _readyCompleter.complete();
   }
-
-  Future<void> awaitReady() async => await _ready;
 
   PostgreSQLConnection getConnection() => _connection;
 }

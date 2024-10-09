@@ -8,8 +8,8 @@ import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/checks.dart';
 import 'package:running_on_dart/src/models/jellyfin_config.dart';
 import 'package:running_on_dart/src/repository/jellyfin_config.dart';
-import 'package:running_on_dart/src/util/custom_task.dart';
 import 'package:running_on_dart/src/util/jellyfin.dart';
+import 'package:running_on_dart/src/util/pipelines.dart';
 import 'package:tentacle/tentacle.dart';
 
 final taskProgressFormat = NumberFormat("0.00");
@@ -47,25 +47,26 @@ final jellyfin = ChatGroup(
             return SelectMenuOptionBuilder(label: label, value: taskInfo.id!, description: description);
           }, authorOnly: true);
 
-          client.startTask(selectMenuResult.id!);
+          Pipeline.fromUpdateContext(
+            messageSupplier: (messageBuilder) => context.interaction.updateOriginalResponse(messageBuilder),
+            tasks: [
+              Task(
+                  runCallback: () => client.startTask(selectMenuResult.id!),
+                  updateCallback: () async {
+                    final scheduledTask = (await client.getScheduledTasks())
+                        .firstWhereOrNull((taskInfo) => taskInfo.id == selectMenuResult.id);
+                    if (scheduledTask == null || scheduledTask.state == TaskState.idle) {
+                      return (true, null);
+                    }
 
-          CustomTask(
-            targetMessageCallback: () => context.interaction.updateOriginalResponse(
-                MessageUpdateBuilder(content: "Running `${selectMenuResult.name!}`", components: [])),
-            updateCallback: (builder) async {
-              final scheduledTask =
-                  (await client.getScheduledTasks()).firstWhereOrNull((taskInfo) => taskInfo.id == selectMenuResult.id);
-              if (scheduledTask == null || scheduledTask.state == TaskState.idle) {
-                builder.content = "Running `${selectMenuResult.name!}` - Done!";
-                return true;
-              }
-
-              builder.content =
-                  "Running `${scheduledTask.name!}` - ${taskProgressFormat.format(scheduledTask.currentProgressPercentage!)}%";
-              return false;
-            },
+                    return (
+                      false,
+                      "Running `${scheduledTask.name!}` - ${taskProgressFormat.format(scheduledTask.currentProgressPercentage!)}%"
+                    );
+                  }),
+            ],
             updateInterval: Duration(seconds: 2),
-          );
+          ).execute();
         }),
       ),
     ]),

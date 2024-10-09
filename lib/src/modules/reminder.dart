@@ -6,6 +6,7 @@ import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/src/models/reminder.dart';
 import 'package:running_on_dart/src/repository/reminder.dart';
+import 'package:running_on_dart/src/util/util.dart';
 
 class ReminderModuleComponentId {
   static String identifier = 'ReminderModuleComponentId';
@@ -33,17 +34,17 @@ class ReminderModuleComponentId {
   String toString() => "$identifier/$reminderId/$userId/${duration.inMinutes}";
 }
 
-class ReminderModule {
+class ReminderModule implements RequiresInitialization {
   final List<Reminder> reminders = [];
 
   final Logger _logger = Logger('ROD.ReminderModule');
   final NyxxGateway _client = Injector.appInstance.get();
   final ReminderRepository _reminderRepository = Injector.appInstance.get();
 
-  ReminderModule() {
-    _reminderRepository.fetchReminders().then((reminders) => this.reminders.addAll(reminders));
-
-    _processCurrent();
+  @override
+  Future<void> init() async {
+    reminders.addAll(await _reminderRepository.fetchReminders());
+    await _processCurrent();
 
     _client.onMessageComponentInteraction
         .where((event) => event.interaction.data.type == MessageComponentType.button)

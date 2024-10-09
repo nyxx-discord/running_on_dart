@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/docs.dart';
+import 'package:running_on_dart/src/util/util.dart';
 
-class DocsModule {
+class DocsModule implements RequiresInitialization {
   final Map<String, PackageDocs> _cache = {};
   DateTime? lastUpdate;
 
-  DocsModule() {
+  @override
+  Future<void> init() async {
     for (final package in docsPackages) {
       _cache[package] = PackageDocs(packageName: package);
     }
