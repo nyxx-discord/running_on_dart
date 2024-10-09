@@ -35,7 +35,8 @@ void main() async {
     ..addConverter(settingsConverter)
     ..addConverter(manageableTagConverter)
     ..addConverter(durationConverter)
-    ..addConverter(reminderConverter);
+    ..addConverter(reminderConverter)
+    ..addConverter(packageDocsConverter);
 
   commands.onCommandError.listen((error) {
     if (error is CheckFailedException) {

@@ -11,8 +11,14 @@ import 'package:running_on_dart/src/modules/docs.dart';
 import 'package:running_on_dart/src/modules/reminder.dart';
 import 'package:running_on_dart/src/modules/tag.dart';
 import 'package:running_on_dart/src/repository/jellyfin_config.dart';
+import 'package:running_on_dart/src/settings.dart';
 
 import 'models/tag.dart';
+
+final packageDocsConverter = Converter<PackageDocs>(
+  (view, context) => Injector.appInstance.get<DocsModule>().getPackageDocs(view.getQuotedWord()),
+  choices: docsPackages.map((packageName) => CommandOptionChoiceBuilder(name: packageName, value: packageName)),
+);
 
 final reminderConverter = Converter<Reminder>(
   (view, context) =>
