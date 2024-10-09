@@ -1,3 +1,7 @@
+## 4.1.1
+
+- Fix docs search command
+
 ## 4.1.0
 
 - Use `injector` package for dependency injection
