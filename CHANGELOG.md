@@ -1,3 +1,7 @@
+## 4.1.2
+
+- Improve Injector implementation
+
 ## 4.1.1
 
 - Fix docs search command
