@@ -46,8 +46,18 @@ class Reminder {
       messageId: row['message_id'] != null ? Snowflake.parse(row['message_id'] as String) : null,
       triggerAt: row['trigger_date'] as DateTime,
       addedAt: row['add_date'] as DateTime,
-      message: row['message'] as String,
+      message: row['message'] as String? ?? '[EMPTY]',
       id: row['id'] as int,
     );
+  }
+
+  factory Reminder.fromOther(Reminder reminder, DateTime triggerAt) {
+    return Reminder(
+        userId: reminder.userId,
+        channelId: reminder.channelId,
+        messageId: reminder.messageId,
+        triggerAt: triggerAt,
+        addedAt: DateTime.now(),
+        message: reminder.message);
   }
 }

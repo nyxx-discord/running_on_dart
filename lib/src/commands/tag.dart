@@ -1,3 +1,4 @@
+import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:running_on_dart/src/models/tag.dart';
@@ -19,7 +20,7 @@ final tag = ChatGroup(
         @Description('The content of the tag') String content, [
         @Description('Whether to enable the tag by default') bool enabled = true,
       ]) async {
-        if (TagModule.instance.getByName(context.guild?.id ?? Snowflake.zero, name) != null) {
+        if (Injector.appInstance.get<TagModule>().getByName(context.guild?.id ?? context.user.id, name) != null) {
           await context.respond(MessageBuilder(embeds: [
             EmbedBuilder(
                 color: DiscordColor.parseHexString("#FF0000"),
@@ -32,13 +33,13 @@ final tag = ChatGroup(
 
         final tag = Tag(
           authorId: context.user.id,
-          guildId: context.guild?.id ?? Snowflake.zero,
+          guildId: context.guild?.id ?? context.user.id,
           content: content,
           enabled: enabled,
           name: name,
         );
 
-        await TagModule.instance.createTag(tag);
+        await Injector.appInstance.get<TagModule>().createTag(tag);
 
         await context.respond(MessageBuilder(content: 'Tag created successfully!'));
       }),
@@ -52,10 +53,10 @@ final tag = ChatGroup(
       ) async {
         await context.respond(MessageBuilder(content: tag.content));
 
-        await TagModule.instance.registerTagUsedEvent(TagUsedEvent.fromTag(
-          tag: tag,
-          hidden: false,
-        ));
+        await Injector.appInstance.get<TagModule>().registerTagUsedEvent(TagUsedEvent.fromTag(
+              tag: tag,
+              hidden: false,
+            ));
       }),
     ),
     ChatCommand(
@@ -67,10 +68,10 @@ final tag = ChatGroup(
         ) async {
           await context.respond(MessageBuilder(content: tag.content));
 
-          await TagModule.instance.registerTagUsedEvent(TagUsedEvent.fromTag(
-            tag: tag,
-            hidden: true,
-          ));
+          await Injector.appInstance.get<TagModule>().registerTagUsedEvent(TagUsedEvent.fromTag(
+                tag: tag,
+                hidden: true,
+              ));
         }),
         options: CommandOptions(defaultResponseLevel: ResponseLevel.private)),
     ChatCommand(
@@ -86,7 +87,7 @@ final tag = ChatGroup(
         }
 
         tag.enabled = true;
-        await TagModule.instance.updateTag(tag);
+        await Injector.appInstance.get<TagModule>().updateTag(tag);
 
         await context.respond(MessageBuilder(content: 'Successfully enabled tag!'));
       }),
@@ -104,7 +105,7 @@ final tag = ChatGroup(
         }
 
         tag.enabled = false;
-        await TagModule.instance.updateTag(tag);
+        await Injector.appInstance.get<TagModule>().updateTag(tag);
 
         await context.respond(MessageBuilder(content: 'Successfully disabled tag!'));
       }),
@@ -116,7 +117,7 @@ final tag = ChatGroup(
         ChatContext context,
         @UseConverter(manageableTagConverter) @Description('The tag to delete') Tag tag,
       ) async {
-        await TagModule.instance.deleteTag(tag);
+        await Injector.appInstance.get<TagModule>().deleteTag(tag);
 
         await context.respond(MessageBuilder(content: 'Successfully deleted tag!'));
       }),
@@ -128,7 +129,8 @@ final tag = ChatGroup(
         ChatContext context, [
         @Description('The tag to show stats for') Tag? tag,
       ]) async {
-        final events = TagModule.instance.getTagUsage(context.guild?.id ?? Snowflake.zero, tag).toList();
+        final events =
+            Injector.appInstance.get<TagModule>().getTagUsage(context.guild?.id ?? context.user.id, tag).toList();
 
         final totalUses = events.length;
         final totalHiddenUses = events.where((event) => event.hidden).length;
@@ -155,7 +157,7 @@ final tag = ChatGroup(
           final useCount = <Tag, int>{};
 
           for (final event in events) {
-            final tag = TagModule.instance.getById(event.tagId);
+            final tag = Injector.appInstance.get<TagModule>().getById(event.tagId);
 
             if (tag == null) {
               continue;

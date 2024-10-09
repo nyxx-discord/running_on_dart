@@ -2,11 +2,16 @@ import 'dart:convert';
 
 import 'package:nyxx/nyxx.dart';
 
+enum DataType {
+  channelMention,
+  json,
+}
+
 enum Setting {
   poopName('poop_name', 'Replace nickname of a member with poop emoji if the member tries to hoist itself', false),
-  joinLogs('join_logs', 'Logs member join events into specified channel', true),
-  modLogs('mod_logs', 'Logs administration event into specified channel', true),
-  jellyfin('jellyfin', 'Allows usage of jellyfin commands', true);
+  joinLogs('join_logs', 'Logs member join events into specified channel', true, DataType.channelMention),
+  modLogs('mod_logs', 'Logs administration event into specified channel', true, DataType.channelMention),
+  jellyfin('jellyfin', 'Allows usage of jellyfin commands', true, DataType.json);
 
   /// name of setting
   final String name;
@@ -17,11 +22,10 @@ enum Setting {
   /// Whether this setting requires extra data (beyond being enabled or not).
   final bool requiresData;
 
-  const Setting(
-    this.name,
-    this.description,
-    this.requiresData,
-  );
+  /// Type of data
+  final DataType? type;
+
+  const Setting(this.name, this.description, this.requiresData, [this.type]);
 }
 
 /// The value of a setting within a guild.

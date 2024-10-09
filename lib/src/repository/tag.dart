@@ -1,17 +1,16 @@
+import 'package:injector/injector.dart';
 import 'package:logging/logging.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/tag.dart';
 
 class TagRepository {
-  static final TagRepository instance = TagRepository._();
+  final _database = Injector.appInstance.get<DatabaseService>();
 
   final Logger _logger = Logger('ROD.TagRepository');
 
-  TagRepository._();
-
   /// Fetch all existing tags from the database.
   Future<Iterable<Tag>> fetchAllActiveTags() async {
-    final result = await DatabaseService.instance.getConnection().query('''
+    final result = await _database.getConnection().query('''
       SELECT * FROM tags WHERE enabled = TRUE;
     ''');
 
@@ -19,7 +18,7 @@ class TagRepository {
   }
 
   Future<Iterable<Tag>> fetchActiveTagsByName(String nameQuery) async {
-    final result = await DatabaseService.instance.getConnection().query('''
+    final result = await _database.getConnection().query('''
       SELECT * FROM tags WHERE enabled = TRUE AND name LIKE '%@nameQuery%';
     ''', substitutionValues: {'name': nameQuery});
 
@@ -34,7 +33,7 @@ class TagRepository {
       return;
     }
 
-    await DatabaseService.instance.getConnection().execute('''
+    await _database.getConnection().execute('''
       UPDATE tags SET enabled = FALSE WHERE id = @id;
     ''', substitutionValues: {
       'id': id,
@@ -48,7 +47,7 @@ class TagRepository {
       return;
     }
 
-    final result = await DatabaseService.instance.getConnection().query('''
+    final result = await _database.getConnection().query('''
     INSERT INTO tags (
       name,
       content,
@@ -79,7 +78,7 @@ class TagRepository {
       return addTag(tag);
     }
 
-    await DatabaseService.instance.getConnection().query('''
+    await _database.getConnection().query('''
       UPDATE tags SET
         name = @name,
         content = @content,
@@ -99,7 +98,7 @@ class TagRepository {
   }
 
   Future<Iterable<TagUsedEvent>> fetchTagUsage() async {
-    final result = await DatabaseService.instance.getConnection().query('''
+    final result = await _database.getConnection().query('''
       SELECT tu.* FROM tag_usage tu JOIN tags t ON t.id = tu.command_id AND t.enabled = TRUE;
     ''');
 
@@ -107,7 +106,7 @@ class TagRepository {
   }
 
   Future<void> registerTagUsedEvent(TagUsedEvent event) async {
-    await DatabaseService.instance.getConnection().query('''
+    await _database.getConnection().query('''
       INSERT INTO tag_usage (
         command_id,
         use_date,

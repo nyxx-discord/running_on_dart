@@ -1,7 +1,6 @@
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:running_on_dart/src/util/util.dart';
-import 'package:http/http.dart' as http;
 
 extension ReplaceEmbedFieldExtension on EmbedBuilder {
   void replaceField(EmbedFieldBuilder embedField) {
@@ -15,8 +14,8 @@ final ping = ChatCommand(
   'ping',
   'Checks if the bot is online',
   id('ping', (ChatContext context) async {
-    final gatewayLatency = context.client.gateway.latency;
-    final restLatency = context.client.httpHandler.latency;
+    final gatewayLatency = context.client.gateway.latency.inMilliseconds;
+    final restLatency = context.client.httpHandler.latency.inMilliseconds;
 
     final embed = EmbedBuilder(color: getRandomColor(), fields: [
       EmbedFieldBuilder(name: 'Gateway latency', value: '${gatewayLatency}ms', isInline: true),

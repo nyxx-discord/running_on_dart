@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:nyxx/nyxx.dart';
 
-String get version => '4.0.0';
+String get version => '4.1.0';
 
 /// Get a [String] from an environment variable, throwing an exception if it is not set.
 ///
@@ -26,13 +26,14 @@ final bool intentFeaturesEnabled = getEnvBool('ROD_INTENT_FEATURES_ENABLE');
 /// The prefix to use for text commands for this instance.
 final String prefix = getEnv('ROD_PREFIX');
 
+/// The ID of admin guild
 final Snowflake adminGuildId = Snowflake.parse(getEnv('ROD_ADMIN_GUILD'));
 
 /// The IDs of the users that are allowed to use administrator commands
 final List<Snowflake> adminIds = getEnv('ROD_ADMIN_IDS').split(RegExp(r'\s+')).map(Snowflake.parse).toList();
 
 /// The interval at which to update the docs cache.
-final Duration docsUpdateInterval = Duration(seconds: int.parse(getEnv('ROD_DOCS_UPDATE_INTERVAL', '900')));
+final Duration docsUpdateInterval = Duration(seconds: int.parse(getEnv('ROD_DOCS_UPDATE_INTERVAL', '86400')));
 
 /// The packages to cache documentation for.
 final List<String> docsPackages =

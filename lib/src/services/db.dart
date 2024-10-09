@@ -32,9 +32,7 @@ class DatabaseService {
   final Completer<void> _readyCompleter = Completer();
   late final Future<void> _ready = _readyCompleter.future;
 
-  static final DatabaseService instance = DatabaseService._();
-
-  DatabaseService._() {
+  DatabaseService() {
     _connect();
   }
 

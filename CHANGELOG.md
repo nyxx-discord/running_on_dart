@@ -1,3 +1,11 @@
+## 4.1.0
+
+- Use `injector` package for dependency injection
+- Implement task support for jellyfin
+- Improve configuration display command
+- Implement jellyfin user command
+- Add extend reminder functionality
+
 ## 4.0.0
 
 - Complete rewrite to nyxx 6.x and nyxx_commands 6.x

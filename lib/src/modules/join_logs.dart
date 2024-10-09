@@ -1,3 +1,4 @@
+import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
@@ -6,18 +7,13 @@ import 'package:running_on_dart/src/services/feature_settings.dart';
 import 'package:running_on_dart/src/settings.dart';
 
 class JoinLogsModule {
-  static JoinLogsModule get instance =>
-      _instance ?? (throw Exception('JoinLogsService must be initialised with JoinLogsService.init()'));
-  static JoinLogsModule? _instance;
+  final NyxxGateway _client = Injector.appInstance.get();
+  final FeatureSettingsRepository _featureSettingsRepository = Injector.appInstance.get();
+  final FeatureSettingsService _featureSettingsService = Injector.appInstance.get();
 
-  static void init(NyxxGateway client) {
-    _instance = JoinLogsModule._(client);
-  }
-
-  final NyxxGateway _client;
   final Logger _logger = Logger('ROD.JoinLogs');
 
-  JoinLogsModule._(this._client) {
+  JoinLogsModule() {
     _client.onGuildMemberAdd.listen(_handle);
   }
 
@@ -27,7 +23,7 @@ class JoinLogsModule {
       return;
     }
 
-    final setting = await FeatureSettingsRepository.instance.fetchSetting(Setting.joinLogs, event.guildId);
+    final setting = await _featureSettingsRepository.fetchSetting(Setting.joinLogs, event.guildId);
     if (setting == null) {
       return;
     }
@@ -63,6 +59,6 @@ class JoinLogsModule {
       return false;
     }
 
-    return await FeatureSettingsService.instance.isEnabled(Setting.joinLogs, guildId);
+    return await _featureSettingsService.isEnabled(Setting.joinLogs, guildId);
   }
 }

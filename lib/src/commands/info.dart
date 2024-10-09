@@ -1,5 +1,11 @@
+import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
+import 'package:nyxx_extensions/nyxx_extensions.dart';
+import 'package:running_on_dart/src/modules/bot_start_duration.dart';
+import 'package:running_on_dart/src/modules/docs.dart';
+import 'package:running_on_dart/src/modules/reminder.dart';
+import 'package:running_on_dart/src/modules/tag.dart';
 import 'package:running_on_dart/src/settings.dart';
 import 'package:running_on_dart/src/util/util.dart';
 
@@ -9,6 +15,15 @@ final info = ChatCommand(
   id('info', (ChatContext context) async {
     final color = getRandomColor();
     final currentUser = await context.client.user.get();
+
+    final startDate = Injector.appInstance.get<BotStartDuration>().startDate;
+    final startDateStr =
+        "${startDate.format(TimestampStyle.longDateTime)} (${startDate.format(TimestampStyle.relativeTime)})";
+
+    final docsUpdatedDate = Injector.appInstance.get<DocsModule>().lastUpdate;
+    final docsUpdateStr = docsUpdatedDate != null
+        ? "${docsUpdatedDate.format(TimestampStyle.longDateTime)} (${docsUpdatedDate.format(TimestampStyle.relativeTime)})"
+        : "Never";
 
     final embed = EmbedBuilder(
       color: color,
@@ -43,7 +58,17 @@ final info = ChatCommand(
                 .toString(),
             isInline: true),
         EmbedFieldBuilder(name: 'Memory usage (current/RSS)', value: getCurrentMemoryString(), isInline: true),
-        EmbedFieldBuilder(name: 'Uptime', value: 'TODO: ', isInline: true),
+        EmbedFieldBuilder(
+            name: 'Tags in guild',
+            value:
+                Injector.appInstance.get<TagModule>().countCachedTags(context.guild?.id ?? context.user.id).toString(),
+            isInline: true),
+        EmbedFieldBuilder(
+            name: 'Current reminders',
+            value: Injector.appInstance.get<ReminderModule>().reminders.length.toString(),
+            isInline: true),
+        EmbedFieldBuilder(name: 'Uptime', value: startDateStr, isInline: false),
+        EmbedFieldBuilder(name: 'Docs Update', value: docsUpdateStr, isInline: false),
       ],
     );
 
@@ -53,7 +78,10 @@ final info = ChatCommand(
         components: [
           ActionRowBuilder(components: [
             ButtonBuilder.link(
-                url: Uri.parse('https://www.youtube.com/watch?v=dQw4w9WgXcQ'), label: 'Add ROD to your guild')
+                url: context.client.application.getInviteUri(scopes: ['bot', 'applications.commands']),
+                label: 'Add ROD to your guild'),
+            ButtonBuilder.link(
+                url: Uri.parse('https://www.youtube.com/watch?v=dQw4w9WgXcQ'), label: 'Special link for special people')
           ]),
         ],
       ),

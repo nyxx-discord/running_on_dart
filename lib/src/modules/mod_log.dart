@@ -1,3 +1,4 @@
+import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/running_on_dart.dart';
@@ -6,15 +7,9 @@ import 'package:running_on_dart/src/repository/feature_settings.dart';
 import 'package:running_on_dart/src/services/feature_settings.dart';
 
 class ModLogsModule {
-  static ModLogsModule get instance =>
-      _instance ?? (throw Exception('ModLogsModule must be initialised with ModLogsModule.init()'));
-  static ModLogsModule? _instance;
-
-  static void init(NyxxGateway client) {
-    _instance = ModLogsModule._(client);
-  }
-
-  final NyxxGateway _client;
+  final NyxxGateway _client = Injector.appInstance.get();
+  final FeatureSettingsRepository _featureSettingsRepository = Injector.appInstance.get();
+  final FeatureSettingsService _featureSettingsService = Injector.appInstance.get();
   final Logger _logger = Logger('ROD.ModLogs');
 
   final handledEventTypes = [
@@ -23,7 +18,7 @@ class ModLogsModule {
     AuditLogEvent.memberKick,
   ];
 
-  ModLogsModule._(this._client) {
+  ModLogsModule() {
     _client.onGuildAuditLogCreate.listen(_handleAuditLogAdd);
   }
 
@@ -33,7 +28,7 @@ class ModLogsModule {
       return;
     }
 
-    final setting = await FeatureSettingsRepository.instance.fetchSetting(Setting.modLogs, event.guildId);
+    final setting = await _featureSettingsRepository.fetchSetting(Setting.modLogs, event.guildId);
     if (setting == null) {
       return;
     }
@@ -90,6 +85,6 @@ Moderator: ${modUser.username} (${modUser.mention})
       return false;
     }
 
-    return await FeatureSettingsService.instance.isEnabled(Setting.modLogs, guildId);
+    return await _featureSettingsService.isEnabled(Setting.modLogs, guildId);
   }
 }

@@ -1,5 +1,6 @@
 import 'package:fuzzy/fuzzy.dart';
 import 'package:human_duration_parser/human_duration_parser.dart';
+import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:running_on_dart/src/models/docs.dart';
@@ -14,8 +15,10 @@ import 'package:running_on_dart/src/repository/jellyfin_config.dart';
 import 'models/tag.dart';
 
 final reminderConverter = Converter<Reminder>(
-  (view, context) => ReminderModule.instance.search(context.user.id, view.getQuotedWord()).firstOrNull,
-  autocompleteCallback: (context) => ReminderModule.instance
+  (view, context) =>
+      Injector.appInstance.get<ReminderModule>().search(context.user.id, view.getQuotedWord()).firstOrNull,
+  autocompleteCallback: (context) => Injector.appInstance
+      .get<ReminderModule>()
       .search(context.user.id, context.currentValue)
       .take(25)
       .map((e) =>
@@ -43,7 +46,7 @@ String stringifySetting(Setting setting) => setting.name;
 const settingsConverter = SimpleConverter.fixed(elements: Setting.values, stringify: stringifySetting);
 
 Iterable<Tag> getManageableTags(ContextData context) =>
-    TagModule.instance.findAll(context.guild?.id ?? Snowflake.zero, context.user.id);
+    Injector.appInstance.get<TagModule>().findAll(context.guild?.id ?? Snowflake.zero, context.user.id);
 String stringifyTag(Tag tag) => tag.name;
 
 const manageableTagConverter = SimpleConverter<Tag>(
@@ -52,7 +55,7 @@ const manageableTagConverter = SimpleConverter<Tag>(
 );
 
 Future<Iterable<JellyfinConfig>> getJellyfinConfigs(ContextData context) =>
-    JellyfinConfigRepository.instance.getConfigsForGuild(context.guild!.id);
+    Injector.appInstance.get<JellyfinConfigRepository>().getConfigsForGuild(context.guild!.id);
 
 String stringifyJellyfinConfig(JellyfinConfig config) => config.name;
 
@@ -65,14 +68,15 @@ Iterable<CommandOptionChoiceBuilder<dynamic>> autocompleteQueryWithPackage(Autoc
 
   PackageDocs? selectedPackage;
   if (selectedPackageName != null) {
-    selectedPackage = DocsModule.instance.getPackageDocs(selectedPackageName);
+    selectedPackage = Injector.appInstance.get<DocsModule>().getPackageDocs(selectedPackageName);
   }
 
   return [
     // Allow the user to select their current value
     if (context.currentValue.isNotEmpty)
       CommandOptionChoiceBuilder(name: context.currentValue, value: context.currentValue),
-    ...DocsModule.instance
+    ...Injector.appInstance
+        .get<DocsModule>()
         .search(context.currentValue, selectedPackage)
         .take(context.currentValue.isEmpty ? 25 : 24)
         .map((e) => CommandOptionChoiceBuilder(name: e.displayName, value: e.qualifiedName)),
