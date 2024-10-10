@@ -9,26 +9,26 @@ class JellyfinConfigRepository {
   Future<void> deleteConfig(int id) async {
     await _database
         .getConnection()
-        .query('DELETE FROM jellyfin_configs WHERE id = @id', substitutionValues: {'id': id});
+        .execute('DELETE FROM jellyfin_configs WHERE id = @id', parameters: {'id': id});
   }
 
   Future<Iterable<JellyfinConfig>> getDefaultConfigs() async {
-    final result = await _database.getConnection().query('SELECT * FROM jellyfin_configs WHERE is_default = 1::bool');
+    final result = await _database.getConnection().execute('SELECT * FROM jellyfin_configs WHERE is_default = 1::bool');
 
     return result.map((row) => row.toColumnMap()).map(JellyfinConfig.fromDatabaseRow);
   }
 
   Future<Iterable<JellyfinConfig>> getConfigsForGuild(Snowflake guildId) async {
-    final result = await _database.getConnection().query('SELECT * FROM jellyfin_configs WHERE guild_id = @guildId',
-        substitutionValues: {'guildId': guildId.toString()});
+    final result = await _database.getConnection().execute('SELECT * FROM jellyfin_configs WHERE guild_id = @guildId',
+        parameters: {'guildId': guildId.toString()});
 
     return result.map((row) => row.toColumnMap()).map(JellyfinConfig.fromDatabaseRow);
   }
 
   Future<JellyfinConfig?> getByName(String name, String guildId) async {
-    final result = await _database.getConnection().query(
+    final result = await _database.getConnection().execute(
         'SELECT * FROM jellyfin_configs WHERE name = @name AND guild_id = @guildId',
-        substitutionValues: {'name': name, 'guildId': guildId});
+        parameters: {'name': name, 'guildId': guildId});
 
     if (result.isEmpty) {
       return null;
@@ -42,7 +42,7 @@ class JellyfinConfigRepository {
     final config =
         JellyfinConfig(name: name, basePath: basePath, token: token, isDefault: isDefault, parentId: guildId);
 
-    final result = await _database.getConnection().query('''
+    final result = await _database.getConnection().execute('''
     INSERT INTO jellyfin_configs (
       name,
       base_path,
@@ -56,7 +56,7 @@ class JellyfinConfigRepository {
       @is_default,
       @guild_id
     ) RETURNING id;
-  ''', substitutionValues: {
+  ''', parameters: {
       'name': config.name,
       'base_path': config.basePath,
       'token': config.token,

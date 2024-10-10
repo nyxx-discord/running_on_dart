@@ -25,7 +25,7 @@ String host = getEnv('DB_HOST', 'db');
 int port = int.parse(getEnv('DB_PORT', '5432'));
 
 class DatabaseService implements RequiresInitialization {
-  late PostgreSQLConnection _connection;
+  late Connection _connection;
   final Logger _logger = Logger('ROD.Database');
 
   @override
@@ -37,19 +37,19 @@ class DatabaseService implements RequiresInitialization {
   Future<void> _connect() async {
     _logger.info('Connecting to database');
 
-    _connection = PostgreSQLConnection(
-      host,
-      port,
-      databaseName,
-      username: user,
-      password: password,
+    _connection = await Connection.open(
+      Endpoint(
+        host: host,
+        port: port,
+        database: databaseName,
+        username: user,
+        password: password,
+      )
     );
-
-    await _connection.open();
 
     _logger.info('Running database migrations');
 
-    final migrator = MigentMigrationRunner(_connection, databaseName, MemoryMigrationAccess())
+    final migrator = MigentMigrationRunner(connection: _connection, databaseName: databaseName, migrationAccess: MemoryMigrationAccess())
       ..enqueueMigration('1', '''
       CREATE TABLE tags (
         id SERIAL PRIMARY KEY,
@@ -148,5 +148,5 @@ class DatabaseService implements RequiresInitialization {
     _logger.info('Connected to database');
   }
 
-  PostgreSQLConnection getConnection() => _connection;
+  Connection getConnection() => _connection;
 }

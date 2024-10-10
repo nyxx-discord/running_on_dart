@@ -9,7 +9,7 @@ class ReminderRepository {
 
   Future<Reminder?> fetchReminder(int id) async {
     final result =
-        await _database.getConnection().query('SELECT * FROM reminders WHERE id = @id', substitutionValues: {'id': id});
+        await _database.getConnection().execute('SELECT * FROM reminders WHERE id = @id', parameters: {'id': id});
     if (result.isEmpty || result.length > 1) {
       throw Exception("Empty or multiple reminder with same id");
     }
@@ -19,7 +19,7 @@ class ReminderRepository {
 
   /// Fetch all reminders currently in the database.
   Future<Iterable<Reminder>> fetchReminders() async {
-    final result = await _database.getConnection().query('SELECT * FROM reminders WHERE trigger_date > now()');
+    final result = await _database.getConnection().execute('SELECT * FROM reminders WHERE trigger_date > now()');
 
     return result.map((row) => row.toColumnMap()).map(Reminder.fromRow);
   }
@@ -32,7 +32,7 @@ class ReminderRepository {
       return;
     }
 
-    await _database.getConnection().execute('DELETE FROM reminders WHERE id = @id', substitutionValues: {
+    await _database.getConnection().execute('DELETE FROM reminders WHERE id = @id', parameters: {
       'id': id,
     });
   }
@@ -44,7 +44,7 @@ class ReminderRepository {
       return reminder;
     }
 
-    final result = await _database.getConnection().query('''
+    final result = await _database.getConnection().execute('''
     INSERT INTO reminders (
       user_id,
       channel_id,
@@ -60,7 +60,7 @@ class ReminderRepository {
       @add_date,
       @message
     ) RETURNING id;
-  ''', substitutionValues: {
+  ''', parameters: {
       'user_id': reminder.userId.toString(),
       'channel_id': reminder.channelId.toString(),
       'message_id': reminder.messageId?.toString(),

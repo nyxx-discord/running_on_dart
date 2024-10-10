@@ -7,9 +7,9 @@ class FeatureSettingsRepository {
   final _database = Injector.appInstance.get<DatabaseService>();
 
   Future<bool> isEnabled(Setting setting, Snowflake guildId) async {
-    final result = await _database.getConnection().query('''
+    final result = await _database.getConnection().execute('''
       SELECT name FROM feature_settings WHERE name = @name AND guild_id = @guild_id
-    ''', substitutionValues: {
+    ''', parameters: {
       'name': setting.name,
       'guild_id': guildId.toString(),
     });
@@ -18,9 +18,9 @@ class FeatureSettingsRepository {
   }
 
   Future<FeatureSetting?> fetchSetting(Setting setting, Snowflake guildId) async {
-    final result = await _database.getConnection().query('''
+    final result = await _database.getConnection().execute('''
       SELECT * FROM feature_settings WHERE name = @name AND guild_id = @guild_id
-    ''', substitutionValues: {
+    ''', parameters: {
       'name': setting.name,
       'guild_id': guildId.toString(),
     });
@@ -34,7 +34,7 @@ class FeatureSettingsRepository {
 
   /// Fetch all settings for all guilds from the database.
   Future<Iterable<FeatureSetting>> fetchSettings() async {
-    final result = await _database.getConnection().query('''
+    final result = await _database.getConnection().execute('''
       SELECT * FROM feature_settings;
     ''');
 
@@ -43,9 +43,9 @@ class FeatureSettingsRepository {
 
   /// Fetch all settings for all guilds from the database.
   Future<Iterable<FeatureSetting>> fetchSettingsForGuild(Snowflake guild) async {
-    final result = await _database.getConnection().query('''
+    final result = await _database.getConnection().execute('''
       SELECT * FROM feature_settings WHERE guild_id = @guildId;
-    ''', substitutionValues: {'guildId': guild.toString()});
+    ''', parameters: {'guildId': guild.toString()});
 
     return result.map((row) => row.toColumnMap()).map(FeatureSetting.fromRow);
   }
@@ -84,7 +84,7 @@ class FeatureSettingsRepository {
   Future<void> disableSetting(FeatureSetting setting) async {
     await _database.getConnection().execute('''
       DELETE FROM feature_settings WHERE name = @name AND guild_id = @guild_id
-    ''', substitutionValues: {
+    ''', parameters: {
       'name': setting.setting.name,
       'guild_id': setting.guildId.toString(),
     });

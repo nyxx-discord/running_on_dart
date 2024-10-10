@@ -10,7 +10,7 @@ class TagRepository {
 
   /// Fetch all existing tags from the database.
   Future<Iterable<Tag>> fetchAllActiveTags() async {
-    final result = await _database.getConnection().query('''
+    final result = await _database.getConnection().execute('''
       SELECT * FROM tags WHERE enabled = TRUE;
     ''');
 
@@ -18,9 +18,9 @@ class TagRepository {
   }
 
   Future<Iterable<Tag>> fetchActiveTagsByName(String nameQuery) async {
-    final result = await _database.getConnection().query('''
+    final result = await _database.getConnection().execute('''
       SELECT * FROM tags WHERE enabled = TRUE AND name LIKE '%@nameQuery%';
-    ''', substitutionValues: {'name': nameQuery});
+    ''', parameters: {'name': nameQuery});
 
     return result.map((row) => row.toColumnMap()).map(Tag.fromRow);
   }
@@ -35,7 +35,7 @@ class TagRepository {
 
     await _database.getConnection().execute('''
       UPDATE tags SET enabled = FALSE WHERE id = @id;
-    ''', substitutionValues: {
+    ''', parameters: {
       'id': id,
     });
   }
@@ -47,7 +47,7 @@ class TagRepository {
       return;
     }
 
-    final result = await _database.getConnection().query('''
+    final result = await _database.getConnection().execute('''
     INSERT INTO tags (
       name,
       content,
@@ -61,7 +61,7 @@ class TagRepository {
       @guild_id,
       @author_id
     ) RETURNING id;
-  ''', substitutionValues: {
+  ''', parameters: {
       'name': tag.name,
       'content': tag.content,
       'enabled': tag.enabled,
@@ -78,7 +78,7 @@ class TagRepository {
       return addTag(tag);
     }
 
-    await _database.getConnection().query('''
+    await _database.getConnection().execute('''
       UPDATE tags SET
         name = @name,
         content = @content,
@@ -87,7 +87,7 @@ class TagRepository {
         author_id = @author_id
       WHERE
         id = @id
-    ''', substitutionValues: {
+    ''', parameters: {
       'id': tag.id,
       'name': tag.name,
       'content': tag.content,
@@ -98,7 +98,7 @@ class TagRepository {
   }
 
   Future<Iterable<TagUsedEvent>> fetchTagUsage() async {
-    final result = await _database.getConnection().query('''
+    final result = await _database.getConnection().execute('''
       SELECT tu.* FROM tag_usage tu JOIN tags t ON t.id = tu.command_id AND t.enabled = TRUE;
     ''');
 
@@ -106,7 +106,7 @@ class TagRepository {
   }
 
   Future<void> registerTagUsedEvent(TagUsedEvent event) async {
-    await _database.getConnection().query('''
+    await _database.getConnection().execute('''
       INSERT INTO tag_usage (
         command_id,
         use_date,
@@ -116,7 +116,7 @@ class TagRepository {
         @use_date,
         @hidden
       )
-    ''', substitutionValues: {
+    ''', parameters: {
       'tag_id': event.tagId,
       'use_date': event.usedAt,
       'hidden': event.hidden,
