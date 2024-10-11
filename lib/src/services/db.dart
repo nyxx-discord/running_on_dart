@@ -38,18 +38,19 @@ class DatabaseService implements RequiresInitialization {
     _logger.info('Connecting to database');
 
     _connection = await Connection.open(
-      Endpoint(
-        host: host,
-        port: port,
-        database: databaseName,
-        username: user,
-        password: password,
-      )
-    );
+        Endpoint(
+          host: host,
+          port: port,
+          database: databaseName,
+          username: user,
+          password: password,
+        ),
+        settings: ConnectionSettings(sslMode: SslMode.disable));
 
     _logger.info('Running database migrations');
 
-    final migrator = MigentMigrationRunner(connection: _connection, databaseName: databaseName, migrationAccess: MemoryMigrationAccess())
+    final migrator = MigentMigrationRunner(
+        connection: _connection, databaseName: databaseName, migrationAccess: MemoryMigrationAccess())
       ..enqueueMigration('1', '''
       CREATE TABLE tags (
         id SERIAL PRIMARY KEY,
@@ -115,7 +116,7 @@ class DatabaseService implements RequiresInitialization {
       ALTER TABLE reminders ALTER COLUMN message TYPE VARCHAR(200)
     ''')
       ..enqueueMigration('1.8', '''
-      ALTER TABLE reminders ADD COLUMN active BOOLEAN NOT NULL; 
+      ALTER TABLE reminders ADD COLUMN active BOOLEAN NOT NULL;
     ''')
       ..enqueueMigration('1.9', '''
       CREATE INDEX name_trgm_idx ON tags USING gin (name gin_trgm_ops);
@@ -141,6 +142,12 @@ class DatabaseService implements RequiresInitialization {
       );
       CREATE UNIQUE INDEX idx_jellyfin_configs_unique_name ON jellyfin_configs(name, guild_id);
       CREATE UNIQUE INDEX idx_jellyfin_configs_unique_default ON jellyfin_configs(guild_id, is_default) WHERE is_default = TRUE;
+      ''')
+      ..enqueueMigration("2.4", '''
+      ALTER TABLE jellyfin_configs ADD COLUMN sonarr_base_path VARCHAR DEFAULT NULL;
+      ALTER TABLE jellyfin_configs ADD COLUMN sonarr_token VARCHAR DEFAULT NULL;
+      ALTER TABLE jellyfin_configs ADD COLUMN wizarr_base_path VARCHAR DEFAULT NULL;
+      ALTER TABLE jellyfin_configs ADD COLUMN wizarr_token VARCHAR DEFAULT NULL;
       ''');
 
     await migrator.runMigrations();

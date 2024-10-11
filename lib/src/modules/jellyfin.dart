@@ -126,6 +126,11 @@ class JellyfinModule implements RequiresInitialization {
     await _jellyfinConfigRepository.deleteConfig(config.id!);
   }
 
+  Future<void> updateClientForConfig(JellyfinConfig config) async {
+    await _jellyfinConfigRepository.updateJellyfinConfig(config);
+    _createClientConfig(config);
+  }
+
   Future<JellyfinClientWrapper?> getClient(JellyfinInstanceIdentity identity) async {
     final cachedClientConfig = _getCachedClientConfig(identity);
     if (cachedClientConfig != null) {
@@ -156,9 +161,8 @@ class JellyfinModule implements RequiresInitialization {
   void addUserToAllowedForRegistration(String instanceName, Snowflake userId, List<String> allowedLibraries) =>
       _allowedUserRegistrations["$instanceName$userId"] = allowedLibraries;
 
-  Future<JellyfinConfig> createJellyfinConfig(
-      String name, String basePath, String token, bool isDefault, Snowflake guildId) async {
-    final config = await _jellyfinConfigRepository.createJellyfinConfig(name, basePath, token, isDefault, guildId);
+  Future<JellyfinConfig> createJellyfinConfig(JellyfinConfig createdConfig) async {
+    final config = await _jellyfinConfigRepository.createJellyfinConfig(createdConfig);
     if (config.id == null) {
       throw Error();
     }

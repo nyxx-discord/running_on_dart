@@ -14,6 +14,8 @@ import 'package:tentacle/tentacle.dart';
 
 final taskProgressFormat = NumberFormat("0.00");
 
+String? _valueOrNull(String value) => value.trim().isEmpty ? null : value.trim();
+
 final jellyfin = ChatGroup(
   "jellyfin",
   "Jellyfin Testing Commands",
@@ -211,27 +213,101 @@ final jellyfin = ChatGroup(
         ]),
     ChatCommand(
         'add-instance',
-        "Add new instance to config",
+        "Add new jellyfin instance",
         id("jellyfin-new-instance", (InteractionChatContext context) async {
           final modalResponse = await context.getModal(title: "New Instance Configuration", components: [
-            TextInputBuilder(customId: "name", style: TextInputStyle.short, label: "Instance Name"),
-            TextInputBuilder(customId: "base_url", style: TextInputStyle.short, label: "Base Url"),
-            TextInputBuilder(customId: "api_token", style: TextInputStyle.short, label: "API Token"),
+            TextInputBuilder(customId: "name", style: TextInputStyle.short, label: "Instance Name", isRequired: true),
+            TextInputBuilder(customId: "base_url", style: TextInputStyle.short, label: "Base Url", isRequired: true),
+            TextInputBuilder(customId: "api_token", style: TextInputStyle.short, label: "API Token", isRequired: true),
             TextInputBuilder(customId: "is_default", style: TextInputStyle.short, label: "Is Default (True/False)"),
+            TextInputBuilder(customId: "sonarr_base_url", style: TextInputStyle.short, label: "API Token"),
+            TextInputBuilder(customId: "sonarr_token", style: TextInputStyle.short, label: "API Token"),
+            TextInputBuilder(customId: "wizarr_base_url", style: TextInputStyle.short, label: "API Token"),
+            TextInputBuilder(customId: "wizarr_token", style: TextInputStyle.short, label: "API Token"),
           ]);
 
-          final config = await Injector.appInstance.get<JellyfinModule>().createJellyfinConfig(
-                modalResponse['name']!,
-                modalResponse['base_url']!,
-                modalResponse['api_token']!,
-                modalResponse['is_default']?.toLowerCase() == 'true',
-                modalResponse.guild?.id ?? modalResponse.user.id,
-              );
+          final config = JellyfinConfig(
+            name: modalResponse['name']!,
+            basePath: modalResponse['base_url']!,
+            token: modalResponse['api_token']!,
+            isDefault: modalResponse['is_default']?.toLowerCase() == 'true',
+            parentId: modalResponse.guild?.id ?? modalResponse.user.id,
+            sonarrBasePath: modalResponse['sonarr_base_url'],
+            sonarrToken: modalResponse['sonarr_token'],
+            wizarrBasePath: modalResponse['wizarr_base_url'],
+            wizarrToken: modalResponse['wizarr_token'],
+          );
 
-          modalResponse.respond(MessageBuilder(content: "Added new jellyfin instance with name: ${config.name}"));
+          final newlyCreatedConfig = await Injector.appInstance.get<JellyfinModule>().createJellyfinConfig(config);
+
+          modalResponse
+              .respond(MessageBuilder(content: "Added new jellyfin instance with name: ${newlyCreatedConfig.name}"));
         }),
         checks: [
           jellyfinFeatureCreateInstanceCommandCheck,
+        ]),
+    ChatCommand(
+        "edit-instance",
+        "Edit jellyfin instance",
+        id('jellyfin-edit-instance', (InteractionChatContext context,
+            [@Description("Instance to use. Default selected if not provided")
+            @UseConverter(jellyfinConfigConverter)
+            JellyfinConfig? config]) async {
+          if (config == null) {
+            return context.respond(MessageBuilder(content: 'Invalid jellyfin config'), level: ResponseLevel.private);
+          }
+
+          final modalResponse = await context.getModal(title: "Jellyfin Instance Edit Pt. 1", components: [
+            TextInputBuilder(
+                customId: "base_url",
+                style: TextInputStyle.short,
+                label: "Base Url",
+                isRequired: true,
+                value: config.basePath),
+            TextInputBuilder(
+                customId: "api_token",
+                style: TextInputStyle.short,
+                label: "API Token",
+                isRequired: true,
+                value: config.token),
+          ]);
+
+          final secondModalResponse = await context.getModal(title: "Jellyfin Instance Edit Pt. 2", components: [
+            TextInputBuilder(
+                customId: "sonarr_base_url",
+                style: TextInputStyle.short,
+                label: "API Token",
+                value: config.sonarrBasePath),
+            TextInputBuilder(
+                customId: "sonarr_token", style: TextInputStyle.short, label: "API Token", value: config.sonarrToken),
+            TextInputBuilder(
+                customId: "wizarr_base_url",
+                style: TextInputStyle.short,
+                label: "API Token",
+                value: config.wizarrBasePath),
+            TextInputBuilder(
+                customId: "wizarr_token", style: TextInputStyle.short, label: "API Token", value: config.wizarrToken),
+          ]);
+
+          final editedConfig = JellyfinConfig(
+            name: config.name,
+            basePath: modalResponse['base_url']!,
+            token: modalResponse['api_token']!,
+            isDefault: config.isDefault,
+            parentId: config.parentId,
+            sonarrBasePath: secondModalResponse['sonarr_base_url'],
+            sonarrToken: secondModalResponse['sonarr_token'],
+            wizarrBasePath: secondModalResponse['wizarr_base_url'],
+            wizarrToken: secondModalResponse['wizarr_token'],
+          );
+          editedConfig.id = config.id;
+
+          Injector.appInstance.get<JellyfinModule>().updateClientForConfig(editedConfig);
+
+          return modalResponse.respond(MessageBuilder(content: 'Successfully updated jellyfin config'));
+        }),
+        checks: [
+          jellyfinFeatureAdminCommandCheck,
         ]),
     ChatCommand(
         "transfer-config",
@@ -243,12 +319,18 @@ final jellyfin = ChatGroup(
           @Description("Copy default flag?") bool copyDefaultFlag = false,
           @Description("New name for config. Copied from original if not provided") String? configName,
         ]) async {
-          final newConfig = await Injector.appInstance.get<JellyfinConfigRepository>().createJellyfinConfig(
-              configName ?? config.name,
-              config.basePath,
-              config.token,
-              copyDefaultFlag && config.isDefault,
-              targetParentId);
+          final newConfig =
+              await Injector.appInstance.get<JellyfinConfigRepository>().createJellyfinConfig(JellyfinConfig(
+                    name: configName ?? config.name,
+                    basePath: config.basePath,
+                    token: config.token,
+                    isDefault: copyDefaultFlag && config.isDefault,
+                    parentId: targetParentId,
+                    sonarrBasePath: config.sonarrBasePath,
+                    sonarrToken: config.sonarrToken,
+                    wizarrBasePath: config.wizarrBasePath,
+                    wizarrToken: config.wizarrToken,
+                  ));
 
           context.respond(
               MessageBuilder(content: 'Copied config: "${newConfig.name}" to parent: "${newConfig.parentId}"'));

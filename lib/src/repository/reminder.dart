@@ -1,5 +1,6 @@
 import 'package:injector/injector.dart';
 import 'package:logging/logging.dart';
+import 'package:postgres/postgres.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/reminder.dart';
 
@@ -9,7 +10,7 @@ class ReminderRepository {
 
   Future<Reminder?> fetchReminder(int id) async {
     final result =
-        await _database.getConnection().execute('SELECT * FROM reminders WHERE id = @id', parameters: {'id': id});
+        await _database.getConnection().execute(Sql.named('SELECT * FROM reminders WHERE id = @id'), parameters: {'id': id});
     if (result.isEmpty || result.length > 1) {
       throw Exception("Empty or multiple reminder with same id");
     }
@@ -32,7 +33,7 @@ class ReminderRepository {
       return;
     }
 
-    await _database.getConnection().execute('DELETE FROM reminders WHERE id = @id', parameters: {
+    await _database.getConnection().execute(Sql.named('DELETE FROM reminders WHERE id = @id'), parameters: {
       'id': id,
     });
   }
@@ -44,7 +45,7 @@ class ReminderRepository {
       return reminder;
     }
 
-    final result = await _database.getConnection().execute('''
+    final result = await _database.getConnection().execute(Sql.named('''
     INSERT INTO reminders (
       user_id,
       channel_id,
@@ -60,7 +61,7 @@ class ReminderRepository {
       @add_date,
       @message
     ) RETURNING id;
-  ''', parameters: {
+  '''), parameters: {
       'user_id': reminder.userId.toString(),
       'channel_id': reminder.channelId.toString(),
       'message_id': reminder.messageId?.toString(),
