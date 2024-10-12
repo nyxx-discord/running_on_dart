@@ -28,10 +28,12 @@ class JellyfinConfig {
     this.sonarrToken,
     this.wizarrBasePath,
     this.wizarrToken,
+    this.id,
   });
 
   factory JellyfinConfig.fromDatabaseRow(Map<String, dynamic> row) {
     return JellyfinConfig(
+      id: row['id'] as int?,
       name: row['name'],
       basePath: row['base_path'],
       token: row['token'],

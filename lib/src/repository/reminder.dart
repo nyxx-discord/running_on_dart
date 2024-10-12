@@ -9,8 +9,9 @@ class ReminderRepository {
   final _database = Injector.appInstance.get<DatabaseService>();
 
   Future<Reminder?> fetchReminder(int id) async {
-    final result =
-        await _database.getConnection().execute(Sql.named('SELECT * FROM reminders WHERE id = @id'), parameters: {'id': id});
+    final result = await _database
+        .getConnection()
+        .execute(Sql.named('SELECT * FROM reminders WHERE id = @id'), parameters: {'id': id});
     if (result.isEmpty || result.length > 1) {
       throw Exception("Empty or multiple reminder with same id");
     }

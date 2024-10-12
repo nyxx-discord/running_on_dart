@@ -9,10 +9,11 @@ class FeatureSettingsRepository {
 
   Future<bool> isEnabled(Setting setting, Snowflake guildId) async {
     final result = await _database.getConnection().execute(
-      Sql.named('SELECT name FROM feature_settings WHERE name = @name AND guild_id = @guild_id'), parameters: {
-      'name': setting.name,
-      'guild_id': guildId.toString(),
-    });
+        Sql.named('SELECT name FROM feature_settings WHERE name = @name AND guild_id = @guild_id'),
+        parameters: {
+          'name': setting.name,
+          'guild_id': guildId.toString(),
+        });
 
     return result.isNotEmpty;
   }

@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
+import 'package:running_on_dart/src/external/sonarr.dart';
 import 'package:running_on_dart/src/modules/jellyfin.dart';
 import 'package:running_on_dart/src/util/util.dart';
 import 'package:tentacle/tentacle.dart';
@@ -12,6 +13,9 @@ final itemCriticRatingNumberFormat = NumberFormat("00");
 
 Duration parseDurationFromTicks(int ticks) => Duration(microseconds: ticks ~/ 10);
 
+String formatSeriesEpisodeString(int seriesNumber, int episodeNumber) =>
+    'S${episodeSeriesNumberFormat.format(seriesNumber)}E${episodeSeriesNumberFormat.format(episodeNumber)}';
+
 String formatProgress(int currentPositionTicks, int totalTicks) {
   final progressPercentage = currentPositionTicks / totalTicks * 100;
 
@@ -19,6 +23,26 @@ String formatProgress(int currentPositionTicks, int totalTicks) {
   final totalDuration = parseDurationFromTicks(totalTicks);
 
   return "${currentPositionDuration.formatShort()}/${totalDuration.formatShort()} (${progressPercentage.toStringAsFixed(2)}%)";
+}
+
+Iterable<EmbedBuilder> getSonarrCalendarEmbeds(Iterable<CalendarItem> calendarItems) sync* {
+  for (final item in calendarItems.take(5)) {
+    final seriesPosterUrl = item.series.images.firstWhereOrNull((image) => image.coverType == 'poster');
+
+    yield EmbedBuilder(
+      title: '${formatSeriesEpisodeString(item.seasonNumber, item.episodeNumber)} ${item.title} (${item.series.title})',
+      description: item.overview,
+      fields: [
+        EmbedFieldBuilder(
+            name: "Air date",
+            value:
+                "${item.airDateUtc.format(TimestampStyle.shortDateTime)} (${item.airDateUtc.format(TimestampStyle.relativeTime)})",
+            isInline: false),
+        EmbedFieldBuilder(name: "Avg runtime", value: "${item.series.runtime} mins", isInline: true),
+      ],
+      thumbnail: seriesPosterUrl != null ? EmbedThumbnailBuilder(url: Uri.parse(seriesPosterUrl.remoteUrl)) : null,
+    );
+  }
 }
 
 Iterable<EmbedFieldBuilder> getMediaInfoEmbedFields(Iterable<MediaStream> mediaStreams) sync* {

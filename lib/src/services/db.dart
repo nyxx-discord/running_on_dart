@@ -143,10 +143,16 @@ class DatabaseService implements RequiresInitialization {
       CREATE UNIQUE INDEX idx_jellyfin_configs_unique_name ON jellyfin_configs(name, guild_id);
       CREATE UNIQUE INDEX idx_jellyfin_configs_unique_default ON jellyfin_configs(guild_id, is_default) WHERE is_default = TRUE;
       ''')
-      ..enqueueMigration("2.4", '''
+      ..enqueueMigration("2.5", '''
       ALTER TABLE jellyfin_configs ADD COLUMN sonarr_base_path VARCHAR DEFAULT NULL;
+      ''')
+      ..enqueueMigration("2.6", '''
       ALTER TABLE jellyfin_configs ADD COLUMN sonarr_token VARCHAR DEFAULT NULL;
+      ''')
+      ..enqueueMigration("2.7", '''
       ALTER TABLE jellyfin_configs ADD COLUMN wizarr_base_path VARCHAR DEFAULT NULL;
+      ''')
+      ..enqueueMigration("2.8", '''
       ALTER TABLE jellyfin_configs ADD COLUMN wizarr_token VARCHAR DEFAULT NULL;
       ''');
 

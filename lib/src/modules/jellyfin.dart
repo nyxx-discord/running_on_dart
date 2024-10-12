@@ -1,5 +1,6 @@
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
+import 'package:running_on_dart/src/external/sonarr.dart';
 import 'package:running_on_dart/src/models/jellyfin_config.dart';
 import 'package:running_on_dart/src/repository/jellyfin_config.dart';
 import 'package:running_on_dart/src/util/util.dart';
@@ -25,12 +26,17 @@ typedef JellyfinInstanceIdentity = (String? instanceName, Snowflake guildId);
 
 class JellyfinClientWrapper {
   final Tentacle jellyfinClient;
+  final SonarrClient? sonarrClient;
   final JellyfinConfig config;
 
   String get basePath => config.basePath;
   String get name => config.name;
+  bool get isSonarrEnabled => sonarrClient != null;
 
-  JellyfinClientWrapper(this.jellyfinClient, this.config);
+  JellyfinClientWrapper(this.jellyfinClient, this.config, this.sonarrClient);
+
+  Future<List<CalendarItem>> getSonarrCalendar({DateTime? start, DateTime? end}) =>
+      sonarrClient!.fetchCalendar(start: start, end: end, includeSeries: true);
 
   Future<Iterable<SessionInfo>> getCurrentSessions() async {
     final response = await jellyfinClient.getSessionApi().getSessions(activeWithinSeconds: 15);
@@ -178,8 +184,11 @@ class JellyfinModule implements RequiresInitialization {
 
   JellyfinClientWrapper _createClientConfig(JellyfinConfig config) {
     final client = Tentacle(basePathOverride: config.basePath, interceptors: [CustomAuthInterceptor(config.token)]);
+    final sonarrClient = config.sonarrBasePath != null && config.sonarrToken != null
+        ? SonarrClient(baseUrl: config.sonarrBasePath!, token: config.sonarrToken!)
+        : null;
 
-    final clientConfig = JellyfinClientWrapper(client, config);
+    final clientConfig = JellyfinClientWrapper(client, config, sonarrClient);
 
     _jellyfinClients[_getClientCacheIdentifier(config.parentId.toString(), config.name, config.isDefault)] =
         clientConfig;

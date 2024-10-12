@@ -31,21 +31,21 @@ class Series {
       status: data['status'] as String,
       overview: data['overview'] as String,
       runtime: data['runtime'] as int,
-      images: (data['images'] as List<Map<String, dynamic>>).map((imageJson) => Image.parseJson(imageJson)),
+      images: (data['images'] as List<dynamic>).map((imageJson) => Image.parseJson(imageJson as Map<String, dynamic>)),
     );
   }
 }
 
-class Calendar {
+class CalendarItem {
   final int seriesId;
   final int seasonNumber;
   final int episodeNumber;
   final String title;
   final DateTime airDateUtc;
-  final String overview;
+  final String? overview;
   final Series series;
 
-  Calendar(
+  CalendarItem(
       {required this.seriesId,
       required this.seasonNumber,
       required this.episodeNumber,
@@ -54,14 +54,14 @@ class Calendar {
       required this.overview,
       required this.series});
 
-  factory Calendar.parseJson(Map<String, dynamic> data) {
-    return Calendar(
+  factory CalendarItem.parseJson(Map<String, dynamic> data) {
+    return CalendarItem(
       seriesId: data['seriesId'] as int,
       seasonNumber: data['seasonNumber'] as int,
       episodeNumber: data['episodeNumber'] as int,
       title: data['title'] as String,
-      airDateUtc: DateTime.parse(data['seriesId']),
-      overview: data['overview'] as String,
+      airDateUtc: DateTime.parse(data['airDateUtc']),
+      overview: data['overview'] as String?,
       series: Series.parseJson(data['series'] as Map<String, dynamic>),
     );
   }
@@ -73,25 +73,23 @@ class SonarrClient {
   late final Map<String, String> _headers;
 
   SonarrClient({required this.baseUrl, required String token}) {
-    _headers = {"X-Api-Key": token, 'Accept': 'application/json', 'Content': 'application/json'};
+    _headers = {"X-Api-Key": token, 'Accept': 'application/json', 'Content-Type': 'application/json'};
   }
 
-  Future<Calendar> fetchCalendar({DateTime? start, DateTime? end, bool? includeSeries = true}) async {
-    final responseBody = await _get("/api/v3/calendar", parameters: {
+  Future<List<CalendarItem>> fetchCalendar({DateTime? start, DateTime? end, bool? includeSeries = true}) async {
+    final response = await _get("/api/v3/calendar", parameters: {
       if (start != null) 'start': start.toIso8601String(),
       if (end != null) 'end': end.toIso8601String(),
       if (includeSeries != null) 'includeSeries': _boolToString(includeSeries),
     });
 
-    return Calendar.parseJson(responseBody);
+    final body = jsonDecode(response.body) as List<dynamic>;
+    return body.map((element) => CalendarItem.parseJson(element as Map<String, dynamic>)).toList();
   }
 
-  Future<Map<String, dynamic>> _get(String path, {Map<String, String> parameters = const {}}) async {
-    final uri = Uri.parse('$baseUrl/$path');
-    uri.queryParameters.addAll(parameters);
+  Future<http.Response> _get(String path, {Map<String, String> parameters = const {}}) async {
+    final uri = Uri.parse('$baseUrl$path').replace(queryParameters: parameters);
 
-    final response = await http.get(uri, headers: _headers);
-
-    return jsonDecode(response.body);
+    return await http.get(uri, headers: _headers);
   }
 }

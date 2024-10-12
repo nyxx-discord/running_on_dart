@@ -14,7 +14,13 @@ import 'package:tentacle/tentacle.dart';
 
 final taskProgressFormat = NumberFormat("0.00");
 
-String? _valueOrNull(String value) => value.trim().isEmpty ? null : value.trim();
+// String? _valueOrNull(String value) => value.trim().isEmpty ? null : value.trim();
+
+Iterable<MessageBuilder> spliceEmbedsForMessageBuilders(Iterable<EmbedBuilder> embeds, [int sliceSize = 2]) sync* {
+  for (final splicedEmbeds in embeds.slices(sliceSize)) {
+    yield MessageBuilder(embeds: splicedEmbeds);
+  }
+}
 
 final jellyfin = ChatGroup(
   "jellyfin",
@@ -23,6 +29,31 @@ final jellyfin = ChatGroup(
     jellyfinFeatureEnabledCheck,
   ],
   children: [
+    ChatGroup("sonarr", "Sonarr related commands", children: [
+      ChatCommand(
+        "calendar",
+        "Show upcoming episodes",
+        id("jellyfin-sonarr-calendar", (ChatContext context,
+            [@Description("Instance to use. Default selected if not provided")
+            @UseConverter(jellyfinConfigConverter)
+            JellyfinConfig? config]) async {
+          final client = await Injector.appInstance.get<JellyfinModule>().getClient((config?.name, context.guild!.id));
+          if (client == null) {
+            return context.respond(MessageBuilder(content: "Invalid Jellyfin instance"));
+          }
+
+          if (!client.isSonarrEnabled) {
+            return context.respond(MessageBuilder(content: "Sonarr not configured!"));
+          }
+
+          final calendarItems = await client.getSonarrCalendar(end: DateTime.now().add(Duration(days: 7)));
+          final embeds = getSonarrCalendarEmbeds(calendarItems);
+
+          final paginator = await pagination.builders(spliceEmbedsForMessageBuilders(embeds).toList());
+          context.respond(paginator);
+        }),
+      ),
+    ]),
     ChatGroup("tasks", "Run tasks on Jellyfin instance", children: [
       ChatCommand(
         "run",
@@ -272,21 +303,42 @@ final jellyfin = ChatGroup(
                 value: config.token),
           ]);
 
+          final message = await context.respond(
+              MessageBuilder(content: "Click to open second modal", components: [
+                ActionRowBuilder(components: [
+                  ButtonBuilder.primary(
+                      customId: ComponentId.generate(allowedUser: context.user.id).toString(), label: 'Open modal')
+                ])
+              ]),
+              level: ResponseLevel.private);
+          await context.getButtonPress(message);
+
           final secondModalResponse = await context.getModal(title: "Jellyfin Instance Edit Pt. 2", components: [
             TextInputBuilder(
-                customId: "sonarr_base_url",
-                style: TextInputStyle.short,
-                label: "API Token",
-                value: config.sonarrBasePath),
+              customId: "sonarr_base_url",
+              style: TextInputStyle.short,
+              label: "Sonarr base url",
+              value: config.sonarrBasePath,
+              isRequired: false,
+            ),
             TextInputBuilder(
-                customId: "sonarr_token", style: TextInputStyle.short, label: "API Token", value: config.sonarrToken),
+                customId: "sonarr_token",
+                style: TextInputStyle.short,
+                label: "Sonarr Token",
+                value: config.sonarrToken,
+                isRequired: false),
             TextInputBuilder(
                 customId: "wizarr_base_url",
                 style: TextInputStyle.short,
-                label: "API Token",
-                value: config.wizarrBasePath),
+                label: "Wizarr base url",
+                value: config.wizarrBasePath,
+                isRequired: false),
             TextInputBuilder(
-                customId: "wizarr_token", style: TextInputStyle.short, label: "API Token", value: config.wizarrToken),
+                customId: "wizarr_token",
+                style: TextInputStyle.short,
+                label: "Wizarr Token",
+                value: config.wizarrToken,
+                isRequired: false),
           ]);
 
           final editedConfig = JellyfinConfig(

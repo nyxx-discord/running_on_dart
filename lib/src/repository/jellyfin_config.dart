@@ -8,9 +8,7 @@ class JellyfinConfigRepository {
   final _database = Injector.appInstance.get<DatabaseService>();
 
   Future<void> deleteConfig(int id) async {
-    await _database
-        .getConnection()
-        .execute('DELETE FROM jellyfin_configs WHERE id = @id', parameters: {'id': id});
+    await _database.getConnection().execute('DELETE FROM jellyfin_configs WHERE id = @id', parameters: {'id': id});
   }
 
   Future<Iterable<JellyfinConfig>> getDefaultConfigs() async {
@@ -20,7 +18,8 @@ class JellyfinConfigRepository {
   }
 
   Future<Iterable<JellyfinConfig>> getConfigsForGuild(Snowflake guildId) async {
-    final result = await _database.getConnection().execute(Sql.named('SELECT * FROM jellyfin_configs WHERE guild_id = @guildId'),
+    final result = await _database.getConnection().execute(
+        Sql.named('SELECT * FROM jellyfin_configs WHERE guild_id = @guildId'),
         parameters: {'guildId': guildId.toString()});
 
     return result.map((row) => row.toColumnMap()).map(JellyfinConfig.fromDatabaseRow);
@@ -56,6 +55,7 @@ class JellyfinConfigRepository {
       'sonarr_token': config.sonarrToken,
       'wizarr_base_path': config.wizarrBasePath,
       'wizarr_token': config.wizarrToken,
+      'id': config.id,
     });
   }
 
