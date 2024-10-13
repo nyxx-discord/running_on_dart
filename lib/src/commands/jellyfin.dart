@@ -81,7 +81,7 @@ final jellyfin = ChatGroup(
             return SelectMenuOptionBuilder(label: label, value: taskInfo.id!, description: description);
           }, authorOnly: true);
 
-          PipelineDefinition(
+          Pipeline(
             name: selectMenuResult.name!,
             description: "",
             tasks: [
@@ -288,13 +288,9 @@ final jellyfin = ChatGroup(
           "edit-instance",
           "Edit jellyfin instance",
           id('jellyfin-settings-edit-instance', (InteractionChatContext context,
-              [@Description("Instance to use. Default selected if not provided")
+              @Description("Instance to use. Default selected if not provided")
               @UseConverter(jellyfinConfigConverter)
-              JellyfinConfig? config]) async {
-            if (config == null) {
-              return context.respond(MessageBuilder(content: 'Invalid jellyfin config'), level: ResponseLevel.private);
-            }
-
+              JellyfinConfig config) async {
             final modalResponse = await context.getModal(title: "Jellyfin Instance Edit Pt. 1", components: [
               TextInputBuilder(
                   customId: "base_url",
@@ -409,6 +405,62 @@ final jellyfin = ChatGroup(
           checks: [
             jellyfinFeatureAdminCommandCheck,
           ]),
-    ])
+    ]),
+    ChatGroup("util", "Util commands for jellyfin", children: [
+      ChatCommand(
+        "complete-refresh",
+        "Do a complete refresh of jellyfin instance content",
+        id("jellyfin-util-complete-refresh", (ChatContext context,
+            [@Description("Instance to use. Default selected if not provided")
+            @UseConverter(jellyfinConfigConverter)
+            JellyfinConfig? config]) async {
+          final client = await Injector.appInstance.get<JellyfinModule>().getClient((config?.name, context.guild!.id));
+          if (client == null) {
+            return context.respond(MessageBuilder(content: "Invalid Jellyfin instance"));
+          }
+
+          final availableTasks = await client.getScheduledTasks();
+          final scanMediaLibraryTask = availableTasks.firstWhere((task) => task.key == 'RefreshLibrary');
+          final subtitleExtractTask = availableTasks.firstWhereOrNull((task) => task.key == 'ExtractSubtitles');
+
+          Pipeline(
+            name: 'Complete Library Refresh',
+            description: "",
+            tasks: [
+              Task(
+                  runCallback: () => client.startTask(scanMediaLibraryTask.id!),
+                  updateCallback: () async {
+                    final scheduledTask = (await client.getScheduledTasks())
+                        .firstWhereOrNull((taskInfo) => taskInfo.id == scanMediaLibraryTask.id);
+                    if (scheduledTask == null || scheduledTask.state == TaskState.idle) {
+                      return (true, null);
+                    }
+
+                    return (
+                      false,
+                      "Running `${scheduledTask.name!}` - ${taskProgressFormat.format(scheduledTask.currentProgressPercentage!)}%"
+                    );
+                  }),
+              if (subtitleExtractTask != null)
+                Task(
+                    runCallback: () => client.startTask(subtitleExtractTask.id!),
+                    updateCallback: () async {
+                      final scheduledTask = (await client.getScheduledTasks())
+                          .firstWhereOrNull((taskInfo) => taskInfo.id == subtitleExtractTask.id);
+                      if (scheduledTask == null || scheduledTask.state == TaskState.idle) {
+                        return (true, null);
+                      }
+
+                      return (
+                        false,
+                        "Running `${scheduledTask.name!}` - ${taskProgressFormat.format(scheduledTask.currentProgressPercentage!)}%"
+                      );
+                    })
+            ],
+            updateInterval: Duration(seconds: 2),
+          ).forCreateContext(messageSupplier: (messageBuilder) => context.respond(messageBuilder)).execute();
+        }),
+      )
+    ]),
   ],
 );

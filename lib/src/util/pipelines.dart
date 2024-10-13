@@ -50,29 +50,28 @@ class InternalTask {
   }
 }
 
-class PipelineDefinition {
+class Pipeline {
   final String name;
   final String description;
   final List<Task> tasks;
   final Duration updateInterval;
 
-  PipelineDefinition(
-      {required this.name, required this.description, required this.tasks, required this.updateInterval});
+  Pipeline({required this.name, required this.description, required this.tasks, required this.updateInterval});
 
-  Pipeline forCreateContext({required TargetMessageSupplier messageSupplier}) {
+  InternalPipeline forCreateContext({required TargetMessageSupplier messageSupplier}) {
     final embed = getInitialEmbed(tasks.length, name);
 
-    return Pipeline(
+    return InternalPipeline(
         messageSupplier: () => messageSupplier(MessageBuilder(embeds: [embed], components: [], content: null)),
         tasks: tasks,
         updateInterval: updateInterval,
         embed: embed);
   }
 
-  Pipeline forUpdateContext({required TargetUpdateMessageSupplier messageSupplier}) {
+  InternalPipeline forUpdateContext({required TargetUpdateMessageSupplier messageSupplier}) {
     final embed = getInitialEmbed(tasks.length, name);
 
-    return Pipeline(
+    return InternalPipeline(
       messageSupplier: () => messageSupplier(MessageUpdateBuilder(embeds: [embed], components: [], content: null)),
       tasks: tasks,
       updateInterval: updateInterval,
@@ -81,14 +80,15 @@ class PipelineDefinition {
   }
 }
 
-class Pipeline {
+class InternalPipeline {
   final List<Task> tasks;
   final MessageSupplier messageSupplier;
   final Duration updateInterval;
 
   late EmbedBuilder embed;
 
-  Pipeline({required this.messageSupplier, required this.tasks, required this.updateInterval, required this.embed});
+  InternalPipeline(
+      {required this.messageSupplier, required this.tasks, required this.updateInterval, required this.embed});
 
   Future<void> execute() async {
     final message = await messageSupplier();
