@@ -10,8 +10,12 @@ typedef MessageSupplier = Future<Message> Function();
 typedef UpdateCallback = Future<(bool, String?)> Function();
 typedef RunCallback = Future<void> Function();
 
-EmbedBuilder getInitialEmbed(int taskAmount) =>
-    EmbedBuilder(title: 'Task 1 of $taskAmount', description: 'Starting...');
+EmbedBuilder getInitialEmbed(int taskAmount, String pipelineName) => EmbedBuilder(
+    title: getEmbedTitle(1, taskAmount),
+    description: 'Starting...',
+    author: EmbedAuthorBuilder(name: "Pipeline `$pipelineName`"));
+
+String getEmbedTitle(int index, int length) => 'Task $index of $length';
 
 class Task {
   final UpdateCallback updateCallback;
@@ -46,6 +50,37 @@ class InternalTask {
   }
 }
 
+class PipelineDefinition {
+  final String name;
+  final String description;
+  final List<Task> tasks;
+  final Duration updateInterval;
+
+  PipelineDefinition(
+      {required this.name, required this.description, required this.tasks, required this.updateInterval});
+
+  Pipeline forCreateContext({required TargetMessageSupplier messageSupplier}) {
+    final embed = getInitialEmbed(tasks.length, name);
+
+    return Pipeline(
+        messageSupplier: () => messageSupplier(MessageBuilder(embeds: [embed], components: [], content: null)),
+        tasks: tasks,
+        updateInterval: updateInterval,
+        embed: embed);
+  }
+
+  Pipeline forUpdateContext({required TargetUpdateMessageSupplier messageSupplier}) {
+    final embed = getInitialEmbed(tasks.length, name);
+
+    return Pipeline(
+      messageSupplier: () => messageSupplier(MessageUpdateBuilder(embeds: [embed], components: [], content: null)),
+      tasks: tasks,
+      updateInterval: updateInterval,
+      embed: embed,
+    );
+  }
+}
+
 class Pipeline {
   final List<Task> tasks;
   final MessageSupplier messageSupplier;
@@ -55,39 +90,15 @@ class Pipeline {
 
   Pipeline({required this.messageSupplier, required this.tasks, required this.updateInterval, required this.embed});
 
-  factory Pipeline.fromCreateContext(
-      {required TargetMessageSupplier messageSupplier, required List<Task> tasks, required Duration updateInterval}) {
-    final embed = getInitialEmbed(tasks.length);
-
-    return Pipeline(
-        messageSupplier: () => messageSupplier(MessageBuilder(embeds: [embed], components: [], content: null)),
-        tasks: tasks,
-        updateInterval: updateInterval,
-        embed: embed);
-  }
-
-  factory Pipeline.fromUpdateContext(
-      {required TargetUpdateMessageSupplier messageSupplier,
-      required List<Task> tasks,
-      required Duration updateInterval}) {
-    final embed = getInitialEmbed(tasks.length);
-
-    return Pipeline(
-      messageSupplier: () => messageSupplier(MessageUpdateBuilder(embeds: [embed], components: [], content: null)),
-      tasks: tasks,
-      updateInterval: updateInterval,
-      embed: embed,
-    );
-  }
-
   Future<void> execute() async {
     final message = await messageSupplier();
 
     final timer = Stopwatch()..start();
-    for (final task in tasks) {
+    for (final (index, task) in tasks.indexed) {
       final internalTask =
           InternalTask(targetMessage: message, updateCallback: task.updateCallback, updateInterval: updateInterval);
 
+      embed.title = getEmbedTitle(index + 1, tasks.length);
       task.runCallback();
       await internalTask.execute(embed);
     }

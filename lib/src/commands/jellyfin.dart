@@ -81,8 +81,9 @@ final jellyfin = ChatGroup(
             return SelectMenuOptionBuilder(label: label, value: taskInfo.id!, description: description);
           }, authorOnly: true);
 
-          Pipeline.fromUpdateContext(
-            messageSupplier: (messageBuilder) => context.interaction.updateOriginalResponse(messageBuilder),
+          PipelineDefinition(
+            name: selectMenuResult.name!,
+            description: "",
             tasks: [
               Task(
                   runCallback: () => client.startTask(selectMenuResult.id!),
@@ -100,7 +101,10 @@ final jellyfin = ChatGroup(
                   }),
             ],
             updateInterval: Duration(seconds: 2),
-          ).execute();
+          )
+              .forUpdateContext(
+                  messageSupplier: (messageBuilder) => context.interaction.updateOriginalResponse(messageBuilder))
+              .execute();
         }),
       ),
     ]),
