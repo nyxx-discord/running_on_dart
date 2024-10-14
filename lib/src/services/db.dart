@@ -154,7 +154,23 @@ class DatabaseService implements RequiresInitialization {
       ''')
       ..enqueueMigration("2.8", '''
       ALTER TABLE jellyfin_configs ADD COLUMN wizarr_token VARCHAR DEFAULT NULL;
-      ''');
+      ''')
+      ..enqueueMigration("2.9", 'ALTER TABLE jellyfin_configs DROP COLUMN token')
+      ..enqueueMigration("2.10", '''
+        CREATE TABLE jellyfin_user_configs (
+          id SERIAL PRIMARY KEY,
+          user_id VARCHAR NOT NULL,
+          token VARCHAR NOT NULL,
+          jellyfin_config_id INT NOT NULL,
+          CONSTRAINT fk_jellyfin_configs
+            FOREIGN KEY(jellyfin_config_id) 
+            REFERENCES jellyfin_configs(id)
+        );
+      ''')
+      ..enqueueMigration("2.11",
+          'CREATE UNIQUE INDEX idx_jellyfin_configs_user_id ON jellyfin_user_configs(user_id, jellyfin_config_id);')
+      ..enqueueMigration("2.12",
+          'ALTER TABLE jellyfin_user_configs ADD CONSTRAINT jellyfin_configs_user_id_unique UNIQUE (user_id, jellyfin_config_id);');
 
     await migrator.runMigrations();
 

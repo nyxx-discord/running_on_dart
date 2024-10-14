@@ -37,32 +37,6 @@ Future<(bool?, FeatureSetting?)> fetchAndCheckSetting(CommandContext context) as
   return (null, setting);
 }
 
-final jellyfinFeatureUserCommandCheck = Check(
-  (CommandContext context) async {
-    final (checkResult, setting) = await fetchAndCheckSetting(context);
-    if (checkResult != null) {
-      return checkResult;
-    }
-
-    final roleId = Snowflake.parse(setting!.dataAsJson!['user_commands_role']);
-
-    return context.member!.roleIds.contains(roleId);
-  },
-);
-
-final jellyfinFeatureAdminCommandCheck = Check(
-  (CommandContext context) async {
-    final (checkResult, setting) = await fetchAndCheckSetting(context);
-    if (checkResult != null) {
-      return checkResult;
-    }
-
-    final roleId = Snowflake.parse(setting!.dataAsJson!['admin_commands_role']);
-
-    return context.member!.roleIds.contains(roleId);
-  },
-);
-
 final jellyfinFeatureCreateInstanceCommandCheck = Check(
   (CommandContext context) async {
     final (checkResult, setting) = await fetchAndCheckSetting(context);

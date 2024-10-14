@@ -61,7 +61,7 @@ EmbedFieldBuilder getExternalUrlsEmbedField(Iterable<ExternalUrl> externalUrls) 
   return EmbedFieldBuilder(name: "External Urls", value: fieldValue.toString(), isInline: false);
 }
 
-EmbedBuilder? buildSessionEmbed(SessionInfo sessionInfo, JellyfinClientWrapper client) {
+EmbedBuilder? buildSessionEmbed(SessionInfo sessionInfo, AuthenticatedJellyfinClient client) {
   final nowPlayingItem = sessionInfo.nowPlayingItem;
   if (nowPlayingItem == null) {
     return null;
@@ -85,7 +85,7 @@ EmbedBuilder? buildSessionEmbed(SessionInfo sessionInfo, JellyfinClientWrapper c
     ...getMediaInfoEmbedFields(primaryMediaStreams),
   ];
 
-  final footer = EmbedFooterBuilder(text: "Jellyfin instance: ${client.name}");
+  final footer = EmbedFooterBuilder(text: "Jellyfin instance: ${client.configUser.config!.name}");
   final author = EmbedAuthorBuilder(
     name: '${sessionInfo.userName} on ${sessionInfo.deviceName}',
     iconUrl: sessionInfo.userPrimaryImageTag != null ? client.getItemPrimaryImage(sessionInfo.userId!) : null,
@@ -135,7 +135,7 @@ EmbedBuilder? buildSessionEmbed(SessionInfo sessionInfo, JellyfinClientWrapper c
   return null;
 }
 
-Stream<MessageBuilder> buildMediaInfoBuilders(List<BaseItemDto> items, JellyfinClientWrapper client) async* {
+Stream<MessageBuilder> buildMediaInfoBuilders(List<BaseItemDto> items, AuthenticatedJellyfinClient client) async* {
   for (final slice in items.slices(2)) {
     final messageBuilder = MessageBuilder(embeds: []);
 
@@ -152,7 +152,7 @@ Stream<MessageBuilder> buildMediaInfoBuilders(List<BaseItemDto> items, JellyfinC
   }
 }
 
-EmbedBuilder? buildMediaEmbedBuilder(BaseItemDto item, JellyfinClientWrapper client) {
+EmbedBuilder? buildMediaEmbedBuilder(BaseItemDto item, AuthenticatedJellyfinClient client) {
   final criticRating = item.criticRating != null ? "${itemCriticRatingNumberFormat.format(item.criticRating)}%" : '?';
   final communityRating = item.communityRating != null ? itemRatingNumberFormat.format(item.communityRating) : '?';
   final rating = "$communityRating / $criticRating";

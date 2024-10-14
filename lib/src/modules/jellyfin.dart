@@ -9,34 +9,11 @@ import 'package:tentacle/src/auth/auth.dart' show AuthInterceptor;
 import 'package:dio/dio.dart' show RequestInterceptorHandler, RequestOptions;
 import 'package:built_collection/built_collection.dart';
 
-class CustomAuthInterceptor extends AuthInterceptor {
-  final String token;
-
-  CustomAuthInterceptor(this.token);
-
-  @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    options.headers['Authorization'] = 'MediaBrowser Token="$token"';
-
-    super.onRequest(options, handler);
-  }
-}
-
-typedef JellyfinInstanceIdentity = (String? instanceName, Snowflake guildId);
-
-class JellyfinClientWrapper {
+class AuthenticatedJellyfinClient {
   final Tentacle jellyfinClient;
-  final SonarrClient? sonarrClient;
-  final JellyfinConfig config;
+  final JellyfinConfigUser configUser;
 
-  String get basePath => config.basePath;
-  String get name => config.name;
-  bool get isSonarrEnabled => sonarrClient != null;
-
-  JellyfinClientWrapper(this.jellyfinClient, this.config, this.sonarrClient);
-
-  Future<List<CalendarItem>> getSonarrCalendar({DateTime? start, DateTime? end}) =>
-      sonarrClient!.fetchCalendar(start: start, end: end, includeSeries: true);
+  AuthenticatedJellyfinClient(this.jellyfinClient, this.configUser);
 
   Future<Iterable<SessionInfo>> getCurrentSessions() async {
     final response = await jellyfinClient.getSessionApi().getSessions(activeWithinSeconds: 15);
@@ -105,102 +82,165 @@ class JellyfinClientWrapper {
 
   Future<void> startTask(String taskId) => jellyfinClient.getScheduledTasksApi().startTask(taskId: taskId);
 
-  Uri getItemPrimaryImage(String itemId) => Uri.parse("$basePath/Items/$itemId/Images/Primary");
+  Uri getItemPrimaryImage(String itemId) => Uri.parse("${configUser.config?.basePath}/Items/$itemId/Images/Primary");
 
-  Uri getJellyfinItemUrl(String itemId) => Uri.parse("$basePath/#/details?id=$itemId");
+  Uri getJellyfinItemUrl(String itemId) => Uri.parse("${configUser.config?.basePath}/#/details?id=$itemId");
 }
 
-class JellyfinModule implements RequiresInitialization {
-  final Map<String, JellyfinClientWrapper> _jellyfinClients = {};
-  final Map<String, List<String>> _allowedUserRegistrations = {};
+class AnonymousJellyfinClient {
+  final Tentacle jellyfinClient;
+  final JellyfinConfig config;
 
-  final JellyfinConfigRepository _jellyfinConfigRepository = Injector.appInstance.get();
+  AnonymousJellyfinClient({required this.jellyfinClient, required this.config});
 
-  @override
-  Future<void> init() async {
-    final defaultConfigs = await _jellyfinConfigRepository.getDefaultConfigs();
-    for (final config in defaultConfigs) {
-      _createClientConfig(config);
-    }
+  Future<AuthenticationResult> loginByPassword(String username, String password) async {
+    final response = await jellyfinClient.getUserApi().authenticateUserByName(
+        authenticateUserByName: AuthenticateUserByName((builder) => builder
+          ..username = username
+          ..pw = password));
+
+    return response.data!;
   }
 
-  Future<void> deleteJellyfinConfig(JellyfinConfig config) async {
-    _jellyfinClients.remove(
-      _getClientCacheIdentifier(config.parentId.toString(), config.name, config.isDefault),
-    );
+  Future<QuickConnectResult> initiateLoginByQuickConnect() async {
+    final response = await jellyfinClient.getQuickConnectApi().initiateQuickConnect();
 
-    await _jellyfinConfigRepository.deleteConfig(config.id!);
+    return response.data!;
   }
 
-  Future<void> updateClientForConfig(JellyfinConfig config) async {
-    await _jellyfinConfigRepository.updateJellyfinConfig(config);
-    _createClientConfig(config);
-  }
+  Future<AuthenticationResult?> finishLoginByQuickConnect(QuickConnectResult quickConnectResult) async {
+    final response = await jellyfinClient.getUserApi().authenticateWithQuickConnect(
+        quickConnectDto:
+            QuickConnectDto((quickConnectBuilder) => quickConnectBuilder.secret = quickConnectResult.secret));
 
-  Future<JellyfinClientWrapper?> getClient(JellyfinInstanceIdentity identity) async {
-    final cachedClientConfig = _getCachedClientConfig(identity);
-    if (cachedClientConfig != null) {
-      return cachedClientConfig;
-    }
-
-    final config = await _jellyfinConfigRepository.getByName(identity.$1!, identity.$2.toString());
-    if (config == null) {
+    if (response.statusCode != 200) {
       return null;
     }
 
-    return _createClientConfig(config);
+    return response.data!;
+  }
+}
+
+class TokenAuthInterceptor extends AuthInterceptor {
+  final String token;
+
+  TokenAuthInterceptor(this.token);
+
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    options.headers['Authorization'] = 'MediaBrowser Token="$token"';
+
+    super.onRequest(options, handler);
+  }
+}
+
+class AnonAuthInterceptor extends AuthInterceptor {
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    options.headers['Authorization'] =
+        'MediaBrowser Client="Jellyfin Web", Device="Chrome", DeviceId="1234", Version="10.9.11"';
+
+    super.onRequest(options, handler);
+  }
+}
+
+class JellyfinConfigNotFoundException implements Exception {
+  final String message;
+  const JellyfinConfigNotFoundException(this.message);
+
+  @override
+  String toString() => "JellyfinConfigNotFoundException: $message";
+}
+
+class JellyfinModuleV2 implements RequiresInitialization {
+  final JellyfinConfigRepository _jellyfinConfigRepository = Injector.appInstance.get();
+
+  @override
+  Future<void> init() async {}
+
+  Future<JellyfinConfig?> getJellyfinConfig(String name, Snowflake parentId) {
+    return _jellyfinConfigRepository.getByNameAndGuild(name, parentId.toString());
   }
 
-  (bool, List<String>) isUserAllowedForRegistration(String instanceName, Snowflake userId) {
-    final key = "$instanceName$userId";
+  Future<JellyfinConfig?> getJellyfinDefaultConfig(Snowflake parentId) {
+    return _jellyfinConfigRepository.getDefaultForParent(parentId.toString());
+  }
 
-    final allowed = _allowedUserRegistrations[key];
-    if (allowed == null) {
-      return (false, []);
+  Future<SonarrClient> fetchGetSonarrClientWithFallback(
+      {required JellyfinConfig? originalConfig, required Snowflake parentId}) async {
+    final config = originalConfig ?? await getJellyfinDefaultConfig(parentId);
+    if (config == null) {
+      throw JellyfinConfigNotFoundException("Missing jellyfin config");
     }
 
-    _allowedUserRegistrations.remove(key);
+    if (config.sonarrBasePath == null || config.sonarrToken == null) {
+      throw JellyfinConfigNotFoundException("Sonarr not configured!");
+    }
 
-    return (true, allowed);
+    return SonarrClient(baseUrl: config.sonarrBasePath!, token: config.sonarrToken!);
   }
 
-  void addUserToAllowedForRegistration(String instanceName, Snowflake userId, List<String> allowedLibraries) =>
-      _allowedUserRegistrations["$instanceName$userId"] = allowedLibraries;
+  Future<JellyfinConfigUser> fetchGetUserConfigWithFallback(
+      {required Snowflake userId, required Snowflake parentId, String? instanceName}) async {
+    final config = instanceName != null
+        ? await getJellyfinConfig(instanceName, parentId)
+        : await getJellyfinDefaultConfig(parentId);
+    if (config == null) {
+      throw JellyfinConfigNotFoundException("Missing jellyfin config");
+    }
 
-  Future<JellyfinConfig> createJellyfinConfig(JellyfinConfig createdConfig) async {
-    final config = await _jellyfinConfigRepository.createJellyfinConfig(createdConfig);
-    if (config.id == null) {
+    final userConfig = await fetchJellyfinUserConfig(userId, config);
+    if (userConfig == null) {
+      throw JellyfinConfigNotFoundException("User not logged in.");
+    }
+
+    return userConfig;
+  }
+
+  Future<JellyfinConfigUser?> fetchJellyfinUserConfig(Snowflake userId, JellyfinConfig config) async {
+    final userConfig = await _jellyfinConfigRepository.getUserConfig(userId.toString(), config.id!);
+    userConfig?.config = config;
+
+    return userConfig;
+  }
+
+  AnonymousJellyfinClient createJellyfinClientAnonymous(JellyfinConfig config) {
+    return AnonymousJellyfinClient(
+        jellyfinClient: Tentacle(basePathOverride: config.basePath, interceptors: [AnonAuthInterceptor()]),
+        config: config);
+  }
+
+  AuthenticatedJellyfinClient createJellyfinClientAuthenticated(JellyfinConfigUser configUser) {
+    return AuthenticatedJellyfinClient(
+        Tentacle(basePathOverride: configUser.config!.basePath, interceptors: [TokenAuthInterceptor(configUser.token)]),
+        configUser);
+  }
+
+  Future<bool> login(JellyfinConfig config, AuthenticationResult authResult, Snowflake userId) async {
+    await _jellyfinConfigRepository.saveJellyfinConfigUser(
+      JellyfinConfigUser(userId: userId, token: authResult.accessToken!, jellyfinConfigId: config.id!),
+    );
+
+    return true;
+  }
+
+  Future<bool> loginWithPassword(JellyfinConfig config, String username, String password, Snowflake userId) async {
+    final client = createJellyfinClientAnonymous(config);
+
+    final response = await client.loginByPassword(username, password);
+    await _jellyfinConfigRepository.saveJellyfinConfigUser(
+      JellyfinConfigUser(userId: userId, token: response.accessToken!, jellyfinConfigId: config.id!),
+    );
+
+    return true;
+  }
+
+  Future<JellyfinConfig> createJellyfinConfig(JellyfinConfig config) async {
+    final createdConfig = await _jellyfinConfigRepository.createJellyfinConfig(config);
+    if (createdConfig.id == null) {
       throw Error();
     }
 
-    _jellyfinClients[_getClientCacheIdentifier(config.parentId.toString(), config.name, config.isDefault)] =
-        _createClientConfig(config);
-
-    return config;
-  }
-
-  JellyfinClientWrapper? _getCachedClientConfig(JellyfinInstanceIdentity identity) =>
-      _jellyfinClients[_getClientCacheIdentifier(identity.$2.toString(), identity.$1)];
-
-  JellyfinClientWrapper _createClientConfig(JellyfinConfig config) {
-    final client = Tentacle(basePathOverride: config.basePath, interceptors: [CustomAuthInterceptor(config.token)]);
-    final sonarrClient = config.sonarrBasePath != null && config.sonarrToken != null
-        ? SonarrClient(baseUrl: config.sonarrBasePath!, token: config.sonarrToken!)
-        : null;
-
-    final clientConfig = JellyfinClientWrapper(client, config, sonarrClient);
-
-    _jellyfinClients[_getClientCacheIdentifier(config.parentId.toString(), config.name, config.isDefault)] =
-        clientConfig;
-
-    return clientConfig;
-  }
-
-  String _getClientCacheIdentifier(String guildId, String? instanceName, [bool isDefault = false]) {
-    if (instanceName != null && !isDefault) {
-      return "$guildId|$instanceName";
-    }
-
-    return guildId;
+    return createdConfig;
   }
 }
