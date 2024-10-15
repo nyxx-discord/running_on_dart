@@ -80,11 +80,17 @@ class AuthenticatedJellyfinClient {
     return response.data?.toList() ?? [];
   }
 
+  Future<UserDto> getCurrentUser() async {
+    final response = await jellyfinClient.getUserApi().getCurrentUser();
+
+    return response.data!;
+  }
+
   Future<void> startTask(String taskId) => jellyfinClient.getScheduledTasksApi().startTask(taskId: taskId);
-
   Uri getItemPrimaryImage(String itemId) => Uri.parse("${configUser.config?.basePath}/Items/$itemId/Images/Primary");
-
   Uri getJellyfinItemUrl(String itemId) => Uri.parse("${configUser.config?.basePath}/#/details?id=$itemId");
+  Uri getUserImage(String userId, String imageTag) => Uri.parse("${configUser.config?.basePath}/Users/$userId/Images/Primary?tag=$imageTag");
+  Uri getUserProfile(String userId) => Uri.parse('${configUser.config?.basePath}/web/#/userprofile.html?userId=$userId');
 }
 
 class AnonymousJellyfinClient {
@@ -106,6 +112,12 @@ class AnonymousJellyfinClient {
     final response = await jellyfinClient.getQuickConnectApi().initiateQuickConnect();
 
     return response.data!;
+  }
+
+  Future<bool> checkQuickConnectStatus(QuickConnectResult quickConnectResult) async {
+    final response = await jellyfinClient.getQuickConnectApi().getQuickConnectState(secret: quickConnectResult.secret!);
+
+    return response.data?.authenticated ?? false;
   }
 
   Future<AuthenticationResult?> finishLoginByQuickConnect(QuickConnectResult quickConnectResult) async {

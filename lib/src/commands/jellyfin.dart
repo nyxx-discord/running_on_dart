@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:injector/injector.dart';
 import 'package:intl/intl.dart';
@@ -7,7 +9,6 @@ import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/checks.dart';
 import 'package:running_on_dart/src/models/jellyfin_config.dart';
-import 'package:running_on_dart/src/repository/jellyfin_config.dart';
 import 'package:running_on_dart/src/util/jellyfin.dart';
 import 'package:running_on_dart/src/util/pipelines.dart';
 import 'package:tentacle/tentacle.dart';
@@ -165,29 +166,44 @@ final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
 
           final initiationResult = await client.initiateLoginByQuickConnect();
 
-          final message = await context.respond(MessageBuilder(
-              content: "Quick Connect code: `${initiationResult.code}`. Click button after you confirm your login",
-              components: [
-                ActionRowBuilder(components: [
-                  ButtonBuilder.primary(
-                      customId: ComponentId.generate(allowedUser: context.user.id).toString(), label: "Confirm login"),
-                ]),
-              ]));
-          await context.getButtonPress(message);
+          await context.respond(MessageBuilder(content: "Quick Connect code: `${initiationResult.code}`. Waiting for confirmation..."), level: ResponseLevel.private);
+          Timer.periodic(Duration(seconds: 2), (Timer timer) async {
+            if (timer.tick > 30) {
+              context.interaction.updateOriginalResponse(MessageUpdateBuilder(content: "Cannot login. Took too long to confirm code"));
+              timer.cancel();
+            }
 
-          final finishResult = await client.finishLoginByQuickConnect(initiationResult);
-          if (finishResult == null) {
-            return context.respond(MessageBuilder(content: "Cannot login. Submitted too soon!"));
-          }
+            final isConfirmed = await client.checkQuickConnectStatus(initiationResult);
+            if (!isConfirmed) {
+              return;
+            }
 
-          final loginResult =
-              await Injector.appInstance.get<JellyfinModuleV2>().login(config, finishResult, context.user.id);
+            timer.cancel();
 
-          if (loginResult) {
-            return context.respond(MessageBuilder(content: "Logged in successfully!"));
-          }
+            final finishResult = await client.finishLoginByQuickConnect(initiationResult);
+            if (finishResult == null) {
+              context.interaction.updateOriginalResponse(MessageUpdateBuilder(content: "Cannot login. Contact with bot admin!"));
+              return;
+            }
 
-          return context.respond(MessageBuilder(content: "Cannot login. Contact with bot admin!"));
+            final loginResult = await Injector.appInstance.get<JellyfinModuleV2>().login(config, finishResult, context.user.id);
+            if (loginResult) {
+              context.interaction.updateOriginalResponse(MessageUpdateBuilder(content: "Logged in successfully!"));
+              return;
+            }
+
+            context.interaction.updateOriginalResponse(MessageUpdateBuilder(content: "Cannot login. Contact with bot admin!"));
+          });
+        }),
+      ),
+      ChatCommand(
+        "current-user",
+        "Display info about current jellyfin user",
+        id('jellyfin-user-current-user', (ChatContext context, [@Description("Instance to use. Default selected if not provided") JellyfinConfigUser? config]) async {
+          final client = await getJellyfinClient(config, context);
+
+          final currentUser = await client.getCurrentUser();
+          context.respond(MessageBuilder(embeds: [getUserInfoEmbed(currentUser, client)]));
         }),
       ),
     ],

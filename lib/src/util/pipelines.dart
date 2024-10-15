@@ -37,7 +37,7 @@ class InternalTask {
     Timer.periodic(updateInterval, (timer) async {
       final (finished, currentStatus) = await updateCallback();
 
-      embed.description = currentStatus.toString();
+      embed.description = currentStatus ?? '...';
       await targetMessage.update(MessageUpdateBuilder(embeds: [embed]));
 
       if (finished) {

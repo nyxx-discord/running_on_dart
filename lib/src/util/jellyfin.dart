@@ -16,6 +16,9 @@ Duration parseDurationFromTicks(int ticks) => Duration(microseconds: ticks ~/ 10
 String formatSeriesEpisodeString(int seriesNumber, int episodeNumber) =>
     'S${episodeSeriesNumberFormat.format(seriesNumber)}E${episodeSeriesNumberFormat.format(episodeNumber)}';
 
+String formatShortDateTimeWithRelative(DateTime dateTime) =>
+    "${dateTime.format(TimestampStyle.shortDateTime)} (${dateTime.format(TimestampStyle.relativeTime)})";
+
 String formatProgress(int currentPositionTicks, int totalTicks) {
   final progressPercentage = currentPositionTicks / totalTicks * 100;
 
@@ -35,8 +38,7 @@ Iterable<EmbedBuilder> getSonarrCalendarEmbeds(Iterable<CalendarItem> calendarIt
       fields: [
         EmbedFieldBuilder(
             name: "Air date",
-            value:
-                "${item.airDateUtc.format(TimestampStyle.shortDateTime)} (${item.airDateUtc.format(TimestampStyle.relativeTime)})",
+            value: formatShortDateTimeWithRelative(item.airDateUtc),
             isInline: false),
         EmbedFieldBuilder(name: "Avg runtime", value: "${item.series.runtime} mins", isInline: true),
       ],
@@ -48,7 +50,7 @@ Iterable<EmbedBuilder> getSonarrCalendarEmbeds(Iterable<CalendarItem> calendarIt
 Iterable<EmbedFieldBuilder> getMediaInfoEmbedFields(Iterable<MediaStream> mediaStreams) sync* {
   for (final mediaStream in mediaStreams) {
     final bitrate = ((mediaStream.bitRate ?? 0) / 1024 / 1024).toStringAsFixed(2);
-    final trackTitle = mediaStream.title ?? mediaStream.displayTitle;
+    final trackTitle = (mediaStream.title ?? mediaStream.displayTitle)?.replaceFirst("- Default", "").trim();
 
     yield EmbedFieldBuilder(
         name: "Media Info (${mediaStream.type!.name})", value: "$trackTitle ($bitrate Mbps)", isInline: true);
@@ -204,4 +206,21 @@ EmbedBuilder? buildMediaEmbedBuilder(BaseItemDto item, AuthenticatedJellyfinClie
   }
 
   return null;
+}
+
+EmbedBuilder getUserInfoEmbed(UserDto currentUser, AuthenticatedJellyfinClient client) {
+  final thumbnail = currentUser.primaryImageTag != null
+    ? EmbedThumbnailBuilder(url: client.getUserImage(currentUser.id!, currentUser.primaryImageTag!))
+    : null;
+
+  return EmbedBuilder(
+    thumbnail: thumbnail,
+    title: currentUser.name,
+    fields: [
+      EmbedFieldBuilder(name: "Last login", value: formatShortDateTimeWithRelative(currentUser.lastLoginDate!), isInline: true),
+      EmbedFieldBuilder(name: "Last activity", value: formatShortDateTimeWithRelative(currentUser.lastActivityDate!), isInline: true),
+      EmbedFieldBuilder(name: "Is admin?", value: currentUser.policy?.isAdministrator == true ? 'true' : 'false', isInline: true),
+      EmbedFieldBuilder(name: "Links", value: '[Profile](${client.getUserProfile(currentUser.id!)})', isInline: false)
+    ],
+  );
 }
