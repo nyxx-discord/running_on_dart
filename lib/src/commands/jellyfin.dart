@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:human_duration_parser/human_duration_parser.dart';
 import 'package:injector/injector.dart';
 import 'package:intl/intl.dart';
 import 'package:nyxx/nyxx.dart';
@@ -8,20 +9,35 @@ import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/checks.dart';
+import 'package:running_on_dart/src/external/wizarr.dart';
 import 'package:running_on_dart/src/models/jellyfin_config.dart';
 import 'package:running_on_dart/src/util/jellyfin.dart';
 import 'package:running_on_dart/src/util/pipelines.dart';
+import 'package:running_on_dart/src/util/util.dart';
 import 'package:tentacle/tentacle.dart';
 
 final taskProgressFormat = NumberFormat("0.00");
-
-// TODO: use it when fetching data from modal
-// String? _valueOrNull(String value) => value.trim().isEmpty ? null : value.trim();
 
 Iterable<MessageBuilder> spliceEmbedsForMessageBuilders(Iterable<EmbedBuilder> embeds, [int sliceSize = 2]) sync* {
   for (final splicedEmbeds in embeds.slices(sliceSize)) {
     yield MessageBuilder(embeds: splicedEmbeds);
   }
+}
+
+Duration? getDurationFromStringOrDefault(String? durationString, Duration? defaultDuration) {
+  if (durationString == null) {
+    return defaultDuration;
+  }
+
+  return parseStringToDuration(durationString) ?? defaultDuration;
+}
+
+String? valueOrNullIfNotDefault(String? value, [String ifNotDefault = 'Unlimited']) {
+  if (value == ifNotDefault) {
+    return null;
+  }
+
+  return valueOrNull(value);
 }
 
 Future<AuthenticatedJellyfinClient> getJellyfinClient(JellyfinConfigUser? config, ChatContext context) async {
@@ -34,15 +50,113 @@ Future<AuthenticatedJellyfinClient> getJellyfinClient(JellyfinConfigUser? config
 final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
   jellyfinFeatureEnabledCheck,
 ], children: [
+  ChatGroup(
+    "wizarr",
+    "Wizarr related commands",
+    children: [
+      ChatCommand(
+        "redeem-invitation",
+        "Redeem invitation code",
+        id("jellyfin-wizarr-redeem-invitation", (InteractionChatContext context, String code, [@Description("Instance to use. Default selected if not provided") JellyfinConfigUser? config]) async {
+          final client = await Injector.appInstance
+              .get<JellyfinModuleV2>()
+              .fetchGetWizarrClientWithFallback(originalConfig: config?.config, parentId: context.guild?.id ?? context.user.id);
+
+          final message = await context.respond(getWizarrInvitationCodeRedeemMessage(code, client, context.user.id), level: ResponseLevel.private);
+
+          await context.getButtonPress(message);
+          final modalResult = await context.getModal(title: "Redeem wizarr code", components: [
+            TextInputBuilder(customId: "username", style: TextInputStyle.short, label: "Username", isRequired: true),
+            TextInputBuilder(customId: "password", style: TextInputStyle.short, label: "Password", isRequired: true),
+            TextInputBuilder(customId: "email", style: TextInputStyle.short, label: "Email", isRequired: true),
+          ]);
+          final redeemResult = await client.validateInvitation(code, modalResult['username']!, modalResult['password']!, modalResult['email']!);
+
+          context.respond(
+            MessageBuilder(
+              content: "Invitation redeemed (username: ${redeemResult.username})",
+              components: [
+                ActionRowBuilder(components: [
+                  ButtonBuilder.link(url: Uri.parse(config!.config!.basePath), label: "Go to Jellyfin"),
+                  ButtonBuilder.link(url: Uri.parse('https://jellyfin.org/downloads'), label: "Download Jellyfin client"),
+                ])
+              ]
+            )
+          );
+        }),
+      ),
+      ChatCommand(
+        "create-invitation",
+        "Create wizarr invitation",
+        id("jellyfin-wizarr-create-invitation", (InteractionChatContext context, [@Description('Inform user about invitation') User? user, @Description("Instance to use. Default selected if not provided") JellyfinConfigUser? config]) async {
+          final jellyfinClient = await getJellyfinClient(config, context);
+          final currentUser = await jellyfinClient.getCurrentUser();
+
+          if (!(currentUser.policy?.isAdministrator ?? false)) {
+            return context.respond(MessageBuilder(content: "This command can use only logged jellyfin users with administrator privileges."), level: ResponseLevel.private);
+          }
+
+          final wizarrClient = await Injector.appInstance.get<JellyfinModuleV2>().fetchGetWizarrClientWithFallback(originalConfig: jellyfinClient.configUser.config!, parentId: context.guild?.id ?? context.user.id);
+
+          final librariesMap = Map.fromEntries((await wizarrClient.getAvailableLibraries()).map((library) => MapEntry(library.name, library.id)));
+
+          final firstModal = await context.getModal(title: "Create Wizarr invitation", components: [
+            TextInputBuilder(customId: "code", style: TextInputStyle.short, label: "Invitation Code (6 characters)", isRequired: true, value: generateRandomString(6)),
+            TextInputBuilder(customId: "expiration", style: TextInputStyle.short, label: "Invitation expiration (or Unlimited)", isRequired: true, value: '1 Day'),
+            TextInputBuilder(customId: "unlimited_usage", style: TextInputStyle.short, label: "Allow unlimited usages (True/False)", isRequired: true, value: 'False'),
+          ]);
+
+          final message = await context.respond(
+              MessageBuilder(content: "Click to open second modal and continue", components: [
+                ActionRowBuilder(components: [
+                  ButtonBuilder.primary(
+                      customId: ComponentId.generate(allowedUser: context.user.id).toString(), label: 'Open modal')
+                ])
+              ]),
+              level: ResponseLevel.private);
+          await context.getButtonPress(message);
+
+          final secondModal = await context.getModal(title: 'Create Wizarr invitation', components: [
+            TextInputBuilder(customId: "simultaneous_logins_max_number", style: TextInputStyle.short, label: "Maximum Number of Simultaneous Logins", isRequired: true, value: 'Unlimited'),
+            TextInputBuilder(customId: "account_duration", style: TextInputStyle.short, label: "User Account Duration", isRequired: true, value: 'Unlimited'),
+            // TextInputBuilder(customId: "libraries", style: TextInputStyle.short, label: "Allowed Libraries", isRequired: true, value: librariesMap.entries.map((entry) => entry.key).join(",")),
+          ]);
+
+          final librariesSelection = await context.getMultiSelection(librariesMap.entries.map((entry) => entry.key).toList(), MessageBuilder(content: 'Select wanted libraries to finish code creation'), level: ResponseLevel.private, authorOnly: true);
+
+          final accountDuration = getDurationFromStringOrDefault(valueOrNullIfNotDefault(secondModal['account_duration']), Duration(days: 1));
+          final expiresDuration = getDurationFromStringOrDefault(valueOrNullIfNotDefault(firstModal['expiration']), null);
+
+          final createInvitationRequest = CreateInvitationRequest(
+              code: firstModal['code']!,
+              expires: accountDuration,
+              duration: expiresDuration,
+              specificLibraries: librariesSelection.map((libraryName) => librariesMap[libraryName]).nonNulls.toList(),
+              unlimited: firstModal['unlimited_usage']?.toLowerCase() == 'true',
+              sessions: int.tryParse(secondModal['simultaneous_logins_max_number']!) ?? 0,
+          );
+
+          final result = await wizarrClient.createInvitation(createInvitationRequest);
+
+          if (result) {
+            final messageToUserSent = user != null ? ' Message to user ${user.mention} sent.' : '';
+            return context.respond(MessageBuilder(content: 'Invitation with code: `${createInvitationRequest.code}` created.$messageToUserSent'), level: ResponseLevel.private);
+          }
+
+          return context.respond(MessageBuilder(content: 'Cannot create invitation. Contact administrator.'), level: ResponseLevel.private);
+        }),
+      ),
+    ]
+  ),
   ChatGroup("sonarr", "Sonarr related commands", children: [
     ChatCommand(
       "calendar",
       "Show upcoming episodes",
       id("jellyfin-sonarr-calendar", (ChatContext context,
-          [@Description("Instance to use. Default selected if not provided") JellyfinConfig? config]) async {
+          [@Description("Instance to use. Default selected if not provided") JellyfinConfigUser? config]) async {
         final client = await Injector.appInstance
             .get<JellyfinModuleV2>()
-            .fetchGetSonarrClientWithFallback(originalConfig: config, parentId: context.guild?.id ?? context.user.id);
+            .fetchGetSonarrClientWithFallback(originalConfig: config?.config, parentId: context.guild?.id ?? context.user.id);
 
         final calendarItems = await client.fetchCalendar(end: DateTime.now().add(Duration(days: 7)));
         final embeds = getSonarrCalendarEmbeds(calendarItems);
@@ -282,10 +396,10 @@ final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
             basePath: modalResponse['base_url']!,
             isDefault: modalResponse['is_default']?.toLowerCase() == 'true',
             parentId: modalResponse.guild?.id ?? modalResponse.user.id,
-            sonarrBasePath: secondModalResponse['sonarr_base_url'],
-            sonarrToken: secondModalResponse['sonarr_token'],
-            wizarrBasePath: secondModalResponse['wizarr_base_url'],
-            wizarrToken: secondModalResponse['wizarr_token'],
+            sonarrBasePath: valueOrNull(secondModalResponse['sonarr_base_url']),
+            sonarrToken: valueOrNull(secondModalResponse['sonarr_token']),
+            wizarrBasePath: valueOrNull(secondModalResponse['wizarr_base_url']),
+            wizarrToken: valueOrNull(secondModalResponse['wizarr_token']),
           );
 
           final newlyCreatedConfig = await Injector.appInstance.get<JellyfinModuleV2>().createJellyfinConfig(config);
@@ -296,86 +410,76 @@ final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
         checks: [
           jellyfinFeatureCreateInstanceCommandCheck,
         ]),
-    //   ChatCommand(
-    //       "edit-instance",
-    //       "Edit jellyfin instance",
-    //       id('jellyfin-settings-edit-instance', (InteractionChatContext context,
-    //           @Description("Instance to use. Default selected if not provided")
-    //           @UseConverter(jellyfinConfigConverter)
-    //           JellyfinConfig config) async {
-    //         final modalResponse = await context.getModal(title: "Jellyfin Instance Edit Pt. 1", components: [
-    //           TextInputBuilder(
-    //               customId: "base_url",
-    //               style: TextInputStyle.short,
-    //               label: "Base Url",
-    //               isRequired: true,
-    //               value: config.basePath),
-    //           TextInputBuilder(
-    //               customId: "api_token",
-    //               style: TextInputStyle.short,
-    //               label: "API Token",
-    //               isRequired: true,
-    //               value: config.token),
-    //         ]);
-    //
-    //         final message = await context.respond(
-    //             MessageBuilder(content: "Click to open second modal", components: [
-    //               ActionRowBuilder(components: [
-    //                 ButtonBuilder.primary(
-    //                     customId: ComponentId.generate(allowedUser: context.user.id).toString(), label: 'Open modal')
-    //               ])
-    //             ]),
-    //             level: ResponseLevel.private);
-    //         await context.getButtonPress(message);
-    //
-    //         final secondModalResponse = await context.getModal(title: "Jellyfin Instance Edit Pt. 2", components: [
-    //           TextInputBuilder(
-    //             customId: "sonarr_base_url",
-    //             style: TextInputStyle.short,
-    //             label: "Sonarr base url",
-    //             value: config.sonarrBasePath,
-    //             isRequired: false,
-    //           ),
-    //           TextInputBuilder(
-    //               customId: "sonarr_token",
-    //               style: TextInputStyle.short,
-    //               label: "Sonarr Token",
-    //               value: config.sonarrToken,
-    //               isRequired: false),
-    //           TextInputBuilder(
-    //               customId: "wizarr_base_url",
-    //               style: TextInputStyle.short,
-    //               label: "Wizarr base url",
-    //               value: config.wizarrBasePath,
-    //               isRequired: false),
-    //           TextInputBuilder(
-    //               customId: "wizarr_token",
-    //               style: TextInputStyle.short,
-    //               label: "Wizarr Token",
-    //               value: config.wizarrToken,
-    //               isRequired: false),
-    //         ]);
-    //
-    //         final editedConfig = JellyfinConfig(
-    //           name: config.name,
-    //           basePath: modalResponse['base_url']!,
-    //           token: modalResponse['api_token']!,
-    //           isDefault: config.isDefault,
-    //           parentId: config.parentId,
-    //           sonarrBasePath: secondModalResponse['sonarr_base_url'],
-    //           sonarrToken: secondModalResponse['sonarr_token'],
-    //           wizarrBasePath: secondModalResponse['wizarr_base_url'],
-    //           wizarrToken: secondModalResponse['wizarr_token'],
-    //         );
-    //         editedConfig.id = config.id;
-    //
-    //         Injector.appInstance.get<JellyfinModule>().updateClientForConfig(editedConfig);
-    //
-    //         return modalResponse.respond(MessageBuilder(content: 'Successfully updated jellyfin config'));
-    //       }),
-    //       checks: [
-    //         jellyfinFeatureAdminCommandCheck,
-    //       ]),
+      ChatCommand(
+        "edit-instance",
+        "Edit jellyfin instance",
+        id('jellyfin-settings-edit-instance', (InteractionChatContext context, @Description("Instance to use. Default selected if not provided") JellyfinConfig config) async {
+          final modalResponse = await context.getModal(title: "Jellyfin Instance Edit Pt. 1", components: [
+            TextInputBuilder(
+                customId: "base_url",
+                style: TextInputStyle.short,
+                label: "Base Url",
+                isRequired: true,
+                value: config.basePath),
+          ]);
+
+          final message = await context.respond(
+              MessageBuilder(content: "Click to open second modal", components: [
+                ActionRowBuilder(components: [
+                  ButtonBuilder.primary(
+                      customId: ComponentId.generate(allowedUser: context.user.id).toString(), label: 'Open modal')
+                ])
+              ]),
+              level: ResponseLevel.private);
+          await context.getButtonPress(message);
+
+          final secondModalResponse = await context.getModal(title: "Jellyfin Instance Edit Pt. 2", components: [
+            TextInputBuilder(
+              customId: "sonarr_base_url",
+              style: TextInputStyle.short,
+              label: "Sonarr base url",
+              value: config.sonarrBasePath,
+              isRequired: false,
+            ),
+            TextInputBuilder(
+                customId: "sonarr_token",
+                style: TextInputStyle.short,
+                label: "Sonarr Token",
+                value: config.sonarrToken,
+                isRequired: false),
+            TextInputBuilder(
+                customId: "wizarr_base_url",
+                style: TextInputStyle.short,
+                label: "Wizarr base url",
+                value: config.wizarrBasePath,
+                isRequired: false),
+            TextInputBuilder(
+                customId: "wizarr_token",
+                style: TextInputStyle.short,
+                label: "Wizarr Token",
+                value: config.wizarrToken,
+                isRequired: false),
+          ]);
+
+          final editedConfig = JellyfinConfig(
+            name: config.name,
+            basePath: modalResponse['base_url']!,
+            isDefault: config.isDefault,
+            parentId: config.parentId,
+            sonarrBasePath: valueOrNull(secondModalResponse['sonarr_base_url']),
+            sonarrToken: valueOrNull(secondModalResponse['sonarr_token']),
+            wizarrBasePath: valueOrNull(secondModalResponse['wizarr_base_url']),
+            wizarrToken: valueOrNull(secondModalResponse['wizarr_token']),
+            id: config.id,
+          );
+
+          Injector.appInstance.get<JellyfinModuleV2>().updateJellyfinConfig(editedConfig);
+
+          return modalResponse.respond(MessageBuilder(content: 'Successfully updated jellyfin config'));
+        }),
+        checks: [
+          jellyfinFeatureCreateInstanceCommandCheck,
+        ]),
     //   ChatCommand(
     //       "transfer-config",
     //       "Transfers jellyfin instance config to another guild",

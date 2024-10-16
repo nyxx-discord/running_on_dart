@@ -1,8 +1,10 @@
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:nyxx/nyxx.dart';
+import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/src/external/sonarr.dart';
+import 'package:running_on_dart/src/external/wizarr.dart';
 import 'package:running_on_dart/src/modules/jellyfin.dart';
 import 'package:running_on_dart/src/util/util.dart';
 import 'package:tentacle/tentacle.dart';
@@ -223,4 +225,13 @@ EmbedBuilder getUserInfoEmbed(UserDto currentUser, AuthenticatedJellyfinClient c
       EmbedFieldBuilder(name: "Links", value: '[Profile](${client.getUserProfile(currentUser.id!)})', isInline: false)
     ],
   );
+}
+
+MessageBuilder getWizarrInvitationCodeRedeemMessage(String code, WizarrClient client, Snowflake userId) {
+  return MessageBuilder(content: "Redeem Wizarr invitation (code: $code)", components: [
+    ActionRowBuilder(components: [
+      ButtonBuilder.link(url: Uri.parse("${client.baseUrl}/j/$code"), label: "Redeem code in browser"),
+      ButtonBuilder.primary(customId: ComponentId.generate(allowedUser: userId).toString(), label: "Redeem here"),
+    ])
+  ]);
 }

@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:nyxx/nyxx.dart';
 
 final random = Random();
+const _chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
 
 DiscordColor getRandomColor() {
   return DiscordColor.fromRgb(random.nextInt(255), random.nextInt(255), random.nextInt(255));
@@ -24,3 +25,19 @@ extension DurationFromTicks on Duration {
 abstract class RequiresInitialization {
   Future<void> init();
 }
+
+String? valueOrNull(String? value) {
+  if (value == null) {
+    return null;
+  }
+
+  final trimmedValue = value.trim();
+  if (trimmedValue.isEmpty) {
+    return null;
+  }
+
+  return value;
+}
+
+String generateRandomString(int length) => String.fromCharCodes(Iterable.generate(
+    length, (_) => _chars.codeUnitAt(random.nextInt(_chars.length)))).toUpperCase();

@@ -76,27 +76,25 @@ class JellyfinConfigRepository {
     return JellyfinConfigUser.fromDatabaseRow(result.first.toColumnMap());
   }
 
-  // Future<void> updateJellyfinConfig(JellyfinConfig config) async {
-  //   await _database.getConnection().execute(Sql.named('''
-  //     UPDATE jellyfin_configs
-  //     SET
-  //       base_path = @base_path,
-  //       token = @token,
-  //       sonarr_base_path = @sonarr_base_path,
-  //       sonarr_token = @sonarr_token,
-  //       wizarr_base_path = @wizarr_base_path,
-  //       wizarr_token = @wizarr_token
-  //     WHERE id = @id
-  //   '''), parameters: {
-  //     'base_path': config.basePath,
-  //     'token': config.token,
-  //     'sonarr_base_path': config.sonarrBasePath,
-  //     'sonarr_token': config.sonarrToken,
-  //     'wizarr_base_path': config.wizarrBasePath,
-  //     'wizarr_token': config.wizarrToken,
-  //     'id': config.id,
-  //   });
-  // }
+  Future<void> updateJellyfinConfig(JellyfinConfig config) async {
+    await _database.getConnection().execute(Sql.named('''
+      UPDATE jellyfin_configs
+      SET
+        base_path = @base_path,
+        sonarr_base_path = @sonarr_base_path,
+        sonarr_token = @sonarr_token,
+        wizarr_base_path = @wizarr_base_path,
+        wizarr_token = @wizarr_token
+      WHERE id = @id
+    '''), parameters: {
+      'base_path': config.basePath,
+      'sonarr_base_path': config.sonarrBasePath,
+      'sonarr_token': config.sonarrToken,
+      'wizarr_base_path': config.wizarrBasePath,
+      'wizarr_token': config.wizarrToken,
+      'id': config.id,
+    });
+  }
 
   Future<JellyfinConfig> createJellyfinConfig(JellyfinConfig config) async {
     final result = await _database.getConnection().execute(Sql.named('''

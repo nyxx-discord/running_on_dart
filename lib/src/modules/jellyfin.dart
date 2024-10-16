@@ -1,6 +1,7 @@
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/external/sonarr.dart';
+import 'package:running_on_dart/src/external/wizarr.dart';
 import 'package:running_on_dart/src/models/jellyfin_config.dart';
 import 'package:running_on_dart/src/repository/jellyfin_config.dart';
 import 'package:running_on_dart/src/util/util.dart';
@@ -178,6 +179,20 @@ class JellyfinModuleV2 implements RequiresInitialization {
     return _jellyfinConfigRepository.getDefaultForParent(parentId.toString());
   }
 
+  Future<WizarrClient> fetchGetWizarrClientWithFallback(
+      {required JellyfinConfig? originalConfig, required Snowflake parentId}) async {
+    final config = originalConfig ?? await getJellyfinDefaultConfig(parentId);
+    if (config == null) {
+      throw JellyfinConfigNotFoundException("Missing jellyfin config");
+    }
+
+    if (config.wizarrBasePath == null || config.wizarrToken == null) {
+      throw JellyfinConfigNotFoundException("Wizarr not configured!");
+    }
+
+    return WizarrClient(baseUrl: config.wizarrBasePath!, token: config.wizarrToken!);
+  }
+
   Future<SonarrClient> fetchGetSonarrClientWithFallback(
       {required JellyfinConfig? originalConfig, required Snowflake parentId}) async {
     final config = originalConfig ?? await getJellyfinDefaultConfig(parentId);
@@ -254,5 +269,9 @@ class JellyfinModuleV2 implements RequiresInitialization {
     }
 
     return createdConfig;
+  }
+
+  Future<void> updateJellyfinConfig(JellyfinConfig config) async {
+    return await _jellyfinConfigRepository.updateJellyfinConfig(config);
   }
 }
