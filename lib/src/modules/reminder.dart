@@ -48,9 +48,7 @@ class ReminderModuleClearComponentsId {
       return null;
     }
 
-    return ReminderModuleClearComponentsId(
-        userId: Snowflake.parse(idParts[1])
-    );
+    return ReminderModuleClearComponentsId(userId: Snowflake.parse(idParts[1]));
   }
 
   @override
@@ -119,15 +117,16 @@ class ReminderModule implements RequiresInitialization {
         .toList();
 
     final messageBuilder = MessageBuilder(
-      content: content.toString(),
-      referencedMessage: reminder.messageId != null ? MessageReferenceBuilder.reply(messageId: reminder.messageId!) : null,
-      components: [
-        ActionRowBuilder(components: [
-          ...buttons,
-          ButtonBuilder.secondary(customId: ReminderModuleClearComponentsId(userId: reminder.userId).toString(), label: 'Confirm'),
-        ])
-      ]
-    );
+        content: content.toString(),
+        referencedMessage:
+            reminder.messageId != null ? MessageReferenceBuilder.reply(messageId: reminder.messageId!) : null,
+        components: [
+          ActionRowBuilder(components: [
+            ...buttons,
+            ButtonBuilder.secondary(
+                customId: ReminderModuleClearComponentsId(userId: reminder.userId).toString(), label: 'Confirm'),
+          ])
+        ]);
 
     await channel.sendMessage(messageBuilder);
   }
@@ -146,7 +145,8 @@ class ReminderModule implements RequiresInitialization {
     }
   }
 
-  Future<void> _handleReminderModuleClearComponentButtonAction(InteractionCreateEvent<MessageComponentInteraction> event, ReminderModuleClearComponentsId customId) async {
+  Future<void> _handleReminderModuleClearComponentButtonAction(
+      InteractionCreateEvent<MessageComponentInteraction> event, ReminderModuleClearComponentsId customId) async {
     final targetUserId = event.interaction.member?.id ?? event.interaction.user?.id;
 
     if (targetUserId == null) {
@@ -161,7 +161,8 @@ class ReminderModule implements RequiresInitialization {
     event.interaction.message?.update(MessageUpdateBuilder(components: []));
   }
 
-  Future<void> _handleReminderModuleComponentButtonAction(InteractionCreateEvent<MessageComponentInteraction> event, ReminderModuleComponentId customId) async {
+  Future<void> _handleReminderModuleComponentButtonAction(
+      InteractionCreateEvent<MessageComponentInteraction> event, ReminderModuleComponentId customId) async {
     final targetUserId = event.interaction.member?.id ?? event.interaction.user?.id;
 
     if (targetUserId == null) {
@@ -184,7 +185,7 @@ class ReminderModule implements RequiresInitialization {
     return event.interaction.respond(
         MessageBuilder(
             content:
-            "Reminder extended ${customId.duration.inMinutes} minutes. Will trigger at: ${newReminder.triggerAt.format(TimestampStyle.longDateTime)}."),
+                "Reminder extended ${customId.duration.inMinutes} minutes. Will trigger at: ${newReminder.triggerAt.format(TimestampStyle.longDateTime)}."),
         isEphemeral: true);
   }
 

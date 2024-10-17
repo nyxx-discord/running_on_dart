@@ -38,10 +38,7 @@ Iterable<EmbedBuilder> getSonarrCalendarEmbeds(Iterable<CalendarItem> calendarIt
       title: '${formatSeriesEpisodeString(item.seasonNumber, item.episodeNumber)} ${item.title} (${item.series.title})',
       description: item.overview,
       fields: [
-        EmbedFieldBuilder(
-            name: "Air date",
-            value: formatShortDateTimeWithRelative(item.airDateUtc),
-            isInline: false),
+        EmbedFieldBuilder(name: "Air date", value: formatShortDateTimeWithRelative(item.airDateUtc), isInline: false),
         EmbedFieldBuilder(name: "Avg runtime", value: "${item.series.runtime} mins", isInline: true),
       ],
       thumbnail: seriesPosterUrl != null ? EmbedThumbnailBuilder(url: Uri.parse(seriesPosterUrl.remoteUrl)) : null,
@@ -212,16 +209,19 @@ EmbedBuilder? buildMediaEmbedBuilder(BaseItemDto item, AuthenticatedJellyfinClie
 
 EmbedBuilder getUserInfoEmbed(UserDto currentUser, AuthenticatedJellyfinClient client) {
   final thumbnail = currentUser.primaryImageTag != null
-    ? EmbedThumbnailBuilder(url: client.getUserImage(currentUser.id!, currentUser.primaryImageTag!))
-    : null;
+      ? EmbedThumbnailBuilder(url: client.getUserImage(currentUser.id!, currentUser.primaryImageTag!))
+      : null;
 
   return EmbedBuilder(
     thumbnail: thumbnail,
     title: currentUser.name,
     fields: [
-      EmbedFieldBuilder(name: "Last login", value: formatShortDateTimeWithRelative(currentUser.lastLoginDate!), isInline: true),
-      EmbedFieldBuilder(name: "Last activity", value: formatShortDateTimeWithRelative(currentUser.lastActivityDate!), isInline: true),
-      EmbedFieldBuilder(name: "Is admin?", value: currentUser.policy?.isAdministrator == true ? 'true' : 'false', isInline: true),
+      EmbedFieldBuilder(
+          name: "Last login", value: formatShortDateTimeWithRelative(currentUser.lastLoginDate!), isInline: true),
+      EmbedFieldBuilder(
+          name: "Last activity", value: formatShortDateTimeWithRelative(currentUser.lastActivityDate!), isInline: true),
+      EmbedFieldBuilder(
+          name: "Is admin?", value: currentUser.policy?.isAdministrator == true ? 'true' : 'false', isInline: true),
       EmbedFieldBuilder(name: "Links", value: '[Profile](${client.getUserProfile(currentUser.id!)})', isInline: false)
     ],
   );

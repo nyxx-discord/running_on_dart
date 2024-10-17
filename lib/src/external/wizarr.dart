@@ -7,7 +7,7 @@ class InvitationValidationResult {
   String username;
 
   InvitationValidationResult({required this.username});
-  
+
   factory InvitationValidationResult.parseJson(Map<String, dynamic> data) {
     return InvitationValidationResult(username: data['username']);
   }
@@ -18,7 +18,7 @@ class Library {
   final String name;
 
   Library({required this.id, required this.name});
-  
+
   factory Library.parseJson(Map<String, dynamic> data) {
     return Library(id: data['id'], name: data['name']);
   }
@@ -32,19 +32,25 @@ class CreateInvitationRequest {
   final bool unlimited;
   final int sessions;
 
-  CreateInvitationRequest({required this.code, required this.expires, required this.duration, required this.specificLibraries, required this.unlimited, required this.sessions});
+  CreateInvitationRequest(
+      {required this.code,
+      required this.expires,
+      required this.duration,
+      required this.specificLibraries,
+      required this.unlimited,
+      required this.sessions});
 
   Map<String, String> toBody() => {
-    'code': code,
-    if (duration != null) 'duration': duration!.inMinutes.toString(),
-    if (expires != null) 'expires': expires!.inMinutes.toString(),
-    'live_tv': 'false',
-    'plex_allow_sync': 'false',
-    'plex_home': 'false',
-    'sessions': sessions.toString(),
-    'unlimited': unlimited ? 'true' : 'false',
-    'specific_libraries': jsonEncode(specificLibraries),
-  };
+        'code': code,
+        if (duration != null) 'duration': duration!.inMinutes.toString(),
+        if (expires != null) 'expires': expires!.inMinutes.toString(),
+        'live_tv': 'false',
+        'plex_allow_sync': 'false',
+        'plex_home': 'false',
+        'sessions': sessions.toString(),
+        'unlimited': unlimited ? 'true' : 'false',
+        'specific_libraries': jsonEncode(specificLibraries),
+      };
 }
 
 class WizarrClient {
@@ -54,7 +60,8 @@ class WizarrClient {
 
   WizarrClient({required this.baseUrl, required this.token, required this.configName});
 
-  Future<InvitationValidationResult> validateInvitation(String code, String username, String password, String email) async {
+  Future<InvitationValidationResult> validateInvitation(
+      String code, String username, String password, String email) async {
     var t = Random.secure().nextInt(100000);
 
     final tempSid = await _fetchSid(t);
@@ -86,7 +93,8 @@ class WizarrClient {
     return body.map((element) => Library.parseJson(element as Map<String, dynamic>)).toList();
   }
 
-  Future<InvitationValidationResult> _validateInvitation(String code, String username, String password, String email, String sid) async {
+  Future<InvitationValidationResult> _validateInvitation(
+      String code, String username, String password, String email, String sid) async {
     final result = await http.post(_getUri("/api/jellyfin"), body: {
       "username": username,
       "email": email,
@@ -113,12 +121,14 @@ class WizarrClient {
   }
 
   Future<void> _validateSid(int t, String sid) async {
-    final result = await http.post(_getUri("/socket.io/", parameters: {
-      "EIO": "4",
-      "transport": "polling",
-      "t": t.toString(),
-      'sid': sid,
-    }), body: '40/jellyfin,');
+    final result = await http.post(
+        _getUri("/socket.io/", parameters: {
+          "EIO": "4",
+          "transport": "polling",
+          "t": t.toString(),
+          'sid': sid,
+        }),
+        body: '40/jellyfin,');
 
     if (result.body != 'OK') {
       throw Exception("Cannot validate sid");
@@ -126,7 +136,7 @@ class WizarrClient {
   }
 
   Future<String> _fetchFinalSid(int t, String sid) async {
-    final result =  await http.get(_getUri("/socket.io/", parameters: {
+    final result = await http.get(_getUri("/socket.io/", parameters: {
       "EIO": "4",
       "transport": "polling",
       "t": t.toString(),
@@ -138,7 +148,7 @@ class WizarrClient {
 
     return bodyJson['sid'];
   }
-  
+
   Future<http.Response> _getAuth(Uri uri) => http.get(uri, headers: _getHeaders(includeAuth: true));
   Future<http.BaseResponse> _postAuth(Uri uri, Map<String, dynamic> body, {bool encodeJson = true}) {
     if (encodeJson) {
@@ -166,5 +176,6 @@ class WizarrClient {
     return headers;
   }
 
-  Uri _getUri(String path, {Map<String, String> parameters = const {}}) => Uri.parse('$baseUrl$path').replace(queryParameters: parameters);
+  Uri _getUri(String path, {Map<String, String> parameters = const {}}) =>
+      Uri.parse('$baseUrl$path').replace(queryParameters: parameters);
 }

@@ -50,106 +50,144 @@ Future<AuthenticatedJellyfinClient> getJellyfinClient(JellyfinConfigUser? config
 final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
   jellyfinFeatureEnabledCheck,
 ], children: [
-  ChatGroup(
-    "wizarr",
-    "Wizarr related commands",
-    children: [
-      ChatCommand(
-        "redeem-invitation",
-        "Redeem invitation code",
-        id("jellyfin-wizarr-redeem-invitation", (InteractionChatContext context, String code, [@Description("Instance to use. Default selected if not provided") JellyfinConfig? config]) async {
-          final client = await Injector.appInstance
-              .get<JellyfinModuleV2>()
-              .fetchGetWizarrClientWithFallback(originalConfig: config, parentId: context.guild?.id ?? context.user.id);
+  ChatGroup("wizarr", "Wizarr related commands", children: [
+    ChatCommand(
+      "redeem-invitation",
+      "Redeem invitation code",
+      id("jellyfin-wizarr-redeem-invitation", (InteractionChatContext context, String code,
+          [@Description("Instance to use. Default selected if not provided") JellyfinConfig? config]) async {
+        final client = await Injector.appInstance
+            .get<JellyfinModuleV2>()
+            .fetchGetWizarrClientWithFallback(originalConfig: config, parentId: context.guild?.id ?? context.user.id);
 
-          return await context.respond(getWizarrRedeemInvitationMessageBuilder(client, code, context.user.id, context.guild?.id ?? context.user.id, client.configName), level: ResponseLevel.private);
-        }),
-      ),
-      ChatCommand(
-        "create-invitation",
-        "Create wizarr invitation",
-        id("jellyfin-wizarr-create-invitation", (InteractionChatContext context, [@Description('Inform user about invitation') User? user, @Description("Instance to use. Default selected if not provided") JellyfinConfigUser? config]) async {
-          final jellyfinClient = await getJellyfinClient(config, context);
-          final currentUser = await jellyfinClient.getCurrentUser();
+        return await context.respond(
+            getWizarrRedeemInvitationMessageBuilder(
+                client, code, context.user.id, context.guild?.id ?? context.user.id, client.configName),
+            level: ResponseLevel.private);
+      }),
+    ),
+    ChatCommand(
+      "create-invitation",
+      "Create wizarr invitation",
+      id("jellyfin-wizarr-create-invitation", (InteractionChatContext context,
+          [@Description('Inform user about invitation') User? user,
+          @Description("Instance to use. Default selected if not provided") JellyfinConfigUser? config]) async {
+        final jellyfinClient = await getJellyfinClient(config, context);
+        final currentUser = await jellyfinClient.getCurrentUser();
 
-          if (!(currentUser.policy?.isAdministrator ?? false)) {
-            return context.respond(MessageBuilder(content: "This command can use only logged jellyfin users with administrator privileges."), level: ResponseLevel.private);
-          }
-
-          final wizarrClient = await Injector.appInstance.get<JellyfinModuleV2>().fetchGetWizarrClientWithFallback(originalConfig: jellyfinClient.configUser.config!, parentId: context.guild?.id ?? context.user.id);
-
-          final librariesMap = Map.fromEntries((await wizarrClient.getAvailableLibraries()).map((library) => MapEntry(library.name, library.id)));
-
-          final firstModal = await context.getModal(title: "Create Wizarr invitation", components: [
-            TextInputBuilder(customId: "code", style: TextInputStyle.short, label: "Invitation Code (6 characters)", isRequired: true, value: generateRandomString(6)),
-            TextInputBuilder(customId: "expiration", style: TextInputStyle.short, label: "Invitation expiration (or Unlimited)", isRequired: true, value: '1 Day'),
-            TextInputBuilder(customId: "unlimited_usage", style: TextInputStyle.short, label: "Allow unlimited usages (True/False)", isRequired: true, value: 'False'),
-          ]);
-
-          final message = await context.respond(
-              MessageBuilder(content: "Click to open second modal and continue", components: [
-                ActionRowBuilder(components: [
-                  ButtonBuilder.primary(
-                      customId: ComponentId.generate(allowedUser: context.user.id).toString(), label: 'Open modal')
-                ])
-              ]),
+        if (!(currentUser.policy?.isAdministrator ?? false)) {
+          return context.respond(
+              MessageBuilder(content: "This command can use only logged jellyfin users with administrator privileges."),
               level: ResponseLevel.private);
-          await context.getButtonPress(message);
+        }
 
-          final secondModal = await context.getModal(title: 'Create Wizarr invitation', components: [
-            TextInputBuilder(customId: "simultaneous_logins_max_number", style: TextInputStyle.short, label: "Maximum Number of Simultaneous Logins", isRequired: true, value: 'Unlimited'),
-            TextInputBuilder(customId: "account_duration", style: TextInputStyle.short, label: "User Account Duration", isRequired: true, value: 'Unlimited'),
-            // TextInputBuilder(customId: "libraries", style: TextInputStyle.short, label: "Allowed Libraries", isRequired: true, value: librariesMap.entries.map((entry) => entry.key).join(",")),
-          ]);
+        final wizarrClient = await Injector.appInstance.get<JellyfinModuleV2>().fetchGetWizarrClientWithFallback(
+            originalConfig: jellyfinClient.configUser.config!, parentId: context.guild?.id ?? context.user.id);
 
-          final librariesSelection = await context.getMultiSelection(librariesMap.entries.map((entry) => entry.key).toList(), MessageBuilder(content: 'Select wanted libraries to finish code creation'), level: ResponseLevel.private, authorOnly: true);
+        final librariesMap = Map.fromEntries(
+            (await wizarrClient.getAvailableLibraries()).map((library) => MapEntry(library.name, library.id)));
 
-          final accountDuration = getDurationFromStringOrDefault(valueOrNullIfNotDefault(secondModal['account_duration']), Duration(days: 1));
-          final expiresDuration = getDurationFromStringOrDefault(valueOrNullIfNotDefault(firstModal['expiration']), null);
-          final code = firstModal['code']!;
+        final firstModal = await context.getModal(title: "Create Wizarr invitation", components: [
+          TextInputBuilder(
+              customId: "code",
+              style: TextInputStyle.short,
+              label: "Invitation Code (6 characters)",
+              isRequired: true,
+              value: generateRandomString(6)),
+          TextInputBuilder(
+              customId: "expiration",
+              style: TextInputStyle.short,
+              label: "Invitation expiration (or Unlimited)",
+              isRequired: true,
+              value: '1 Day'),
+          TextInputBuilder(
+              customId: "unlimited_usage",
+              style: TextInputStyle.short,
+              label: "Allow unlimited usages (True/False)",
+              isRequired: true,
+              value: 'False'),
+        ]);
 
-          final createInvitationRequest = CreateInvitationRequest(
-              code: code,
-              expires: accountDuration,
-              duration: expiresDuration,
-              specificLibraries: librariesSelection.map((libraryName) => librariesMap[libraryName]).nonNulls.toList(),
-              unlimited: firstModal['unlimited_usage']?.toLowerCase() == 'true',
-              sessions: int.tryParse(secondModal['simultaneous_logins_max_number']!) ?? 0,
-          );
+        final message = await context.respond(
+            MessageBuilder(content: "Click to open second modal and continue", components: [
+              ActionRowBuilder(components: [
+                ButtonBuilder.primary(
+                    customId: ComponentId.generate(allowedUser: context.user.id).toString(), label: 'Open modal')
+              ])
+            ]),
+            level: ResponseLevel.private);
+        await context.getButtonPress(message);
 
-          final result = await wizarrClient.createInvitation(createInvitationRequest);
+        final secondModal = await context.getModal(title: 'Create Wizarr invitation', components: [
+          TextInputBuilder(
+              customId: "simultaneous_logins_max_number",
+              style: TextInputStyle.short,
+              label: "Maximum Number of Simultaneous Logins",
+              isRequired: true,
+              value: 'Unlimited'),
+          TextInputBuilder(
+              customId: "account_duration",
+              style: TextInputStyle.short,
+              label: "User Account Duration",
+              isRequired: true,
+              value: 'Unlimited'),
+        ]);
 
-          if (result) {
-            var messageToUserSent = '';
-            if (user != null) {
-              messageToUserSent = ' Message to user ${user.mention} sent.';
+        final librariesSelection = await context.getMultiSelection(
+            librariesMap.entries.map((entry) => entry.key).toList(),
+            MessageBuilder(content: 'Select wanted libraries to finish code creation'),
+            level: ResponseLevel.private,
+            authorOnly: true);
 
-              (await user.manager.createDm(user.id)).sendMessage(getWizarrRedeemInvitationMessageBuilder(
-                wizarrClient,
-                code,
-                user.id,
-                context.guild?.id ?? context.user.id,
-                wizarrClient.configName,
-              ));
-            }
+        final accountDuration =
+            getDurationFromStringOrDefault(valueOrNullIfNotDefault(secondModal['account_duration']), Duration(days: 1));
+        final expiresDuration = getDurationFromStringOrDefault(valueOrNullIfNotDefault(firstModal['expiration']), null);
+        final code = firstModal['code']!;
 
-            return context.respond(MessageBuilder(content: 'Invitation with code: `${createInvitationRequest.code}` created.$messageToUserSent'), level: ResponseLevel.private);
+        final createInvitationRequest = CreateInvitationRequest(
+          code: code,
+          expires: accountDuration,
+          duration: expiresDuration,
+          specificLibraries: librariesSelection.map((libraryName) => librariesMap[libraryName]).nonNulls.toList(),
+          unlimited: firstModal['unlimited_usage']?.toLowerCase() == 'true',
+          sessions: int.tryParse(secondModal['simultaneous_logins_max_number']!) ?? 0,
+        );
+
+        final result = await wizarrClient.createInvitation(createInvitationRequest);
+
+        if (result) {
+          var messageToUserSent = '';
+          if (user != null) {
+            messageToUserSent = ' Message to user ${user.mention} sent.';
+
+            (await user.manager.createDm(user.id)).sendMessage(getWizarrRedeemInvitationMessageBuilder(
+              wizarrClient,
+              code,
+              user.id,
+              context.guild?.id ?? context.user.id,
+              wizarrClient.configName,
+            ));
           }
 
-          return context.respond(MessageBuilder(content: 'Cannot create invitation. Contact administrator.'), level: ResponseLevel.private);
-        }),
-      ),
-    ]
-  ),
+          return context.respond(
+              MessageBuilder(
+                  content: 'Invitation with code: `${createInvitationRequest.code}` created.$messageToUserSent'),
+              level: ResponseLevel.private);
+        }
+
+        return context.respond(MessageBuilder(content: 'Cannot create invitation. Contact administrator.'),
+            level: ResponseLevel.private);
+      }),
+    ),
+  ]),
   ChatGroup("sonarr", "Sonarr related commands", children: [
     ChatCommand(
       "calendar",
       "Show upcoming episodes",
       id("jellyfin-sonarr-calendar", (ChatContext context,
           [@Description("Instance to use. Default selected if not provided") JellyfinConfigUser? config]) async {
-        final client = await Injector.appInstance
-            .get<JellyfinModuleV2>()
-            .fetchGetSonarrClientWithFallback(originalConfig: config?.config, parentId: context.guild?.id ?? context.user.id);
+        final client = await Injector.appInstance.get<JellyfinModuleV2>().fetchGetSonarrClientWithFallback(
+            originalConfig: config?.config, parentId: context.guild?.id ?? context.user.id);
 
         final calendarItems = await client.fetchCalendar(end: DateTime.now().add(Duration(days: 7)));
         final embeds = getSonarrCalendarEmbeds(calendarItems);
@@ -273,10 +311,13 @@ final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
 
           final initiationResult = await client.initiateLoginByQuickConnect();
 
-          await context.respond(MessageBuilder(content: "Quick Connect code: `${initiationResult.code}`. Waiting for confirmation..."), level: ResponseLevel.private);
+          await context.respond(
+              MessageBuilder(content: "Quick Connect code: `${initiationResult.code}`. Waiting for confirmation..."),
+              level: ResponseLevel.private);
           Timer.periodic(Duration(seconds: 2), (Timer timer) async {
             if (timer.tick > 30) {
-              context.interaction.updateOriginalResponse(MessageUpdateBuilder(content: "Cannot login. Took too long to confirm code"));
+              context.interaction
+                  .updateOriginalResponse(MessageUpdateBuilder(content: "Cannot login. Took too long to confirm code"));
               timer.cancel();
             }
 
@@ -289,24 +330,28 @@ final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
 
             final finishResult = await client.finishLoginByQuickConnect(initiationResult);
             if (finishResult == null) {
-              context.interaction.updateOriginalResponse(MessageUpdateBuilder(content: "Cannot login. Contact with bot admin!"));
+              context.interaction
+                  .updateOriginalResponse(MessageUpdateBuilder(content: "Cannot login. Contact with bot admin!"));
               return;
             }
 
-            final loginResult = await Injector.appInstance.get<JellyfinModuleV2>().login(config, finishResult, context.user.id);
+            final loginResult =
+                await Injector.appInstance.get<JellyfinModuleV2>().login(config, finishResult, context.user.id);
             if (loginResult) {
               context.interaction.updateOriginalResponse(MessageUpdateBuilder(content: "Logged in successfully!"));
               return;
             }
 
-            context.interaction.updateOriginalResponse(MessageUpdateBuilder(content: "Cannot login. Contact with bot admin!"));
+            context.interaction
+                .updateOriginalResponse(MessageUpdateBuilder(content: "Cannot login. Contact with bot admin!"));
           });
         }),
       ),
       ChatCommand(
         "current-user",
         "Display info about current jellyfin user",
-        id('jellyfin-user-current-user', (ChatContext context, [@Description("Instance to use. Default selected if not provided") JellyfinConfigUser? config]) async {
+        id('jellyfin-user-current-user', (ChatContext context,
+            [@Description("Instance to use. Default selected if not provided") JellyfinConfigUser? config]) async {
           final client = await getJellyfinClient(config, context);
 
           final currentUser = await client.getCurrentUser();
@@ -403,10 +448,11 @@ final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
         checks: [
           jellyfinFeatureCreateInstanceCommandCheck,
         ]),
-      ChatCommand(
+    ChatCommand(
         "edit-instance",
         "Edit jellyfin instance",
-        id('jellyfin-settings-edit-instance', (InteractionChatContext context, @Description("Instance to use. Default selected if not provided") JellyfinConfig config) async {
+        id('jellyfin-settings-edit-instance', (InteractionChatContext context,
+            @Description("Instance to use. Default selected if not provided") JellyfinConfig config) async {
           final modalResponse = await context.getModal(title: "Jellyfin Instance Edit Pt. 1", components: [
             TextInputBuilder(
                 customId: "base_url",
