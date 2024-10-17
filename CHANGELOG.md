@@ -1,3 +1,11 @@
+## 4.2.0
+
+- Add sonarr calendar API
+- Implement pipelines
+- Rework jellyfin implementation
+- Implement wizarr support
+- Code cleanup
+
 ## 4.1.2
 
 - Improve Injector implementation
