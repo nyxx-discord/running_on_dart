@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/external/sonarr.dart';
@@ -9,6 +10,52 @@ import 'package:tentacle/tentacle.dart';
 import 'package:tentacle/src/auth/auth.dart' show AuthInterceptor;
 import 'package:dio/dio.dart' show RequestInterceptorHandler, RequestOptions;
 import 'package:built_collection/built_collection.dart';
+
+MessageBuilder getWizarrRedeemInvitationMessageBuilder(WizarrClient client, String code, Snowflake userId, Snowflake parentId, String configName) {
+  return MessageBuilder(content: "Redeem Wizarr invitation to jellyfin instance. Your code: `$code`. \nYou can also redeem later using slash command: `/jellyfin wizarr redeem-invitation`", components: [
+    ActionRowBuilder(components: [
+      ButtonBuilder.link(url: Uri.parse("${client.baseUrl}/j/$code"), label: "Redeem code in browser"),
+      ButtonBuilder.primary(customId: ReminderRedeemWizarrInvitationId.button(userId: userId, code: code, parentId: parentId, configName: configName).toString(), label: "Redeem here"),
+    ])
+  ]);
+}
+
+class ReminderRedeemWizarrInvitationId {
+  static String buttonIdentifier = 'ReminderRedeemWizarrInvitationButtonIdButton';
+  static String modalIdentifier = 'ReminderRedeemWizarrInvitationButtonIdModal';
+
+  final String identifier;
+  final Snowflake userId;
+  final String code;
+  final Snowflake parentId;
+  final String configName;
+
+  bool get isButton => identifier == buttonIdentifier;
+  bool get isModal => identifier == modalIdentifier;
+
+  ReminderRedeemWizarrInvitationId({required this.identifier, required this.userId, required this.code, required this.parentId, required this.configName});
+  factory ReminderRedeemWizarrInvitationId.button({required Snowflake userId, required String code, required Snowflake parentId, required String configName}) => ReminderRedeemWizarrInvitationId(identifier: buttonIdentifier, userId: userId, code: code, parentId: parentId, configName: configName);
+  factory ReminderRedeemWizarrInvitationId.modal({required Snowflake userId, required String code, required Snowflake parentId, required String configName}) => ReminderRedeemWizarrInvitationId(identifier: modalIdentifier, userId: userId, code: code, parentId: parentId, configName: configName);
+
+  static ReminderRedeemWizarrInvitationId? parse(String idString) {
+    final idParts = idString.split("/");
+
+    if (idParts.isEmpty || ![buttonIdentifier, modalIdentifier].contains(idParts[0])) {
+      return null;
+    }
+
+    return ReminderRedeemWizarrInvitationId(
+      identifier: idParts[0],
+      userId: Snowflake.parse(idParts[1]),
+      code: idParts[2],
+      parentId: Snowflake.parse(idParts[3]),
+      configName: idParts[4],
+    );
+  }
+
+  @override
+  String toString() => "$identifier/$userId/$code/$parentId/$configName";
+}
 
 class AuthenticatedJellyfinClient {
   final Tentacle jellyfinClient;
@@ -167,9 +214,77 @@ class JellyfinConfigNotFoundException implements Exception {
 
 class JellyfinModuleV2 implements RequiresInitialization {
   final JellyfinConfigRepository _jellyfinConfigRepository = Injector.appInstance.get();
+  final NyxxGateway _client = Injector.appInstance.get();
 
   @override
-  Future<void> init() async {}
+  Future<void> init() async {
+    _client.onMessageComponentInteraction
+        .where((event) => event.interaction.data.type == MessageComponentType.button)
+        .listen(_handleButtonInteractionForWizarrRedeemInvitation);
+
+    _client.onModalSubmitInteraction.listen(_handleModalInteractionForWizarrRedeemInvitation);
+  }
+
+  Future<void> _handleModalInteractionForWizarrRedeemInvitation(InteractionCreateEvent<ModalSubmitInteraction> event) async {
+    final customId = ReminderRedeemWizarrInvitationId.parse(event.interaction.data.customId);
+    if (customId == null || !customId.isModal) {
+      return;
+    }
+
+    if (customId.userId != event.interaction.user?.id) {
+      return event.interaction.respond(MessageBuilder(content: "Invalid interaction"));
+    }
+
+    final modalComponents = event.interaction.data.components.cast<ActionRowComponent>().map((row) => row.components).flattened.cast<TextInputComponent>();
+
+    final usernameComponent = modalComponents.firstWhere((component) => component.customId == 'username');
+    final passwordComponent = modalComponents.firstWhere((component) => component.customId == 'password');
+    final emailComponent = modalComponents.firstWhere((component) => component.customId == 'email');
+
+    final config = await getJellyfinConfig(customId.configName, customId.parentId);
+    final client = await fetchGetWizarrClientWithFallback(originalConfig: config, parentId: customId.parentId);
+
+    final redeemResult = await client.validateInvitation(customId.code, usernameComponent.value!, passwordComponent.value!, emailComponent.value!);
+
+    event.interaction.respond(
+      MessageBuilder(
+        content: "Invitation redeemed (username: ${redeemResult.username})",
+        components: [
+          ActionRowBuilder(components: [
+            ButtonBuilder.link(url: Uri.parse(config!.basePath), label: "Go to Jellyfin"),
+            ButtonBuilder.link(url: Uri.parse('https://jellyfin.org/downloads'), label: "Download Jellyfin client"),
+          ])
+        ]
+      )
+    );
+  }
+
+  Future<void> _handleButtonInteractionForWizarrRedeemInvitation(InteractionCreateEvent<MessageComponentInteraction> event) async {
+    final customId = ReminderRedeemWizarrInvitationId.parse(event.interaction.data.customId);
+    if (customId == null || !customId.isButton) {
+      return;
+    }
+
+    if (customId.userId != event.interaction.user?.id) {
+      return event.interaction.respond(MessageBuilder(content: "Invalid interaction"));
+    }
+
+    event.interaction.respondModal(ModalBuilder(
+      customId: ReminderRedeemWizarrInvitationId.modal(userId: customId.userId, code: customId.code, parentId: customId.parentId, configName: customId.configName).toString(),
+      title: "Redeem wizarr code",
+      components: [
+        ActionRowBuilder(components: [
+          TextInputBuilder(customId: "username", style: TextInputStyle.short, label: "Username", isRequired: true),
+        ]),
+        ActionRowBuilder(components: [
+          TextInputBuilder(customId: "password", style: TextInputStyle.short, label: "Password", isRequired: true),
+        ]),
+        ActionRowBuilder(components: [
+          TextInputBuilder(customId: "email", style: TextInputStyle.short, label: "Email", isRequired: true),
+        ]),
+      ]
+    ));
+  }
 
   Future<JellyfinConfig?> getJellyfinConfig(String name, Snowflake parentId) {
     return _jellyfinConfigRepository.getByNameAndGuild(name, parentId.toString());
@@ -190,7 +305,7 @@ class JellyfinModuleV2 implements RequiresInitialization {
       throw JellyfinConfigNotFoundException("Wizarr not configured!");
     }
 
-    return WizarrClient(baseUrl: config.wizarrBasePath!, token: config.wizarrToken!);
+    return WizarrClient(baseUrl: config.wizarrBasePath!, token: config.wizarrToken!, configName: config.name);
   }
 
   Future<SonarrClient> fetchGetSonarrClientWithFallback(

@@ -226,12 +226,3 @@ EmbedBuilder getUserInfoEmbed(UserDto currentUser, AuthenticatedJellyfinClient c
     ],
   );
 }
-
-MessageBuilder getWizarrInvitationCodeRedeemMessage(String code, WizarrClient client, Snowflake userId) {
-  return MessageBuilder(content: "Redeem Wizarr invitation (code: $code)", components: [
-    ActionRowBuilder(components: [
-      ButtonBuilder.link(url: Uri.parse("${client.baseUrl}/j/$code"), label: "Redeem code in browser"),
-      ButtonBuilder.primary(customId: ComponentId.generate(allowedUser: userId).toString(), label: "Redeem here"),
-    ])
-  ]);
-}

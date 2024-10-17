@@ -57,32 +57,12 @@ final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
       ChatCommand(
         "redeem-invitation",
         "Redeem invitation code",
-        id("jellyfin-wizarr-redeem-invitation", (InteractionChatContext context, String code, [@Description("Instance to use. Default selected if not provided") JellyfinConfigUser? config]) async {
+        id("jellyfin-wizarr-redeem-invitation", (InteractionChatContext context, String code, [@Description("Instance to use. Default selected if not provided") JellyfinConfig? config]) async {
           final client = await Injector.appInstance
               .get<JellyfinModuleV2>()
-              .fetchGetWizarrClientWithFallback(originalConfig: config?.config, parentId: context.guild?.id ?? context.user.id);
+              .fetchGetWizarrClientWithFallback(originalConfig: config, parentId: context.guild?.id ?? context.user.id);
 
-          final message = await context.respond(getWizarrInvitationCodeRedeemMessage(code, client, context.user.id), level: ResponseLevel.private);
-
-          await context.getButtonPress(message);
-          final modalResult = await context.getModal(title: "Redeem wizarr code", components: [
-            TextInputBuilder(customId: "username", style: TextInputStyle.short, label: "Username", isRequired: true),
-            TextInputBuilder(customId: "password", style: TextInputStyle.short, label: "Password", isRequired: true),
-            TextInputBuilder(customId: "email", style: TextInputStyle.short, label: "Email", isRequired: true),
-          ]);
-          final redeemResult = await client.validateInvitation(code, modalResult['username']!, modalResult['password']!, modalResult['email']!);
-
-          context.respond(
-            MessageBuilder(
-              content: "Invitation redeemed (username: ${redeemResult.username})",
-              components: [
-                ActionRowBuilder(components: [
-                  ButtonBuilder.link(url: Uri.parse(config!.config!.basePath), label: "Go to Jellyfin"),
-                  ButtonBuilder.link(url: Uri.parse('https://jellyfin.org/downloads'), label: "Download Jellyfin client"),
-                ])
-              ]
-            )
-          );
+          return await context.respond(getWizarrRedeemInvitationMessageBuilder(client, code, context.user.id, context.guild?.id ?? context.user.id, client.configName), level: ResponseLevel.private);
         }),
       ),
       ChatCommand(
@@ -126,9 +106,10 @@ final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
 
           final accountDuration = getDurationFromStringOrDefault(valueOrNullIfNotDefault(secondModal['account_duration']), Duration(days: 1));
           final expiresDuration = getDurationFromStringOrDefault(valueOrNullIfNotDefault(firstModal['expiration']), null);
+          final code = firstModal['code']!;
 
           final createInvitationRequest = CreateInvitationRequest(
-              code: firstModal['code']!,
+              code: code,
               expires: accountDuration,
               duration: expiresDuration,
               specificLibraries: librariesSelection.map((libraryName) => librariesMap[libraryName]).nonNulls.toList(),
@@ -139,7 +120,19 @@ final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
           final result = await wizarrClient.createInvitation(createInvitationRequest);
 
           if (result) {
-            final messageToUserSent = user != null ? ' Message to user ${user.mention} sent.' : '';
+            var messageToUserSent = '';
+            if (user != null) {
+              messageToUserSent = ' Message to user ${user.mention} sent.';
+
+              (await user.manager.createDm(user.id)).sendMessage(getWizarrRedeemInvitationMessageBuilder(
+                wizarrClient,
+                code,
+                user.id,
+                context.guild?.id ?? context.user.id,
+                wizarrClient.configName,
+              ));
+            }
+
             return context.respond(MessageBuilder(content: 'Invitation with code: `${createInvitationRequest.code}` created.$messageToUserSent'), level: ResponseLevel.private);
           }
 

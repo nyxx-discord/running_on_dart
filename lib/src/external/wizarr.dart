@@ -50,8 +50,9 @@ class CreateInvitationRequest {
 class WizarrClient {
   final String baseUrl;
   final String token;
+  final String configName;
 
-  WizarrClient({required this.baseUrl, required this.token});
+  WizarrClient({required this.baseUrl, required this.token, required this.configName});
 
   Future<InvitationValidationResult> validateInvitation(String code, String username, String password, String email) async {
     var t = Random.secure().nextInt(100000);
