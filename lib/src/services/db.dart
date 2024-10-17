@@ -25,7 +25,7 @@ String host = getEnv('DB_HOST', 'db');
 int port = int.parse(getEnv('DB_PORT', '5432'));
 
 class DatabaseService implements RequiresInitialization {
-  late PostgreSQLConnection _connection;
+  late Connection _connection;
   final Logger _logger = Logger('ROD.Database');
 
   @override
@@ -37,19 +37,20 @@ class DatabaseService implements RequiresInitialization {
   Future<void> _connect() async {
     _logger.info('Connecting to database');
 
-    _connection = PostgreSQLConnection(
-      host,
-      port,
-      databaseName,
-      username: user,
-      password: password,
-    );
-
-    await _connection.open();
+    _connection = await Connection.open(
+        Endpoint(
+          host: host,
+          port: port,
+          database: databaseName,
+          username: user,
+          password: password,
+        ),
+        settings: ConnectionSettings(sslMode: SslMode.disable));
 
     _logger.info('Running database migrations');
 
-    final migrator = MigentMigrationRunner(_connection, databaseName, MemoryMigrationAccess())
+    final migrator = MigentMigrationRunner(
+        connection: _connection, databaseName: databaseName, migrationAccess: MemoryMigrationAccess())
       ..enqueueMigration('1', '''
       CREATE TABLE tags (
         id SERIAL PRIMARY KEY,
@@ -115,7 +116,7 @@ class DatabaseService implements RequiresInitialization {
       ALTER TABLE reminders ALTER COLUMN message TYPE VARCHAR(200)
     ''')
       ..enqueueMigration('1.8', '''
-      ALTER TABLE reminders ADD COLUMN active BOOLEAN NOT NULL; 
+      ALTER TABLE reminders ADD COLUMN active BOOLEAN NOT NULL;
     ''')
       ..enqueueMigration('1.9', '''
       CREATE INDEX name_trgm_idx ON tags USING gin (name gin_trgm_ops);
@@ -141,12 +142,40 @@ class DatabaseService implements RequiresInitialization {
       );
       CREATE UNIQUE INDEX idx_jellyfin_configs_unique_name ON jellyfin_configs(name, guild_id);
       CREATE UNIQUE INDEX idx_jellyfin_configs_unique_default ON jellyfin_configs(guild_id, is_default) WHERE is_default = TRUE;
-      ''');
+      ''')
+      ..enqueueMigration("2.5", '''
+      ALTER TABLE jellyfin_configs ADD COLUMN sonarr_base_path VARCHAR DEFAULT NULL;
+      ''')
+      ..enqueueMigration("2.6", '''
+      ALTER TABLE jellyfin_configs ADD COLUMN sonarr_token VARCHAR DEFAULT NULL;
+      ''')
+      ..enqueueMigration("2.7", '''
+      ALTER TABLE jellyfin_configs ADD COLUMN wizarr_base_path VARCHAR DEFAULT NULL;
+      ''')
+      ..enqueueMigration("2.8", '''
+      ALTER TABLE jellyfin_configs ADD COLUMN wizarr_token VARCHAR DEFAULT NULL;
+      ''')
+      ..enqueueMigration("2.9", 'ALTER TABLE jellyfin_configs DROP COLUMN token')
+      ..enqueueMigration("2.10", '''
+        CREATE TABLE jellyfin_user_configs (
+          id SERIAL PRIMARY KEY,
+          user_id VARCHAR NOT NULL,
+          token VARCHAR NOT NULL,
+          jellyfin_config_id INT NOT NULL,
+          CONSTRAINT fk_jellyfin_configs
+            FOREIGN KEY(jellyfin_config_id) 
+            REFERENCES jellyfin_configs(id)
+        );
+      ''')
+      ..enqueueMigration("2.11",
+          'CREATE UNIQUE INDEX idx_jellyfin_configs_user_id ON jellyfin_user_configs(user_id, jellyfin_config_id);')
+      ..enqueueMigration("2.12",
+          'ALTER TABLE jellyfin_user_configs ADD CONSTRAINT jellyfin_configs_user_id_unique UNIQUE (user_id, jellyfin_config_id);');
 
     await migrator.runMigrations();
 
     _logger.info('Connected to database');
   }
 
-  PostgreSQLConnection getConnection() => _connection;
+  Connection getConnection() => _connection;
 }

@@ -109,10 +109,7 @@ final reminder = ChatGroup(
       'clear',
       'Remove all your reminders',
       id('reminder-clear', (ChatContext context) async {
-        await Future.wait(Injector.appInstance
-            .get<ReminderModule>()
-            .getUserReminders(context.user.id)
-            .map((reminder) => Injector.appInstance.get<ReminderModule>().removeReminder(reminder)));
+        Injector.appInstance.get<ReminderModule>().removeAllRemindersForUser(context.user.id);
 
         await context.respond(MessageBuilder(content: 'Successfully cleared all your reminders.'));
       }),
