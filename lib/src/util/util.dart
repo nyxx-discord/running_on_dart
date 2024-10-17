@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:collection/collection.dart';
+import 'package:human_duration_parser/human_duration_parser.dart';
 import 'package:nyxx/nyxx.dart';
 
 final random = Random();
@@ -42,3 +44,17 @@ String? valueOrNull(String? value) {
 String generateRandomString(int length) =>
     String.fromCharCodes(Iterable.generate(length, (_) => _chars.codeUnitAt(random.nextInt(_chars.length))))
         .toUpperCase();
+
+Iterable<MessageBuilder> spliceEmbedsForMessageBuilders(Iterable<EmbedBuilder> embeds, [int sliceSize = 2]) sync* {
+  for (final splicedEmbeds in embeds.slices(sliceSize)) {
+    yield MessageBuilder(embeds: splicedEmbeds);
+  }
+}
+
+Duration? getDurationFromStringOrDefault(String? durationString, Duration? defaultDuration) {
+  if (durationString == null) {
+    return defaultDuration;
+  }
+
+  return parseStringToDuration(durationString) ?? defaultDuration;
+}

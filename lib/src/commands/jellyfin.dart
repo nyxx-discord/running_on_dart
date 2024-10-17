@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:human_duration_parser/human_duration_parser.dart';
 import 'package:injector/injector.dart';
 import 'package:intl/intl.dart';
 import 'package:nyxx/nyxx.dart';
@@ -17,20 +16,6 @@ import 'package:running_on_dart/src/util/util.dart';
 import 'package:tentacle/tentacle.dart';
 
 final taskProgressFormat = NumberFormat("0.00");
-
-Iterable<MessageBuilder> spliceEmbedsForMessageBuilders(Iterable<EmbedBuilder> embeds, [int sliceSize = 2]) sync* {
-  for (final splicedEmbeds in embeds.slices(sliceSize)) {
-    yield MessageBuilder(embeds: splicedEmbeds);
-  }
-}
-
-Duration? getDurationFromStringOrDefault(String? durationString, Duration? defaultDuration) {
-  if (durationString == null) {
-    return defaultDuration;
-  }
-
-  return parseStringToDuration(durationString) ?? defaultDuration;
-}
 
 String? valueOrNullIfNotDefault(String? value, [String ifNotDefault = 'Unlimited']) {
   if (value == ifNotDefault) {

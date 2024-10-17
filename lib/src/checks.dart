@@ -46,6 +46,6 @@ final jellyfinFeatureCreateInstanceCommandCheck = Check(
 
     final roleId = Snowflake.parse(setting!.dataAsJson!['create_instance_role']);
 
-    return context.member!.roleIds.contains(roleId);
+    return (context.member?.permissions?.isAdministrator ?? false) || context.member!.roleIds.contains(roleId);
   },
 );
