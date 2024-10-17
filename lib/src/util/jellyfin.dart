@@ -1,7 +1,10 @@
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:nyxx/nyxx.dart';
+import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
+import 'package:running_on_dart/src/external/sonarr.dart';
+import 'package:running_on_dart/src/external/wizarr.dart';
 import 'package:running_on_dart/src/modules/jellyfin.dart';
 import 'package:running_on_dart/src/util/util.dart';
 import 'package:tentacle/tentacle.dart';
@@ -12,6 +15,12 @@ final itemCriticRatingNumberFormat = NumberFormat("00");
 
 Duration parseDurationFromTicks(int ticks) => Duration(microseconds: ticks ~/ 10);
 
+String formatSeriesEpisodeString(int seriesNumber, int episodeNumber) =>
+    'S${episodeSeriesNumberFormat.format(seriesNumber)}E${episodeSeriesNumberFormat.format(episodeNumber)}';
+
+String formatShortDateTimeWithRelative(DateTime dateTime) =>
+    "${dateTime.format(TimestampStyle.shortDateTime)} (${dateTime.format(TimestampStyle.relativeTime)})";
+
 String formatProgress(int currentPositionTicks, int totalTicks) {
   final progressPercentage = currentPositionTicks / totalTicks * 100;
 
@@ -21,10 +30,26 @@ String formatProgress(int currentPositionTicks, int totalTicks) {
   return "${currentPositionDuration.formatShort()}/${totalDuration.formatShort()} (${progressPercentage.toStringAsFixed(2)}%)";
 }
 
+Iterable<EmbedBuilder> getSonarrCalendarEmbeds(Iterable<CalendarItem> calendarItems) sync* {
+  for (final item in calendarItems.take(5)) {
+    final seriesPosterUrl = item.series.images.firstWhereOrNull((image) => image.coverType == 'poster');
+
+    yield EmbedBuilder(
+      title: '${formatSeriesEpisodeString(item.seasonNumber, item.episodeNumber)} ${item.title} (${item.series.title})',
+      description: item.overview,
+      fields: [
+        EmbedFieldBuilder(name: "Air date", value: formatShortDateTimeWithRelative(item.airDateUtc), isInline: false),
+        EmbedFieldBuilder(name: "Avg runtime", value: "${item.series.runtime} mins", isInline: true),
+      ],
+      thumbnail: seriesPosterUrl != null ? EmbedThumbnailBuilder(url: Uri.parse(seriesPosterUrl.remoteUrl)) : null,
+    );
+  }
+}
+
 Iterable<EmbedFieldBuilder> getMediaInfoEmbedFields(Iterable<MediaStream> mediaStreams) sync* {
   for (final mediaStream in mediaStreams) {
     final bitrate = ((mediaStream.bitRate ?? 0) / 1024 / 1024).toStringAsFixed(2);
-    final trackTitle = mediaStream.title ?? mediaStream.displayTitle;
+    final trackTitle = (mediaStream.title ?? mediaStream.displayTitle)?.replaceFirst("- Default", "").trim();
 
     yield EmbedFieldBuilder(
         name: "Media Info (${mediaStream.type!.name})", value: "$trackTitle ($bitrate Mbps)", isInline: true);
@@ -37,7 +62,7 @@ EmbedFieldBuilder getExternalUrlsEmbedField(Iterable<ExternalUrl> externalUrls) 
   return EmbedFieldBuilder(name: "External Urls", value: fieldValue.toString(), isInline: false);
 }
 
-EmbedBuilder? buildSessionEmbed(SessionInfo sessionInfo, JellyfinClientWrapper client) {
+EmbedBuilder? buildSessionEmbed(SessionInfo sessionInfo, AuthenticatedJellyfinClient client) {
   final nowPlayingItem = sessionInfo.nowPlayingItem;
   if (nowPlayingItem == null) {
     return null;
@@ -61,7 +86,7 @@ EmbedBuilder? buildSessionEmbed(SessionInfo sessionInfo, JellyfinClientWrapper c
     ...getMediaInfoEmbedFields(primaryMediaStreams),
   ];
 
-  final footer = EmbedFooterBuilder(text: "Jellyfin instance: ${client.name}");
+  final footer = EmbedFooterBuilder(text: "Jellyfin instance: ${client.configUser.config!.name}");
   final author = EmbedAuthorBuilder(
     name: '${sessionInfo.userName} on ${sessionInfo.deviceName}',
     iconUrl: sessionInfo.userPrimaryImageTag != null ? client.getItemPrimaryImage(sessionInfo.userId!) : null,
@@ -111,7 +136,7 @@ EmbedBuilder? buildSessionEmbed(SessionInfo sessionInfo, JellyfinClientWrapper c
   return null;
 }
 
-Stream<MessageBuilder> buildMediaInfoBuilders(List<BaseItemDto> items, JellyfinClientWrapper client) async* {
+Stream<MessageBuilder> buildMediaInfoBuilders(List<BaseItemDto> items, AuthenticatedJellyfinClient client) async* {
   for (final slice in items.slices(2)) {
     final messageBuilder = MessageBuilder(embeds: []);
 
@@ -128,7 +153,7 @@ Stream<MessageBuilder> buildMediaInfoBuilders(List<BaseItemDto> items, JellyfinC
   }
 }
 
-EmbedBuilder? buildMediaEmbedBuilder(BaseItemDto item, JellyfinClientWrapper client) {
+EmbedBuilder? buildMediaEmbedBuilder(BaseItemDto item, AuthenticatedJellyfinClient client) {
   final criticRating = item.criticRating != null ? "${itemCriticRatingNumberFormat.format(item.criticRating)}%" : '?';
   final communityRating = item.communityRating != null ? itemRatingNumberFormat.format(item.communityRating) : '?';
   final rating = "$communityRating / $criticRating";
@@ -180,4 +205,24 @@ EmbedBuilder? buildMediaEmbedBuilder(BaseItemDto item, JellyfinClientWrapper cli
   }
 
   return null;
+}
+
+EmbedBuilder getUserInfoEmbed(UserDto currentUser, AuthenticatedJellyfinClient client) {
+  final thumbnail = currentUser.primaryImageTag != null
+      ? EmbedThumbnailBuilder(url: client.getUserImage(currentUser.id!, currentUser.primaryImageTag!))
+      : null;
+
+  return EmbedBuilder(
+    thumbnail: thumbnail,
+    title: currentUser.name,
+    fields: [
+      EmbedFieldBuilder(
+          name: "Last login", value: formatShortDateTimeWithRelative(currentUser.lastLoginDate!), isInline: true),
+      EmbedFieldBuilder(
+          name: "Last activity", value: formatShortDateTimeWithRelative(currentUser.lastActivityDate!), isInline: true),
+      EmbedFieldBuilder(
+          name: "Is admin?", value: currentUser.policy?.isAdministrator == true ? 'true' : 'false', isInline: true),
+      EmbedFieldBuilder(name: "Links", value: '[Profile](${client.getUserProfile(currentUser.id!)})', isInline: false)
+    ],
+  );
 }

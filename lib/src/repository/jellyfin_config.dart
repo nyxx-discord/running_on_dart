@@ -1,33 +1,35 @@
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
+import 'package:postgres/postgres.dart';
 import 'package:running_on_dart/src/models/jellyfin_config.dart';
 import 'package:running_on_dart/src/services/db.dart';
 
 class JellyfinConfigRepository {
   final _database = Injector.appInstance.get<DatabaseService>();
 
-  Future<void> deleteConfig(int id) async {
-    await _database
-        .getConnection()
-        .execute('DELETE FROM jellyfin_configs WHERE id = @id', parameters: {'id': id});
-  }
-
-  Future<Iterable<JellyfinConfig>> getDefaultConfigs() async {
-    final result = await _database.getConnection().execute('SELECT * FROM jellyfin_configs WHERE is_default = 1::bool');
-
-    return result.map((row) => row.toColumnMap()).map(JellyfinConfig.fromDatabaseRow);
-  }
-
-  Future<Iterable<JellyfinConfig>> getConfigsForGuild(Snowflake guildId) async {
-    final result = await _database.getConnection().execute('SELECT * FROM jellyfin_configs WHERE guild_id = @guildId',
-        parameters: {'guildId': guildId.toString()});
-
-    return result.map((row) => row.toColumnMap()).map(JellyfinConfig.fromDatabaseRow);
-  }
-
-  Future<JellyfinConfig?> getByName(String name, String guildId) async {
+  Future<Iterable<JellyfinConfig>> getConfigsForParent(String parentId) async {
     final result = await _database.getConnection().execute(
-        'SELECT * FROM jellyfin_configs WHERE name = @name AND guild_id = @guildId',
+        Sql.named('SELECT * FROM jellyfin_configs WHERE guild_id = @parentId'),
+        parameters: {'parentId': parentId});
+
+    return result.map((row) => row.toColumnMap()).map(JellyfinConfig.fromDatabaseRow);
+  }
+
+  Future<JellyfinConfig?> getDefaultForParent(String parentId) async {
+    final result = await _database.getConnection().execute(
+        Sql.named('SELECT * FROM jellyfin_configs WHERE is_default = 1::bool AND guild_id = @parentId LIMIT 1'),
+        parameters: {'parentId': parentId});
+
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return JellyfinConfig.fromDatabaseRow(result.first.toColumnMap());
+  }
+
+  Future<JellyfinConfig?> getByNameAndGuild(String name, String guildId) async {
+    final result = await _database.getConnection().execute(
+        Sql.named('SELECT * FROM jellyfin_configs WHERE name = @name AND guild_id = @guildId'),
         parameters: {'name': name, 'guildId': guildId});
 
     if (result.isEmpty) {
@@ -37,31 +39,94 @@ class JellyfinConfigRepository {
     return JellyfinConfig.fromDatabaseRow(result.first.toColumnMap());
   }
 
-  Future<JellyfinConfig> createJellyfinConfig(
-      String name, String basePath, String token, bool isDefault, Snowflake guildId) async {
-    final config =
-        JellyfinConfig(name: name, basePath: basePath, token: token, isDefault: isDefault, parentId: guildId);
+  Future<JellyfinConfigUser> saveJellyfinConfigUser(JellyfinConfigUser configUser) async {
+    final result = await _database.getConnection().execute(Sql.named('''
+      INSERT INTO jellyfin_user_configs (
+        user_id,
+        token,
+        jellyfin_config_id
+      ) VALUES (
+        @user_id,
+        @token,
+        @jellyfin_config_id
+      ) ON CONFLICT ON CONSTRAINT jellyfin_configs_user_id_unique DO UPDATE SET
+        token = @token
+      WHERE
+        jellyfin_user_configs.user_id = @user_id AND jellyfin_user_configs.jellyfin_config_id = @jellyfin_config_id
+      RETURNING id;
+    '''), parameters: {
+      'user_id': configUser.userId.toString(),
+      'token': configUser.token,
+      'jellyfin_config_id': configUser.jellyfinConfigId,
+    });
 
-    final result = await _database.getConnection().execute('''
+    configUser.id = result.first.first as int;
+    return configUser;
+  }
+
+  Future<JellyfinConfigUser?> getUserConfig(String userId, int configId) async {
+    final result = await _database.getConnection().execute(
+        Sql.named('SELECT * FROM jellyfin_user_configs WHERE user_id = @userId AND jellyfin_config_id = @configId'),
+        parameters: {'userId': userId, 'configId': configId});
+
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return JellyfinConfigUser.fromDatabaseRow(result.first.toColumnMap());
+  }
+
+  Future<void> updateJellyfinConfig(JellyfinConfig config) async {
+    await _database.getConnection().execute(Sql.named('''
+      UPDATE jellyfin_configs
+      SET
+        base_path = @base_path,
+        sonarr_base_path = @sonarr_base_path,
+        sonarr_token = @sonarr_token,
+        wizarr_base_path = @wizarr_base_path,
+        wizarr_token = @wizarr_token
+      WHERE id = @id
+    '''), parameters: {
+      'base_path': config.basePath,
+      'sonarr_base_path': config.sonarrBasePath,
+      'sonarr_token': config.sonarrToken,
+      'wizarr_base_path': config.wizarrBasePath,
+      'wizarr_token': config.wizarrToken,
+      'id': config.id,
+    });
+  }
+
+  Future<JellyfinConfig> createJellyfinConfig(JellyfinConfig config) async {
+    final result = await _database.getConnection().execute(Sql.named('''
     INSERT INTO jellyfin_configs (
       name,
       base_path,
-      token,
       is_default,
-      guild_id
+      guild_id,
+      sonarr_base_path,
+      sonarr_token,
+      wizarr_base_path,
+      wizarr_token
     ) VALUES (
       @name,
-      @base_path,
+      @basePath,
       @token,
-      @is_default,
-      @guild_id
+      @isDefault,
+      @parentId,
+      @sonarrBasePath,
+      @sonarrToken,
+      @wizarrBasePath,
+      @wizarrToken
     ) RETURNING id;
-  ''', parameters: {
+  '''), parameters: {
       'name': config.name,
       'base_path': config.basePath,
-      'token': config.token,
       'is_default': config.isDefault,
-      'guild_id': config.parentId.toString(),
+      'parentId': config.parentId.toString(),
+      'sonarrBasePath': config.sonarrBasePath,
+      'sonarrToken': config.sonarrToken,
+      'wizarrBasePath': config.wizarrBasePath,
+      'wizarrToken': config.wizarrToken,
     });
 
     config.id = result.first.first as int;

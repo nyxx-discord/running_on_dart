@@ -34,6 +34,27 @@ class ReminderModuleComponentId {
   String toString() => "$identifier/$reminderId/$userId/${duration.inMinutes}";
 }
 
+class ReminderModuleClearComponentsId {
+  static String identifier = 'ReminderModuleClearComponentsId';
+
+  final Snowflake userId;
+
+  ReminderModuleClearComponentsId({required this.userId});
+
+  static ReminderModuleClearComponentsId? parse(String idString) {
+    final idParts = idString.split("/");
+
+    if (idParts.isEmpty || idParts.first != identifier) {
+      return null;
+    }
+
+    return ReminderModuleClearComponentsId(userId: Snowflake.parse(idParts[1]));
+  }
+
+  @override
+  String toString() => "$identifier/$userId";
+}
+
 class ReminderModule implements RequiresInitialization {
   final List<Reminder> reminders = [];
 
@@ -96,7 +117,16 @@ class ReminderModule implements RequiresInitialization {
         .toList();
 
     final messageBuilder = MessageBuilder(
-        content: content.toString(), replyId: reminder.messageId, components: [ActionRowBuilder(components: buttons)]);
+        content: content.toString(),
+        referencedMessage:
+            reminder.messageId != null ? MessageReferenceBuilder.reply(messageId: reminder.messageId!) : null,
+        components: [
+          ActionRowBuilder(components: [
+            ...buttons,
+            ButtonBuilder.secondary(
+                customId: ReminderModuleClearComponentsId(userId: reminder.userId).toString(), label: 'Confirm'),
+          ])
+        ]);
 
     await channel.sendMessage(messageBuilder);
   }
@@ -105,10 +135,34 @@ class ReminderModule implements RequiresInitialization {
     final data = event.interaction.data;
 
     final customId = ReminderModuleComponentId.parse(data.customId);
-    if (customId == null) {
-      return;
+    if (customId != null) {
+      return _handleReminderModuleComponentButtonAction(event, customId);
     }
 
+    final customIdClearAction = ReminderModuleClearComponentsId.parse(data.customId);
+    if (customIdClearAction != null) {
+      return _handleReminderModuleClearComponentButtonAction(event, customIdClearAction);
+    }
+  }
+
+  Future<void> _handleReminderModuleClearComponentButtonAction(
+      InteractionCreateEvent<MessageComponentInteraction> event, ReminderModuleClearComponentsId customId) async {
+    final targetUserId = event.interaction.member?.id ?? event.interaction.user?.id;
+
+    if (targetUserId == null) {
+      return event.interaction
+          .respond(MessageBuilder(content: "Invalid interaction. Missing user id!"), isEphemeral: true);
+    }
+
+    if (targetUserId != customId.userId) {
+      return event.interaction.respond(MessageBuilder(content: "You cannot use this button!"), isEphemeral: true);
+    }
+
+    event.interaction.message?.update(MessageUpdateBuilder(components: []));
+  }
+
+  Future<void> _handleReminderModuleComponentButtonAction(
+      InteractionCreateEvent<MessageComponentInteraction> event, ReminderModuleComponentId customId) async {
     final targetUserId = event.interaction.member?.id ?? event.interaction.user?.id;
 
     if (targetUserId == null) {
@@ -150,6 +204,8 @@ class ReminderModule implements RequiresInitialization {
   Future<void> removeReminder(Reminder reminder) async {
     reminders.remove(reminder);
   }
+
+  void removeAllRemindersForUser(Snowflake userId) => reminders.removeWhere((reminder) => reminder.userId == userId);
 
   /// Get all the reminders for a specific user.
   Iterable<Reminder> getUserReminders(Snowflake userId) => reminders.where((reminder) => reminder.userId == userId);

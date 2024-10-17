@@ -36,11 +36,18 @@ void main() async {
     ..addConverter(manageableTagConverter)
     ..addConverter(durationConverter)
     ..addConverter(reminderConverter)
-    ..addConverter(packageDocsConverter);
+    ..addConverter(packageDocsConverter)
+    ..addConverter(jellyfinConfigConverter)
+    ..addConverter(jellyfinConfigUserConverter);
 
   commands.onCommandError.listen((error) {
     if (error is CheckFailedException) {
       error.context.respond(MessageBuilder(content: "Sorry, you can't use that command!"));
+      return;
+    }
+
+    if (error is UncaughtException && error.exception is JellyfinConfigNotFoundException) {
+      error.context.respond(MessageBuilder(content: error.message));
     }
   });
 
@@ -70,10 +77,10 @@ void main() async {
     ..registerSingleton(() => ModLogsModule())
     ..registerSingleton(() => TagModule())
     ..registerSingleton(() => DocsModule())
-    ..registerSingleton(() => JellyfinModule());
+    ..registerSingleton(() => JellyfinModuleV2());
 
   await Injector.appInstance.get<DatabaseService>().init();
-  await Injector.appInstance.get<JellyfinModule>().init();
+  await Injector.appInstance.get<JellyfinModuleV2>().init();
   await Injector.appInstance.get<DocsModule>().init();
   await Injector.appInstance.get<TagModule>().init();
   await Injector.appInstance.get<ModLogsModule>().init();

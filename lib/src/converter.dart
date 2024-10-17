@@ -8,6 +8,7 @@ import 'package:running_on_dart/src/models/feature_settings.dart';
 import 'package:running_on_dart/src/models/jellyfin_config.dart';
 import 'package:running_on_dart/src/models/reminder.dart';
 import 'package:running_on_dart/src/modules/docs.dart';
+import 'package:running_on_dart/src/modules/jellyfin.dart';
 import 'package:running_on_dart/src/modules/reminder.dart';
 import 'package:running_on_dart/src/modules/tag.dart';
 import 'package:running_on_dart/src/repository/jellyfin_config.dart';
@@ -60,8 +61,20 @@ const manageableTagConverter = SimpleConverter<Tag>(
   stringify: stringifyTag,
 );
 
-Future<Iterable<JellyfinConfig>> getJellyfinConfigs(ContextData context) =>
-    Injector.appInstance.get<JellyfinConfigRepository>().getConfigsForGuild(context.guild!.id);
+final jellyfinConfigUserConverter = Converter<JellyfinConfigUser>(
+  (view, context) async {
+    return Injector.appInstance.get<JellyfinModuleV2>().fetchGetUserConfigWithFallback(
+        userId: context.user.id, parentId: context.guild?.id ?? context.user.id, instanceName: view.getQuotedWord());
+  },
+  autocompleteCallback: (context) async => (await Injector.appInstance
+          .get<JellyfinConfigRepository>()
+          .getConfigsForParent((context.guild?.id ?? context.user.id).toString()))
+      .map((config) => CommandOptionChoiceBuilder(name: config.name, value: config.name)),
+);
+
+Future<Iterable<JellyfinConfig>> getJellyfinConfigs(ContextData context) => Injector.appInstance
+    .get<JellyfinConfigRepository>()
+    .getConfigsForParent((context.guild?.id ?? context.user.id).toString());
 
 String stringifyJellyfinConfig(JellyfinConfig config) => config.name;
 
