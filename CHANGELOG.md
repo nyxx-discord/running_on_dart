@@ -1,3 +1,7 @@
+## 4.2.1
+
+- Fix pub dependencies
+
 ## 4.2.0
 
 - Add sonarr calendar API

@@ -16,9 +16,7 @@ dependencies:
   intl: ^0.19.0
   logging: ^1.0.2
   migent:
-    git:
-      url: https://github.com/nyxx-discord/migent.git
-      ref: feature/update-postgres-package
+    git: https://github.com/nyxx-discord/migent.git
   nyxx: ^6.3.0
   nyxx_commands: ^6.0.0
   nyxx_extensions: ^4.1.0
