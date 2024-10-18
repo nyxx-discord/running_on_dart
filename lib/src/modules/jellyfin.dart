@@ -233,6 +233,11 @@ class JellyfinConfigNotFoundException implements Exception {
   String toString() => "JellyfinConfigNotFoundException: $message";
 }
 
+class JellyfinAdminUserRequired implements Exception {
+  @override
+  String toString() => "JellyfinAdminUserRequired: You don't have admin permissions on jellyfin instance.";
+}
+
 class JellyfinModuleV2 implements RequiresInitialization {
   final JellyfinConfigRepository _jellyfinConfigRepository = Injector.appInstance.get();
   final NyxxGateway _client = Injector.appInstance.get();

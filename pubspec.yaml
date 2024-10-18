@@ -8,7 +8,7 @@ issue_tracker: https://github.com/nyxx-discord/running_on_dart/issues
 publish_to: none
 
 environment:
-  sdk: '^3.5.0'
+  sdk: ^3.5.0
 
 dependencies:
   http: ^1.0.0
@@ -18,7 +18,7 @@ dependencies:
   migent:
     git: https://github.com/nyxx-discord/migent.git
   nyxx: ^6.3.0
-  nyxx_commands: ^6.0.0
+  nyxx_commands: ^6.0.3
   nyxx_extensions: ^4.1.0
   postgres: ^3.4.0
   fuzzy: ^0.5.1
