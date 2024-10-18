@@ -32,6 +32,14 @@ Future<AuthenticatedJellyfinClient> getJellyfinClient(JellyfinConfigUser? config
   return Injector.appInstance.get<JellyfinModuleV2>().createJellyfinClientAuthenticated(config);
 }
 
+Future<void> ensureAdminJellyfinUser(AuthenticatedJellyfinClient jellyfinClient) async {
+  final currentUser = await jellyfinClient.getCurrentUser();
+
+  if (!(currentUser.policy?.isAdministrator ?? false)) {
+    throw JellyfinAdminUserRequired();
+  }
+}
+
 final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
   jellyfinFeatureEnabledCheck,
 ], children: [
@@ -58,13 +66,8 @@ final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
           [@Description('Inform user about invitation') User? user,
           @Description("Instance to use. Default selected if not provided") JellyfinConfigUser? config]) async {
         final jellyfinClient = await getJellyfinClient(config, context);
-        final currentUser = await jellyfinClient.getCurrentUser();
 
-        if (!(currentUser.policy?.isAdministrator ?? false)) {
-          return context.respond(
-              MessageBuilder(content: "This command can use only logged jellyfin users with administrator privileges."),
-              level: ResponseLevel.private);
-        }
+        await ensureAdminJellyfinUser(jellyfinClient);
 
         final wizarrClient = await Injector.appInstance.get<JellyfinModuleV2>().fetchGetWizarrClientWithFallback(
             originalConfig: jellyfinClient.configUser.config!, parentId: context.guild?.id ?? context.user.id);
