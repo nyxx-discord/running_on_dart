@@ -1,3 +1,8 @@
+## 4.2.3
+- Fix db params
+- Fix modal labels
+- Fix jellyfin add instance perms check
+
 ## 4.2.2
 
 - Update nyxx_commands
