@@ -46,8 +46,18 @@ void main() async {
       return;
     }
 
-    if (error is UncaughtException && error.exception is JellyfinConfigNotFoundException) {
-      error.context.respond(MessageBuilder(content: error.message));
+    if (error is UncaughtException) {
+      final context = error.context;
+
+      switch (error.exception) {
+        case JellyfinConfigNotFoundException(:final message):
+          error.context.respond(MessageBuilder(content: message));
+          break;
+        case JellyfinAdminUserRequired _:
+          context.respond(MessageBuilder(content: "This command can use only logged jellyfin users with administrator privileges."), level: ResponseLevel.private);
+          break;
+        case _: print(error.exception);
+      }
     }
   });
 
