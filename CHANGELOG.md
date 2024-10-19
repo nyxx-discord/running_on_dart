@@ -1,3 +1,8 @@
+## 4.2.2
+
+- Update nyxx_commands
+- Improve jellyfin permissions handling
+
 ## 4.2.1
 
 - Fix pub dependencies
