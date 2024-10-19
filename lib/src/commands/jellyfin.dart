@@ -411,10 +411,10 @@ final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
           await context.getButtonPress(message);
 
           final secondModalResponse = await context.getModal(title: "New Instance Configuration Pt. 2", components: [
-            TextInputBuilder(customId: "sonarr_base_url", style: TextInputStyle.short, label: "API Token"),
-            TextInputBuilder(customId: "sonarr_token", style: TextInputStyle.short, label: "API Token"),
-            TextInputBuilder(customId: "wizarr_base_url", style: TextInputStyle.short, label: "API Token"),
-            TextInputBuilder(customId: "wizarr_token", style: TextInputStyle.short, label: "API Token"),
+            TextInputBuilder(customId: "sonarr_base_url", style: TextInputStyle.short, label: "Sonarr base url"),
+            TextInputBuilder(customId: "sonarr_token", style: TextInputStyle.short, label: "Sonarr Token"),
+            TextInputBuilder(customId: "wizarr_base_url", style: TextInputStyle.short, label: "Wizarr base url"),
+            TextInputBuilder(customId: "wizarr_token", style: TextInputStyle.short, label: "Wizarr Token"),
           ]);
 
           final config = JellyfinConfig(

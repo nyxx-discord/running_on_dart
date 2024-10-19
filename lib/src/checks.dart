@@ -44,8 +44,11 @@ final jellyfinFeatureCreateInstanceCommandCheck = Check(
       return checkResult;
     }
 
-    final roleId = Snowflake.parse(setting!.dataAsJson!['create_instance_role']);
+    if (context.member?.permissions?.isAdministrator ?? false) {
+      return true;
+    }
 
-    return (context.member?.permissions?.isAdministrator ?? false) || context.member!.roleIds.contains(roleId);
+    final roleId = Snowflake.parse(setting!.dataAsJson!['create_instance_role']);
+    return context.member!.roleIds.contains(roleId);
   },
 );

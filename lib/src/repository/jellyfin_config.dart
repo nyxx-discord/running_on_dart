@@ -110,7 +110,6 @@ class JellyfinConfigRepository {
     ) VALUES (
       @name,
       @basePath,
-      @token,
       @isDefault,
       @parentId,
       @sonarrBasePath,
@@ -120,8 +119,8 @@ class JellyfinConfigRepository {
     ) RETURNING id;
   '''), parameters: {
       'name': config.name,
-      'base_path': config.basePath,
-      'is_default': config.isDefault,
+      'basePath': config.basePath,
+      'isDefault': config.isDefault,
       'parentId': config.parentId.toString(),
       'sonarrBasePath': config.sonarrBasePath,
       'sonarrToken': config.sonarrToken,

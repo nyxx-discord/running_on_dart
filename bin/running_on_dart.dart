@@ -54,9 +54,12 @@ void main() async {
           error.context.respond(MessageBuilder(content: message));
           break;
         case JellyfinAdminUserRequired _:
-          context.respond(MessageBuilder(content: "This command can use only logged jellyfin users with administrator privileges."), level: ResponseLevel.private);
+          context.respond(
+              MessageBuilder(content: "This command can use only logged jellyfin users with administrator privileges."),
+              level: ResponseLevel.private);
           break;
-        case _: print(error.exception);
+        case _:
+          print(error.exception);
       }
     }
   });
