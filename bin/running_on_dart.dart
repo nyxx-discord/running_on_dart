@@ -49,11 +49,15 @@ void main() async {
     if (error is UncaughtException) {
       final context = error.context;
 
-      final _ = switch (error.exception) {
-        JellyfinConfigNotFoundException(message: final message) => error.context.respond(MessageBuilder(content: message)),
-        JellyfinAdminUserRequired _ => context.respond(MessageBuilder(content: "This command can use only logged jellyfin users with administrator privileges."), level: ResponseLevel.private),
-        Object() => print(error.exception),
-      };
+      switch (error.exception) {
+        case JellyfinConfigNotFoundException(:final message):
+          error.context.respond(MessageBuilder(content: message));
+          break;
+        case JellyfinAdminUserRequired _:
+          context.respond(MessageBuilder(content: "This command can use only logged jellyfin users with administrator privileges."), level: ResponseLevel.private);
+          break;
+        case _: print(error.exception);
+      }
     }
   });
 
