@@ -1,10 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:nyxx/nyxx.dart';
-import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/src/external/sonarr.dart';
-import 'package:running_on_dart/src/external/wizarr.dart';
 import 'package:running_on_dart/src/modules/jellyfin.dart';
 import 'package:running_on_dart/src/util/util.dart';
 import 'package:tentacle/tentacle.dart';
@@ -226,3 +224,21 @@ EmbedBuilder getUserInfoEmbed(UserDto currentUser, AuthenticatedJellyfinClient c
     ],
   );
 }
+
+MessageBuilder getJellyfinLoginMessage(
+        {required Snowflake userId, required String configName, required Snowflake parentId, bool isReAuth = false}) =>
+    MessageBuilder(
+        content:
+            '${isReAuth ? 'Session expired. ' : ''}Login using username and password or using Quick Connect feature',
+        components: [
+          ActionRowBuilder(components: [
+            ButtonBuilder.primary(
+                customId: JellyfinLoginCustomId.username(userId: userId, configName: configName, parentId: parentId)
+                    .toString(),
+                label: "Username login"),
+            ButtonBuilder.primary(
+                customId: JellyfinLoginCustomId.quickConnect(userId: userId, configName: configName, parentId: parentId)
+                    .toString(),
+                label: "Quick Connect login"),
+          ])
+        ]);

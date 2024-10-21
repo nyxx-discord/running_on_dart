@@ -35,7 +35,8 @@ Future<AuthenticatedJellyfinClient> getJellyfinClient(JellyfinConfigUser? config
 Future<void> ensureAdminJellyfinUser(AuthenticatedJellyfinClient jellyfinClient) async {
   final currentUser = await jellyfinClient.getCurrentUser();
 
-  if (!(currentUser.policy?.isAdministrator ?? false)) {
+  final isAdministrator = currentUser.policy?.isAdministrator ?? false;
+  if (!isAdministrator) {
     throw JellyfinAdminUserRequired();
   }
 }
@@ -271,68 +272,8 @@ final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
         "login",
         "Login with password to given jellyfin instance",
         id("jellyfin-user-login", (InteractionChatContext context, JellyfinConfig config) async {
-          final client = Injector.appInstance.get<JellyfinModuleV2>().createJellyfinClientAnonymous(config);
-
-          final loginDataModal =
-              await context.getModal(title: "Login to jellyfin instance (${config.name})", components: [
-            TextInputBuilder(customId: 'username', style: TextInputStyle.short, label: 'Username', isRequired: true),
-            TextInputBuilder(customId: 'password', style: TextInputStyle.short, label: 'Password', isRequired: true),
-          ]);
-
-          final loginCallResult =
-              await client.loginByPassword(loginDataModal['username']!, loginDataModal['password']!);
-          final loginResult =
-              await Injector.appInstance.get<JellyfinModuleV2>().login(config, loginCallResult, context.user.id);
-
-          if (loginResult) {
-            return context.respond(MessageBuilder(content: "Logged in successfully!"));
-          }
-
-          return context.respond(MessageBuilder(content: "Cannot login. Contact with bot admin!"));
-        }),
-      ),
-      ChatCommand(
-        "login-quick-connect",
-        "Login with Quick Connect to given jellyfin instance",
-        id("jellyfin-user-login-quick-connect", (InteractionChatContext context, JellyfinConfig config) async {
-          final client = Injector.appInstance.get<JellyfinModuleV2>().createJellyfinClientAnonymous(config);
-
-          final initiationResult = await client.initiateLoginByQuickConnect();
-
-          await context.respond(
-              MessageBuilder(content: "Quick Connect code: `${initiationResult.code}`. Waiting for confirmation..."),
-              level: ResponseLevel.private);
-          Timer.periodic(Duration(seconds: 2), (Timer timer) async {
-            if (timer.tick > 30) {
-              context.interaction
-                  .updateOriginalResponse(MessageUpdateBuilder(content: "Cannot login. Took too long to confirm code"));
-              timer.cancel();
-            }
-
-            final isConfirmed = await client.checkQuickConnectStatus(initiationResult);
-            if (!isConfirmed) {
-              return;
-            }
-
-            timer.cancel();
-
-            final finishResult = await client.finishLoginByQuickConnect(initiationResult);
-            if (finishResult == null) {
-              context.interaction
-                  .updateOriginalResponse(MessageUpdateBuilder(content: "Cannot login. Contact with bot admin!"));
-              return;
-            }
-
-            final loginResult =
-                await Injector.appInstance.get<JellyfinModuleV2>().login(config, finishResult, context.user.id);
-            if (loginResult) {
-              context.interaction.updateOriginalResponse(MessageUpdateBuilder(content: "Logged in successfully!"));
-              return;
-            }
-
-            context.interaction
-                .updateOriginalResponse(MessageUpdateBuilder(content: "Cannot login. Contact with bot admin!"));
-          });
+          return context.respond(
+              getJellyfinLoginMessage(userId: context.user.id, configName: config.name, parentId: config.parentId));
         }),
       ),
       ChatCommand(
@@ -556,6 +497,8 @@ final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
       id("jellyfin-util-complete-refresh", (ChatContext context,
           [@Description("Instance to use. Default selected if not provided") JellyfinConfigUser? config]) async {
         final client = await getJellyfinClient(config, context);
+
+        await ensureAdminJellyfinUser(client);
 
         final availableTasks = await client.getScheduledTasks();
         final scanMediaLibraryTask = availableTasks.firstWhere((task) => task.key == 'RefreshLibrary');

@@ -27,5 +27,7 @@ dependencies:
     git: https://github.com/TentacleOrg/Tentacle.git
   injector: ^4.0.0
 
+  dio: any
+  built_collection: any
 dev_dependencies:
   lints: ^5.0.0

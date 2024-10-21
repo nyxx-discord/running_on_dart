@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
@@ -8,7 +10,8 @@ import 'package:running_on_dart/src/repository/jellyfin_config.dart';
 import 'package:running_on_dart/src/util/util.dart';
 import 'package:tentacle/tentacle.dart';
 import 'package:tentacle/src/auth/auth.dart' show AuthInterceptor;
-import 'package:dio/dio.dart' show RequestInterceptorHandler, RequestOptions;
+import 'package:dio/dio.dart'
+    show DioException, ErrorInterceptorHandler, Interceptor, RequestInterceptorHandler, RequestOptions;
 import 'package:built_collection/built_collection.dart';
 
 MessageBuilder getWizarrRedeemInvitationMessageBuilder(
@@ -20,7 +23,7 @@ MessageBuilder getWizarrRedeemInvitationMessageBuilder(
         ActionRowBuilder(components: [
           ButtonBuilder.link(url: Uri.parse("${client.baseUrl}/j/$code"), label: "Redeem code in browser"),
           ButtonBuilder.primary(
-              customId: ReminderRedeemWizarrInvitationId.button(
+              customId: RedeemWizarrInvitationId.button(
                       userId: userId, code: code, parentId: parentId, configName: configName)
                   .toString(),
               label: "Redeem here"),
@@ -28,7 +31,80 @@ MessageBuilder getWizarrRedeemInvitationMessageBuilder(
       ]);
 }
 
-class ReminderRedeemWizarrInvitationId {
+class JellyfinLoginSelectId {
+  static String identifier = 'JellyfinLoginSelectId';
+
+  final Snowflake userId;
+
+  JellyfinLoginSelectId({required this.userId});
+
+  static JellyfinLoginSelectId? parse(String idString) {
+    final idParts = idString.split("/");
+
+    if (idParts.isEmpty || idParts[0] != identifier) {
+      return null;
+    }
+
+    return JellyfinLoginSelectId(userId: Snowflake.parse(idParts[1]));
+  }
+
+  @override
+  String toString() => "$identifier/$userId";
+}
+
+class JellyfinLoginCustomId {
+  static String usernameIdentifier = 'JellyfinLoginCustomId_usernameIdentifier';
+  static String quickConnectIdentifier = 'JellyfinLoginCustomId_quickConnectIdentifier';
+
+  final String identifier;
+  final Snowflake userId;
+  final Snowflake parentId;
+  final String configName;
+  final bool isModal;
+
+  bool get isUsernameAuth => identifier == usernameIdentifier;
+  bool get isQuickConnectAuth => identifier == quickConnectIdentifier;
+
+  JellyfinLoginCustomId(
+      {required this.identifier,
+      required this.userId,
+      required this.configName,
+      required this.parentId,
+      required this.isModal});
+
+  factory JellyfinLoginCustomId.username(
+          {required Snowflake userId, required String configName, required Snowflake parentId, bool isModal = false}) =>
+      JellyfinLoginCustomId(
+          identifier: usernameIdentifier, userId: userId, configName: configName, parentId: parentId, isModal: isModal);
+  factory JellyfinLoginCustomId.quickConnect(
+          {required Snowflake userId, required String configName, required Snowflake parentId}) =>
+      JellyfinLoginCustomId(
+          identifier: quickConnectIdentifier,
+          userId: userId,
+          configName: configName,
+          parentId: parentId,
+          isModal: false);
+
+  static JellyfinLoginCustomId? parse(String idString) {
+    final idParts = idString.split("/");
+
+    if (idParts.isEmpty || ![usernameIdentifier, quickConnectIdentifier].contains(idParts[0])) {
+      return null;
+    }
+
+    return JellyfinLoginCustomId(
+        identifier: idParts[0],
+        userId: Snowflake.parse(idParts[1]),
+        parentId: Snowflake.parse(idParts[2]),
+        configName: idParts[3],
+        isModal: idParts[4] == 'true');
+  }
+
+  @override
+  String toString() => "$identifier/$userId/$parentId/$configName/${isModal ? 'true' : 'false'}";
+}
+
+class RedeemWizarrInvitationId {
   static String buttonIdentifier = 'ReminderRedeemWizarrInvitationButtonIdButton';
   static String modalIdentifier = 'ReminderRedeemWizarrInvitationButtonIdModal';
 
@@ -41,29 +117,29 @@ class ReminderRedeemWizarrInvitationId {
   bool get isButton => identifier == buttonIdentifier;
   bool get isModal => identifier == modalIdentifier;
 
-  ReminderRedeemWizarrInvitationId(
+  RedeemWizarrInvitationId(
       {required this.identifier,
       required this.userId,
       required this.code,
       required this.parentId,
       required this.configName});
-  factory ReminderRedeemWizarrInvitationId.button(
+  factory RedeemWizarrInvitationId.button(
           {required Snowflake userId, required String code, required Snowflake parentId, required String configName}) =>
-      ReminderRedeemWizarrInvitationId(
+      RedeemWizarrInvitationId(
           identifier: buttonIdentifier, userId: userId, code: code, parentId: parentId, configName: configName);
-  factory ReminderRedeemWizarrInvitationId.modal(
+  factory RedeemWizarrInvitationId.modal(
           {required Snowflake userId, required String code, required Snowflake parentId, required String configName}) =>
-      ReminderRedeemWizarrInvitationId(
+      RedeemWizarrInvitationId(
           identifier: modalIdentifier, userId: userId, code: code, parentId: parentId, configName: configName);
 
-  static ReminderRedeemWizarrInvitationId? parse(String idString) {
+  static RedeemWizarrInvitationId? parse(String idString) {
     final idParts = idString.split("/");
 
     if (idParts.isEmpty || ![buttonIdentifier, modalIdentifier].contains(idParts[0])) {
       return null;
     }
 
-    return ReminderRedeemWizarrInvitationId(
+    return RedeemWizarrInvitationId(
       identifier: idParts[0],
       userId: Snowflake.parse(idParts[1]),
       code: idParts[2],
@@ -225,6 +301,22 @@ class AnonAuthInterceptor extends AuthInterceptor {
   }
 }
 
+class AuthResponseErrorInterceptor extends Interceptor {
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    if (err.response?.statusCode == 401) {
+      throw JellyfinUnauthorizedException(err.requestOptions.uri.host);
+    }
+
+    handler.next(err);
+  }
+}
+
+class JellyfinUnauthorizedException implements Exception {
+  final String host;
+  const JellyfinUnauthorizedException(this.host);
+}
+
 class JellyfinConfigNotFoundException implements Exception {
   final String message;
   const JellyfinConfigNotFoundException(this.message);
@@ -244,16 +336,38 @@ class JellyfinModuleV2 implements RequiresInitialization {
 
   @override
   Future<void> init() async {
-    _client.onMessageComponentInteraction
-        .where((event) => event.interaction.data.type == MessageComponentType.button)
-        .listen(_handleButtonInteractionForWizarrRedeemInvitation);
+    final buttonInteractions = _client.onMessageComponentInteraction
+        .where((event) => event.interaction.data.type == MessageComponentType.button);
+
+    buttonInteractions.listen(_handleButtonInteractionForWizarrRedeemInvitation);
+    buttonInteractions.listen(_handleButtonInteractionForJellyfinLogin);
 
     _client.onModalSubmitInteraction.listen(_handleModalInteractionForWizarrRedeemInvitation);
+    _client.onModalSubmitInteraction.listen(_handleModalJellyfinLoginUsername);
+  }
+
+  Future<void> _handleModalJellyfinLoginUsername(InteractionCreateEvent<ModalSubmitInteraction> event) async {
+    final customId = JellyfinLoginCustomId.parse(event.interaction.data.customId);
+    if (customId == null || !customId.isModal) {
+      return;
+    }
+
+    final currentUserId = event.interaction.user?.id ?? event.interaction.member?.id;
+    if (customId.userId != currentUserId) {
+      return event.interaction.respond(MessageBuilder(content: "Invalid interaction"));
+    }
+
+    final config = await getJellyfinConfig(customId.configName, customId.parentId);
+    if (config == null) {
+      return;
+    }
+
+    return _handleLoginUsername(event.interaction, config, customId.userId);
   }
 
   Future<void> _handleModalInteractionForWizarrRedeemInvitation(
       InteractionCreateEvent<ModalSubmitInteraction> event) async {
-    final customId = ReminderRedeemWizarrInvitationId.parse(event.interaction.data.customId);
+    final customId = RedeemWizarrInvitationId.parse(event.interaction.data.customId);
     if (customId == null || !customId.isModal) {
       return;
     }
@@ -287,9 +401,48 @@ class JellyfinModuleV2 implements RequiresInitialization {
     ]));
   }
 
+  Future<void> _handleButtonInteractionForJellyfinLogin(
+      InteractionCreateEvent<MessageComponentInteraction> event) async {
+    final customId = JellyfinLoginCustomId.parse(event.interaction.data.customId);
+    if (customId == null) {
+      return;
+    }
+
+    final currentUserId = event.interaction.user?.id ?? event.interaction.member?.id;
+
+    if (customId.userId != currentUserId) {
+      return event.interaction.respond(MessageBuilder(content: "Invalid interaction"));
+    }
+
+    final config = await getJellyfinConfig(customId.configName, customId.parentId);
+    if (config == null) {
+      return;
+    }
+
+    if (customId.isQuickConnectAuth) {
+      return _handleLoginQuickConnect(event.interaction, config, customId.userId);
+    }
+
+    if (customId.isUsernameAuth) {
+      return event.interaction.respondModal(ModalBuilder(
+          customId: JellyfinLoginCustomId.username(
+                  userId: customId.userId, configName: customId.configName, parentId: customId.parentId, isModal: true)
+              .toString(),
+          title: "Login to jellyfin instance (${config.name})",
+          components: [
+            ActionRowBuilder(components: [
+              TextInputBuilder(customId: 'username', style: TextInputStyle.short, label: 'Username', isRequired: true)
+            ]),
+            ActionRowBuilder(components: [
+              TextInputBuilder(customId: 'password', style: TextInputStyle.short, label: 'Password', isRequired: true)
+            ])
+          ]));
+    }
+  }
+
   Future<void> _handleButtonInteractionForWizarrRedeemInvitation(
       InteractionCreateEvent<MessageComponentInteraction> event) async {
-    final customId = ReminderRedeemWizarrInvitationId.parse(event.interaction.data.customId);
+    final customId = RedeemWizarrInvitationId.parse(event.interaction.data.customId);
     if (customId == null || !customId.isButton) {
       return;
     }
@@ -299,7 +452,7 @@ class JellyfinModuleV2 implements RequiresInitialization {
     }
 
     event.interaction.respondModal(ModalBuilder(
-        customId: ReminderRedeemWizarrInvitationId.modal(
+        customId: RedeemWizarrInvitationId.modal(
                 userId: customId.userId,
                 code: customId.code,
                 parentId: customId.parentId,
@@ -319,8 +472,70 @@ class JellyfinModuleV2 implements RequiresInitialization {
         ]));
   }
 
+  Future<void> _handleLoginUsername(ModalSubmitInteraction interaction, JellyfinConfig config, Snowflake userId) async {
+    final client = Injector.appInstance.get<JellyfinModuleV2>().createJellyfinClientAnonymous(config);
+    final modalData = getModalDataIndexed(interaction.data.components);
+
+    final loginCallResult = await client.loginByPassword(modalData['username']!, modalData['password']!);
+    final loginResult = await Injector.appInstance.get<JellyfinModuleV2>().login(config, loginCallResult, userId);
+
+    if (loginResult) {
+      return interaction.respond(MessageBuilder(content: "Logged in successfully!"), isEphemeral: true);
+    }
+
+    return interaction.respond(MessageBuilder(content: "Cannot login. Contact with bot admin!"), isEphemeral: true);
+  }
+
+  Future<void> _handleLoginQuickConnect(
+      MessageComponentInteraction interaction, JellyfinConfig config, Snowflake userId) async {
+    final client = Injector.appInstance.get<JellyfinModuleV2>().createJellyfinClientAnonymous(config);
+
+    final initiationResult = await client.initiateLoginByQuickConnect();
+
+    await interaction.respond(
+        MessageBuilder(content: "Quick Connect code: `${initiationResult.code}`. Waiting for confirmation..."),
+        isEphemeral: true);
+    Timer.periodic(Duration(seconds: 2), (Timer timer) async {
+      if (timer.tick > 30) {
+        interaction
+            .updateOriginalResponse(MessageUpdateBuilder(content: "Cannot login. Took too long to confirm code"));
+        timer.cancel();
+      }
+
+      final isConfirmed = await client.checkQuickConnectStatus(initiationResult);
+      if (!isConfirmed) {
+        return;
+      }
+
+      timer.cancel();
+
+      final finishResult = await client.finishLoginByQuickConnect(initiationResult);
+      if (finishResult == null) {
+        interaction.updateOriginalResponse(MessageUpdateBuilder(content: "Cannot login. Contact with bot admin!"));
+        return;
+      }
+
+      final loginResult = await Injector.appInstance.get<JellyfinModuleV2>().login(config, finishResult, userId);
+      if (loginResult) {
+        interaction.updateOriginalResponse(MessageUpdateBuilder(content: "Logged in successfully!"));
+        return;
+      }
+
+      interaction.updateOriginalResponse(MessageUpdateBuilder(content: "Cannot login. Contact with bot admin!"));
+    });
+  }
+
+  Future<List<JellyfinConfigUser>> getJellyfinConfigBasedOnPreviousLogin(
+      Snowflake userId, Snowflake guildId, String host) {
+    return _jellyfinConfigRepository.getJellyfinConfigBasedOnPreviousLogin(userId.toString(), guildId.toString(), host);
+  }
+
   Future<JellyfinConfig?> getJellyfinConfig(String name, Snowflake parentId) {
     return _jellyfinConfigRepository.getByNameAndGuild(name, parentId.toString());
+  }
+
+  Future<JellyfinConfig?> getJellyfinConfigById(int id) {
+    return _jellyfinConfigRepository.getJellyfinConfigById(id);
   }
 
   Future<JellyfinConfig?> getJellyfinDefaultConfig(Snowflake parentId) {
@@ -387,7 +602,9 @@ class JellyfinModuleV2 implements RequiresInitialization {
 
   AuthenticatedJellyfinClient createJellyfinClientAuthenticated(JellyfinConfigUser configUser) {
     return AuthenticatedJellyfinClient(
-        Tentacle(basePathOverride: configUser.config!.basePath, interceptors: [TokenAuthInterceptor(configUser.token)]),
+        Tentacle(
+            basePathOverride: configUser.config!.basePath,
+            interceptors: [TokenAuthInterceptor(configUser.token), AuthResponseErrorInterceptor()]),
         configUser);
   }
 

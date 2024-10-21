@@ -13,6 +13,9 @@ import 'package:running_on_dart/src/repository/reminder.dart';
 import 'package:running_on_dart/src/repository/tag.dart';
 import 'package:running_on_dart/src/services/feature_settings.dart';
 
+import 'package:dio/dio.dart' show DioException;
+import 'package:running_on_dart/src/util/jellyfin.dart';
+
 void main() async {
   final commands = CommandsPlugin(
     prefix: null,
@@ -40,7 +43,7 @@ void main() async {
     ..addConverter(jellyfinConfigConverter)
     ..addConverter(jellyfinConfigUserConverter);
 
-  commands.onCommandError.listen((error) {
+  commands.onCommandError.listen((error) async {
     if (error is CheckFailedException) {
       error.context.respond(MessageBuilder(content: "Sorry, you can't use that command!"));
       return;
@@ -50,12 +53,34 @@ void main() async {
       final context = error.context;
 
       switch (error.exception) {
-        case JellyfinConfigNotFoundException(:final message):
-          error.context.respond(MessageBuilder(content: message));
-          break;
+        // case JellyfinConfigNotFoundException(:final message):
+        //   error.context.respond(MessageBuilder(content: message));
+        //   break;
         case JellyfinAdminUserRequired _:
           context.respond(
               MessageBuilder(content: "This command can use only logged jellyfin users with administrator privileges."),
+              level: ResponseLevel.private);
+          break;
+        case DioException(:final error) when error is JellyfinUnauthorizedException:
+          final jellyfinConfigs = await Injector.appInstance
+              .get<JellyfinModuleV2>()
+              .getJellyfinConfigBasedOnPreviousLogin(context.user.id, context.guild?.id ?? context.user.id, error.host);
+
+          if (jellyfinConfigs.length == 1) {
+            final userConfig = jellyfinConfigs.first;
+            final config =
+                await Injector.appInstance.get<JellyfinModuleV2>().getJellyfinConfigById(userConfig.jellyfinConfigId);
+
+            context.respond(
+                getJellyfinLoginMessage(
+                    userId: userConfig.userId, configName: config!.name, parentId: config.parentId, isReAuth: true),
+                level: ResponseLevel.private);
+            break;
+          }
+
+          context.respond(
+              MessageBuilder(
+                  content: 'Cannot provide config automatically. Login manually using: `/jellyfin user login`.'),
               level: ResponseLevel.private);
           break;
         case _:

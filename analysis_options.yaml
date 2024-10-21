@@ -2,7 +2,3 @@ include: package:lints/recommended.yaml
 
 analyzer:
   exclude: [build/**]
-  language:
-    strict-raw-types: true
-  strong-mode:
-    implicit-casts: false

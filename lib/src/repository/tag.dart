@@ -20,8 +20,8 @@ class TagRepository {
 
   Future<Iterable<Tag>> fetchActiveTagsByName(String nameQuery) async {
     final result = await _database.getConnection().execute(Sql.named('''
-      SELECT * FROM tags WHERE enabled = TRUE AND name LIKE '%@nameQuery%';
-    '''), parameters: {'name': nameQuery});
+      SELECT * FROM tags WHERE enabled = TRUE AND name LIKE @nameQuery;
+    '''), parameters: {'nameQuery': '%$nameQuery%'});
 
     return result.map((row) => row.toColumnMap()).map(Tag.fromRow);
   }

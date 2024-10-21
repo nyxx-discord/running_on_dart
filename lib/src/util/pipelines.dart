@@ -103,7 +103,8 @@ class InternalPipeline {
       await internalTask.execute(embed);
     }
 
-    embed.description = 'Done! Took ${timer.elapsed.formatShort()}';
+    embed.title = null;
+    embed.description = 'Done! Finished tasks ${tasks.length}/${tasks.length}. Took ${timer.elapsed.formatShort()}';
 
     message.update(MessageUpdateBuilder(embeds: [embed]));
   }

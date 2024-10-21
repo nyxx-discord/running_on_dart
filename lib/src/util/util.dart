@@ -58,3 +58,12 @@ Duration? getDurationFromStringOrDefault(String? durationString, Duration? defau
 
   return parseStringToDuration(durationString) ?? defaultDuration;
 }
+
+Map<String, String?> getModalDataIndexed(List<MessageComponent> components) {
+  return Map.fromEntries(components
+      .cast<ActionRowComponent>()
+      .map((row) => row.components)
+      .flattened
+      .cast<TextInputComponent>()
+      .map((textInputComponent) => MapEntry<String, String?>(textInputComponent.customId, textInputComponent.value)));
+}

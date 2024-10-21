@@ -1,5 +1,4 @@
 import 'package:injector/injector.dart';
-import 'package:nyxx/nyxx.dart';
 import 'package:postgres/postgres.dart';
 import 'package:running_on_dart/src/models/jellyfin_config.dart';
 import 'package:running_on_dart/src/services/db.dart';
@@ -19,6 +18,18 @@ class JellyfinConfigRepository {
     final result = await _database.getConnection().execute(
         Sql.named('SELECT * FROM jellyfin_configs WHERE is_default = 1::bool AND guild_id = @parentId LIMIT 1'),
         parameters: {'parentId': parentId});
+
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return JellyfinConfig.fromDatabaseRow(result.first.toColumnMap());
+  }
+
+  Future<JellyfinConfig?> getJellyfinConfigById(int id) async {
+    final result = await _database
+        .getConnection()
+        .execute(Sql.named('SELECT * FROM jellyfin_configs WHERE id = @id'), parameters: {'id': id});
 
     if (result.isEmpty) {
       return null;
@@ -130,5 +141,15 @@ class JellyfinConfigRepository {
 
     config.id = result.first.first as int;
     return config;
+  }
+
+  Future<List<JellyfinConfigUser>> getJellyfinConfigBasedOnPreviousLogin(
+      String userId, String guildId, String host) async {
+    final result = await _database.getConnection().execute(
+        Sql.named(
+            "SELECT juc.* FROM jellyfin_user_configs juc JOIN jellyfin_configs jc ON jc.id = juc.jellyfin_config_id WHERE juc.user_id = @userId AND jc.guild_id = @guildId AND jc.base_path LIKE @requestHost"),
+        parameters: {'userId': userId, 'guildId': guildId, 'requestHost': '%$host%'});
+
+    return result.map((row) => JellyfinConfigUser.fromDatabaseRow(row.toColumnMap())).toList();
   }
 }
