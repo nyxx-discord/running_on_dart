@@ -29,6 +29,10 @@ Future<AuthenticatedJellyfinClient> getJellyfinClient(JellyfinConfigUser? config
   config ??= await Injector.appInstance
       .get<JellyfinModuleV2>()
       .fetchGetUserConfigWithFallback(userId: context.user.id, parentId: context.guild?.id ?? context.user.id);
+
+  if (config == null) {
+    throw JellyfinConfigNotFoundException("Invalid jellyfin config or user not logged in.");
+  }
   return Injector.appInstance.get<JellyfinModuleV2>().createJellyfinClientAuthenticated(config);
 }
 
@@ -273,7 +277,8 @@ final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
         "Login with password to given jellyfin instance",
         id("jellyfin-user-login", (InteractionChatContext context, JellyfinConfig config) async {
           return context.respond(
-              getJellyfinLoginMessage(userId: context.user.id, configName: config.name, parentId: config.parentId));
+              getJellyfinLoginMessage(userId: context.user.id, configName: config.name, parentId: config.parentId),
+              level: ResponseLevel.private);
         }),
       ),
       ChatCommand(

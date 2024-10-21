@@ -570,18 +570,18 @@ class JellyfinModuleV2 implements RequiresInitialization {
     return SonarrClient(baseUrl: config.sonarrBasePath!, token: config.sonarrToken!);
   }
 
-  Future<JellyfinConfigUser> fetchGetUserConfigWithFallback(
+  Future<JellyfinConfigUser?> fetchGetUserConfigWithFallback(
       {required Snowflake userId, required Snowflake parentId, String? instanceName}) async {
     final config = instanceName != null
         ? await getJellyfinConfig(instanceName, parentId)
         : await getJellyfinDefaultConfig(parentId);
     if (config == null) {
-      throw JellyfinConfigNotFoundException("Missing jellyfin config");
+      return null;
     }
 
     final userConfig = await fetchJellyfinUserConfig(userId, config);
     if (userConfig == null) {
-      throw JellyfinConfigNotFoundException("User not logged in.");
+      return null;
     }
 
     return userConfig;
