@@ -1,3 +1,9 @@
+## 4.3.0
+- Rework catching JellyfinConfigNotFoundException
+- Handle 401 from jellyfin
+- Rework util methods. 
+- Extract login logic from command body
+
 ## 4.2.3
 - Fix db params
 - Fix modal labels
