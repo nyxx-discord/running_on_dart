@@ -1,4 +1,7 @@
-## 4.3.0
+## 4.3.1
+- Shorten custom components ids
+
+- ## 4.3.0
 - Rework catching JellyfinConfigNotFoundException
 - Handle 401 from jellyfin
 - Rework util methods. 
