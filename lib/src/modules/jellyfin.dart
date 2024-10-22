@@ -53,8 +53,8 @@ class JellyfinLoginSelectId {
 }
 
 class JellyfinLoginCustomId {
-  static String usernameIdentifier = 'JellyfinLoginCustomId_usernameIdentifier';
-  static String quickConnectIdentifier = 'JellyfinLoginCustomId_quickConnectIdentifier';
+  static String usernameIdentifier = 'JLCId_UI';
+  static String quickConnectIdentifier = 'JLCId_QCI';
 
   final String identifier;
   final Snowflake userId;
@@ -97,16 +97,16 @@ class JellyfinLoginCustomId {
         userId: Snowflake.parse(idParts[1]),
         parentId: Snowflake.parse(idParts[2]),
         configName: idParts[3],
-        isModal: idParts[4] == 'true');
+        isModal: idParts[4] == '1');
   }
 
   @override
-  String toString() => "$identifier/$userId/$parentId/$configName/${isModal ? 'true' : 'false'}";
+  String toString() => "$identifier/$userId/$parentId/$configName/${isModal ? '1' : '0'}";
 }
 
 class RedeemWizarrInvitationId {
-  static String buttonIdentifier = 'ReminderRedeemWizarrInvitationButtonIdButton';
-  static String modalIdentifier = 'ReminderRedeemWizarrInvitationButtonIdModal';
+  static String buttonIdentifier = 'RWIBIB';
+  static String modalIdentifier = 'RWIBIM';
 
   final String identifier;
   final Snowflake userId;
