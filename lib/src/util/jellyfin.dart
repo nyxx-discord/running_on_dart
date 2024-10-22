@@ -158,8 +158,9 @@ EmbedBuilder? buildMediaEmbedBuilder(BaseItemDto item, AuthenticatedJellyfinClie
 
   final fields = [
     EmbedFieldBuilder(name: "Rating (Community/Critic)", value: rating, isInline: true),
-    EmbedFieldBuilder(
-        name: "Url", value: "[Open in Jellyfin](${client.getJellyfinItemUrl(item.id!)})", isInline: false),
+    if ([BaseItemKind.episode, BaseItemKind.movie].contains(item.type)) EmbedFieldBuilder(
+        name: "Length", value: parseDurationFromTicks(item.runTimeTicks!).formatShort(), isInline: true),
+    EmbedFieldBuilder(name: "Url", value: "[Open in Jellyfin](${client.getJellyfinItemUrl(item.id!)})", isInline: false),
   ];
 
   if (item.type == BaseItemKind.episode) {
@@ -194,11 +195,7 @@ EmbedBuilder? buildMediaEmbedBuilder(BaseItemDto item, AuthenticatedJellyfinClie
       thumbnail: EmbedThumbnailBuilder(url: client.getItemPrimaryImage(item.id!)),
       title: "${item.name} (${item.productionYear.toString()})",
       description: item.overview,
-      fields: [
-        EmbedFieldBuilder(
-            name: "Length", value: parseDurationFromTicks(item.runTimeTicks!).formatShort(), isInline: true),
-        ...fields,
-      ],
+      fields: fields,
     );
   }
 
