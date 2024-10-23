@@ -62,26 +62,22 @@ EmbedFieldBuilder getExternalUrlsEmbedField(Iterable<ExternalUrl> externalUrls) 
 
 Iterable<EmbedFieldBuilder> getMediaPlaybackInfoFields(SessionInfo sessionInfo) {
   if (sessionInfo.transcodingInfo == null) {
-    final mediaStreams = (sessionInfo.nowPlayingItem!.mediaStreams as Iterable<
-        MediaStream>? ?? []);
+    final mediaStreams = (sessionInfo.nowPlayingItem!.mediaStreams as Iterable<MediaStream>? ?? []);
 
     return getMediaInfoEmbedFields([
+      ...mediaStreams.where((mediaStream) => mediaStream.type == MediaStreamType.video),
       ...mediaStreams.where((mediaStream) =>
-      mediaStream.type == MediaStreamType.video),
-      ...mediaStreams.where((mediaStream) =>
-      mediaStream.type == MediaStreamType.audio &&
-          mediaStream.index == sessionInfo.playState!.audioStreamIndex),
+          mediaStream.type == MediaStreamType.audio && mediaStream.index == sessionInfo.playState!.audioStreamIndex),
     ]).toList();
   }
 
   final transcodingInfo = sessionInfo.transcodingInfo!;
 
   final finalBitrate = ((transcodingInfo.bitrate ?? 0) / 1024 / 1024).toStringAsFixed(2);
-  final transCodingInfoString = '${transcodingInfo.height}p (${transcodingInfo.videoCodec} ${transcodingInfo.audioCodec} ${transcodingInfo.container}) $finalBitrate Mbps - ${transcodingInfo.completionPercentage!.toStringAsFixed(2)}% (${transcodingInfo.framerate} fps)';
+  final transCodingInfoString =
+      '${transcodingInfo.height}p (${transcodingInfo.videoCodec} ${transcodingInfo.audioCodec} ${transcodingInfo.container}) $finalBitrate Mbps - ${transcodingInfo.completionPercentage!.toStringAsFixed(2)}% (${transcodingInfo.framerate} fps)';
 
-  return [
-    EmbedFieldBuilder(name: "Transcoding", value: transCodingInfoString, isInline: false)
-  ];
+  return [EmbedFieldBuilder(name: "Transcoding", value: transCodingInfoString, isInline: false)];
 }
 
 EmbedBuilder? buildSessionEmbed(SessionInfo sessionInfo, AuthenticatedJellyfinClient client) {
@@ -176,9 +172,11 @@ EmbedBuilder? buildMediaEmbedBuilder(BaseItemDto item, AuthenticatedJellyfinClie
 
   final fields = [
     EmbedFieldBuilder(name: "Rating (Community/Critic)", value: rating, isInline: true),
-    if ([BaseItemKind.episode, BaseItemKind.movie].contains(item.type)) EmbedFieldBuilder(
-        name: "Length", value: parseDurationFromTicks(item.runTimeTicks!).formatShort(), isInline: true),
-    EmbedFieldBuilder(name: "Url", value: "[Open in Jellyfin](${client.getJellyfinItemUrl(item.id!)})", isInline: false),
+    if ([BaseItemKind.episode, BaseItemKind.movie].contains(item.type))
+      EmbedFieldBuilder(
+          name: "Length", value: parseDurationFromTicks(item.runTimeTicks!).formatShort(), isInline: true),
+    EmbedFieldBuilder(
+        name: "Url", value: "[Open in Jellyfin](${client.getJellyfinItemUrl(item.id!)})", isInline: false),
   ];
 
   if (item.type == BaseItemKind.episode) {
