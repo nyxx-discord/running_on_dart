@@ -60,6 +60,30 @@ EmbedFieldBuilder getExternalUrlsEmbedField(Iterable<ExternalUrl> externalUrls) 
   return EmbedFieldBuilder(name: "External Urls", value: fieldValue.toString(), isInline: false);
 }
 
+Iterable<EmbedFieldBuilder> getMediaPlaybackInfoFields(SessionInfo sessionInfo) {
+  if (sessionInfo.transcodingInfo == null) {
+    final mediaStreams = (sessionInfo.nowPlayingItem!.mediaStreams as Iterable<
+        MediaStream>? ?? []);
+
+    return getMediaInfoEmbedFields([
+      ...mediaStreams.where((mediaStream) =>
+      mediaStream.type == MediaStreamType.video),
+      ...mediaStreams.where((mediaStream) =>
+      mediaStream.type == MediaStreamType.audio &&
+          mediaStream.index == sessionInfo.playState!.audioStreamIndex),
+    ]).toList();
+  }
+
+  final transcodingInfo = sessionInfo.transcodingInfo!;
+
+  final finalBitrate = ((transcodingInfo.bitrate ?? 0) / 1024 / 1024).toStringAsFixed(2);
+  final transCodingInfoString = '${transcodingInfo.width}x${transcodingInfo.height} (${transcodingInfo.videoCodec} ${transcodingInfo.audioCodec} ${transcodingInfo.container}) $finalBitrate Mbps - ${transcodingInfo.completionPercentage!.toStringAsFixed(2)}% (${transcodingInfo.framerate} fps)';
+
+  return [
+    EmbedFieldBuilder(name: "Transcoding", value: transCodingInfoString, isInline: false)
+  ];
+}
+
 EmbedBuilder? buildSessionEmbed(SessionInfo sessionInfo, AuthenticatedJellyfinClient client) {
   final nowPlayingItem = sessionInfo.nowPlayingItem;
   if (nowPlayingItem == null) {
@@ -67,21 +91,15 @@ EmbedBuilder? buildSessionEmbed(SessionInfo sessionInfo, AuthenticatedJellyfinCl
   }
 
   final progress = formatProgress(sessionInfo.playState!.positionTicks ?? 1, nowPlayingItem.runTimeTicks ?? 1);
-
   final premiereDateString = nowPlayingItem.premiereDate!.format(TimestampStyle.shortDateTime);
 
-  final mediaStreams = (nowPlayingItem.mediaStreams as Iterable<MediaStream>? ?? []);
-  final primaryMediaStreams = [
-    ...mediaStreams.where((mediaStream) => mediaStream.type == MediaStreamType.video),
-    ...mediaStreams.where((mediaStream) =>
-        mediaStream.type == MediaStreamType.audio && mediaStream.index == sessionInfo.playState!.audioStreamIndex),
-  ];
+  var mediaPlaybackInfo = getMediaPlaybackInfoFields(sessionInfo);
 
   final fields = [
     EmbedFieldBuilder(name: 'Progress', value: progress, isInline: true),
     EmbedFieldBuilder(name: "Premiere Date", value: premiereDateString, isInline: true),
     getExternalUrlsEmbedField(nowPlayingItem.externalUrls?.toList() ?? []),
-    ...getMediaInfoEmbedFields(primaryMediaStreams),
+    ...mediaPlaybackInfo,
   ];
 
   final footer = EmbedFooterBuilder(text: "Jellyfin instance: ${client.configUser.config!.name}");
