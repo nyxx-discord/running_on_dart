@@ -41,3 +41,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Redeploy portainer
+        uses: muinmomin/webhook-action@v1.0.0
+        with:
+          url: ${{ secrets.ROD_PORTAINER_WEBHOOK }}
