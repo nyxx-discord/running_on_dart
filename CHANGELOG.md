@@ -1,3 +1,6 @@
+## 4.4.0
+- Display transcoding info on media embeds
+
 ## 4.3.1
 - Shorten custom components ids
 
