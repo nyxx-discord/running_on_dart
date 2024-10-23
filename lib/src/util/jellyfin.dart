@@ -77,7 +77,7 @@ Iterable<EmbedFieldBuilder> getMediaPlaybackInfoFields(SessionInfo sessionInfo) 
   final transcodingInfo = sessionInfo.transcodingInfo!;
 
   final finalBitrate = ((transcodingInfo.bitrate ?? 0) / 1024 / 1024).toStringAsFixed(2);
-  final transCodingInfoString = '${transcodingInfo.width}x${transcodingInfo.height} (${transcodingInfo.videoCodec} ${transcodingInfo.audioCodec} ${transcodingInfo.container}) $finalBitrate Mbps - ${transcodingInfo.completionPercentage!.toStringAsFixed(2)}% (${transcodingInfo.framerate} fps)';
+  final transCodingInfoString = '${transcodingInfo.height}p (${transcodingInfo.videoCodec} ${transcodingInfo.audioCodec} ${transcodingInfo.container}) $finalBitrate Mbps - ${transcodingInfo.completionPercentage!.toStringAsFixed(2)}% (${transcodingInfo.framerate} fps)';
 
   return [
     EmbedFieldBuilder(name: "Transcoding", value: transCodingInfoString, isInline: false)

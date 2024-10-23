@@ -1,3 +1,6 @@
+## 4.4.1
+- Change video resolution format for transcoding info
+
 ## 4.4.0
 - Display transcoding info on media embeds
 
