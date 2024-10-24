@@ -1,3 +1,7 @@
+## 4.4.2
+- Fix jellyfin session user avatar
+- Fix displaying music info
+
 ## 4.4.1
 - Change video resolution format for transcoding info
 
