@@ -64,11 +64,15 @@ Iterable<EmbedFieldBuilder> getMediaPlaybackInfoFields(SessionInfo sessionInfo) 
   if (sessionInfo.transcodingInfo == null) {
     final mediaStreams = (sessionInfo.nowPlayingItem!.mediaStreams as Iterable<MediaStream>? ?? []);
 
+    if (sessionInfo.nowPlayingItem!.type == BaseItemKind.audio) {
+      return getMediaInfoEmbedFields(mediaStreams.where((mediaStream) => mediaStream.type == MediaStreamType.audio));
+    }
+
     return getMediaInfoEmbedFields([
       ...mediaStreams.where((mediaStream) => mediaStream.type == MediaStreamType.video),
       ...mediaStreams.where((mediaStream) =>
           mediaStream.type == MediaStreamType.audio && mediaStream.index == sessionInfo.playState!.audioStreamIndex),
-    ]).toList();
+    ]);
   }
 
   final transcodingInfo = sessionInfo.transcodingInfo!;
@@ -101,7 +105,7 @@ EmbedBuilder? buildSessionEmbed(SessionInfo sessionInfo, AuthenticatedJellyfinCl
   final footer = EmbedFooterBuilder(text: "Jellyfin instance: ${client.configUser.config!.name}");
   final author = EmbedAuthorBuilder(
     name: '${sessionInfo.userName} on ${sessionInfo.deviceName}',
-    iconUrl: sessionInfo.userPrimaryImageTag != null ? client.getItemPrimaryImage(sessionInfo.userId!) : null,
+    iconUrl: client.getUserImage(sessionInfo.userId!),
   );
 
   if (nowPlayingItem.type == BaseItemKind.episode) {
@@ -219,9 +223,8 @@ EmbedBuilder? buildMediaEmbedBuilder(BaseItemDto item, AuthenticatedJellyfinClie
 }
 
 EmbedBuilder getUserInfoEmbed(UserDto currentUser, AuthenticatedJellyfinClient client) {
-  final thumbnail = currentUser.primaryImageTag != null
-      ? EmbedThumbnailBuilder(url: client.getUserImage(currentUser.id!, currentUser.primaryImageTag!))
-      : null;
+  final thumbnail =
+      currentUser.primaryImageTag != null ? EmbedThumbnailBuilder(url: client.getUserImage(currentUser.id!)) : null;
 
   return EmbedBuilder(
     thumbnail: thumbnail,
