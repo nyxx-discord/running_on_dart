@@ -29,5 +29,6 @@ dependencies:
 
   dio: any
   built_collection: any
+
 dev_dependencies:
   lints: ^5.0.0

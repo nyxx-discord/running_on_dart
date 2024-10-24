@@ -206,6 +206,7 @@ EmbedBuilder? buildMediaEmbedBuilder(BaseItemDto item, AuthenticatedJellyfinClie
         EmbedFieldBuilder(name: "Runtime", value: runtime, isInline: true),
         EmbedFieldBuilder(name: "Status", value: item.status.toString(), isInline: true),
         ...fields,
+        EmbedFieldBuilder(name: 'Avg Length', value: parseDurationFromTicks(item.runTimeTicks!).formatShort(), isInline: true)
       ],
     );
   }
