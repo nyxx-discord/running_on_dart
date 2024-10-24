@@ -409,7 +409,6 @@ class JellyfinModuleV2 implements RequiresInitialization {
     }
 
     final currentUserId = event.interaction.user?.id ?? event.interaction.member?.id;
-
     if (customId.userId != currentUserId) {
       return event.interaction.respond(MessageBuilder(content: "Invalid interaction"));
     }
@@ -611,17 +610,6 @@ class JellyfinModuleV2 implements RequiresInitialization {
   Future<bool> login(JellyfinConfig config, AuthenticationResult authResult, Snowflake userId) async {
     await _jellyfinConfigRepository.saveJellyfinConfigUser(
       JellyfinConfigUser(userId: userId, token: authResult.accessToken!, jellyfinConfigId: config.id!),
-    );
-
-    return true;
-  }
-
-  Future<bool> loginWithPassword(JellyfinConfig config, String username, String password, Snowflake userId) async {
-    final client = createJellyfinClientAnonymous(config);
-
-    final response = await client.loginByPassword(username, password);
-    await _jellyfinConfigRepository.saveJellyfinConfigUser(
-      JellyfinConfigUser(userId: userId, token: response.accessToken!, jellyfinConfigId: config.id!),
     );
 
     return true;
