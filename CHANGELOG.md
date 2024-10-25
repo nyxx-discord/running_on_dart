@@ -1,3 +1,8 @@
+## 4.5.0
+- Implement remove, transfer config commands
+- Implement jellyfin next up episodes command
+- Display avg length of series episode
+
 ## 4.4.2
 - Fix jellyfin session user avatar
 - Fix displaying music info
