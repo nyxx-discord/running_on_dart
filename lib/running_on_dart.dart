@@ -7,6 +7,8 @@ export 'src/commands/docs.dart' show docs;
 export 'src/commands/reminder.dart' show reminder;
 export 'src/commands/admin.dart' show admin;
 export 'src/commands/jellyfin.dart' show jellyfin;
+export 'src/commands/tag.dart' show tag;
+export 'src/commands/reminder.dart' show reminderMessageCommand;
 
 export 'src/modules/join_logs.dart';
 export 'src/modules/poop_name.dart';
@@ -20,3 +22,5 @@ export 'src/services/db.dart';
 
 export 'src/settings.dart';
 export 'src/converter.dart';
+export 'src/error_handler.dart';
+export 'src/init.dart';
