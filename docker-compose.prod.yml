@@ -11,26 +11,13 @@ services:
       - db
 
   db:
-    image: postgres:13.5
-    container_name: running_on_dart_db
-    restart: always
-    env_file:
-     - .env
-    volumes:
-      - "rod-new_rod_db:/var/lib/postgresql/data"
-      - "~/test:/test"
-
-  db17:
     image: postgres:17
-    container_name: running_on_dart_db_17
+    container_name: running_on_dart_db
     restart: always
     env_file:
       - .env
     volumes:
       - "rod_db_17:/var/lib/postgresql/data"
-      - "~/test:/test"
 
 volumes:
-  rod-new_rod_db:
-    external: true
   rod_db_17:
