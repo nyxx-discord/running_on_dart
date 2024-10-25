@@ -35,4 +35,9 @@ Additionally, if `ROD_DEV` is `true`, the following environment variables must a
 ### With Docker
 
 1. Set all the above environment variables in a `.env` file in the project root.
-3. Run `docker-compose up` to run the bot.
+2. Run `docker-compose up` to run the bot.
+
+## With Makefile
+
+1. Set all the above environment variables in a `.env` file in the project root.
+2. Run `make run` to run the bot.
