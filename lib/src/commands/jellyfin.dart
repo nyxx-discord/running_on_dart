@@ -10,6 +10,7 @@ import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/checks.dart';
 import 'package:running_on_dart/src/external/wizarr.dart';
 import 'package:running_on_dart/src/models/jellyfin_config.dart';
+import 'package:running_on_dart/src/repository/jellyfin_config.dart';
 import 'package:running_on_dart/src/util/jellyfin.dart';
 import 'package:running_on_dart/src/util/pipelines.dart';
 import 'package:running_on_dart/src/util/util.dart';
@@ -335,6 +336,19 @@ final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
       context.respond(MessageBuilder(embeds: embeds));
     }),
   ),
+  ChatCommand(
+    "next-up-episodes",
+    "Show next up episodes to watch",
+    id('jellyfin-next-up-episodes', (ChatContext context,
+        [@Description("Instance to use. Default selected if not provided") JellyfinConfigUser? config]) async {
+      final client = await getJellyfinClient(config, context);
+
+      final results = await client.getNextUpEpisodes();
+
+      final paginator = await pagination.builders(await buildMediaInfoBuilders(results, client).toList());
+      return context.respond(paginator);
+    }),
+  ),
   ChatGroup("settings", "Settings for jellyfin", children: [
     ChatCommand(
         'add-instance',
@@ -453,47 +467,52 @@ final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
         checks: [
           jellyfinFeatureCreateInstanceCommandCheck,
         ]),
-    //   ChatCommand(
-    //       "transfer-config",
-    //       "Transfers jellyfin instance config to another guild",
-    //       id("jellyfin-settings-transfer-config", (
-    //         ChatContext context,
-    //         @Description("Name of instance") @UseConverter(jellyfinConfigConverter) JellyfinConfig config,
-    //         @Description("Guild or user id to copy to") Snowflake targetParentId, [
-    //         @Description("Copy default flag?") bool copyDefaultFlag = false,
-    //         @Description("New name for config. Copied from original if not provided") String? configName,
-    //       ]) async {
-    //         final newConfig =
-    //             await Injector.appInstance.get<JellyfinConfigRepository>().createJellyfinConfig(JellyfinConfig(
-    //                   name: configName ?? config.name,
-    //                   basePath: config.basePath,
-    //                   token: config.token,
-    //                   isDefault: copyDefaultFlag && config.isDefault,
-    //                   parentId: targetParentId,
-    //                   sonarrBasePath: config.sonarrBasePath,
-    //                   sonarrToken: config.sonarrToken,
-    //                   wizarrBasePath: config.wizarrBasePath,
-    //                   wizarrToken: config.wizarrToken,
-    //                 ));
-    //
-    //         context.respond(
-    //             MessageBuilder(content: 'Copied config: "${newConfig.name}" to parent: "${newConfig.parentId}"'));
-    //       }),
-    //       checks: [
-    //         jellyfinFeatureAdminCommandCheck,
-    //       ]),
-    //   ChatCommand(
-    //       "remove-config",
-    //       "Removes config from current guild",
-    //       id("jellyfin-settings-remove-config", (ChatContext context,
-    //           @Description("Name of instance") @UseConverter(jellyfinConfigConverter) JellyfinConfig config) async {
-    //         await Injector.appInstance.get<JellyfinModule>().deleteJellyfinConfig(config);
-    //
-    //         context.respond(MessageBuilder(content: 'Delete config with name: "${config.name}"'));
-    //       }),
-    //       checks: [
-    //         jellyfinFeatureAdminCommandCheck,
-    //       ]),
+    ChatCommand(
+        "transfer-config",
+        "Transfers jellyfin instance config to another guild",
+        id("jellyfin-settings-transfer-config", (
+          ChatContext context,
+          @Description("Instance to use. Default selected if not provided") JellyfinConfigUser userConfig,
+          @Description("Guild or user id to copy to") Snowflake targetParentId, [
+          @Description("Copy default flag?") bool copyDefaultFlag = false,
+          @Description("New name for config. Copied from original if not provided") String? configName,
+        ]) async {
+          final client = await getJellyfinClient(userConfig, context);
+          await ensureAdminJellyfinUser(client);
+
+          final config = userConfig.config;
+          if (config == null) {
+            return context.respond(MessageBuilder(content: 'Cannot find valid jellyfin config'));
+          }
+
+          final newConfig =
+              await Injector.appInstance.get<JellyfinConfigRepository>().createJellyfinConfig(JellyfinConfig(
+                    name: configName ?? config.name,
+                    basePath: config.basePath,
+                    isDefault: copyDefaultFlag && config.isDefault,
+                    parentId: targetParentId,
+                    sonarrBasePath: config.sonarrBasePath,
+                    sonarrToken: config.sonarrToken,
+                    wizarrBasePath: config.wizarrBasePath,
+                    wizarrToken: config.wizarrToken,
+                  ));
+
+          context.respond(
+              MessageBuilder(content: 'Copied config: "${newConfig.name}" to parent: "${newConfig.parentId}"'));
+        })),
+    ChatCommand(
+      "remove-config",
+      "Removes config from current guild",
+      id("jellyfin-settings-remove-config", (ChatContext context,
+          @Description("Instance to use. Default selected if not provided") JellyfinConfigUser config) async {
+        final client = await getJellyfinClient(config, context);
+        await ensureAdminJellyfinUser(client);
+
+        await Injector.appInstance.get<JellyfinConfigRepository>().removeJellyfinConfig(config.config!);
+
+        context.respond(MessageBuilder(content: 'Delete config with name: "${config.config?.name}"'));
+      }),
+    ),
   ]),
   ChatGroup("util", "Util commands for jellyfin", children: [
     ChatCommand(

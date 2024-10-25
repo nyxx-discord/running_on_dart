@@ -229,6 +229,17 @@ class AuthenticatedJellyfinClient {
     return response.data!;
   }
 
+  Future<List<BaseItemDto>> getNextUpEpisodes({int limit = 10}) async {
+    final result = await jellyfinClient.getTvShowsApi().getNextUp(
+        limit: limit,
+        enableTotalRecordCount: false,
+        disableFirstEpisode: true,
+        enableRewatching: false,
+        fields: BuiltList([ItemFields.overview]));
+
+    return result.data?.items?.toList() ?? [];
+  }
+
   Future<void> startTask(String taskId) => jellyfinClient.getScheduledTasksApi().startTask(taskId: taskId);
   Uri getItemPrimaryImage(String itemId) => Uri.parse("${configUser.config?.basePath}/Items/$itemId/Images/Primary");
   Uri getJellyfinItemUrl(String itemId) => Uri.parse("${configUser.config?.basePath}/#/details?id=$itemId");

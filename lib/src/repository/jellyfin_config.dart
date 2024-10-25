@@ -6,6 +6,15 @@ import 'package:running_on_dart/src/services/db.dart';
 class JellyfinConfigRepository {
   final _database = Injector.appInstance.get<DatabaseService>();
 
+  Future<void> removeJellyfinConfig(JellyfinConfig config) async {
+    await _database.getConnection().execute(
+        Sql.named('DELETE FROM jellyfin_user_configs WHERE jellyfin_config_id = @id'),
+        parameters: {'id': config.id});
+    await _database
+        .getConnection()
+        .execute(Sql.named('DELETE FROM jellyfin_configs WHERE id = @id'), parameters: {'id': config.id});
+  }
+
   Future<Iterable<JellyfinConfig>> getConfigsForParent(String parentId) async {
     final result = await _database.getConnection().execute(
         Sql.named('SELECT * FROM jellyfin_configs WHERE guild_id = @parentId'),
