@@ -9,6 +9,39 @@ import 'package:running_on_dart/src/modules/docs.dart';
 import 'package:running_on_dart/src/settings.dart';
 import 'package:running_on_dart/src/util/util.dart';
 
+List<MessageBuilder> _getPaginationBuilders(Iterable<DocEntry> searchResults, String query, PackageDocs? package) {
+  var pageCount = 1;
+
+  final foldedResults = searchResults.fold<List<List<String>>>([[]], (pages, entry) {
+    final entryContent = '[${entry.displayName} ${entry.type}](${entry.urlToDocs})';
+
+    // +1 for newline
+    var wouldBeLength = pages.last.join('\n').length + entryContent.length + 1;
+
+    if (wouldBeLength > 1024 || pages.last.length >= 10) {
+      pages.add([]);
+      pageCount++;
+    }
+
+    return pages..last.add(entryContent);
+  });
+
+  return foldedResults.asMap().entries.map((entry) {
+    final embed = EmbedBuilder(
+        color: getRandomColor(),
+        title: 'Search results - $query',
+        fields: [
+          EmbedFieldBuilder(
+              name: 'Results in ${package != null ? 'package ${package.packageName}' : 'all packages'}',
+              value: entry.value.join('\n'),
+              isInline: false),
+        ],
+        footer: EmbedFooterBuilder(text: 'Page ${entry.key + 1} of $pageCount'));
+
+    return MessageBuilder(embeds: [embed]);
+  }).toList();
+}
+
 final docs = ChatGroup(
   'docs',
   'Search and get documentation for various packages',
@@ -74,36 +107,3 @@ Package: [${element.packageName}](https://pub.dev/packages/${element.packageName
     ),
   ],
 );
-
-List<MessageBuilder> _getPaginationBuilders(Iterable<DocEntry> searchResults, String query, PackageDocs? package) {
-  var pageCount = 1;
-
-  final foldedResults = searchResults.fold<List<List<String>>>([[]], (pages, entry) {
-    final entryContent = '[${entry.displayName} ${entry.type}](${entry.urlToDocs})';
-
-    // +1 for newline
-    var wouldBeLength = pages.last.join('\n').length + entryContent.length + 1;
-
-    if (wouldBeLength > 1024 || pages.last.length >= 10) {
-      pages.add([]);
-      pageCount++;
-    }
-
-    return pages..last.add(entryContent);
-  });
-
-  return foldedResults.asMap().entries.map((entry) {
-    final embed = EmbedBuilder(
-        color: getRandomColor(),
-        title: 'Search results - $query',
-        fields: [
-          EmbedFieldBuilder(
-              name: 'Results in ${package != null ? 'package ${package.packageName}' : 'all packages'}',
-              value: entry.value.join('\n'),
-              isInline: false),
-        ],
-        footer: EmbedFooterBuilder(text: 'Page ${entry.key + 1} of $pageCount'));
-
-    return MessageBuilder(embeds: [embed]);
-  }).toList();
-}

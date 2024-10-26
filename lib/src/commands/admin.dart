@@ -5,6 +5,25 @@ import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/src/modules/poop_name.dart';
 
+Future<MessageBuilder> createMessageBuilder(String messageString, String messageHeader) async {
+  if (messageString.isEmpty) {
+    return MessageBuilder(content: "-/-");
+  }
+
+  return pagination.split(messageString, buildChunk: (String chunk) => MessageBuilder(content: """
+$messageHeader:
+```
+$chunk
+```
+"""));
+}
+
+Stream<Member> searchMembers(String disallowedChar, int batchSize, Guild guild) {
+  return (guild.manager.client as NyxxGateway)
+      .gateway
+      .listGuildMembers(guild.id, query: disallowedChar, limit: batchSize);
+}
+
 final admin = ChatGroup(
   'admin',
   'Administrative commands',
@@ -69,22 +88,3 @@ final admin = ChatGroup(
         ])
   ],
 );
-
-Future<MessageBuilder> createMessageBuilder(String messageString, String messageHeader) async {
-  if (messageString.isEmpty) {
-    return MessageBuilder(content: "-/-");
-  }
-
-  return pagination.split(messageString, buildChunk: (String chunk) => MessageBuilder(content: """
-$messageHeader:
-```
-$chunk
-```
-"""));
-}
-
-Stream<Member> searchMembers(String disallowedChar, int batchSize, Guild guild) {
-  return (guild.manager.client as NyxxGateway)
-      .gateway
-      .listGuildMembers(guild.id, query: disallowedChar, limit: batchSize);
-}

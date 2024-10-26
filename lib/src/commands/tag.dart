@@ -4,8 +4,7 @@ import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:running_on_dart/src/models/tag.dart';
 import 'package:running_on_dart/src/modules/tag.dart';
 import 'package:running_on_dart/src/util/util.dart';
-
-import '../converter.dart';
+import 'package:running_on_dart/src/converter.dart';
 
 final tag = ChatGroup(
   'tag',
