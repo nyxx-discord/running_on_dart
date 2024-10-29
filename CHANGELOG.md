@@ -1,3 +1,6 @@
+## 4.6.0
+- Implement jellyfin ping command
+
 ## 4.5.0
 - Implement remove, transfer config commands
 - Implement jellyfin next up episodes command
