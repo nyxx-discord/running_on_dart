@@ -264,6 +264,8 @@ class AnonymousJellyfinClient {
     return response.data!;
   }
 
+  Future<void> getPing() => jellyfinClient.getSystemApi().getPingSystem();
+
   Future<QuickConnectResult> initiateLoginByQuickConnect() async {
     final response = await jellyfinClient.getQuickConnectApi().initiateQuickConnect();
 

@@ -7,7 +7,7 @@ void main() async {
   final commands = CommandsPlugin(
     prefix: null,
     guild: devGuildId,
-    options: CommandsOptions(logErrors: dev),
+    options: CommandsOptions(logErrors: dev, type: CommandType.slashOnly),
   );
 
   commands
