@@ -1,3 +1,8 @@
+## 4.6.1
+- Fix unnecessary coma in join logs
+- Move number to song title in media info
+- Improve invalid nicks in pooping module
+
 ## 4.6.0
 - Implement jellyfin ping command
 
