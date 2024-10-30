@@ -514,23 +514,26 @@ final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
       }),
     ),
     ChatCommand(
-      "ping",
-      "Ping jellyfin server",
-      id('jellyfin-settings-ping', (ChatContext context, [@Description('Instance to use. Default selected if not provided') JellyfinConfig? config]) async {
-        config ??= await Injector.appInstance.get<JellyfinModuleV2>().getJellyfinDefaultConfig(context.guild?.id ?? context.user.id);
-        if (config == null) {
-          return context.respond(MessageBuilder(content: 'Invalid jellyfin config'));
-        }
+        "ping",
+        "Ping jellyfin server",
+        id('jellyfin-settings-ping', (ChatContext context,
+            [@Description('Instance to use. Default selected if not provided') JellyfinConfig? config]) async {
+          config ??= await Injector.appInstance
+              .get<JellyfinModuleV2>()
+              .getJellyfinDefaultConfig(context.guild?.id ?? context.user.id);
+          if (config == null) {
+            return context.respond(MessageBuilder(content: 'Invalid jellyfin config'));
+          }
 
-        final client = Injector.appInstance.get<JellyfinModuleV2>().createJellyfinClientAnonymous(config);
+          final client = Injector.appInstance.get<JellyfinModuleV2>().createJellyfinClientAnonymous(config);
 
-        final stopwatch = Stopwatch()..start();
-        await client.getPing();
-        final stopwatchResult = stopwatch.elapsedMilliseconds;
+          final stopwatch = Stopwatch()..start();
+          await client.getPing();
+          final stopwatchResult = stopwatch.elapsedMilliseconds;
 
-        return context.respond(MessageBuilder(content: 'Latency to jellyfin instance "${config.name}": ${stopwatchResult}ms'));
-      })
-    )
+          return context
+              .respond(MessageBuilder(content: 'Latency to jellyfin instance "${config.name}": ${stopwatchResult}ms'));
+        }))
   ]),
   ChatGroup("util", "Util commands for jellyfin", children: [
     ChatCommand(

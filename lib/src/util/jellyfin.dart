@@ -140,11 +140,7 @@ EmbedBuilder? buildSessionEmbed(SessionInfo sessionInfo, AuthenticatedJellyfinCl
       author: author,
       thumbnail: EmbedThumbnailBuilder(url: client.getItemPrimaryImage(nowPlayingItem.albumId!)),
       title: '${artist.name!} - ${nowPlayingItem.name} (Track ${nowPlayingItem.indexNumber})',
-      fields: [
-        EmbedFieldBuilder(
-            name: 'Album', value: '${nowPlayingItem.album}', isInline: false),
-        ...fields
-      ],
+      fields: [EmbedFieldBuilder(name: 'Album', value: '${nowPlayingItem.album}', isInline: false), ...fields],
       footer: footer,
     );
   }
