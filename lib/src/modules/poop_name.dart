@@ -28,8 +28,8 @@ class PoopNameModule implements RequiresInitialization {
   }
 
   Future<(bool, String?)> poopMember(Member member, {bool dryRun = true}) async {
-    final memberName = member.nick ?? member.user?.globalName ?? '';
-    if (!_shouldPoopName(memberName)) {
+    final memberName = member.nick ?? member.user?.globalName;
+    if (memberName == null || !_shouldPoopName(memberName)) {
       return (false, null);
     }
 

@@ -54,7 +54,7 @@ class JoinLogsModule implements RequiresInitialization {
   }
 
   String _formatDateTimeString(DateTime dateTime) =>
-      '${dateTime.format(TimestampStyle.shortDate)}, (${dateTime.format(TimestampStyle.relativeTime)})';
+      '${dateTime.format(TimestampStyle.shortDate)} (${dateTime.format(TimestampStyle.relativeTime)})';
 
   Future<bool> _isEnabledForGuild(Snowflake guildId) async {
     if (!intentFeaturesEnabled) {
