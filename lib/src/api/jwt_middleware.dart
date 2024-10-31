@@ -1,11 +1,9 @@
-import 'dart:convert';
-
 import 'package:jaguar_jwt/jaguar_jwt.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/api/utils.dart';
 import 'package:shelf/shelf.dart' as shelf;
 
-final jwtKey = getEnv("JWT_KEY");
+final jwtKey = getEnv("JWT_SECRET");
 
 class MissingPermissionsException implements Exception {}
 
@@ -25,25 +23,25 @@ void validateClaims(JwtClaim jwt, List<String> requiredPermissions) {
 }
 
 shelf.Middleware jwtMiddleware([List<String> requiredPermissions = const []]) => (shelf.Handler handler) {
-  return (shelf.Request request) {
-    final authHeader = request.headers['Authorization'];
+      return (shelf.Request request) {
+        final authHeader = request.headers['Authorization'];
 
-    if (authHeader == null) {
-      return createUnauthorizedResponse('Missing authorization header');
-    }
+        if (authHeader == null) {
+          return createUnauthorizedResponse('Missing authorization header');
+        }
 
-    try {
-      final jwt = verifyJwtHS256Signature(authHeader.replaceFirst('Bearer ', ''), jwtKey);
+        try {
+          final jwt = verifyJwtHS256Signature(authHeader.replaceFirst('Bearer ', ''), jwtKey);
 
-      if (requiredPermissions.isNotEmpty) {
-        validateClaims(jwt, requiredPermissions);
-      }
-    } on JwtException catch (e) {
-      return createUnauthorizedResponse(e.message);
-    } on MissingPermissionsException {
-      return createForbiddenResponse();
-    }
+          if (requiredPermissions.isNotEmpty) {
+            validateClaims(jwt, requiredPermissions);
+          }
+        } on JwtException catch (e) {
+          return createUnauthorizedResponse(e.message);
+        } on MissingPermissionsException {
+          return createForbiddenResponse();
+        }
 
-    return handler(request);
-  };
-};
+        return handler(request);
+      };
+    };
