@@ -44,4 +44,6 @@ void main() async {
       ));
 
   await setupContainer(client);
+
+  WebServer().startServer();
 }

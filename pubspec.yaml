@@ -27,8 +27,14 @@ dependencies:
     git: https://github.com/TentacleOrg/Tentacle.git
   injector: ^4.0.0
 
+  # directly used transitive dependencies
   dio: any
   built_collection: any
+
+  # api server
+  shelf: ^1.4.2
+  shelf_router: ^1.1.4
+  jaguar_jwt: ^3.0.0
 
 dev_dependencies:
   lints: ^5.0.0
