@@ -9,6 +9,12 @@ final jwtKey = getEnv("JWT_KEY");
 
 class MissingPermissionsException implements Exception {}
 
+String generateJwtKey(String subject) {
+  final claimSet = JwtClaim(subject: subject, maxAge: Duration(days: 1));
+
+  return issueJwtHS256(claimSet, jwtKey);
+}
+
 void validateClaims(JwtClaim jwt, List<String> requiredPermissions) {
   final claims = jwt.payload['permissions'] as List<String>? ?? <String>[];
 
@@ -27,7 +33,7 @@ shelf.Middleware jwtMiddleware([List<String> requiredPermissions = const []]) =>
     }
 
     try {
-      final jwt = verifyJwtHS256Signature(authHeader, jwtKey);
+      final jwt = verifyJwtHS256Signature(authHeader.replaceFirst('Bearer ', ''), jwtKey);
 
       if (requiredPermissions.isNotEmpty) {
         validateClaims(jwt, requiredPermissions);
