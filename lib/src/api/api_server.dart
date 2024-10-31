@@ -17,8 +17,8 @@ class WebServer {
 
   Future<shelf_router.Router> _setupRouter() async {
     return shelf_router.Router()
-      ..get("/api/info", _handleBotInfo)
-      ..get("/api/test", _authorized(_handleBotInfo));
+      ..get("/api/info", _handleBotInfo);
+      // ..get("/api/test", _authorized(_handleBotInfo));
   }
 
   shelf.Handler _authorized(shelf.Handler inner) => const shelf.Pipeline().addMiddleware(jwtMiddleware()).addHandler(inner);

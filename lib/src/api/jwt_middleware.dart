@@ -10,15 +10,15 @@ final jwtKey = getEnv("JWT_KEY");
 class MissingPermissionsException implements Exception {}
 
 String generateJwtKey(String subject) {
-  final claimSet = JwtClaim(subject: subject, maxAge: Duration(days: 1));
+  final jwtClaim = JwtClaim(subject: subject, maxAge: Duration(days: 1));
 
-  return issueJwtHS256(claimSet, jwtKey);
+  return issueJwtHS256(jwtClaim, jwtKey);
 }
 
 void validateClaims(JwtClaim jwt, List<String> requiredPermissions) {
-  final claims = jwt.payload['permissions'] as List<String>? ?? <String>[];
+  final permissions = jwt.payload['permissions'] as List<String>? ?? <String>[];
 
-  final valid = Set.of(claims).containsAll(requiredPermissions);
+  final valid = Set.of(permissions).containsAll(requiredPermissions);
   if (!valid) {
     throw MissingPermissionsException();
   }
