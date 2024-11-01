@@ -2,71 +2,43 @@ import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
-import 'package:running_on_dart/src/modules/bot_start_duration.dart';
-import 'package:running_on_dart/src/modules/docs.dart';
-import 'package:running_on_dart/src/modules/reminder.dart';
-import 'package:running_on_dart/src/modules/tag.dart';
-import 'package:running_on_dart/src/settings.dart';
+import 'package:running_on_dart/src/services/bot_info.dart';
 import 'package:running_on_dart/src/util/util.dart';
 
 final info = ChatCommand(
   'info',
   'Get info about the bot',
   id('info', (ChatContext context) async {
-    final color = getRandomColor();
     final currentUser = await context.client.user.get();
+    final botInfo = await Injector.appInstance.get<BotInfoService>().getCurrentBotInfo();
 
-    final startDate = Injector.appInstance.get<BotStartDuration>().startDate;
     final startDateStr =
-        "${startDate.format(TimestampStyle.longDateTime)} (${startDate.format(TimestampStyle.relativeTime)})";
-
-    final docsUpdatedDate = Injector.appInstance.get<DocsModule>().lastUpdate;
-    final docsUpdateStr = docsUpdatedDate != null
-        ? "${docsUpdatedDate.format(TimestampStyle.longDateTime)} (${docsUpdatedDate.format(TimestampStyle.relativeTime)})"
+        "${botInfo.uptime.format(TimestampStyle.longDateTime)} (${botInfo.uptime.format(TimestampStyle.relativeTime)})";
+    final docsUpdateStr = botInfo.docsUpdate != null
+        ? "${botInfo.docsUpdate!.format(TimestampStyle.longDateTime)} (${botInfo.docsUpdate!.format(TimestampStyle.relativeTime)})"
         : "Never";
 
     final embed = EmbedBuilder(
-      color: color,
+      color: getRandomColor(),
       author: EmbedAuthorBuilder(
         name: currentUser.username,
         iconUrl: currentUser.avatar.url,
         url: Uri.parse(ApiOptions.nyxxRepositoryUrl),
       ),
       footer: EmbedFooterBuilder(
-          text: 'nyxx ${ApiOptions.nyxxVersion}'
-              ' | ROD $version'
-              ' | Dart SDK ${getDartPlatform()}'),
+          text: 'nyxx ${botInfo.nyxxVersion}'
+              ' | ROD ${botInfo.version}'
+              ' | Dart SDK ${botInfo.dartPlatform}'),
       fields: [
-        EmbedFieldBuilder(name: 'Cached guilds', value: context.client.guilds.cache.length.toString(), isInline: true),
-        EmbedFieldBuilder(name: 'Cached users', value: context.client.users.cache.length.toString(), isInline: true),
-        EmbedFieldBuilder(
-            name: 'Cached channels', value: context.client.channels.cache.length.toString(), isInline: true),
-        EmbedFieldBuilder(
-            name: 'Cached voice states',
-            value: context.client.guilds.cache.values
-                .map((g) => g.voiceStates.length)
-                .fold<num>(0, (value, element) => value + element)
-                .toString(),
-            isInline: true),
-        EmbedFieldBuilder(name: 'Shard count', value: context.client.gateway.shards.length.toString(), isInline: true),
-        EmbedFieldBuilder(
-            name: 'Cached messages',
-            value: context.client.channels.cache.values
-                .whereType<TextChannel>()
-                .map((c) => c.messages.cache.length)
-                .fold<num>(0, (value, element) => value + element)
-                .toString(),
-            isInline: true),
-        EmbedFieldBuilder(name: 'Memory usage (current/RSS)', value: getCurrentMemoryString(), isInline: true),
-        EmbedFieldBuilder(
-            name: 'Tags in guild',
-            value:
-                Injector.appInstance.get<TagModule>().countCachedTags(context.guild?.id ?? context.user.id).toString(),
-            isInline: true),
-        EmbedFieldBuilder(
-            name: 'Current reminders',
-            value: Injector.appInstance.get<ReminderModule>().reminders.length.toString(),
-            isInline: true),
+        EmbedFieldBuilder(name: 'Cached guilds', value: botInfo.cachedGuilds.toString(), isInline: true),
+        EmbedFieldBuilder(name: 'Cached users', value: botInfo.cachedUsers.toString(), isInline: true),
+        EmbedFieldBuilder(name: 'Cached channels', value: botInfo.cachedChannels.toString(), isInline: true),
+        EmbedFieldBuilder(name: 'Cached voice states', value: botInfo.cachedVoiceStates.toString(), isInline: true),
+        EmbedFieldBuilder(name: 'Shard count', value: botInfo.shardCount.toString(), isInline: true),
+        EmbedFieldBuilder(name: 'Cached messages', value: botInfo.cachedMessages.toString(), isInline: true),
+        EmbedFieldBuilder(name: 'Memory usage (current/RSS)', value: botInfo.memoryUserString, isInline: true),
+        EmbedFieldBuilder(name: 'Tags in guild', value: botInfo.totalTagsCount.toString(), isInline: true),
+        EmbedFieldBuilder(name: 'Current reminders', value: botInfo.totalRemainderCount.toString(), isInline: true),
         EmbedFieldBuilder(name: 'Uptime', value: startDateStr, isInline: false),
         EmbedFieldBuilder(name: 'Docs Update', value: docsUpdateStr, isInline: false),
       ],

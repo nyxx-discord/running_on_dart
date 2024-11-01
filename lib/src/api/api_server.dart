@@ -4,7 +4,7 @@ import 'package:injector/injector.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/api/jwt_middleware.dart';
 import 'package:running_on_dart/src/api/utils.dart';
-import 'package:running_on_dart/src/modules/bot_start_duration.dart';
+import 'package:running_on_dart/src/services/bot_info.dart';
 
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
 import 'package:shelf_router/shelf_router.dart' as shelf_router;
@@ -19,10 +19,9 @@ final clientRedirectUri = getEnv('DISCORD_REDIRECT_URI');
 
 class WebServer {
   Future<shelf.Response> _handleBotInfo(shelf.Request request) async {
-    final botStartDuration = Injector.appInstance.get<BotStartDuration>();
+    final botInfo = await Injector.appInstance.get<BotInfoService>().getCurrentBotInfo();
 
-    return shelf.Response.ok(jsonEncode({"ok": true, 'uptime': botStartDuration.startDate.toIso8601String()}),
-        headers: {'Content-Type': 'application/json'});
+    return createOkResponse(botInfo.toJson());
   }
 
   Future<shelf.Response> _handleLogin(shelf.Request request) async {
