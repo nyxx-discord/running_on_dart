@@ -7,8 +7,8 @@ final jwtKey = getEnv("JWT_SECRET");
 
 class MissingPermissionsException implements Exception {}
 
-String generateJwtKey(String subject) {
-  final jwtClaim = JwtClaim(subject: subject, maxAge: Duration(days: 1));
+String generateJwtKey(String discordUserId, String userName) {
+  final jwtClaim = JwtClaim(subject: discordUserId, maxAge: Duration(days: 1), payload: {"name": userName});
 
   return issueJwtHS256(jwtClaim, jwtKey);
 }

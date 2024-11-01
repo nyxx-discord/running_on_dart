@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:injector/injector.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/api/jwt_middleware.dart';
+import 'package:running_on_dart/src/api/utils.dart';
 import 'package:running_on_dart/src/modules/bot_start_duration.dart';
 
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
@@ -28,7 +29,7 @@ class WebServer {
     final requestBody = jsonDecode(await request.readAsString()) as Map<String, dynamic>;
     final authCode = requestBody['code'];
 
-    await http.post(Uri.https('discord.com', '/api/oauth2/token'), body: {
+    final response = await http.post(Uri.https('discord.com', '/api/oauth2/token'), body: {
       'client_id': clientId,
       'client_secret': clientSecret,
       'redirect_uri': clientRedirectUri,
@@ -38,7 +39,24 @@ class WebServer {
       'Content-Type': 'application/x-www-form-urlencoded',
     });
 
-    final jwtToken = generateJwtKey('test');
+    if (response.statusCode != 200) {
+      return createJsonErrorResponse(400, "Cannot login through discord. Try again");
+    }
+
+    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
+    final accessToken = responseBody['access_token'];
+
+    final authorizedUserResponse = await http.get(Uri.https('discord.com', '/api/oauth2/@me'),
+        headers: {"Accept": 'application/json', 'Authorization': 'Bearer $accessToken'});
+
+    if (authorizedUserResponse.statusCode != 200) {
+      return createJsonErrorResponse(400, "Cannot fetch user data from discord!");
+    }
+
+    final authorizedUserResponseBody = jsonDecode(authorizedUserResponse.body) as Map<String, dynamic>;
+
+    final jwtToken = generateJwtKey(authorizedUserResponseBody['user']['id'],
+        authorizedUserResponseBody['user']['global_name'] ?? authorizedUserResponseBody['user']['username']);
 
     return shelf.Response.ok(jsonEncode({'token': jwtToken}));
   }
