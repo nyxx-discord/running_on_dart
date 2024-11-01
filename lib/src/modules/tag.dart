@@ -38,6 +38,7 @@ class TagModule implements RequiresInitialization {
   }
 
   int countCachedTags(Snowflake targetId) => tags.where((tag) => tag.guildId == targetId).length;
+  int countTags() => tags.length;
 
   /// Get all the enabled tags in a guild.
   Iterable<Tag> getGuildTags(Snowflake guildId) => tags.where((tag) => tag.guildId == guildId && tag.enabled);

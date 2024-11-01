@@ -12,6 +12,7 @@ import 'package:running_on_dart/src/repository/feature_settings.dart';
 import 'package:running_on_dart/src/repository/jellyfin_config.dart';
 import 'package:running_on_dart/src/repository/reminder.dart';
 import 'package:running_on_dart/src/repository/tag.dart';
+import 'package:running_on_dart/src/services/bot_info.dart';
 import 'package:running_on_dart/src/services/db.dart';
 import 'package:running_on_dart/src/services/feature_settings.dart';
 
@@ -31,7 +32,8 @@ Future<void> setupContainer(NyxxGateway client) async {
     ..registerSingleton(() => ModLogsModule())
     ..registerSingleton(() => TagModule())
     ..registerSingleton(() => DocsModule())
-    ..registerSingleton(() => JellyfinModuleV2());
+    ..registerSingleton(() => JellyfinModuleV2())
+    ..registerSingleton(() => BotInfoService());
 
   await Injector.appInstance.get<DatabaseService>().init();
   await Injector.appInstance.get<JellyfinModuleV2>().init();

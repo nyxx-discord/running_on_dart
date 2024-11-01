@@ -7,14 +7,15 @@ final jwtKey = getEnv("JWT_SECRET");
 
 class MissingPermissionsException implements Exception {}
 
-String generateJwtKey(String discordUserId, String userName) {
-  final jwtClaim = JwtClaim(subject: discordUserId, maxAge: Duration(days: 1), payload: {"name": userName});
+String generateJwtKey(String discordUserId, String userName, {List<String> requiredPermissions = const []}) {
+  final jwtClaim = JwtClaim(
+      subject: discordUserId, maxAge: Duration(days: 1), payload: {"name": userName, 'perms': requiredPermissions});
 
   return issueJwtHS256(jwtClaim, jwtKey);
 }
 
 void validateClaims(JwtClaim jwt, List<String> requiredPermissions) {
-  final permissions = jwt.payload['permissions'] as List<String>? ?? <String>[];
+  final permissions = jwt.payload['perms'] as List<String>? ?? <String>[];
 
   final valid = Set.of(permissions).containsAll(requiredPermissions);
   if (!valid) {
