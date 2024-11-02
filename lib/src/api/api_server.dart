@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:injector/injector.dart';
+import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/api/jwt_middleware.dart';
 import 'package:running_on_dart/src/api/utils.dart';
@@ -17,11 +18,31 @@ final clientId = getEnv('DISCORD_CLIENT_ID');
 final clientSecret = getEnv('DISCORD_CLIENT_SECRET');
 final clientRedirectUri = getEnv('DISCORD_REDIRECT_URI');
 
+enum WebApiPermission {
+  guilds('G');
+
+  final String name;
+
+  const WebApiPermission(this.name);
+}
+
 class WebServer {
   Future<shelf.Response> _handleBotInfo(shelf.Request request) async {
     final botInfo = await Injector.appInstance.get<BotInfoService>().getCurrentBotInfo();
 
     return createOkResponse(botInfo.toJson());
+  }
+
+  Future<shelf.Response> _handleGuildInfo(shelf.Request request) async {
+    final outputJson = Injector.appInstance.get<NyxxGateway>().guilds.cache.values.map((guild) {
+      return <String, dynamic>{
+        "id": guild.id.toString(),
+        "name": guild.name,
+        "cached_members": guild.members.cache.length,
+      };
+    });
+
+    return createOkResponse(outputJson.toList());
   }
 
   Future<shelf.Response> _handleLogin(shelf.Request request) async {
@@ -63,12 +84,12 @@ class WebServer {
   Future<shelf_router.Router> _setupRouter() async {
     return shelf_router.Router()
       ..get("/api/info", _handleBotInfo)
-      ..post("/api/login", _handleLogin);
-    // ..get("/api/test", _authorized(_handleBotInfo));
+      ..post("/api/login", _handleLogin)
+      ..get("/api/guilds", _authorized(_handleGuildInfo, [WebApiPermission.guilds]));
   }
 
-  shelf.Handler _authorized(shelf.Handler inner) =>
-      const shelf.Pipeline().addMiddleware(jwtMiddleware()).addHandler(inner);
+  shelf.Handler _authorized(shelf.Handler inner, [List<WebApiPermission> requiredRoles = const []]) =>
+      shelf.Pipeline().addMiddleware(jwtMiddleware(requiredRoles.map((e) => e.name).toList())).addHandler(inner);
 
   Future<void> startServer() async {
     final router = await _setupRouter();
