@@ -37,8 +37,11 @@ class WebServer {
     final outputJson = Injector.appInstance.get<NyxxGateway>().guilds.cache.values.map((guild) {
       return <String, dynamic>{
         "id": guild.id.toString(),
+        "icon_hash": guild.iconHash,
+        "banner_hash": guild.bannerHash,
         "name": guild.name,
         "cached_members": guild.members.cache.length,
+        "cached_roles": guild.roles.cache.length,
       };
     });
 
