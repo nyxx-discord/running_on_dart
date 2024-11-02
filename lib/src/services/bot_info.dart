@@ -40,6 +40,8 @@ class BotInfo {
         'version': version,
         'platform': dartPlatform,
         'memory_usage_string': memoryUserString,
+        'cached_channels': cachedChannels,
+        'cached_messages': cachedMessages,
         'cached_guilds': cachedGuilds,
         'cached_users': cachedUsers,
         'cached_voice_states': cachedVoiceStates,
