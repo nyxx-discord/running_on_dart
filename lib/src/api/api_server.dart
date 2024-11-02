@@ -75,10 +75,18 @@ class WebServer {
 
     final authorizedUserResponseBody = jsonDecode(authorizedUserResponse.body) as Map<String, dynamic>;
 
-    final jwtToken = generateJwtKey(authorizedUserResponseBody['user']['id'],
-        authorizedUserResponseBody['user']['global_name'] ?? authorizedUserResponseBody['user']['username']);
+    final userName =
+        authorizedUserResponseBody['user']['global_name'] ?? authorizedUserResponseBody['user']['username'];
+    final jwtToken = generateJwtKey(authorizedUserResponseBody['user']['id'], userName);
 
-    return shelf.Response.ok(jsonEncode({'token': jwtToken}));
+    return createOkResponse({
+      'token': jwtToken,
+      'user': {
+        'id': authorizedUserResponseBody['user']['id'],
+        'name': userName,
+        'avatar_hash': authorizedUserResponseBody['user']['avatar'],
+      },
+    });
   }
 
   Future<shelf_router.Router> _setupRouter() async {
