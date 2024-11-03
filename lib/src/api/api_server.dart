@@ -27,6 +27,8 @@ enum WebApiPermission {
 }
 
 class WebServer {
+  final Logger _logger = Logger('ROD.ApiServer');
+
   Future<shelf.Response> _handleBotInfo(shelf.Request request) async {
     final botInfo = await Injector.appInstance.get<BotInfoService>().getCurrentBotInfo();
 
@@ -103,11 +105,17 @@ class WebServer {
       shelf.Pipeline().addMiddleware(jwtMiddleware(requiredRoles.map((e) => e.name).toList())).addHandler(inner);
 
   Future<void> startServer() async {
+    if (!enableApiServer) {
+      _logger.info("Api server disabled...");
+      return;
+    }
+
     final router = await _setupRouter();
 
     final app =
         const shelf.Pipeline().addMiddleware(shelf.logRequests()).addMiddleware(corsHeaders()).addHandler(router.call);
 
-    await shelf_io.serve(app, "0.0.0.0", 8088);
+    _logger.info("Starting api server at `$apiServerHost:$apiServerPort`");
+    await shelf_io.serve(app, apiServerHost, apiServerPort);
   }
 }

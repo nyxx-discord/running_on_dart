@@ -17,6 +17,13 @@ String getEnv(String key, [String? def]) =>
 /// instead of throwing an exception.
 bool getEnvBool(String key, [bool? def]) => ['true', '1'].contains(getEnv(key, def?.toString()).toLowerCase());
 
+/// Get a [int] from an environment variable, throwing an exception if it is not set or if cannot parse env value to int.
+///
+/// If [def] is provided and the environment variable [key] is not set, [def] will be returned
+/// instead of throwing an exception.
+int getEnvInt(String key, [int? def]) =>
+    int.tryParse(getEnv(key, def?.toString())) ?? (throw Exception("Cannot parse `$key` env to int"));
+
 /// The token to use for this instance.
 final String token = getEnv('ROD_TOKEN');
 
@@ -34,6 +41,15 @@ final List<Snowflake> adminIds = getEnv('ROD_ADMIN_IDS').split(RegExp(r'\s+')).m
 
 /// The interval at which to update the docs cache.
 final Duration docsUpdateInterval = Duration(seconds: int.parse(getEnv('ROD_DOCS_UPDATE_INTERVAL', '86400')));
+
+/// Whether api server functionality should be enabled.
+final bool enableApiServer = getEnvBool('ROD_ENABLE_API_SERVER', false);
+
+/// Api server host. Default 'localhost'.
+final String apiServerHost = getEnv('API_SERVER_HOST', 'localhost');
+
+/// Api server port. Default '8088'.
+final int apiServerPort = getEnvInt('API_SERVER_PORT', 8088);
 
 /// The packages to cache documentation for.
 final List<String> docsPackages =

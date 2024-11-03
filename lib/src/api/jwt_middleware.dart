@@ -1,5 +1,7 @@
 import 'package:jaguar_jwt/jaguar_jwt.dart';
+import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/running_on_dart.dart';
+import 'package:running_on_dart/src/api/api_server.dart';
 import 'package:running_on_dart/src/api/utils.dart';
 import 'package:shelf/shelf.dart' as shelf;
 
@@ -7,9 +9,17 @@ final jwtKey = getEnv("JWT_SECRET");
 
 class MissingPermissionsException implements Exception {}
 
-String generateJwtKey(String discordUserId, String userName, {List<String> perms = const []}) {
-  final jwtClaim =
-      JwtClaim(subject: discordUserId, maxAge: Duration(days: 1), payload: {"name": userName, 'perms': perms});
+String generateJwtKey(String discordUserId, String userName) {
+  final perms = adminIds.contains(Snowflake.parse(discordUserId)) ? WebApiPermission.values.map((e) => e.name) : [];
+
+  final jwtClaim = JwtClaim(
+    subject: discordUserId,
+    maxAge: Duration(days: 1),
+    payload: {
+      "name": userName,
+      'perms': perms,
+    },
+  );
 
   return issueJwtHS256(jwtClaim, jwtKey);
 }
