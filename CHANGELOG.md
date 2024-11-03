@@ -1,3 +1,7 @@
+## 4.7.0-dev.1
+- Implement api server for dashboard
+- Bot info collection improvements
+
 ## 4.6.1
 - Fix unnecessary coma in join logs
 - Move number to song title in media info

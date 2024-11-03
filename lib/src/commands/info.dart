@@ -39,6 +39,8 @@ final info = ChatCommand(
         EmbedFieldBuilder(name: 'Memory usage (current/RSS)', value: botInfo.memoryUserString, isInline: true),
         EmbedFieldBuilder(name: 'Tags in guild', value: botInfo.totalTagsCount.toString(), isInline: true),
         EmbedFieldBuilder(name: 'Current reminders', value: botInfo.totalRemainderCount.toString(), isInline: true),
+        EmbedFieldBuilder(
+            name: 'Api Server enabled', value: botInfo.apiServerEnabled ? 'true' : 'false', isInline: true),
         EmbedFieldBuilder(name: 'Uptime', value: startDateStr, isInline: false),
         EmbedFieldBuilder(name: 'Docs Update', value: docsUpdateStr, isInline: false),
       ],

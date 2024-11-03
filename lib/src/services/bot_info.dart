@@ -11,6 +11,7 @@ class BotInfo {
   String get version => settings.version;
   String get dartPlatform => getDartPlatform();
   String get memoryUserString => getCurrentMemoryString();
+  bool get apiServerEnabled => enableApiServer;
 
   final int cachedGuilds;
   final int cachedUsers;
