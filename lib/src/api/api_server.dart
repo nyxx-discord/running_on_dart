@@ -112,8 +112,12 @@ class WebServer {
 
     final router = await _setupRouter();
 
-    final app =
-        const shelf.Pipeline().addMiddleware(shelf.logRequests()).addMiddleware(corsHeaders()).addHandler(router.call);
+    final corsOriginChecker = dev ? originAllowAll : originOneOf([getEnv('API_SERVER_FRONTEND_ORIGIN')]);
+
+    final app = const shelf.Pipeline()
+        .addMiddleware(shelf.logRequests())
+        .addMiddleware(corsHeaders(originChecker: corsOriginChecker))
+        .addHandler(router.call);
 
     _logger.info("Starting api server at `$apiServerHost:$apiServerPort`");
     await shelf_io.serve(app, apiServerHost, apiServerPort);
