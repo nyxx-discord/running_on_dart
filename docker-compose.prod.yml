@@ -9,6 +9,8 @@ services:
       - db
     depends_on:
       - db
+    networks:
+      - nginx-proxy_default
 
   db:
     image: postgres:17
@@ -21,3 +23,8 @@ services:
 
 volumes:
   rod_db_17:
+
+networks:
+  nginx-proxy_default:
+    name: nginx-proxy_default
+    driver: bridge
