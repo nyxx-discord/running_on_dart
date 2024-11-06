@@ -15,6 +15,16 @@ class JellyfinConfigRepository {
         .execute(Sql.named('DELETE FROM jellyfin_configs WHERE id = @id'), parameters: {'id': config.id});
   }
 
+  Future<Iterable<JellyfinConfigUserData>> getAggregateJellyfinUserConfigData(String parentId, String userId) async {
+    final result = await _database.getConnection().execute(
+        Sql.named(
+            'SELECT jc.name as instance_name, jc.base_path as instance_base_path, jc.is_default as instance_is_default, ju.user_id as user_id FROM jellyfin_configs jc '
+            'LEFT JOIN jellyfin_user_configs ju ON ju.jellyfin_config_id = jc.id WHERE jc.guild_id = @parentId AND ju.user_id = @userId'),
+        parameters: {'parentId': parentId, 'userId': userId});
+
+    return result.map((row) => row.toColumnMap()).map(JellyfinConfigUserData.fromDatabaseRow);
+  }
+
   Future<Iterable<JellyfinConfig>> getConfigsForParent(String parentId) async {
     final result = await _database.getConnection().execute(
         Sql.named('SELECT * FROM jellyfin_configs WHERE guild_id = @parentId'),

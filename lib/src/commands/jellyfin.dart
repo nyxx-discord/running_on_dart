@@ -29,7 +29,7 @@ String? valueOrNullIfNotDefault(String? value, [String ifNotDefault = 'Unlimited
 Future<AuthenticatedJellyfinClient> getJellyfinClient(JellyfinConfigUser? config, ChatContext context) async {
   config ??= await Injector.appInstance
       .get<JellyfinModuleV2>()
-      .fetchGetUserConfigWithFallback(userId: context.user.id, parentId: context.guild?.id ?? context.user.id);
+      .fetchGetUserConfigWithFallback(userId: context.user.id, parentId: getParentIdFromContext(context));
 
   if (config == null) {
     throw JellyfinConfigNotFoundException("Invalid jellyfin config or user not logged in.");
@@ -347,6 +347,23 @@ final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
 
       final paginator = await pagination.builders(await buildMediaInfoBuilders(results, client).toList());
       return context.respond(paginator);
+    }),
+  ),
+  ChatCommand(
+    'info',
+    'Displays info about jellyfin instances',
+    id('jellyfin-info', (ChatContext context) async {
+      final configs = await Injector.appInstance
+          .get<JellyfinModuleV2>()
+          .getAggregateJellyfinUserConfigData(getParentIdFromContext(context), context.user.id);
+
+      final embeds =
+          configs.map((config) => EmbedBuilder(title: "${config.instanceName} (${config.instanceBaseBath})", fields: [
+                EmbedFieldBuilder(name: 'Links', value: '[Open](${config.instanceBaseBath})', isInline: true),
+                EmbedFieldBuilder(name: 'Logged in?', value: config.userId != null ? 'Yes' : 'No', isInline: true),
+              ]));
+
+      return context.respond(MessageBuilder(embeds: embeds.toList()));
     }),
   ),
   ChatGroup("settings", "Settings for jellyfin", children: [

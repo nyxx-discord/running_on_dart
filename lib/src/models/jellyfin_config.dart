@@ -2,6 +2,25 @@ import 'package:nyxx/nyxx.dart';
 
 Snowflake? parseSnowflakeOrNull(dynamic value) => value != null ? Snowflake.parse(value) : null;
 
+class JellyfinConfigUserData {
+  final String instanceName;
+  final String instanceBaseBath;
+  final bool instanceIsDefault;
+  final String? userId;
+
+  JellyfinConfigUserData(
+      {required this.instanceName, required this.instanceBaseBath, required this.instanceIsDefault, this.userId});
+
+  factory JellyfinConfigUserData.fromDatabaseRow(Map<String, dynamic> row) {
+    return JellyfinConfigUserData(
+      instanceName: row['instance_name'],
+      instanceBaseBath: row['instance_base_path'],
+      instanceIsDefault: row['instance_is_default'] as bool,
+      userId: row['user_id'],
+    );
+  }
+}
+
 class JellyfinConfigUser {
   final Snowflake userId;
   final String token;

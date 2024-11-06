@@ -537,6 +537,9 @@ class JellyfinModuleV2 implements RequiresInitialization {
     });
   }
 
+  Future<Iterable<JellyfinConfigUserData>> getAggregateJellyfinUserConfigData(Snowflake parentId, Snowflake userId) =>
+      _jellyfinConfigRepository.getAggregateJellyfinUserConfigData(parentId.toString(), userId.toString());
+
   Future<List<JellyfinConfigUser>> getJellyfinConfigBasedOnPreviousLogin(
       Snowflake userId, Snowflake guildId, String host) {
     return _jellyfinConfigRepository.getJellyfinConfigBasedOnPreviousLogin(userId.toString(), guildId.toString(), host);
