@@ -6,6 +6,8 @@ import 'package:running_on_dart/src/repository/feature_settings.dart';
 import 'package:running_on_dart/src/services/feature_settings.dart';
 import 'package:running_on_dart/src/settings.dart';
 
+const jellyfinFeatureEnabledCheckName = 'jellyfinFeatureEnabledCheck';
+
 final administratorCheck = UserCheck.anyId(adminIds, name: 'Administrator check');
 final administratorGuildCheck = GuildCheck.id(adminGuildId, name: 'Administrator Guild check');
 
@@ -17,6 +19,7 @@ final jellyfinFeatureEnabledCheck = Check(
 
     return Injector.appInstance.get<FeatureSettingsService>().isEnabled(Setting.jellyfin, context.guild!.id);
   },
+  name: jellyfinFeatureEnabledCheckName,
 );
 
 Future<(bool?, FeatureSetting?)> fetchAndCheckSetting(CommandContext context) async {

@@ -2,12 +2,18 @@ import 'package:dio/dio.dart';
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
+import 'package:running_on_dart/src/checks.dart';
 import 'package:running_on_dart/src/models/jellyfin_config.dart';
 import 'package:running_on_dart/src/modules/jellyfin.dart';
 import 'package:running_on_dart/src/util/jellyfin.dart';
 
 Future<void> handleException(CommandsException error) async {
   if (error is CheckFailedException) {
+    if (error.failed.name == jellyfinFeatureEnabledCheckName) {
+      error.context.respond(MessageBuilder(content: "Jellyfin feature not enabled here"));
+      return;
+    }
+
     error.context.respond(MessageBuilder(content: "Sorry, you can't use that command!"));
     return;
   }
