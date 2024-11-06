@@ -1,3 +1,8 @@
+## 4.7.0
+- Improve command check error handling
+- Improve dates handling in join logs
+- Add jellyfin info command
+
 ## 4.6.1
 - Fix unnecessary coma in join logs
 - Move number to song title in media info
