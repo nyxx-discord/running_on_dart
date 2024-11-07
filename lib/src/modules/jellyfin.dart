@@ -15,8 +15,8 @@ import 'package:dio/dio.dart'
     show DioException, ErrorInterceptorHandler, Interceptor, RequestInterceptorHandler, RequestOptions;
 import 'package:built_collection/built_collection.dart';
 
-final _mediaInfoAuthHeader =
-    'MediaBrowser Client="$botName", Device="DiscordBot ($botName)", DeviceId="$botName", Version="$version"';
+String _getMediaInfoAuthHeader(String parentId) =>
+    'MediaBrowser Client="$botName", Device="DiscordBot ($botName, $parentId)", DeviceId="${botName}_$parentId", Version="$version"';
 
 MessageBuilder getWizarrRedeemInvitationMessageBuilder(
     WizarrClient client, String code, Snowflake userId, Snowflake parentId, String configName) {
@@ -297,21 +297,26 @@ class AnonymousJellyfinClient {
 
 class TokenAuthInterceptor extends AuthInterceptor {
   final String token;
+  final Snowflake parentId;
 
-  TokenAuthInterceptor(this.token);
+  TokenAuthInterceptor(this.token, this.parentId);
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    options.headers['Authorization'] = '$_mediaInfoAuthHeader, Token="$token"';
+    options.headers['Authorization'] = '${_getMediaInfoAuthHeader(parentId.toString())}, Token="$token"';
 
     super.onRequest(options, handler);
   }
 }
 
 class AnonAuthInterceptor extends AuthInterceptor {
+  final Snowflake parentId;
+
+  AnonAuthInterceptor(this.parentId);
+
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    options.headers['Authorization'] = _mediaInfoAuthHeader;
+    options.headers['Authorization'] = _getMediaInfoAuthHeader(parentId.toString());
 
     super.onRequest(options, handler);
   }
@@ -614,15 +619,17 @@ class JellyfinModuleV2 implements RequiresInitialization {
 
   AnonymousJellyfinClient createJellyfinClientAnonymous(JellyfinConfig config) {
     return AnonymousJellyfinClient(
-        jellyfinClient: Tentacle(basePathOverride: config.basePath, interceptors: [AnonAuthInterceptor()]),
+        jellyfinClient:
+            Tentacle(basePathOverride: config.basePath, interceptors: [AnonAuthInterceptor(config.parentId)]),
         config: config);
   }
 
   AuthenticatedJellyfinClient createJellyfinClientAuthenticated(JellyfinConfigUser configUser) {
     return AuthenticatedJellyfinClient(
-        Tentacle(
-            basePathOverride: configUser.config!.basePath,
-            interceptors: [TokenAuthInterceptor(configUser.token), AuthResponseErrorInterceptor()]),
+        Tentacle(basePathOverride: configUser.config!.basePath, interceptors: [
+          TokenAuthInterceptor(configUser.token, configUser.config?.parentId ?? configUser.userId),
+          AuthResponseErrorInterceptor()
+        ]),
         configUser);
   }
 
