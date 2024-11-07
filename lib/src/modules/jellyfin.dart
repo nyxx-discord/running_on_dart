@@ -302,7 +302,7 @@ class TokenAuthInterceptor extends AuthInterceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    options.headers['Authorization'] = '$_mediaInfoAuthHeader Token="$token"';
+    options.headers['Authorization'] = '$_mediaInfoAuthHeader, Token="$token"';
 
     super.onRequest(options, handler);
   }
@@ -320,10 +320,6 @@ class AnonAuthInterceptor extends AuthInterceptor {
 class AuthResponseErrorInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    print(err.message);
-    print(err.response?.data);
-    print(err.response?.statusCode);
-
     if (err.response?.statusCode == 401) {
       throw JellyfinUnauthorizedException(err.requestOptions.uri.host);
     }
