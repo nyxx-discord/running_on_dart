@@ -4,6 +4,7 @@ import 'package:running_on_dart/src/modules/bot_start_duration.dart';
 import 'package:running_on_dart/src/modules/docs.dart';
 import 'package:running_on_dart/src/modules/jellyfin.dart';
 import 'package:running_on_dart/src/modules/join_logs.dart';
+import 'package:running_on_dart/src/modules/mentions.dart';
 import 'package:running_on_dart/src/modules/mod_log.dart';
 import 'package:running_on_dart/src/modules/poop_name.dart';
 import 'package:running_on_dart/src/modules/reminder.dart';
@@ -31,7 +32,8 @@ Future<void> setupContainer(NyxxGateway client) async {
     ..registerSingleton(() => ModLogsModule())
     ..registerSingleton(() => TagModule())
     ..registerSingleton(() => DocsModule())
-    ..registerSingleton(() => JellyfinModuleV2());
+    ..registerSingleton(() => JellyfinModuleV2())
+    ..registerSingleton(() => MentionsMonitoringModule());
 
   await Injector.appInstance.get<DatabaseService>().init();
   await Injector.appInstance.get<JellyfinModuleV2>().init();
@@ -42,4 +44,5 @@ Future<void> setupContainer(NyxxGateway client) async {
   await Injector.appInstance.get<JoinLogsModule>().init();
   await Injector.appInstance.get<PoopNameModule>().init();
   await Injector.appInstance.get<BotStartDuration>().init();
+  await Injector.appInstance.get<MentionsMonitoringModule>().init();
 }

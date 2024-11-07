@@ -17,6 +17,7 @@ export 'src/modules/docs.dart';
 export 'src/modules/tag.dart';
 export 'src/modules/mod_log.dart';
 export 'src/modules/jellyfin.dart';
+export 'src/modules/mentions.dart';
 
 export 'src/services/db.dart';
 
