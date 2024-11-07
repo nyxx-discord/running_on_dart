@@ -13,7 +13,7 @@ typedef RunCallback = Future<void> Function();
 EmbedBuilder getInitialEmbed(int taskAmount, String pipelineName) => EmbedBuilder(
     title: getEmbedTitle(1, taskAmount),
     description: 'Starting...',
-    author: EmbedAuthorBuilder(name: "Pipeline `$pipelineName`"));
+    author: EmbedAuthorBuilder(name: "Pipeline $pipelineName"));
 
 String getEmbedTitle(int index, int length) => 'Task $index of $length';
 
