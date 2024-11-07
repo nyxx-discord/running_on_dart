@@ -1,3 +1,6 @@
+## 4.7.3
+- Pass client parent id to jellyfin
+
 ## 4.7.2
 - Upgrade dependencies
 - Fix jellyfin unauthorized exception
