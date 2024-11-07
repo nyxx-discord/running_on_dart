@@ -1,3 +1,6 @@
+## 4.7.4
+- Fix member join message embed
+
 ## 4.7.3
 - Pass client parent id to jellyfin
 
