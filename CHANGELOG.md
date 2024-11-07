@@ -1,3 +1,7 @@
+## 4.7.2
+- Upgrade dependencies
+- Fix jellyfin unauthorized exception
+
 ## 4.7.1
 - Sent proper identification headers to jellyfin
 
