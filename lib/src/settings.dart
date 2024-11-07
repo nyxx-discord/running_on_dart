@@ -17,6 +17,9 @@ String getEnv(String key, [String? def]) =>
 /// instead of throwing an exception.
 bool getEnvBool(String key, [bool? def]) => ['true', '1'].contains(getEnv(key, def?.toString()).toLowerCase());
 
+/// Name of the bot
+final String botName = getEnv('BOT_NAME', 'Running on Dart');
+
 /// The token to use for this instance.
 final String token = getEnv('ROD_TOKEN');
 

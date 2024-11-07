@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
+import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/external/sonarr.dart';
 import 'package:running_on_dart/src/external/wizarr.dart';
 import 'package:running_on_dart/src/models/jellyfin_config.dart';
@@ -13,6 +14,9 @@ import 'package:tentacle/src/auth/auth.dart' show AuthInterceptor;
 import 'package:dio/dio.dart'
     show DioException, ErrorInterceptorHandler, Interceptor, RequestInterceptorHandler, RequestOptions;
 import 'package:built_collection/built_collection.dart';
+
+final _mediaInfoAuthHeader =
+    'MediaBrowser Client="$botName", Device="DiscordBot ($botName)", DeviceId="$botName", Version="$version"';
 
 MessageBuilder getWizarrRedeemInvitationMessageBuilder(
     WizarrClient client, String code, Snowflake userId, Snowflake parentId, String configName) {
@@ -298,7 +302,7 @@ class TokenAuthInterceptor extends AuthInterceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    options.headers['Authorization'] = 'MediaBrowser Token="$token"';
+    options.headers['Authorization'] = '$_mediaInfoAuthHeader Token="$token"';
 
     super.onRequest(options, handler);
   }
@@ -307,8 +311,7 @@ class TokenAuthInterceptor extends AuthInterceptor {
 class AnonAuthInterceptor extends AuthInterceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    options.headers['Authorization'] =
-        'MediaBrowser Client="Jellyfin Web", Device="Chrome", DeviceId="1234", Version="10.9.11"';
+    options.headers['Authorization'] = _mediaInfoAuthHeader;
 
     super.onRequest(options, handler);
   }
@@ -317,6 +320,10 @@ class AnonAuthInterceptor extends AuthInterceptor {
 class AuthResponseErrorInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
+    print(err.message);
+    print(err.response?.data);
+    print(err.response?.statusCode);
+
     if (err.response?.statusCode == 401) {
       throw JellyfinUnauthorizedException(err.requestOptions.uri.host);
     }

@@ -333,7 +333,7 @@ final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
       }
 
       final embeds = currentSessions.map((sessionInfo) => buildSessionEmbed(sessionInfo, client)).nonNulls.toList();
-      context.respond(MessageBuilder(embeds: embeds));
+      return context.respond(MessageBuilder(embeds: embeds));
     }),
   ),
   ChatCommand(
