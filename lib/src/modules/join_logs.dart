@@ -39,15 +39,14 @@ class JoinLogsModule implements RequiresInitialization {
 
     _logger.fine('Sending join message for member ${event.member.id} in channel $channelId');
 
-    final now = DateTime.now();
-
     final embed = EmbedBuilder(
         description: '**Member joined**',
         author: EmbedAuthorBuilder(name: event.member.user!.username, iconUrl: event.member.user!.avatar.url),
         fields: [
-          EmbedFieldBuilder(name: 'ID', value: event.member.id.toString(), isInline: true),
-          EmbedFieldBuilder(name: 'Joined At', value: _formatDateTimeString(now), isInline: true),
-          EmbedFieldBuilder(name: 'Account created at', value: _formatDateTimeString(now), isInline: true)
+          EmbedFieldBuilder(name: 'ID', value: userMention(event.member.id), isInline: true),
+          EmbedFieldBuilder(name: 'Joined At', value: _formatDateTimeString(event.member.joinedAt), isInline: true),
+          EmbedFieldBuilder(
+              name: 'Account created at', value: _formatDateTimeString(event.member.id.timestamp), isInline: true)
         ]);
 
     channel.sendMessage(MessageBuilder(embeds: [embed]));
