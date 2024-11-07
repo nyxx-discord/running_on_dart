@@ -85,10 +85,10 @@ packages:
     dependency: transitive
     description:
       name: clock
-      sha256: cb6d7f03e1de671e34607e909a7213e31d7752be4fb66a86d29fe1eb14bfb5cf
+      sha256: fddb70d9b5277016c77a80201021d40a2247104d9f4aa7bab7157b7e3f05b84b
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.1"
+    version: "1.1.2"
   collection:
     dependency: "direct main"
     description:
@@ -270,10 +270,10 @@ packages:
     dependency: "direct main"
     description:
       name: nyxx
-      sha256: "073c4f3a49269b4580c54aef32a472b3eae0e6f0e125eb1be2eeb5976210e886"
+      sha256: "3ee891f4098c0dd7b992dafc2b4e961b82bd076b3149a15408efda1e11c7c5aa"
       url: "https://pub.dev"
     source: hosted
-    version: "6.5.0"
+    version: "6.5.2"
   nyxx_commands:
     dependency: "direct main"
     description:
@@ -286,10 +286,10 @@ packages:
     dependency: "direct main"
     description:
       name: nyxx_extensions
-      sha256: "8016605fc131320bfb58362e5124a0fb1c23e51c26f1638098611fa8f93760aa"
+      sha256: f0b6dfc5ed2350c10f3018c7fc5fbaa7c01fbce6fee8b8fb14724f57cc0d67fe
       url: "https://pub.dev"
     source: hosted
-    version: "4.2.0"
+    version: "4.2.1"
   oauth2:
     dependency: transitive
     description:
@@ -342,10 +342,10 @@ packages:
     dependency: "direct main"
     description:
       name: postgres
-      sha256: bc3a36f9960d822af1ac4c2e0a32c4e7a3e426d2ce4500c11afca40f53c34612
+      sha256: c271fb05cf83f47ff8d6915ea7fc780381e581309f55846a21a3257ad6b05f6d
       url: "https://pub.dev"
     source: hosted
-    version: "3.4.0"
+    version: "3.4.1"
   pub_semver:
     dependency: transitive
     description:
