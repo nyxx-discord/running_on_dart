@@ -1,3 +1,6 @@
+## 4.7.1
+- Sent proper identification headers to jellyfin
+
 ## 4.7.0
 - Improve command check error handling
 - Improve dates handling in join logs
