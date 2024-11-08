@@ -11,7 +11,8 @@ enum Setting {
   poopName('poop_name', 'Replace nickname of a member with poop emoji if the member tries to hoist itself', false),
   joinLogs('join_logs', 'Logs member join events into specified channel', true, DataType.channelMention),
   modLogs('mod_logs', 'Logs administration event into specified channel', true, DataType.channelMention),
-  jellyfin('jellyfin', 'Allows usage of jellyfin commands', true, DataType.json);
+  jellyfin('jellyfin', 'Allows usage of jellyfin commands', true, DataType.json),
+  mentions('mentions', 'Monitors messages for mention abuse', false);
 
   /// name of setting
   final String name;
