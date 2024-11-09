@@ -160,6 +160,8 @@ class AuthenticatedJellyfinClient {
   final Tentacle jellyfinClient;
   final JellyfinConfigUser configUser;
 
+  String? get basePath => configUser.config?.basePath;
+
   AuthenticatedJellyfinClient(this.jellyfinClient, this.configUser);
 
   Future<Iterable<SessionInfo>> getCurrentSessions() async {
@@ -245,12 +247,12 @@ class AuthenticatedJellyfinClient {
   }
 
   Future<void> startTask(String taskId) => jellyfinClient.getScheduledTasksApi().startTask(taskId: taskId);
-  Uri getItemPrimaryImage(String itemId) => Uri.parse("${configUser.config?.basePath}/Items/$itemId/Images/Primary");
-  Uri getJellyfinItemUrl(String itemId) => Uri.parse("${configUser.config?.basePath}/#/details?id=$itemId");
-  Uri getUserImage(String userId, [String? imageTag]) => Uri.parse(
-      "${configUser.config?.basePath}/Users/$userId/Images/Primary${imageTag != null ? '?tag=$imageTag' : ''}");
-  Uri getUserProfile(String userId) =>
-      Uri.parse('${configUser.config?.basePath}/web/#/userprofile.html?userId=$userId');
+
+  Uri getItemPrimaryImage(String itemId) => Uri.parse("$basePath/Items/$itemId/Images/Primary");
+  Uri getJellyfinItemUrl(String itemId) => Uri.parse("$basePath/#/details?id=$itemId");
+  Uri getUserImage(String userId, [String? imageTag]) =>
+      Uri.parse("$basePath/Users/$userId/Images/Primary${imageTag != null ? '?tag=$imageTag' : ''}");
+  Uri getUserProfile(String userId) => Uri.parse('$basePath/web/#/userprofile.html?userId=$userId');
 }
 
 class AnonymousJellyfinClient {
