@@ -21,7 +21,7 @@ class _CacheEntry {
   }
 }
 
-final _mentionRegex = RegExp(r'<@\d+>');
+final _mentionRegex = RegExp(r'<@!?\d+>');
 
 class MentionsMonitoringModule implements RequiresInitialization {
   final NyxxGateway _client = Injector.appInstance.get();
