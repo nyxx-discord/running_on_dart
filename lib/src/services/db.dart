@@ -6,6 +6,7 @@ import 'package:migent/migent.dart';
 import 'package:postgres/postgres.dart';
 
 import 'package:running_on_dart/src/settings.dart';
+import 'package:running_on_dart/src/util/query_builder.dart';
 import 'package:running_on_dart/src/util/util.dart';
 
 /// The user to use when connecting to the database.
@@ -163,7 +164,7 @@ class DatabaseService implements RequiresInitialization {
           token VARCHAR NOT NULL,
           jellyfin_config_id INT NOT NULL,
           CONSTRAINT fk_jellyfin_configs
-            FOREIGN KEY(jellyfin_config_id) 
+            FOREIGN KEY(jellyfin_config_id)
             REFERENCES jellyfin_configs(id)
         );
       ''')
@@ -178,4 +179,8 @@ class DatabaseService implements RequiresInitialization {
   }
 
   Connection getConnection() => _connection;
+
+  Future<Result> executeQuery(Query query, {Map<String, dynamic>? parameters}) {
+    return getConnection().execute(query.build(), parameters: parameters);
+  }
 }

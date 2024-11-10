@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:postgres/postgres.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/tag.dart';
+import 'package:running_on_dart/src/util/query_builder.dart';
 
 class TagRepository {
   final _database = Injector.appInstance.get<DatabaseService>();
@@ -11,17 +12,19 @@ class TagRepository {
 
   /// Fetch all existing tags from the database.
   Future<Iterable<Tag>> fetchAllActiveTags() async {
-    final result = await _database.getConnection().execute(Sql.named('''
-      SELECT * FROM tags WHERE enabled = TRUE;
-    '''));
+    final query = SelectQuery.selectAll('tags')..andWhere('enabled = TRUE');
+
+    final result = await _database.executeQuery(query);
 
     return result.map((row) => row.toColumnMap()).map(Tag.fromRow);
   }
 
   Future<Iterable<Tag>> fetchActiveTagsByName(String nameQuery) async {
-    final result = await _database.getConnection().execute(Sql.named('''
-      SELECT * FROM tags WHERE enabled = TRUE AND name LIKE @nameQuery;
-    '''), parameters: {'nameQuery': '%$nameQuery%'});
+    final query = SelectQuery.selectAll("tags")
+      ..andWhere("enabled = TRUE")
+      ..andWhere("name LIKE @nameQuery");
+
+    final result = await _database.executeQuery(query, parameters: {'nameQuery': '%$nameQuery%'});
 
     return result.map((row) => row.toColumnMap()).map(Tag.fromRow);
   }
@@ -34,11 +37,11 @@ class TagRepository {
       return;
     }
 
-    await _database.getConnection().execute(Sql.named('''
-      UPDATE tags SET enabled = FALSE WHERE id = @id;
-    '''), parameters: {
-      'id': id,
-    });
+    final query = UpdateQuery("tags")
+      ..addSet("enabled", "FALSE")
+      ..andWhere("id = @id");
+
+    await _database.executeQuery(query, parameters: {'id': id});
   }
 
   /// Add a tag to the database.
