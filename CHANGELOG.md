@@ -1,3 +1,9 @@
+## 4.8.0
+- Mentions monitoring module (#37)
+- Remove backticks from pipeline header
+- Add bathPath helper property on AuthenticatedJellyfinClient
+- Mention could have ! (https://github.com/nyxx-discord/running_on_dart/pull/37#discussion_r1835362118)
+
 ## 4.7.4
 - Fix member join message embed
 
