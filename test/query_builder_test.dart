@@ -115,5 +115,13 @@ void main() {
         expect(query.build().asString(), "INSERT INTO test (name,model) VALUES (moron,@model) RETURNING id;");
       });
     });
+
+    group("Delete tests", () {
+      test("Simple delete", () {
+        final query = DeleteQuery("test")..andWhere("name = 'test'");
+
+        expect(query.build().asString(), "DELETE FROM test WHERE name = 'test';");
+      });
+    });
   });
 }

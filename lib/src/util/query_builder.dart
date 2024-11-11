@@ -44,6 +44,8 @@ abstract class Query {
   final String from;
   final String? alias;
 
+  String get aliasOrEmpty => alias ?? '';
+
   Query(this.from, {this.alias});
 
   Sql build();
@@ -154,6 +156,24 @@ class UpdateQuery extends Query with _WhereQuery {
     _buildWheres(buffer);
 
     buffer.write(";");
+    return Sql.named(buffer.toStringClean());
+  }
+}
+
+class DeleteQuery extends Query with _WhereQuery {
+  DeleteQuery(super.from);
+
+  @override
+  Sql build() {
+    if (_andWheres.isEmpty && _orWheres.isEmpty) {
+      throw QueryBuilderException("Delete query requires where statement");
+    }
+
+    final buffer = StringBuffer("DELETE FROM $from $aliasOrEmpty ");
+
+    _buildWheres(buffer);
+    buffer.write(";");
+
     return Sql.named(buffer.toStringClean());
   }
 }
