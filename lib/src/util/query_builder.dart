@@ -32,19 +32,26 @@ String buildSets(Map<String, String> sets) {
   );
 }
 
+String buildReturnings(List<String> returnings) => returnings.join(",");
+
+extension ToStringCleanStringBufferExtension on StringBuffer {
+  String toStringClean() {
+    return toString().split(" ").where((substr) => substr.isNotEmpty).join(" ").replaceFirst(" ;", ";");
+  }
+}
+
 abstract class Query {
   final String from;
+  final String? alias;
 
-  Query(this.from);
+  Query(this.from, {this.alias});
 
   Sql build();
 }
 
-abstract class _WhereQuery extends Query {
+mixin _WhereQuery implements Query {
   final List<String> _andWheres = [];
   final List<String> _orWheres = [];
-
-  _WhereQuery(super.from);
 
   void andWhere(String expression) => _andWheres.add(expression);
   void orWhere(String expression) => _orWheres.add(expression);
@@ -66,13 +73,43 @@ abstract class _WhereQuery extends Query {
   }
 }
 
+class _Join {
+  final String target;
+  final String targetAlias;
+  final String joinType; // LEFT JOIN, RIGHT JOIN, JOIN, OUTER JOIN
+  final List<String> conditions;
+
+  _Join(this.target, this.targetAlias, this.joinType, this.conditions);
+
+  String build() => "$joinType $target $targetAlias ON ${buildWheres(conditions, 'AND')}";
+}
+
+mixin _JoinQuery implements Query {
+  final List<_Join> _joins = [];
+
+  void addJoin(String target, String alias, List<String> conditions) =>
+      _joins.add(_Join(target, alias, 'JOIN', conditions));
+  void addLeftJoin(String target, String alias, List<String> conditions) =>
+      _joins.add(_Join(target, alias, 'LEFT JOIN', conditions));
+
+  void _buildJoins(StringBuffer buffer) {
+    if (_joins.isEmpty) {
+      return;
+    }
+
+    buffer.write(_joins.map((join) => join.build()).join(","));
+  }
+}
+
 class InsertQuery extends Query {
   final Map<String, String> _inserts = {};
+  final List<String> _returnings = [];
 
-  InsertQuery(super.from);
+  InsertQuery(super.from, {super.alias});
 
   void addInsert(String name, String value) => _inserts[name] = value;
   void addNamedInsert(String name) => _inserts[name] = '@$name';
+  void addReturning(String name) => _returnings.add(name);
 
   @override
   Sql build() {
@@ -83,16 +120,23 @@ class InsertQuery extends Query {
     buffer.write(fields);
     buffer.write(") VALUES (");
     buffer.write(values);
-    buffer.write(");");
+    buffer.write(")");
 
-    return Sql.named(buffer.toString());
+    if (_returnings.isNotEmpty) {
+      buffer.write(" RETURNING ");
+      buffer.write(buildReturnings(_returnings));
+    }
+
+    buffer.write(";");
+
+    return Sql.named(buffer.toStringClean());
   }
 }
 
-class UpdateQuery extends _WhereQuery {
+class UpdateQuery extends Query with _WhereQuery {
   final Map<String, String> _sets = {};
 
-  UpdateQuery(super.from);
+  UpdateQuery(super.from, {super.alias});
 
   void addSet(String name, String value) => _sets[name] = value;
 
@@ -109,14 +153,14 @@ class UpdateQuery extends _WhereQuery {
     _buildWheres(buffer);
 
     buffer.write(";");
-    return Sql.named(buffer.toString());
+    return Sql.named(buffer.toStringClean());
   }
 }
 
-class SelectQuery extends _WhereQuery {
+class SelectQuery extends Query with _WhereQuery, _JoinQuery {
   final List<String> _selects = [];
 
-  SelectQuery(super.from);
+  SelectQuery(super.from, {super.alias});
   factory SelectQuery.selectAll(String from) => SelectQuery(from)..select("*");
 
   void select(String expression) => _selects.add(expression);
@@ -125,12 +169,14 @@ class SelectQuery extends _WhereQuery {
   Sql build() {
     final buffer = StringBuffer("SELECT ");
     buffer.write(buildSelects(_selects));
-    buffer.write(" FROM $from ");
+    buffer.write(" FROM $from ${alias ?? ""} ");
 
+    _buildJoins(buffer);
+    buffer.write(" ");
     _buildWheres(buffer);
 
     buffer.write(";");
 
-    return Sql.named(buffer.toString());
+    return Sql.named(buffer.toStringClean());
   }
 }

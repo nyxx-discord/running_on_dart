@@ -21,8 +21,7 @@ void main() {
       });
 
       test("Simple select all", () {
-        final query = SelectQuery.selectAll("test")
-          ..andWhere("name = 'test'");
+        final query = SelectQuery.selectAll("test")..andWhere("name = 'test'");
 
         expect(query.build().asString(), "SELECT * FROM test WHERE name = 'test';");
       });
@@ -30,8 +29,7 @@ void main() {
       test("Select without where", () {
         final query = SelectQuery("test")..select("*");
 
-        expect(query.build().asString(),
-            "SELECT * FROM test ;"); // TODO: Somehow clean up unnecessary whitespaces after building query
+        expect(query.build().asString(), "SELECT * FROM test;");
       });
 
       test("Select multiple and statements", () {
@@ -50,6 +48,19 @@ void main() {
           ..orWhere("model = 'xg'");
 
         expect(query.build().asString(), "SELECT * FROM test WHERE name = 'test' OR model = 'xg';");
+      });
+
+      test("Join another table", () {
+        final query = SelectQuery("test", alias: "t")
+          ..select("t.*")
+          ..select("ot.*")
+          ..orWhere("t.name = 'test'")
+          ..orWhere("t.model = 'xg'")
+          ..addJoin("other_table", "ot", ["ot.id = t.test_id"])
+          ..addLeftJoin("another_table", "at", ["at.test_id = t.id"]);
+
+        expect(query.build().asString(),
+            "SELECT t.*,ot.* FROM test t JOIN other_table ot ON ot.id = t.test_id,LEFT JOIN another_table at ON at.test_id = t.id WHERE t.name = 'test' OR t.model = 'xg';");
       });
     });
 
@@ -70,6 +81,15 @@ void main() {
           ..addNamedInsert("model");
 
         expect(query.build().asString(), "INSERT INTO test (name,model) VALUES (moron,@model);");
+      });
+
+      test("Insert with returning", () {
+        final query = InsertQuery("test")
+          ..addInsert("name", "moron")
+          ..addNamedInsert("model")
+          ..addReturning("id");
+
+        expect(query.build().asString(), "INSERT INTO test (name,model) VALUES (moron,@model) RETURNING id;");
       });
     });
   });
