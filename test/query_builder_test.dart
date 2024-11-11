@@ -20,6 +20,13 @@ void main() {
         expect(query.build().asString(), "SELECT * FROM test WHERE name = 'test';");
       });
 
+      test("Simple select all", () {
+        final query = SelectQuery.selectAll("test")
+          ..andWhere("name = 'test'");
+
+        expect(query.build().asString(), "SELECT * FROM test WHERE name = 'test';");
+      });
+
       test("Select without where", () {
         final query = SelectQuery("test")..select("*");
 
