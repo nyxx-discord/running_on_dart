@@ -8,10 +8,48 @@ class KavitaRepository {
 
   Future<Iterable<KavitaConfig>> findAllForParent(String parentId) async {
     final query = SelectQuery.selectAll(KavitaConfig.tableName)..andWhere("parent_id = @parent_id");
-
     final result = await _database.executeQuery(query, parameters: {'parent_id': parentId});
 
     return result.map((row) => KavitaConfig.fromDatabaseRow(row.toColumnMap()));
+  }
+
+  Future<KavitaConfig?> find(String name, String parentId) async {
+    final query = SelectQuery.selectAll(KavitaConfig.tableName)
+      ..andWhere("parent_id = @parent_id")
+      ..andWhere("name = @name");
+
+    final result = await _database.executeQuery(query, parameters: {'parent_id': parentId, 'name': name});
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return KavitaConfig.fromDatabaseRow(result.first.toColumnMap());
+  }
+
+  Future<KavitaConfig?> findDefault(String parentId) async {
+    final query = SelectQuery.selectAll(KavitaConfig.tableName)
+      ..andWhere("parent_id = @parent_id")
+      ..andWhere("is_default = 1::bool");
+
+    final result = await _database.executeQuery(query, parameters: {'parent_id': parentId});
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return KavitaConfig.fromDatabaseRow(result.first.toColumnMap());
+  }
+
+  Future<KavitaUserConfig?> findUserConfigForConfig(String userId, int configId) async {
+    final query = SelectQuery.selectAll(KavitaUserConfig.tableName)
+      ..andWhere("kavita_config_id = @config_id")
+      ..andWhere('user_id = @user_id');
+
+    final result = await _database.executeQuery(query, parameters: {'config_id': configId, 'user_id': userId});
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return KavitaUserConfig.fromDatabaseRow(result.first.toColumnMap());
   }
 
   Future<KavitaUserConfig?> findUserConfig(String configName, String parentId, String userId) async {
@@ -32,5 +70,24 @@ class KavitaRepository {
     }
 
     return KavitaUserConfig.fromDatabaseRowWithConfig(result.first.toColumnMap());
+  }
+
+  Future<KavitaUserConfig> saveUserConfig(KavitaUserConfig userConfig) async {
+    final query = InsertQuery(KavitaUserConfig.tableName)
+      ..addNamedInsert("user_id")
+      ..addNamedInsert("auth_token")
+      ..addNamedInsert("api_key")
+      ..addNamedInsert("kavita_config_id")
+      ..addReturning('id');
+
+    final result = await _database.executeQuery(query, parameters: {
+      'user_id': userConfig.userId.toString(),
+      'auth_token': userConfig.authToken,
+      'api_key': userConfig.apiKey,
+      'kavita_config_id': userConfig.kavitaConfigId,
+    });
+
+    userConfig.id = result.first.first as int;
+    return userConfig;
   }
 }

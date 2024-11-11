@@ -6,13 +6,17 @@ import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:running_on_dart/src/models/docs.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
 import 'package:running_on_dart/src/models/jellyfin_config.dart';
+import 'package:running_on_dart/src/models/kavita.dart';
 import 'package:running_on_dart/src/models/reminder.dart';
 import 'package:running_on_dart/src/modules/docs.dart';
 import 'package:running_on_dart/src/modules/jellyfin.dart';
+import 'package:running_on_dart/src/modules/kavita.dart';
 import 'package:running_on_dart/src/modules/reminder.dart';
 import 'package:running_on_dart/src/modules/tag.dart';
 import 'package:running_on_dart/src/repository/jellyfin_config.dart';
+import 'package:running_on_dart/src/repository/kavita.dart';
 import 'package:running_on_dart/src/settings.dart';
+import 'package:running_on_dart/src/util/util.dart';
 
 import 'models/tag.dart';
 
@@ -71,6 +75,23 @@ final jellyfinConfigUserConverter = Converter<JellyfinConfigUser>(
           .getConfigsForParent((context.guild?.id ?? context.user.id).toString()))
       .map((config) => CommandOptionChoiceBuilder(name: config.name, value: config.name)),
 );
+
+final kavitaUserConfigsConverter = Converter<KavitaUserConfig>(
+  (view, context) async {
+    return Injector.appInstance.get<KavitaModule>().fetchGetUserConfigWithFallback(
+        userId: context.user.id, parentId: context.guild?.id ?? context.user.id, instanceName: view.getQuotedWord());
+  },
+  autocompleteCallback: (context) async =>
+      (await Injector.appInstance.get<KavitaRepository>().findAllForParent(getParentIdFromContext(context).toString()))
+          .map((config) => CommandOptionChoiceBuilder(name: config.name, value: config.name)),
+);
+
+String stringifyKavitaConfig(KavitaConfig config) => config.name;
+Future<Iterable<KavitaConfig>> getKavitaConfigs(ContextData context) =>
+    Injector.appInstance.get<KavitaRepository>().findAllForParent(getParentIdFromContext(context).toString());
+
+const kavitaConfigConverter =
+    SimpleConverter<KavitaConfig>(provider: getKavitaConfigs, stringify: stringifyKavitaConfig);
 
 Future<Iterable<JellyfinConfig>> getJellyfinConfigs(ContextData context) => Injector.appInstance
     .get<JellyfinConfigRepository>()

@@ -69,4 +69,4 @@ Map<String, String?> getModalDataIndexed(List<MessageComponent> components) {
       .map((textInputComponent) => MapEntry<String, String?>(textInputComponent.customId, textInputComponent.value)));
 }
 
-Snowflake getParentIdFromContext(CommandContext context) => context.guild?.id ?? context.user.id;
+Snowflake getParentIdFromContext(ContextData context) => context.guild?.id ?? context.user.id;

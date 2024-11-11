@@ -9,6 +9,7 @@ export 'src/commands/admin.dart' show admin;
 export 'src/commands/jellyfin.dart' show jellyfin;
 export 'src/commands/tag.dart' show tag;
 export 'src/commands/reminder.dart' show reminderMessageCommand;
+export 'src/commands/kavita.dart' show kavita;
 
 export 'src/modules/join_logs.dart';
 export 'src/modules/poop_name.dart';

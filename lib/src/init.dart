@@ -4,6 +4,7 @@ import 'package:running_on_dart/src/modules/bot_start_duration.dart';
 import 'package:running_on_dart/src/modules/docs.dart';
 import 'package:running_on_dart/src/modules/jellyfin.dart';
 import 'package:running_on_dart/src/modules/join_logs.dart';
+import 'package:running_on_dart/src/modules/kavita.dart';
 import 'package:running_on_dart/src/modules/mentions.dart';
 import 'package:running_on_dart/src/modules/mod_log.dart';
 import 'package:running_on_dart/src/modules/poop_name.dart';
@@ -11,6 +12,7 @@ import 'package:running_on_dart/src/modules/reminder.dart';
 import 'package:running_on_dart/src/modules/tag.dart';
 import 'package:running_on_dart/src/repository/feature_settings.dart';
 import 'package:running_on_dart/src/repository/jellyfin_config.dart';
+import 'package:running_on_dart/src/repository/kavita.dart';
 import 'package:running_on_dart/src/repository/reminder.dart';
 import 'package:running_on_dart/src/repository/tag.dart';
 import 'package:running_on_dart/src/services/db.dart';
@@ -24,6 +26,7 @@ Future<void> setupContainer(NyxxGateway client) async {
     ..registerSingleton(() => JellyfinConfigRepository())
     ..registerSingleton(() => ReminderRepository())
     ..registerSingleton(() => TagRepository())
+    ..registerSingleton(() => KavitaRepository())
     ..registerSingleton(() => FeatureSettingsService())
     ..registerSingleton(() => BotStartDuration())
     ..registerSingleton(() => PoopNameModule())
@@ -33,7 +36,8 @@ Future<void> setupContainer(NyxxGateway client) async {
     ..registerSingleton(() => TagModule())
     ..registerSingleton(() => DocsModule())
     ..registerSingleton(() => JellyfinModuleV2())
-    ..registerSingleton(() => MentionsMonitoringModule());
+    ..registerSingleton(() => MentionsMonitoringModule())
+    ..registerSingleton(() => KavitaModule());
 
   await Injector.appInstance.get<DatabaseService>().init();
   await Injector.appInstance.get<JellyfinModuleV2>().init();
