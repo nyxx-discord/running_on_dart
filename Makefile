@@ -13,6 +13,9 @@ analyze: ## Run dart analyze
 tests: ## Run unit tests
 	dart run test
 
+run: ## Run dev project
+	docker compose up --build
+
 fix-project: analyze fix format ## Fix whole project
 
 check-project: fix-project tests ## Run all checks

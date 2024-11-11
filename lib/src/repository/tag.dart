@@ -109,7 +109,7 @@ class TagRepository {
       ..addNamedInsert("hidden");
 
     await _database.executeQuery(query, parameters: {
-      'tag_id': event.tagId,
+      'command_id': event.tagId,
       'use_date': event.usedAt,
       'hidden': event.hidden,
     });
