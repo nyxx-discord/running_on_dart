@@ -7,7 +7,15 @@ format: ## Run dart format
 fix: ## Run dart fix
 	dart fix --apply
 
-fix-project: fix format ## Fix whole project
+analyze: ## Run dart analyze
+	dart analyze
+
+tests: ## Run unit tests
+	dart run test
 
 run: ## Run dev project
 	docker compose up --build
+
+fix-project: analyze fix format ## Fix whole project
+
+check-project: fix-project tests ## Run all checks
