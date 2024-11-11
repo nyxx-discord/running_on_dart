@@ -21,7 +21,7 @@ String getCurrentMemoryString() {
 
 String getDartPlatform() => Platform.version.split('(').first.trim();
 
-extension DurationFromTicks on Duration {
+extension FormatShortDurationExtension on Duration {
   String formatShort() => toString().split('.').first.padLeft(8, "0");
 }
 
@@ -52,7 +52,7 @@ Iterable<MessageBuilder> spliceEmbedsForMessageBuilders(Iterable<EmbedBuilder> e
   }
 }
 
-Duration? getDurationFromStringOrDefault(String? durationString, Duration? defaultDuration) {
+Duration? getDurationFromStringOrDefault(String? durationString, [Duration? defaultDuration]) {
   if (durationString == null) {
     return defaultDuration;
   }

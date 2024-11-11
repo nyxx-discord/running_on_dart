@@ -2,8 +2,7 @@ import 'package:postgres/postgres.dart';
 import 'package:postgres/src/v3/query_description.dart' show SqlImpl;
 
 import 'package:running_on_dart/src/util/query_builder.dart';
-import 'package:test/expect.dart';
-import 'package:test/scaffolding.dart';
+import 'package:test/test.dart';
 
 extension PostgresSqlStringExtension on Sql {
   String asString() => (this as SqlImpl).sql;
