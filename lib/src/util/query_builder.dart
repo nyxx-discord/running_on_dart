@@ -139,6 +139,7 @@ class UpdateQuery extends Query with _WhereQuery {
   UpdateQuery(super.from, {super.alias});
 
   void addSet(String name, String value) => _sets[name] = value;
+  void addNamedSet(String name) => _sets[name] = "@$name";
 
   @override
   Sql build() {
@@ -161,7 +162,8 @@ class SelectQuery extends Query with _WhereQuery, _JoinQuery {
   final List<String> _selects = [];
 
   SelectQuery(super.from, {super.alias});
-  factory SelectQuery.selectAll(String from) => SelectQuery(from)..select("*");
+  factory SelectQuery.selectAll(String from, {String? alias}) =>
+      SelectQuery(from, alias: alias)..select("${alias != null ? '$alias.' : ''}*");
 
   void select(String expression) => _selects.add(expression);
 

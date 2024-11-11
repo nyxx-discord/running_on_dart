@@ -62,6 +62,20 @@ void main() {
         expect(query.build().asString(),
             "SELECT t.*,ot.* FROM test t JOIN other_table ot ON ot.id = t.test_id,LEFT JOIN another_table at ON at.test_id = t.id WHERE t.name = 'test' OR t.model = 'xg';");
       });
+
+      test('Join multiple conditions', () {
+        final query = SelectQuery.selectAll("tag_usage", alias: "tu")
+          ..addJoin('tags', 't', ['t.id = tu.command_id', 't.enabled = TRUE']);
+
+        expect(query.build().asString(),
+            "SELECT tu.* FROM tag_usage tu JOIN tags t ON t.id = tu.command_id AND t.enabled = TRUE;");
+      });
+
+      test("Simple select all with alias", () {
+        final query = SelectQuery.selectAll("test", alias: 't')..andWhere("t.name = 'test'");
+
+        expect(query.build().asString(), "SELECT t.* FROM test t WHERE t.name = 'test';");
+      });
     });
 
     group("Update tests", () {
@@ -71,6 +85,15 @@ void main() {
           ..andWhere("id = 1");
 
         expect(query.build().asString(), "UPDATE test SET name = moron WHERE id = 1;");
+      });
+
+      test("Named sets", () {
+        final query = UpdateQuery("test")
+          ..addNamedSet("name")
+          ..addNamedSet("model")
+          ..andWhere("id = 1");
+
+        expect(query.build().asString(), "UPDATE test SET name = @name,model = @model WHERE id = 1;");
       });
     });
 

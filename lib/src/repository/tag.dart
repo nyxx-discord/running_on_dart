@@ -1,6 +1,5 @@
 import 'package:injector/injector.dart';
 import 'package:logging/logging.dart';
-import 'package:postgres/postgres.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/tag.dart';
 import 'package:running_on_dart/src/util/query_builder.dart';
@@ -51,21 +50,15 @@ class TagRepository {
       return;
     }
 
-    final result = await _database.getConnection().execute(Sql.named('''
-    INSERT INTO tags (
-      name,
-      content,
-      enabled,
-      guild_id,
-      author_id
-    ) VALUES (
-      @name,
-      @content,
-      @enabled,
-      @guild_id,
-      @author_id
-    ) RETURNING id;
-  '''), parameters: {
+    final query = InsertQuery("tags")
+      ..addNamedInsert("name")
+      ..addNamedInsert("content")
+      ..addNamedInsert("enabled")
+      ..addNamedInsert("guild_id")
+      ..addNamedInsert("author_id")
+      ..addReturning("id");
+
+    final result = await _database.executeQuery(query, parameters: {
       'name': tag.name,
       'content': tag.content,
       'enabled': tag.enabled,
@@ -82,16 +75,15 @@ class TagRepository {
       return addTag(tag);
     }
 
-    await _database.getConnection().execute(Sql.named('''
-      UPDATE tags SET
-        name = @name,
-        content = @content,
-        enabled = @enabled,
-        guild_id = @guild_id,
-        author_id = @author_id
-      WHERE
-        id = @id
-    '''), parameters: {
+    final query = UpdateQuery("tags")
+      ..addNamedSet('name')
+      ..addNamedSet('content')
+      ..addNamedSet('enabled')
+      ..addNamedSet('guild_id')
+      ..addNamedSet('author_id')
+      ..andWhere("id = @id");
+
+    await _database.executeQuery(query, parameters: {
       'id': tag.id,
       'name': tag.name,
       'content': tag.content,
@@ -102,25 +94,21 @@ class TagRepository {
   }
 
   Future<Iterable<TagUsedEvent>> fetchTagUsage() async {
-    final result = await _database.getConnection().execute(Sql.named('''
-      SELECT tu.* FROM tag_usage tu JOIN tags t ON t.id = tu.command_id AND t.enabled = TRUE;
-    '''));
+    final query = SelectQuery.selectAll("tag_usage", alias: "tu")
+      ..addJoin('tags', 't', ['t.id = tu.command_id', 't.enabled = TRUE']);
+
+    final result = await _database.executeQuery(query);
 
     return result.map((row) => row.toColumnMap()).map(TagUsedEvent.fromRow);
   }
 
   Future<void> registerTagUsedEvent(TagUsedEvent event) async {
-    await _database.getConnection().execute(Sql.named('''
-      INSERT INTO tag_usage (
-        command_id,
-        use_date,
-        hidden
-      ) VALUES (
-        @tag_id,
-        @use_date,
-        @hidden
-      )
-    '''), parameters: {
+    final query = InsertQuery("tag_usage")
+      ..addNamedInsert("command_id")
+      ..addNamedInsert("use_date")
+      ..addNamedInsert("hidden");
+
+    await _database.executeQuery(query, parameters: {
       'tag_id': event.tagId,
       'use_date': event.usedAt,
       'hidden': event.hidden,
