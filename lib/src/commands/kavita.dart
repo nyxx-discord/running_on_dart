@@ -3,7 +3,6 @@ import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:running_on_dart/src/models/kavita.dart';
 import 'package:running_on_dart/src/modules/kavita.dart';
-import 'package:running_on_dart/src/repository/kavita.dart';
 import 'package:running_on_dart/src/util/util.dart';
 
 Future<AuthenticatedKavitaClient> getKavitaClient(KavitaUserConfig? config, ChatContext context) async {
@@ -25,22 +24,19 @@ final kavita = ChatGroup('kavita', 'Kavita related commands', children: [
       ChatCommand(
         "login",
         "Login user into given kavita instance",
-        id('kavita-user-login', (InteractionChatContext context) async {
-          final config = await Injector.appInstance
-              .get<KavitaRepository>()
-              .findAllForParent(getParentIdFromContext(context).toString());
+        id('kavita-user-login', (InteractionChatContext context, KavitaConfig config) async {
+          final kavitaModule = Injector.appInstance.get<KavitaModule>();
 
           final modalResult = await context.getModal(title: "Login to Kavita", components: [
             TextInputBuilder(customId: 'username', style: TextInputStyle.short, label: 'Username', isRequired: true),
             TextInputBuilder(customId: 'password', style: TextInputStyle.short, label: 'Password', isRequired: true),
           ]);
 
-          final apiLoginResult = await Injector.appInstance
-              .get<KavitaModule>()
-              .createUnauthenticatedClient(config.first)
+          final apiLoginResult = await kavitaModule
+              .createUnauthenticatedClient(config)
               .login(modalResult['username']!, modalResult['password']!);
 
-          await Injector.appInstance.get<KavitaModule>().login(config.first, apiLoginResult, context.user.id);
+          await kavitaModule.login(config, apiLoginResult, context.user.id);
 
           return context.respond(MessageBuilder(content: "Logged in successfully!"));
         }),
