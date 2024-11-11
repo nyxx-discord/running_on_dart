@@ -78,6 +78,13 @@ class KavitaRepository {
       ..addNamedInsert("auth_token")
       ..addNamedInsert("api_key")
       ..addNamedInsert("kavita_config_id")
+      ..onConflict('kavita_user_configs_user_id_unique', {
+        'auth_token': '@auth_token',
+        'api_key': '@api_key',
+      }, [
+        '${KavitaUserConfig.tableName}.user_id = @user_id',
+        '${KavitaUserConfig.tableName}.kavita_config_id = @kavita_config_id'
+      ])
       ..addReturning('id');
 
     final result = await _database.executeQuery(query, parameters: {

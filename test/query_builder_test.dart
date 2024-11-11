@@ -121,7 +121,8 @@ void main() {
           ..onConflict("test_constraint", {'model': "@model"}, ['id = @id'])
           ..addReturning("id");
 
-        expect(query.build().asString(), "INSERT INTO test (name,model) VALUES (moron,@model) ON CONFLICT ON CONSTRAINT test_constraint DO UPDATE SET model = @model WHERE id = @id RETURNING id;");
+        expect(query.build().asString(),
+            "INSERT INTO test (name,model) VALUES (moron,@model) ON CONFLICT ON CONSTRAINT test_constraint DO UPDATE SET model = @model WHERE id = @id RETURNING id;");
       });
     });
 
