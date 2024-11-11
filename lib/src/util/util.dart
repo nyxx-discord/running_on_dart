@@ -19,7 +19,7 @@ String getCurrentMemoryString() {
   return '$current/$rss MB';
 }
 
-String getDartPlatform() => Platform.version.split('(').first;
+String getDartPlatform() => Platform.version.split('(').first.trim();
 
 extension DurationFromTicks on Duration {
   String formatShort() => toString().split('.').first.padLeft(8, "0");

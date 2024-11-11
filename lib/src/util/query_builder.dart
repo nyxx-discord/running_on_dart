@@ -25,6 +25,13 @@ String buildSets(Map<String, String> sets) {
   return sets.entries.map((entry) => '${entry.key} = ${entry.value}').join(",");
 }
 
+(String, String) buildInsert(Map<String, String> inserts) {
+  return (
+    inserts.entries.map((entry) => entry.key).join(","),
+    inserts.entries.map((entry) => entry.value).join(","),
+  );
+}
+
 abstract class Query {
   final String from;
 
@@ -59,6 +66,29 @@ abstract class _WhereQuery extends Query {
   }
 }
 
+class InsertQuery extends Query {
+  final Map<String, String> _inserts = {};
+
+  InsertQuery(super.from);
+
+  void addInsert(String name, String value) => _inserts[name] = value;
+  void addNamedInsert(String name) => _inserts[name] = '@$name';
+
+  @override
+  Sql build() {
+    final buffer = StringBuffer("INSERT INTO $from (");
+
+    final (fields, values) = buildInsert(_inserts);
+
+    buffer.write(fields);
+    buffer.write(") VALUES (");
+    buffer.write(values);
+    buffer.write(");");
+
+    return Sql.named(buffer.toString());
+  }
+}
+
 class UpdateQuery extends _WhereQuery {
   final Map<String, String> _sets = {};
 
@@ -73,7 +103,8 @@ class UpdateQuery extends _WhereQuery {
     }
 
     final buffer = StringBuffer("UPDATE $from SET ");
-    buffer.write(buildSets);
+    buffer.write(buildSets(_sets));
+    buffer.write(" ");
 
     _buildWheres(buffer);
 
