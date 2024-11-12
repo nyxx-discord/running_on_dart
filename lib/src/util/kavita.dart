@@ -33,9 +33,15 @@ Stream<MessageBuilder> getSearchEmbedPages(Iterable<SeriesItem> items, Authentic
 }
 
 Stream<FutureOr<MessageBuilder> Function()> generateReadingPaginationFactories(
-    ContinuePoint continuePoint, AuthenticatedKavitaClient client) async* {
+    ContinuePoint continuePoint, AuthenticatedKavitaClient client, int seriesId, bool saveReadProgress) async* {
   for (var i = 0; i < continuePoint.pages; i += 1) {
-    yield () => generateReadingPage(i, continuePoint.chapterId, client);
+    yield () {
+      if (saveReadProgress) {
+        client.saveContinuePoint(seriesId, continuePoint.volumeId, continuePoint.chapterId, i + 1);
+      }
+
+      return generateReadingPage(i, continuePoint.chapterId, client);
+    };
   }
 }
 

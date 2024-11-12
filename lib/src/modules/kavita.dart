@@ -98,6 +98,19 @@ class AuthenticatedKavitaClient {
     return (body['series'] as List<dynamic>).map((e) => SeriesItem.fromJson(e as Map<String, dynamic>));
   }
 
+  Future<bool> saveContinuePoint(int seriesId, int volumeId, int chapterId, int page) async {
+    final result = await _post('/api/Reader/progress',
+        body: {
+          'seriesId': seriesId,
+          'volumeId': volumeId,
+          'chapterId': chapterId,
+          'pageNum': page,
+        },
+        authToken: true);
+
+    return result.body == 'true';
+  }
+
   Future<ContinuePoint> getContinuePoint(int seriesId) async {
     final result = await _get("/api/reader/continue-point",
         parameters: {
@@ -141,6 +154,17 @@ class AuthenticatedKavitaClient {
         Uri.parse('$baseUrl$path').replace(queryParameters: _makeQueryParameters(parameters, authApiKey: authApiKey));
 
     return await http.get(uri, headers: _makeHeaders(authToken: authToken));
+  }
+
+  Future<http.Response> _post(String path,
+      {Object? body,
+      Map<String, String> parameters = const {},
+      bool authToken = false,
+      bool authApiKey = false}) async {
+    return await http.post(
+        Uri.parse('$baseUrl$path').replace(queryParameters: _makeQueryParameters(parameters, authApiKey: authApiKey)),
+        headers: _makeHeaders(authToken: authToken),
+        body: jsonEncode(body));
   }
 
   Map<String, String> _makeQueryParameters(Map<String, String> parameters, {bool authApiKey = false}) => {

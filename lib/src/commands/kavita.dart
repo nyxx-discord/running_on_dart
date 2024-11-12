@@ -59,13 +59,15 @@ final kavita = ChatGroup('kavita', 'Kavita related commands', children: [
   ChatCommand(
     'read',
     'Read series',
-    id('kavita-read', (ChatContext context, int seriesId, [KavitaUserConfig? config]) async {
+    id('kavita-read', (ChatContext context, int seriesId,
+        [bool saveReadProgress = true, KavitaUserConfig? config]) async {
       final client = await getKavitaClient(config, context);
 
       final continuePoint = await client.getContinuePoint(seriesId);
       final paginator = await pagination.factories(
-          await generateReadingPaginationFactories(continuePoint, client).toList(),
-          startIndex: continuePoint.pagesRead);
+          await generateReadingPaginationFactories(continuePoint, client, seriesId, saveReadProgress).toList(),
+          startIndex: continuePoint.pagesRead,
+          userId: context.user.id);
 
       return context.respond(paginator);
     }),
