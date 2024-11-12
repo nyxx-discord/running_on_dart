@@ -46,8 +46,8 @@ final kavita = ChatGroup('kavita', 'Kavita related commands', children: [
     ],
   ),
   ChatCommand(
-      "search",
-      "Search kavita library",
+      'search',
+      'Search kavita library',
       id('kavita-test', (ChatContext context, String query, [KavitaUserConfig? config]) async {
         final client = await getKavitaClient(config, context);
 
@@ -55,5 +55,19 @@ final kavita = ChatGroup('kavita', 'Kavita related commands', children: [
         final paginator = await pagination.builders(await getSearchEmbedPages(items, client).toList());
 
         return context.respond(paginator);
-      }))
+      })),
+  ChatCommand(
+    'read',
+    'Read series',
+    id('kavita-read', (ChatContext context, int seriesId, [KavitaUserConfig? config]) async {
+      final client = await getKavitaClient(config, context);
+
+      final continuePoint = await client.getContinuePoint(seriesId);
+      final paginator = await pagination.factories(
+          await generateReadingPaginationFactories(continuePoint, client).toList(),
+          startIndex: continuePoint.pagesRead);
+
+      return context.respond(paginator);
+    }),
+  ),
 ]);

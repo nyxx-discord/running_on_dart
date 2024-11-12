@@ -47,6 +47,26 @@ class SeriesItem {
   }
 }
 
+class ContinuePoint {
+  final int id;
+  final int pagesRead;
+  final int pages;
+  final int volumeId;
+
+  int get chapterId => id;
+
+  ContinuePoint({required this.id, required this.pagesRead, required this.pages, required this.volumeId});
+
+  factory ContinuePoint.fromJson(Map<String, dynamic> raw) {
+    return ContinuePoint(
+      id: raw['id'],
+      pagesRead: raw['pagesRead'],
+      pages: raw['pages'],
+      volumeId: raw['volumeId'],
+    );
+  }
+}
+
 class AuthenticatedKavitaClient {
   final String baseUrl;
   final String token;
@@ -76,6 +96,29 @@ class AuthenticatedKavitaClient {
     final body = jsonDecode(result.body) as Map<String, dynamic>;
 
     return (body['series'] as List<dynamic>).map((e) => SeriesItem.fromJson(e as Map<String, dynamic>));
+  }
+
+  Future<ContinuePoint> getContinuePoint(int seriesId) async {
+    final result = await _get("/api/reader/continue-point",
+        parameters: {
+          'seriesId': seriesId.toString(),
+        },
+        authToken: true);
+
+    final body = jsonDecode(result.body) as Map<String, dynamic>;
+    return ContinuePoint.fromJson(body);
+  }
+
+  Future<int> getNextChapter(int seriesId, int volumeId, int currentChapterId) async {
+    final result = await _get("/api/Reader/next-chapter",
+        parameters: {
+          'seriesId': seriesId.toString(),
+          'volumeId': volumeId.toString(),
+          'currentChapterId': currentChapterId.toString(),
+        },
+        authToken: true);
+
+    return int.parse(result.body);
   }
 
   Future<Uint8List> getChapterCover(int chapterId) async {

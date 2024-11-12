@@ -1,6 +1,11 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
+import 'package:intl/intl.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/modules/kavita.dart';
+
+final pageNumberFormat = NumberFormat('000');
 
 Stream<MessageBuilder> getSearchEmbedPages(Iterable<SeriesItem> items, AuthenticatedKavitaClient client) async* {
   for (final itemSlice in items.slices(2)) {
@@ -12,7 +17,7 @@ Stream<MessageBuilder> getSearchEmbedPages(Iterable<SeriesItem> items, Authentic
       attachments.add(attachment);
 
       return EmbedBuilder(
-        title: item.name,
+        title: '${item.name} (${item.seriesId})',
         fields: [
           EmbedFieldBuilder(name: 'Library', value: item.libraryName, isInline: true),
         ],
@@ -25,4 +30,18 @@ Stream<MessageBuilder> getSearchEmbedPages(Iterable<SeriesItem> items, Authentic
       attachments: attachments,
     );
   }
+}
+
+Stream<FutureOr<MessageBuilder> Function()> generateReadingPaginationFactories(
+    ContinuePoint continuePoint, AuthenticatedKavitaClient client) async* {
+  for (var i = 0; i < continuePoint.pages; i += 1) {
+    yield () => generateReadingPage(i, continuePoint.chapterId, client);
+  }
+}
+
+Future<MessageBuilder> generateReadingPage(int page, int chapterId, AuthenticatedKavitaClient client) async {
+  final pageData = await client.getChapterImage(chapterId, page);
+
+  return MessageBuilder(
+      attachments: [AttachmentBuilder(data: pageData, fileName: '${pageNumberFormat.format(page)}.jpg')]);
 }
