@@ -19,6 +19,34 @@ class LoginResult {
   }
 }
 
+class SeriesItem {
+  final int seriesId;
+  final String name;
+  final String originalName;
+  final int format;
+  final String libraryName;
+  final int libraryId;
+
+  SeriesItem(
+      {required this.seriesId,
+      required this.name,
+      required this.originalName,
+      required this.format,
+      required this.libraryName,
+      required this.libraryId});
+
+  factory SeriesItem.fromJson(Map<String, dynamic> raw) {
+    return SeriesItem(
+      seriesId: raw['seriesId'],
+      name: raw['name'],
+      originalName: raw['originalName'],
+      format: raw['format'],
+      libraryName: raw['libraryName'],
+      libraryId: raw['libraryId'],
+    );
+  }
+}
+
 class AuthenticatedKavitaClient {
   final String baseUrl;
   final String token;
@@ -33,6 +61,33 @@ class AuthenticatedKavitaClient {
   Future<Uint8List> getChapterImage(int chapterId, int page) async {
     final result = await _get("/api/Reader/image",
         parameters: {"chapterId": chapterId.toString(), "page": page.toString()}, authApiKey: true);
+
+    return result.bodyBytes;
+  }
+
+  Future<Iterable<SeriesItem>> searchSeries(String query) async {
+    final result = await _get("/api/Search/search",
+        parameters: {
+          'queryString': query,
+          'includeChapterAndFiles': false.toString(),
+        },
+        authToken: true);
+
+    final body = jsonDecode(result.body) as Map<String, dynamic>;
+
+    return (body['series'] as List<dynamic>).map((e) => SeriesItem.fromJson(e as Map<String, dynamic>));
+  }
+
+  Future<Uint8List> getChapterCover(int chapterId) async {
+    final result =
+        await _get("/api/Image/chapter-cover", parameters: {"chapterId": chapterId.toString()}, authApiKey: true);
+
+    return result.bodyBytes;
+  }
+
+  Future<Uint8List> getSeriesCover(int seriesId) async {
+    final result =
+        await _get("/api/Image/series-cover", parameters: {"seriesId": seriesId.toString()}, authApiKey: true);
 
     return result.bodyBytes;
   }

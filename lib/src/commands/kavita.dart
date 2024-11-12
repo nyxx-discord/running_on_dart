@@ -1,8 +1,10 @@
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
+import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/src/models/kavita.dart';
 import 'package:running_on_dart/src/modules/kavita.dart';
+import 'package:running_on_dart/src/util/kavita.dart';
 import 'package:running_on_dart/src/util/util.dart';
 
 Future<AuthenticatedKavitaClient> getKavitaClient(KavitaUserConfig? config, ChatContext context) async {
@@ -44,15 +46,14 @@ final kavita = ChatGroup('kavita', 'Kavita related commands', children: [
     ],
   ),
   ChatCommand(
-      "test",
-      "Test",
-      id('kavita-test', (ChatContext context, [KavitaUserConfig? config]) async {
+      "search",
+      "Search kavita library",
+      id('kavita-test', (ChatContext context, String query, [KavitaUserConfig? config]) async {
         final client = await getKavitaClient(config, context);
 
-        final pageData = await client.getChapterImage(104, 3);
+        final items = await client.searchSeries(query);
+        final paginator = await pagination.builders(await getSearchEmbedPages(items, client).toList());
 
-        return context.respond(MessageBuilder(attachments: [
-          AttachmentBuilder(data: pageData, fileName: '003.jpg'),
-        ]));
+        return context.respond(paginator);
       }))
 ]);
