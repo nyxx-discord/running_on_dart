@@ -1,8 +1,8 @@
 import 'package:injector/injector.dart';
 import 'package:logging/logging.dart';
 import 'package:postgres/postgres.dart';
-import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/reminder.dart';
+import 'package:running_on_dart/src/services/db.dart';
 
 class ReminderRepository {
   final Logger _logger = Logger('ROD.ReminderRepository');

@@ -1,7 +1,7 @@
 import 'package:injector/injector.dart';
 import 'package:logging/logging.dart';
-import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/tag.dart';
+import 'package:running_on_dart/src/services/db.dart';
 import 'package:running_on_dart/src/util/query_builder.dart';
 
 class TagRepository {
