@@ -12,7 +12,8 @@ enum Setting {
   joinLogs('join_logs', 'Logs member join events into specified channel', true, DataType.channelMention),
   modLogs('mod_logs', 'Logs administration event into specified channel', true, DataType.channelMention),
   jellyfin('jellyfin', 'Allows usage of jellyfin commands', true, DataType.json),
-  mentions('mentions', 'Monitors messages for mention abuse', false);
+  mentions('mentions', 'Monitors messages for mention abuse', false),
+  kavita('kavita', 'Allows usage of jellyfin command', true, DataType.json);
 
   /// name of setting
   final String name;

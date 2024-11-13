@@ -127,7 +127,7 @@ class AuthenticatedKavitaClient {
 
   Future<String> getBookPage(int chapterId, int page) async {
     final result =
-    await _get("/api/Book/$chapterId/book-page", parameters: {"page": page.toString()}, authApiKey: true);
+        await _get("/api/Book/$chapterId/book-page", parameters: {"page": page.toString()}, authApiKey: true);
 
     return result.body;
   }

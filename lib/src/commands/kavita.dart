@@ -2,8 +2,10 @@ import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
+import 'package:running_on_dart/src/checks.dart';
 import 'package:running_on_dart/src/models/kavita.dart';
 import 'package:running_on_dart/src/modules/kavita.dart';
+import 'package:running_on_dart/src/repository/kavita.dart';
 import 'package:running_on_dart/src/util/kavita.dart';
 import 'package:running_on_dart/src/util/util.dart';
 
@@ -18,7 +20,38 @@ Future<AuthenticatedKavitaClient> getKavitaClient(KavitaUserConfig? config, Chat
   return Injector.appInstance.get<KavitaModule>().createAuthenticatedClient(config);
 }
 
-final kavita = ChatGroup('kavita', 'Kavita related commands', children: [
+final kavita = ChatGroup('kavita', 'Kavita related commands', checks: [
+  kavitaJellyfinCheck,
+], children: [
+  ChatGroup(
+    'settings',
+    'Settings for Kavita',
+    children: [
+      ChatCommand(
+          'add-instance',
+          'Add new kavita instance',
+          id('kavita-settings-add-instance', (InteractionChatContext context) async {
+            final modalResponse = await context.getModal(title: "New Instance Configuration", components: [
+              TextInputBuilder(customId: "name", style: TextInputStyle.short, label: "Instance Name", isRequired: true),
+              TextInputBuilder(customId: "base_url", style: TextInputStyle.short, label: "Base Url", isRequired: true),
+              TextInputBuilder(customId: "is_default", style: TextInputStyle.short, label: "Is Default (True/False)"),
+            ]);
+
+            final newlyCreatedConfig = await Injector.appInstance.get<KavitaRepository>().saveConfig(
+                  KavitaConfig(
+                    name: modalResponse['name']!,
+                    basePath: modalResponse['base_url']!,
+                    isDefault: modalResponse['is_default']?.toLowerCase() == 'true',
+                    parentId: getParentIdFromContext(context),
+                  ),
+                );
+
+            modalResponse
+                .respond(MessageBuilder(content: "Added new jellyfin instance with name: ${newlyCreatedConfig.name}"));
+          }),
+          checks: [kavitaFeatureCreateInstanceCommandCheck]),
+    ],
+  ),
   ChatGroup(
     'user',
     'User related kavita commands',
@@ -26,7 +59,8 @@ final kavita = ChatGroup('kavita', 'Kavita related commands', children: [
       ChatCommand(
         "login",
         "Login user into given kavita instance",
-        id('kavita-user-login', (InteractionChatContext context, KavitaConfig config) async {
+        id('kavita-user-login',
+            (InteractionChatContext context, @Description('Kavita instance to be used') KavitaConfig config) async {
           final kavitaModule = Injector.appInstance.get<KavitaModule>();
 
           final modalResult = await context.getModal(title: "Login to Kavita", components: [
@@ -48,7 +82,8 @@ final kavita = ChatGroup('kavita', 'Kavita related commands', children: [
   ChatCommand(
       'search',
       'Search kavita library',
-      id('kavita-test', (ChatContext context, String query, [KavitaUserConfig? config]) async {
+      id('kavita-test', (ChatContext context, @Description('Query string to search content with') String query,
+          [@Description('Kavita instance to be used. Default if not provided') KavitaUserConfig? config]) async {
         final client = await getKavitaClient(config, context);
 
         final items = await client.searchSeries(query);
@@ -60,10 +95,15 @@ final kavita = ChatGroup('kavita', 'Kavita related commands', children: [
     'read',
     'Read series',
     id('kavita-read', (ChatContext context, int seriesId,
-        [bool saveReadProgress = true, KavitaUserConfig? config]) async {
+        [@Description('Whether save reading progress to kavita') bool saveReadProgress = true,
+        @Description('Kavita instance to be used. Default if not provided') KavitaUserConfig? config]) async {
       final client = await getKavitaClient(config, context);
 
       final continuePoint = await client.getContinuePoint(seriesId);
+      if (continuePoint.isBook) {
+        return context.respond(MessageBuilder(content: "Books are not currently supported."));
+      }
+
       final paginator = await pagination.factories(
           await generateReadingPaginationFactories(continuePoint, client, seriesId, saveReadProgress).toList(),
           startIndex: continuePoint.pagesRead,

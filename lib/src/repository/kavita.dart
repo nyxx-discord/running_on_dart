@@ -72,6 +72,25 @@ class KavitaRepository {
     return KavitaUserConfig.fromDatabaseRowWithConfig(result.first.toColumnMap());
   }
 
+  Future<KavitaConfig> saveConfig(KavitaConfig config) async {
+    final query = InsertQuery(KavitaConfig.tableName)
+      ..addNamedInsert('name')
+      ..addNamedInsert('base_path')
+      ..addNamedInsert('is_default')
+      ..addNamedInsert('parent_id')
+      ..addReturning('id');
+
+    final result = await _database.executeQuery(query, parameters: {
+      'name': config.name,
+      'base_path': config.basePath,
+      'is_default': config.isDefault,
+      'parent_id': config.parentId.toString(),
+    });
+
+    config.id = result.first.first as int;
+    return config;
+  }
+
   Future<KavitaUserConfig> saveUserConfig(KavitaUserConfig userConfig) async {
     final query = InsertQuery(KavitaUserConfig.tableName)
       ..addNamedInsert("user_id")
