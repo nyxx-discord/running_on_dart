@@ -52,10 +52,12 @@ class ContinuePoint {
   final int pagesRead;
   final int pages;
   final int volumeId;
+  final bool isBook;
 
   int get chapterId => id;
 
-  ContinuePoint({required this.id, required this.pagesRead, required this.pages, required this.volumeId});
+  ContinuePoint(
+      {required this.id, required this.pagesRead, required this.pages, required this.volumeId, this.isBook = false});
 
   factory ContinuePoint.fromJson(Map<String, dynamic> raw) {
     return ContinuePoint(
@@ -63,6 +65,7 @@ class ContinuePoint {
       pagesRead: raw['pagesRead'],
       pages: raw['pages'],
       volumeId: raw['volumeId'],
+      isBook: (raw['files'] as List<dynamic>?)?.firstOrNull?['format'] == 3,
     );
   }
 }
@@ -120,6 +123,13 @@ class AuthenticatedKavitaClient {
 
     final body = jsonDecode(result.body) as Map<String, dynamic>;
     return ContinuePoint.fromJson(body);
+  }
+
+  Future<String> getBookPage(int chapterId, int page) async {
+    final result =
+    await _get("/api/Book/$chapterId/book-page", parameters: {"page": page.toString()}, authApiKey: true);
+
+    return result.body;
   }
 
   Future<int> getNextChapter(int seriesId, int volumeId, int currentChapterId) async {
