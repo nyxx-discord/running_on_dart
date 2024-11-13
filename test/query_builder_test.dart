@@ -113,6 +113,17 @@ void main() {
 
         expect(query.build().asString(), "INSERT INTO test (name,model) VALUES (moron,@model) RETURNING id;");
       });
+
+      test("on conflict", () {
+        final query = InsertQuery("test")
+          ..addInsert("name", "moron")
+          ..addNamedInsert("model")
+          ..onConflict("test_constraint", {'model': "@model"}, ['id = @id'])
+          ..addReturning("id");
+
+        expect(query.build().asString(),
+            "INSERT INTO test (name,model) VALUES (moron,@model) ON CONFLICT ON CONSTRAINT test_constraint DO UPDATE SET model = @model WHERE id = @id RETURNING id;");
+      });
     });
 
     group("Delete tests", () {

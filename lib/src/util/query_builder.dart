@@ -86,6 +86,30 @@ class _Join {
   String build() => "$joinType $target $targetAlias ON ${buildWheres(conditions, 'AND')}";
 }
 
+class _InsertOnConflict {
+  final String constraintName;
+  final Map<String, String> _sets;
+  final List<String> _wheres;
+
+  _InsertOnConflict(this.constraintName, this._sets, this._wheres);
+
+  String build() {
+    if (_sets.isEmpty || _wheres.isEmpty) {
+      throw QueryBuilderException("Insert on conflict cannot have empty set or where statements");
+    }
+
+    return "ON CONFLICT ON CONSTRAINT $constraintName DO UPDATE SET ${buildSets(_sets)}"
+        " WHERE ${buildWheres(_wheres, 'AND')}";
+  }
+}
+
+mixin _SetQuery implements Query {
+  final Map<String, String> _sets = {};
+
+  void addSet(String name, String value) => _sets[name] = value;
+  void addNamedSet(String name) => _sets[name] = "@$name";
+}
+
 mixin _JoinQuery implements Query {
   final List<_Join> _joins = [];
 
@@ -106,12 +130,15 @@ mixin _JoinQuery implements Query {
 class InsertQuery extends Query {
   final Map<String, String> _inserts = {};
   final List<String> _returnings = [];
+  _InsertOnConflict? _onConflict;
 
   InsertQuery(super.from, {super.alias});
 
   void addInsert(String name, String value) => _inserts[name] = value;
   void addNamedInsert(String name) => _inserts[name] = '@$name';
   void addReturning(String name) => _returnings.add(name);
+  void onConflict(String constraintName, Map<String, String> sets, List<String> wheres) =>
+      _onConflict = _InsertOnConflict(constraintName, sets, wheres);
 
   @override
   Sql build() {
@@ -124,6 +151,11 @@ class InsertQuery extends Query {
     buffer.write(values);
     buffer.write(")");
 
+    if (_onConflict != null) {
+      buffer.write(" ");
+      buffer.write(_onConflict!.build());
+    }
+
     if (_returnings.isNotEmpty) {
       buffer.write(" RETURNING ");
       buffer.write(buildReturnings(_returnings));
@@ -135,13 +167,8 @@ class InsertQuery extends Query {
   }
 }
 
-class UpdateQuery extends Query with _WhereQuery {
-  final Map<String, String> _sets = {};
-
+class UpdateQuery extends Query with _WhereQuery, _SetQuery {
   UpdateQuery(super.from, {super.alias});
-
-  void addSet(String name, String value) => _sets[name] = value;
-  void addNamedSet(String name) => _sets[name] = "@$name";
 
   @override
   Sql build() {

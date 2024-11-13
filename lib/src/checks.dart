@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
@@ -11,24 +13,31 @@ const jellyfinFeatureEnabledCheckName = 'jellyfinFeatureEnabledCheck';
 final administratorCheck = UserCheck.anyId(adminIds, name: 'Administrator check');
 final administratorGuildCheck = GuildCheck.id(adminGuildId, name: 'Administrator Guild check');
 
-final jellyfinFeatureEnabledCheck = Check(
-  (CommandContext context) {
-    if (context.guild == null) {
-      return true;
-    }
+FutureOr<bool> _checkForSetting(Setting setting, CommandContext context) {
+  if (context.guild == null) {
+    return true;
+  }
 
-    return Injector.appInstance.get<FeatureSettingsService>().isEnabled(Setting.jellyfin, context.guild!.id);
-  },
+  return Injector.appInstance.get<FeatureSettingsService>().isEnabled(Setting.jellyfin, context.guild!.id);
+}
+
+final kavitaJellyfinCheck = Check(
+  (CommandContext context) => _checkForSetting(Setting.kavita, context),
   name: jellyfinFeatureEnabledCheckName,
 );
 
-Future<(bool?, FeatureSetting?)> fetchAndCheckSetting(CommandContext context) async {
+final jellyfinFeatureEnabledCheck = Check(
+  (CommandContext context) => _checkForSetting(Setting.jellyfin, context),
+  name: jellyfinFeatureEnabledCheckName,
+);
+
+Future<(bool?, FeatureSetting?)> fetchAndCheckSetting(CommandContext context, Setting settingToCheck) async {
   if (context.guild == null) {
     return (true, null);
   }
 
   final setting =
-      await Injector.appInstance.get<FeatureSettingsRepository>().fetchSetting(Setting.jellyfin, context.guild!.id);
+      await Injector.appInstance.get<FeatureSettingsRepository>().fetchSetting(settingToCheck, context.guild!.id);
   if (setting == null) {
     return (false, null);
   }
@@ -42,7 +51,23 @@ Future<(bool?, FeatureSetting?)> fetchAndCheckSetting(CommandContext context) as
 
 final jellyfinFeatureCreateInstanceCommandCheck = Check(
   (CommandContext context) async {
-    final (checkResult, setting) = await fetchAndCheckSetting(context);
+    final (checkResult, setting) = await fetchAndCheckSetting(context, Setting.jellyfin);
+    if (checkResult != null) {
+      return checkResult;
+    }
+
+    if (context.member?.permissions?.isAdministrator ?? false) {
+      return true;
+    }
+
+    final roleId = Snowflake.parse(setting!.dataAsJson!['create_instance_role']);
+    return context.member!.roleIds.contains(roleId);
+  },
+);
+
+final kavitaFeatureCreateInstanceCommandCheck = Check(
+  (CommandContext context) async {
+    final (checkResult, setting) = await fetchAndCheckSetting(context, Setting.kavita);
     if (checkResult != null) {
       return checkResult;
     }

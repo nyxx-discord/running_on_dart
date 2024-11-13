@@ -171,7 +171,36 @@ class DatabaseService implements RequiresInitialization {
       ..enqueueMigration("2.11",
           'CREATE UNIQUE INDEX idx_jellyfin_configs_user_id ON jellyfin_user_configs(user_id, jellyfin_config_id);')
       ..enqueueMigration("2.12",
-          'ALTER TABLE jellyfin_user_configs ADD CONSTRAINT jellyfin_configs_user_id_unique UNIQUE (user_id, jellyfin_config_id);');
+          'ALTER TABLE jellyfin_user_configs ADD CONSTRAINT jellyfin_configs_user_id_unique UNIQUE (user_id, jellyfin_config_id);')
+      ..enqueueMigration("2.13", '''
+        CREATE TABLE kavita_configs (
+          id SERIAL PRIMARY KEY,
+          name VARCHAR NOT NULL,
+          base_path VARCHAR NOT NULL,
+          is_default BOOLEAN NOT NULL DEFAULT FALSE,
+          parent_id VARCHAR NOT NULL
+        );
+      ''')
+      ..enqueueMigration(
+          "2.14", 'CREATE UNIQUE INDEX idx_kavita_configs_unique_name ON kavita_configs(name, parent_id);')
+      ..enqueueMigration("2.15",
+          'CREATE UNIQUE INDEX idx_kavita_configs_unique_default ON kavita_configs(parent_id, is_default) WHERE is_default = TRUE;')
+      ..enqueueMigration("2.16", '''
+        CREATE TABLE kavita_user_configs (
+          id SERIAL PRIMARY KEY,
+          user_id VARCHAR NOT NULL,
+          auth_token VARCHAR NOT NULL,
+          api_key VARCHAR NOT NULL,
+          kavita_config_id INT NOT NULL,
+          CONSTRAINT fk_kavita_configs
+            FOREIGN KEY(kavita_config_id)
+            REFERENCES kavita_configs(id)
+        );
+      ''')
+      ..enqueueMigration(
+          "2.17", 'CREATE UNIQUE INDEX idx_kavita_user_configs_id ON kavita_user_configs(user_id, kavita_config_id);')
+      ..enqueueMigration("2.18",
+          'ALTER TABLE kavita_user_configs ADD CONSTRAINT kavita_user_configs_user_id_unique UNIQUE (user_id, kavita_config_id);');
 
     await migrator.runMigrations();
 

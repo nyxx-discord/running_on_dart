@@ -81,8 +81,6 @@ class MentionsMonitoringModule implements RequiresInitialization {
         (member.permissions?.canManageMessages ?? false) ||
         (member.permissions?.canManageChannels ?? false);
     if (shouldBeSkippedByPermissions) {
-      _logger.info(
-          "Detected spamming from user: ${member.user?.username}, id: ${member.id}. Skipping since can manage guild.");
       return;
     }
 

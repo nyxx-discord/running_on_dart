@@ -22,13 +22,16 @@ void main() async {
     ..addCommand(admin)
     ..addCommand(jellyfin)
     ..addCommand(reminderMessageCommand)
+    ..addCommand(kavita)
     ..addConverter(settingsConverter)
     ..addConverter(manageableTagConverter)
     ..addConverter(durationConverter)
     ..addConverter(reminderConverter)
     ..addConverter(packageDocsConverter)
     ..addConverter(jellyfinConfigConverter)
-    ..addConverter(jellyfinConfigUserConverter);
+    ..addConverter(jellyfinConfigUserConverter)
+    ..addConverter(kavitaConfigConverter)
+    ..addConverter(kavitaUserConfigsConverter);
 
   commands.onCommandError.listen(handleException);
 
