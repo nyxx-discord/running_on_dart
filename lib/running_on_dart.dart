@@ -11,17 +11,6 @@ export 'src/commands/tag.dart' show tag;
 export 'src/commands/reminder.dart' show reminderMessageCommand;
 export 'src/commands/kavita.dart' show kavita;
 
-export 'src/modules/join_logs.dart';
-export 'src/modules/poop_name.dart';
-export 'src/modules/reminder.dart';
-export 'src/modules/docs.dart';
-export 'src/modules/tag.dart';
-export 'src/modules/mod_log.dart';
-export 'src/modules/jellyfin.dart';
-export 'src/modules/mentions.dart';
-
-export 'src/services/db.dart';
-
 export 'src/settings.dart';
 export 'src/converter.dart';
 export 'src/error_handler.dart';
