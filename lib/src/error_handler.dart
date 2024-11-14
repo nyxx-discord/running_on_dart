@@ -6,6 +6,7 @@ import 'package:running_on_dart/src/checks.dart';
 import 'package:running_on_dart/src/models/jellyfin_config.dart';
 import 'package:running_on_dart/src/modules/jellyfin.dart';
 import 'package:running_on_dart/src/util/jellyfin.dart';
+import 'package:running_on_dart/src/util/util.dart';
 
 Future<void> handleException(CommandsException error) async {
   if (error is CheckFailedException) {
@@ -48,7 +49,7 @@ Future<void> _handleUncaughtException(UncaughtException error, CommandContext co
     case DioException(:final error) when error is JellyfinUnauthorizedException:
       final jellyfinConfigs = await Injector.appInstance
           .get<JellyfinModuleV2>()
-          .getJellyfinConfigBasedOnPreviousLogin(context.user.id, context.guild?.id ?? context.user.id, error.host);
+          .getJellyfinConfigBasedOnPreviousLogin(context.user.id, getParentIdFromContext(context), error.host);
 
       if (jellyfinConfigs.length == 1) {
         final userConfig = jellyfinConfigs.first;
