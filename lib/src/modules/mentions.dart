@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
-import 'package:running_on_dart/src/services/feature_settings.dart';
+import 'package:running_on_dart/src/modules/feature_settings.dart';
 import 'package:running_on_dart/src/util/util.dart';
 
 extension MapExtensions<K, V> on Map<K, V> {
@@ -25,7 +25,7 @@ final _mentionRegex = RegExp(r'<@!?\d+>');
 
 class MentionsMonitoringModule implements RequiresInitialization {
   final NyxxGateway _client = Injector.appInstance.get();
-  final FeatureSettingsService _featureSettings = Injector.appInstance.get();
+  final FeatureSettingsModule _featureSettings = Injector.appInstance.get();
 
   final _logger = Logger('ROD.MentionsMonitoringModule');
 

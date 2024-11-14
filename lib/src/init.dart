@@ -17,7 +17,7 @@ import 'package:running_on_dart/src/repository/kavita.dart';
 import 'package:running_on_dart/src/repository/reminder.dart';
 import 'package:running_on_dart/src/repository/tag.dart';
 import 'package:running_on_dart/src/services/db.dart';
-import 'package:running_on_dart/src/services/feature_settings.dart';
+import 'package:running_on_dart/src/modules/feature_settings.dart';
 
 Future<void> setupContainer(NyxxGateway client) async {
   Injector.appInstance
@@ -28,7 +28,7 @@ Future<void> setupContainer(NyxxGateway client) async {
     ..registerSingleton(() => ReminderRepository())
     ..registerSingleton(() => TagRepository())
     ..registerSingleton(() => KavitaRepository())
-    ..registerSingleton(() => FeatureSettingsService())
+    ..registerSingleton(() => FeatureSettingsModule())
     ..registerSingleton(() => BotStartDuration())
     ..registerSingleton(() => PoopNameModule())
     ..registerSingleton(() => JoinLogsModule())
@@ -42,6 +42,7 @@ Future<void> setupContainer(NyxxGateway client) async {
     ..registerSingleton(() => EmojiReactModule());
 
   await Injector.appInstance.get<DatabaseService>().init();
+  await Injector.appInstance.get<FeatureSettingsModule>().init();
   await Injector.appInstance.get<JellyfinModuleV2>().init();
   await Injector.appInstance.get<DocsModule>().init();
   await Injector.appInstance.get<TagModule>().init();

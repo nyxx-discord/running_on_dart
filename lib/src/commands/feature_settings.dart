@@ -4,7 +4,7 @@ import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
 import 'package:running_on_dart/src/repository/feature_settings.dart';
-import 'package:running_on_dart/src/services/feature_settings.dart';
+import 'package:running_on_dart/src/modules/feature_settings.dart';
 
 final featureSettings = ChatGroup(
   'settings',
@@ -38,7 +38,7 @@ final featureSettings = ChatGroup(
           data: data,
         );
 
-        await Injector.appInstance.get<FeatureSettingsService>().enable(featureSetting);
+        await Injector.appInstance.get<FeatureSettingsModule>().enable(featureSetting);
 
         await context.respond(MessageBuilder(content: 'Successfully enabled setting!'));
       }),
@@ -54,7 +54,7 @@ final featureSettings = ChatGroup(
             await Injector.appInstance.get<FeatureSettingsRepository>().fetchSetting(setting, context.guild!.id);
 
         if (featureSetting != null) {
-          Injector.appInstance.get<FeatureSettingsService>().disable(featureSetting);
+          Injector.appInstance.get<FeatureSettingsModule>().disable(featureSetting);
         }
 
         await context.respond(MessageBuilder(content: 'Successfully disabled setting!'));

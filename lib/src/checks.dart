@@ -5,7 +5,7 @@ import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
 import 'package:running_on_dart/src/repository/feature_settings.dart';
-import 'package:running_on_dart/src/services/feature_settings.dart';
+import 'package:running_on_dart/src/modules/feature_settings.dart';
 import 'package:running_on_dart/src/settings.dart';
 
 const jellyfinFeatureEnabledCheckName = 'jellyfinFeatureEnabledCheck';
@@ -18,7 +18,7 @@ FutureOr<bool> _checkForSetting(Setting setting, CommandContext context) {
     return true;
   }
 
-  return Injector.appInstance.get<FeatureSettingsService>().isEnabled(Setting.jellyfin, context.guild!.id);
+  return Injector.appInstance.get<FeatureSettingsModule>().isEnabled(Setting.jellyfin, context.guild!.id);
 }
 
 final kavitaJellyfinCheck = Check(

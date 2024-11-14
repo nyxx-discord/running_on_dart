@@ -4,13 +4,13 @@ import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
 import 'package:running_on_dart/src/repository/feature_settings.dart';
-import 'package:running_on_dart/src/services/feature_settings.dart';
+import 'package:running_on_dart/src/modules/feature_settings.dart';
 import 'package:running_on_dart/src/util/util.dart';
 
 class ModLogsModule implements RequiresInitialization {
   final NyxxGateway _client = Injector.appInstance.get();
   final FeatureSettingsRepository _featureSettingsRepository = Injector.appInstance.get();
-  final FeatureSettingsService _featureSettingsService = Injector.appInstance.get();
+  final FeatureSettingsModule _featureSettingsService = Injector.appInstance.get();
   final Logger _logger = Logger('ROD.ModLogs');
 
   final handledEventTypes = [

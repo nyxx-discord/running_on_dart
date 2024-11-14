@@ -18,7 +18,7 @@ enum Setting {
   kavita('kavita', 'Allows usage of jellyfin command', true,
       DataType.json), // {"create_instance_role":"419506523467939853"}
   emojiReact('emoji_react', 'React to predefined words with emojis', true,
-      DataType.string); //{"use_builtin": true|false, "mode": "react|message", "process_other_bots": true}
+      DataType.string); //{"use_builtin": true|false, "mode": "react|message", "process_other_bots": false}
 
   /// name of setting
   final String name;

@@ -1,7 +1,7 @@
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
-import 'package:running_on_dart/src/services/feature_settings.dart';
+import 'package:running_on_dart/src/modules/feature_settings.dart';
 import 'package:running_on_dart/src/settings.dart';
 import 'package:running_on_dart/src/util/util.dart';
 
@@ -50,6 +50,6 @@ class PoopNameModule implements RequiresInitialization {
       return false;
     }
 
-    return await Injector.appInstance.get<FeatureSettingsService>().isEnabled(Setting.poopName, guildId);
+    return await Injector.appInstance.get<FeatureSettingsModule>().isEnabled(Setting.poopName, guildId);
   }
 }
