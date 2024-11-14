@@ -10,15 +10,18 @@ enum DataType {
 
 enum Setting {
   poopName('poop_name', 'Replace nickname of a member with poop emoji if the member tries to hoist itself', false),
-  joinLogs('join_logs', 'Logs member join events into specified channel', true, DataType.channelMention),
-  modLogs('mod_logs', 'Logs administration event into specified channel', true, DataType.channelMention),
+  joinLogs('join_logs', 'Logs member join events into specified channel', true,
+      type: DataType.channelMention, example: '419506523467939853'),
+  modLogs('mod_logs', 'Logs administration event into specified channel', true,
+      type: DataType.channelMention, example: '419506523467939853'),
   jellyfin('jellyfin', 'Allows usage of jellyfin commands', true,
-      DataType.json), // {"create_instance_role":"419506523467939853"}
+      type: DataType.json, example: '{"create_instance_role":"419506523467939853"}'),
   mentions('mentions', 'Monitors messages for mention abuse', false),
   kavita('kavita', 'Allows usage of jellyfin command', true,
-      DataType.json), // {"create_instance_role":"419506523467939853"}
+      type: DataType.json, example: '{"create_instance_role":"419506523467939853"}'),
   emojiReact('emoji_react', 'React to predefined words with emojis', true,
-      DataType.string); //{"use_builtin": true|false, "mode": "react|message", "process_other_bots": false}
+      type: DataType.json,
+      example: '{"use_builtin": true|false, "mode": "react|message", "process_other_bots": true|false}');
 
   /// name of setting
   final String name;
@@ -32,7 +35,10 @@ enum Setting {
   /// Type of data
   final DataType? type;
 
-  const Setting(this.name, this.description, this.requiresData, [this.type]);
+  /// Example data for setting
+  final String? example;
+
+  const Setting(this.name, this.description, this.requiresData, {this.example, this.type});
 }
 
 /// The value of a setting within a guild.

@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
@@ -88,5 +89,24 @@ final featureSettings = ChatGroup(
           return context.respond(paginator);
         }),
         options: CommandOptions(defaultResponseLevel: ResponseLevel.private)),
+    ChatCommand(
+      'list',
+      'List available settings',
+      id('settings-list', (ChatContext context) async {
+        final embeds = Setting.values.map((s) {
+          return EmbedBuilder(title: s.name, description: s.description, fields: [
+            if (s.requiresData)
+              EmbedFieldBuilder(name: 'Example data (if requires)', value: s.example!, isInline: true),
+            if (s.requiresData)
+              EmbedFieldBuilder(name: 'Data type (if requires)', value: s.type.toString(), isInline: true),
+          ]);
+        });
+
+        final builders = embeds.slices(4).map((embeds) => MessageBuilder(embeds: embeds)).toList();
+
+        final paginator = await pagination.builders(builders);
+        return context.respond(paginator);
+      }),
+    ),
   ],
 );
