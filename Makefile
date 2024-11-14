@@ -16,6 +16,6 @@ tests: ## Run unit tests
 run: ## Run dev project
 	docker compose up --build
 
-fix-project: analyze fix format ## Fix whole project
+fix-project: fix analyze format ## Fix whole project
 
 check-project: fix-project tests ## Run all checks

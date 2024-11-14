@@ -6,6 +6,15 @@ import 'package:running_on_dart/src/repository/feature_settings.dart';
 class FeatureSettingsService {
   final _featureSettingsRepository = Injector.appInstance.get<FeatureSettingsRepository>();
 
+  Future<(bool, FeatureSetting?)> fetchSetting(Setting setting, Snowflake guildId) async {
+    final result = await _featureSettingsRepository.fetchSetting(setting, guildId);
+
+    return (
+      result != null,
+      result,
+    );
+  }
+
   /// Returns whether a setting is enabled in a particular guild.
   Future<bool> isEnabled(Setting setting, Snowflake guildId) async =>
       await _featureSettingsRepository.isEnabled(setting, guildId);

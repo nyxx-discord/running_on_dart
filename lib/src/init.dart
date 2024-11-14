@@ -2,6 +2,7 @@ import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/modules/bot_start_duration.dart';
 import 'package:running_on_dart/src/modules/docs.dart';
+import 'package:running_on_dart/src/modules/emoji_react_module.dart';
 import 'package:running_on_dart/src/modules/jellyfin.dart';
 import 'package:running_on_dart/src/modules/join_logs.dart';
 import 'package:running_on_dart/src/modules/kavita.dart';
@@ -37,7 +38,8 @@ Future<void> setupContainer(NyxxGateway client) async {
     ..registerSingleton(() => DocsModule())
     ..registerSingleton(() => JellyfinModuleV2())
     ..registerSingleton(() => MentionsMonitoringModule())
-    ..registerSingleton(() => KavitaModule());
+    ..registerSingleton(() => KavitaModule())
+    ..registerSingleton(() => EmojiReactModule());
 
   await Injector.appInstance.get<DatabaseService>().init();
   await Injector.appInstance.get<JellyfinModuleV2>().init();
@@ -49,4 +51,5 @@ Future<void> setupContainer(NyxxGateway client) async {
   await Injector.appInstance.get<PoopNameModule>().init();
   await Injector.appInstance.get<BotStartDuration>().init();
   await Injector.appInstance.get<MentionsMonitoringModule>().init();
+  await Injector.appInstance.get<EmojiReactModule>().init();
 }

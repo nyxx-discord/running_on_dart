@@ -25,6 +25,14 @@ extension FormatShortDurationExtension on Duration {
   String formatShort() => toString().split('.').first.padLeft(8, "0");
 }
 
+extension ToMapExtension<K, V> on Iterable<MapEntry<K, V>> {
+  Map<K, V> toMap() => Map.fromEntries(this);
+}
+
+extension EmojiToMention on Emoji {
+  String get mention => "<:$name:${this.id}>";
+}
+
 abstract class RequiresInitialization {
   Future<void> init();
 }

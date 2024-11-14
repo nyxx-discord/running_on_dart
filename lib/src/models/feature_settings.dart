@@ -5,15 +5,20 @@ import 'package:nyxx/nyxx.dart';
 enum DataType {
   channelMention,
   json,
+  string,
 }
 
 enum Setting {
   poopName('poop_name', 'Replace nickname of a member with poop emoji if the member tries to hoist itself', false),
   joinLogs('join_logs', 'Logs member join events into specified channel', true, DataType.channelMention),
   modLogs('mod_logs', 'Logs administration event into specified channel', true, DataType.channelMention),
-  jellyfin('jellyfin', 'Allows usage of jellyfin commands', true, DataType.json),
+  jellyfin('jellyfin', 'Allows usage of jellyfin commands', true,
+      DataType.json), // {"create_instance_role":"419506523467939853"}
   mentions('mentions', 'Monitors messages for mention abuse', false),
-  kavita('kavita', 'Allows usage of jellyfin command', true, DataType.json);
+  kavita('kavita', 'Allows usage of jellyfin command', true,
+      DataType.json), // {"create_instance_role":"419506523467939853"}
+  emojiReact('emoji_react', 'React to predefined words with emojis', true,
+      DataType.string); //{"use_builtin": true|false, "mode": "react|message", "process_other_bots": true}
 
   /// name of setting
   final String name;
