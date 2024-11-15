@@ -1,3 +1,14 @@
+## 4.9.0
+- feature: Query builder (#38)
+- feature: Kavita (#39)
+- Clean up exports
+- Fix imports
+- use getParentIdFromContext
+- Emoji reactions module
+- Rework FeatureSettingsService
+- Implement feature setting streams
+- Add settings list command
+
 ## 4.8.0
 - Mentions monitoring module (#37)
 - Remove backticks from pipeline header
