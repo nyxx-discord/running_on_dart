@@ -302,10 +302,10 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: a31aaa35c975e8a6d17554d0241c11c297b7afb6
+      resolved-ref: "82104b2934f7fa13a88e2cd596d4b4df932e6cd6"
       url: "https://github.com/nyxx-discord/migent.git"
     source: git
-    version: "1.1.0"
+    version: "1.2.0"
   mime:
     dependency: transitive
     description:
