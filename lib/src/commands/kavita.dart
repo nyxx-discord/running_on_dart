@@ -15,8 +15,9 @@ Future<AuthenticatedKavitaClient> getKavitaClient(KavitaUserConfig? config, Chat
       .fetchGetUserConfigWithFallback(userId: context.user.id, parentId: getParentIdFromContext(context));
 
   if (config == null) {
-    throw Exception("Invalid jellyfin config or user not logged in.");
+    throw Exception("Invalid kavita config or user not logged in."); // Todo: handle properly
   }
+
   return Injector.appInstance.get<KavitaModule>().createAuthenticatedClient(config);
 }
 
