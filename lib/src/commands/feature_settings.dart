@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:collection/collection.dart';
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
@@ -27,8 +29,16 @@ final featureSettings = ChatGroup(
               description: 'The setting `${setting.name}` requires the `data` argument to be specified.'
                   ' Please re-run the command and specify the additional data required, or contact a developer for more details.');
 
-          await context.respond(MessageBuilder(embeds: [embed]));
-          return;
+          return context.respond(MessageBuilder(embeds: [embed]));
+        }
+
+        if (setting.type == DataType.json) {
+          try {
+            final decodedData = jsonDecode(data!);
+            data = jsonEncode(decodedData);
+          } on FormatException {
+            return context.respond(MessageBuilder(content: 'Setting requires valid json as data'));
+          }
         }
 
         final featureSetting = FeatureSetting(
@@ -41,7 +51,7 @@ final featureSettings = ChatGroup(
 
         await Injector.appInstance.get<FeatureSettingsModule>().enable(featureSetting);
 
-        await context.respond(MessageBuilder(content: 'Successfully enabled setting!'));
+        return context.respond(MessageBuilder(content: 'Successfully enabled setting!'));
       }),
     ),
     ChatCommand(

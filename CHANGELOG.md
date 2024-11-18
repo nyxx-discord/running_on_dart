@@ -1,3 +1,8 @@
+## 4.9.1
+- Upgrade migent
+- Fix kavita exception message
+- Validate json before saving to db
+
 ## 4.9.0
 - feature: Query builder (#38)
 - feature: Kavita (#39)
