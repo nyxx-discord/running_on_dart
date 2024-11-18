@@ -514,6 +514,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.4"
+  shelf_session:
+    dependency: "direct main"
+    description:
+      name: shelf_session
+      sha256: "5c658d16ddac1ad364d047e9a22e1023fcb383f2f32d5b621feb57c6c3ca8748"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.2"
   shelf_static:
     dependency: transitive
     description:

@@ -35,6 +35,7 @@ dependencies:
   shelf: ^1.4.2
   shelf_router: ^1.1.4
   shelf_cors_headers: ^0.1.0
+  shelf_session: ^0.1.2
   mustachex: ^1.0.0
 
 dev_dependencies:

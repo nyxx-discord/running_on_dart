@@ -3,8 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <title>Test</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
 </head>
 <body>
-<p>Memory usage: {{memory_usage_string}}</p>
+<nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <a class="navbar-item" href="/">Running on Dart</a>
+    </div>
+
+    <div id="navbarBasicExample" class="navbar-menu">
+        <div class="navbar-start">
+            <a class="navbar-item" href="/guild">Guild</a>
+        </div>
+
+        <div class="navbar-end">
+            <div class="navbar-item">
+                <div class="buttons">
+                    <a class="button is-light" href="https://discord.com/oauth2/authorize?response_type=code&client_id={{clientId}}&redirect_uri={{redirectUri}}&scope=identify">Log in</a>
+                    {{#user_data}}
+                    <a class="button is-light" href="/logout">Log out</a>
+                    {{/user_data}}
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<p>Is logged in: {{user_data}}</p>
 </body>
 </html>

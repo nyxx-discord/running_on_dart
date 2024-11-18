@@ -16,4 +16,4 @@ export 'src/converter.dart';
 export 'src/error_handler.dart';
 export 'src/init.dart';
 
-export 'src/api/api_server.dart' show WebServer;
+export 'src/web_app/api_server.dart' show WebServer;
