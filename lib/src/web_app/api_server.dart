@@ -27,7 +27,7 @@ class WebServer {
       ...data.toJson(),
       'clientId': clientId,
       'redirectUri': clientRedirectUri,
-      'user_data': Session.getSession(request)?.data['user_data'] ?? false,
+      'user_data': getUserDataFromSession(request) ?? false,
     });
   }
 
@@ -47,34 +47,19 @@ class WebServer {
     final tokenBodyJson = jsonDecode(tokenResponse.body);
     final token = tokenBodyJson['access_token'];
 
-    print(tokenResponse.body);
-    print(tokenResponse.statusCode);
-
     final userData = await http.get(Uri.https('discord.com', '/api/oauth2/@me'), headers: {
       "Accept": "application/json",
       "Authorization": "Bearer $token",
     });
-
     final userDataJson = jsonDecode(userData.body);
-    print(userData.body);
-    print(userData.statusCode);
 
-    var session = Session.getSession(request);
-    session ??= Session.createSession(request);
-    session.data['user_data'] = {
-      'id': userDataJson['user']['id'],
-      'name': userDataJson['user']['global_name'] ?? userDataJson['user']['username'],
-      'avatar': userDataJson['user']['avatar'],
-      'expires_at': userDataJson['expires'],
-      'token': token,
-    };
-    session.expires = DateTime.now().add(Duration(seconds: tokenBodyJson['expires_in']));
+    initSession(request, userDataJson, tokenBodyJson);
 
     return shelf.Response.seeOther("/");
   }
 
   Future<shelf.Response> _handleLogOut(shelf.Request request) async {
-    Session.deleteSession(request);
+    deleteSession(request);
 
     return shelf.Response.seeOther("/");
   }

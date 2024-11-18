@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:mustachex/mustachex.dart';
 import 'package:shelf/shelf.dart' as shelf;
+import 'package:shelf_session/session_middleware.dart';
 
 shelf.Response createJsonErrorResponse(int errorCode, String errorMessage) {
   return shelf.Response(errorCode,
@@ -23,3 +24,23 @@ Future<shelf.Response> createTwigResponse(String name, {Map<String, dynamic>? pa
 shelf.Response createUnauthorizedResponse(String errorMessage) => createJsonErrorResponse(400, errorMessage);
 
 shelf.Response createForbiddenResponse() => shelf.Response.forbidden(null);
+
+void initSession(shelf.Request request, Map<String, dynamic> userDataJson, Map<String, dynamic> tokenDataJson) {
+  var session = Session.getSession(request);
+  session ??= Session.createSession(request);
+  session.data['user_data'] = {
+    'id': userDataJson['user']['id'],
+    'name': userDataJson['user']['global_name'] ?? userDataJson['user']['username'],
+    'avatar': userDataJson['user']['avatar'],
+    'expires_at': userDataJson['expires'],
+    'token': tokenDataJson['access_token'],
+  };
+  session.expires = DateTime.now().add(Duration(seconds: tokenDataJson['expires_in']));
+}
+
+void deleteSession(shelf.Request request) {
+  Session.deleteSession(request);
+}
+
+Map<String, dynamic>? getUserDataFromSession(shelf.Request request) =>
+    Session.getSession(request)?.data['user_data'] as Map<String, dynamic>?;

@@ -6,20 +6,23 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
 </head>
 <body>
-<nav class="navbar" role="navigation" aria-label="main navigation">
+<nav class="navbar is-primary" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
         <a class="navbar-item" href="/">Running on Dart</a>
     </div>
 
     <div id="navbarBasicExample" class="navbar-menu">
         <div class="navbar-start">
-            <a class="navbar-item" href="/guild">Guild</a>
+            <a class="navbar-item" href="/guilds">Guilds</a>
         </div>
 
         <div class="navbar-end">
             <div class="navbar-item">
                 <div class="buttons">
+                    {{^user_data}}
                     <a class="button is-light" href="https://discord.com/oauth2/authorize?response_type=code&client_id={{clientId}}&redirect_uri={{redirectUri}}&scope=identify">Log in</a>
+                    {{/user_data}}
+
                     {{#user_data}}
                     <a class="button is-light" href="/logout">Log out</a>
                     {{/user_data}}
@@ -29,6 +32,83 @@
     </div>
 </nav>
 
-<p>Is logged in: {{user_data}}</p>
+<div class="container block mt-4">
+    <div class="notification is-danger">
+        Experimental version
+    </div>
+</div>
+
+<div class="container block">
+    <h1 class="title">Cache Info</h1>
+    <div class="grid">
+        <div class="hero-body cell">
+            <p class="title">{{cached_channels}}</p>
+            <p class="subtitle">Cached channels</p>
+        </div>
+        <div class="hero-body cell">
+            <p class="title">{{cached_messages}}</p>
+            <p class="subtitle">Cached messages</p>
+        </div>
+        <div class="hero-body cell">
+            <p class="title">{{cached_guilds}}</p>
+            <p class="subtitle">Cached guilds</p>
+        </div>
+        <div class="hero-body cell">
+            <p class="title">{{cached_users}}</p>
+            <p class="subtitle">Cached Users</p>
+        </div>
+        <div class="hero-body cell">
+            <p class="title">{{cached_voice_states}}</p>
+            <p class="subtitle">Cached voice states</p>
+        </div>
+    </div>
+</div>
+
+<div class="container block">
+    <h1 class="title">Modules Info</h1>
+    <div class="grid">
+        <div class="hero-body cell">
+            <p class="title">{{total_tags_count}}</p>
+            <p class="subtitle">Total tags</p>
+        </div>
+        <div class="hero-body cell">
+            <p class="title">{{total_reminder_count}}</p>
+            <p class="subtitle">Total reminders</p>
+        </div>
+        <div class="hero-body cell">
+            <p class="title">n/a</p>
+            <!--        <p class="title">{{docs_update}}</p>-->
+            <p class="subtitle">Last docs update</p>
+        </div>
+    </div>
+</div>
+
+<div class="container block">
+    <h1 class="title">Program Info</h1>
+    <div class="grid">
+        <div class="hero-body cell">
+            <p class="title">{{nyxx_version}}</p>
+            <p class="subtitle">Nyxx Version</p>
+        </div>
+        <div class="hero-body cell">
+            <p class="title">{{version}}</p>
+            <p class="subtitle">Bot Version</p>
+        </div>
+        <div class="hero-body cell">
+            <p class="title">{{platform}}</p>
+            <p class="subtitle">Dart Version</p>
+        </div>
+        <div class="hero-body cell">
+            <p class="title">{{memory_usage_string}}</p>
+            <p class="subtitle">Memory usage</p>
+        </div>
+        <div class="hero-body cell is-col-start-1">
+            <p class="title">n/a</p>
+            <!--        <p class="title">{{uptime}}</p>-->
+            <p class="subtitle">Uptime</p>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
