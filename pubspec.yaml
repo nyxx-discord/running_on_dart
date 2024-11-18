@@ -34,8 +34,8 @@ dependencies:
   # api server
   shelf: ^1.4.2
   shelf_router: ^1.1.4
-  shelf_cors_headers: ^0.1.5
-  jaguar_jwt: ^3.0.0
+  shelf_cors_headers: ^0.1.0
+  mustachex: ^1.0.0
 
 dev_dependencies:
   lints: ^5.0.0

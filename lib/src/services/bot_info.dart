@@ -1,7 +1,9 @@
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
-import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/modules/bot_start_duration.dart';
+import 'package:running_on_dart/src/modules/docs.dart';
+import 'package:running_on_dart/src/modules/reminder.dart';
+import 'package:running_on_dart/src/modules/tag.dart';
 
 import 'package:running_on_dart/src/settings.dart' as settings;
 import 'package:running_on_dart/src/util/util.dart';
