@@ -60,7 +60,7 @@ EmbedFieldBuilder getExternalUrlsEmbedField(Iterable<ExternalUrl> externalUrls) 
   return EmbedFieldBuilder(name: "External Urls", value: fieldValue.toString(), isInline: false);
 }
 
-Iterable<EmbedFieldBuilder> getMediaPlaybackInfoFields(SessionInfo sessionInfo) {
+Iterable<EmbedFieldBuilder> getMediaPlaybackInfoFields(SessionInfoDto sessionInfo) {
   if (sessionInfo.transcodingInfo == null) {
     final mediaStreams = (sessionInfo.nowPlayingItem!.mediaStreams as Iterable<MediaStream>? ?? []);
 
@@ -84,7 +84,7 @@ Iterable<EmbedFieldBuilder> getMediaPlaybackInfoFields(SessionInfo sessionInfo) 
   return [EmbedFieldBuilder(name: "Transcoding", value: transCodingInfoString, isInline: false)];
 }
 
-EmbedBuilder? buildSessionEmbed(SessionInfo sessionInfo, AuthenticatedJellyfinClient client) {
+EmbedBuilder? buildSessionEmbed(SessionInfoDto sessionInfo, AuthenticatedJellyfinClient client) {
   final nowPlayingItem = sessionInfo.nowPlayingItem;
   if (nowPlayingItem == null) {
     return null;

@@ -164,7 +164,7 @@ class AuthenticatedJellyfinClient {
 
   AuthenticatedJellyfinClient(this.jellyfinClient, this.configUser);
 
-  Future<Iterable<SessionInfo>> getCurrentSessions() async {
+  Future<Iterable<SessionInfoDto>> getCurrentSessions() async {
     final response = await jellyfinClient.getSessionApi().getSessions(activeWithinSeconds: 15);
     return response.data ?? [];
   }
