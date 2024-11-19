@@ -543,10 +543,10 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: e4c2efb6c21e3cb8e69d32ea646a2e92c3719be0
+      resolved-ref: "8d9e67ec01196f8ac515606a4dfd8d2a7de4f9ec"
       url: "https://github.com/l7ssha/Tentacle.git"
     source: git
-    version: "3.0.1"
+    version: "3.1.0"
   term_glyph:
     dependency: transitive
     description:
