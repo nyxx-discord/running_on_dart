@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:mustachex/mustachex.dart';
+import 'package:nyxx/nyxx.dart';
+import 'package:running_on_dart/running_on_dart.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf_session/session_middleware.dart';
 
@@ -28,13 +30,18 @@ shelf.Response createForbiddenResponse() => shelf.Response.forbidden(null);
 void initSession(shelf.Request request, Map<String, dynamic> userDataJson, Map<String, dynamic> tokenDataJson) {
   var session = Session.getSession(request);
   session ??= Session.createSession(request);
+
+  final userId = userDataJson['user']['id'] as String;
+
   session.data['user_data'] = {
-    'id': userDataJson['user']['id'],
+    'id': userId,
     'name': userDataJson['user']['global_name'] ?? userDataJson['user']['username'],
     'avatar': userDataJson['user']['avatar'],
-    'expires_at': userDataJson['expires'],
+    'expires_t': userDataJson['expires'],
     'token': tokenDataJson['access_token'],
   };
+  session.data['is_admin'] = adminIds.contains(Snowflake.parse(userId));
+
   session.expires = DateTime.now().add(Duration(seconds: tokenDataJson['expires_in']));
 }
 
@@ -42,5 +49,11 @@ void deleteSession(shelf.Request request) {
   Session.deleteSession(request);
 }
 
-Map<String, dynamic>? getUserDataFromSession(shelf.Request request) =>
-    Session.getSession(request)?.data['user_data'] as Map<String, dynamic>?;
+Map<String, dynamic> getCustomDataFromSession(shelf.Request request) {
+  final session = Session.getSession(request);
+
+  return {
+    'user_data': session?.data['user_data'] as Map<String, dynamic>? ?? false,
+    'is_admin': session?.data['is_admin'] ?? false,
+  };
+}

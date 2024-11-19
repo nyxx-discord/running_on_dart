@@ -16,6 +16,9 @@ tests: ## Run unit tests
 run: ## Run dev project
 	docker compose up --build
 
+upgrade: ## Run dart pub upgrade
+	dart pub upgrade
+
 fix-project: fix analyze format ## Fix whole project
 
 check-project: fix-project tests ## Run all checks

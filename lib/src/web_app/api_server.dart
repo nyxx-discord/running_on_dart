@@ -27,7 +27,7 @@ class WebServer {
       ...data.toJson(),
       'clientId': clientId,
       'redirectUri': clientRedirectUri,
-      'user_data': getUserDataFromSession(request) ?? false,
+      ...getCustomDataFromSession(request),
     });
   }
 

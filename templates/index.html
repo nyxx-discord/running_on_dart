@@ -13,21 +13,32 @@
 
     <div id="navbarBasicExample" class="navbar-menu">
         <div class="navbar-start">
+            {{#is_admin}}
             <a class="navbar-item" href="/guilds">Guilds</a>
+            {{/is_admin}}
         </div>
 
         <div class="navbar-end">
+            {{^user_data}}
             <div class="navbar-item">
                 <div class="buttons">
-                    {{^user_data}}
                     <a class="button is-light" href="https://discord.com/oauth2/authorize?response_type=code&client_id={{clientId}}&redirect_uri={{redirectUri}}&scope=identify">Log in</a>
-                    {{/user_data}}
-
-                    {{#user_data}}
-                    <a class="button is-light" href="/logout">Log out</a>
-                    {{/user_data}}
                 </div>
             </div>
+            {{/user_data}}
+
+            {{#user_data}}
+            <div class="navbar-item has-dropdown is-hoverable navbar-brand">
+                <figure class="image is-32x32">
+                    <img class="is-rounded" src="https://media.discordapp.net/avatars/{{id}}/{{avatar}}.png?size=32" alt="Avatar of currently logged in user" />
+                </figure>
+                <div class="navbar-dropdown is-boxed">
+                    <div class="navbar-item">
+                        <a class="button is-light" href="/logout">Log out</a>
+                    </div>
+                </div>
+            </div>
+            {{/user_data}}
         </div>
     </div>
 </nav>
