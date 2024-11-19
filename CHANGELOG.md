@@ -1,3 +1,6 @@
+## 4.9.2
+- Fix jellyfin model deserialization
+
 ## 4.9.1
 - Upgrade migent
 - Fix kavita exception message
