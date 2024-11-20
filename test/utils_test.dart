@@ -10,6 +10,10 @@ void main() {
     expect(color, color);
   });
 
+  test("strip non ascii characters", () {
+    expect('This is test ', stripNonAscii('This śis test 言葉にせずとも'));
+  });
+
   group("FormatShortDurationExtension", () {
     test("Minutes and second", () {
       final duration = Duration(minutes: 2, seconds: 56);

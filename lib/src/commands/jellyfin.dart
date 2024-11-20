@@ -316,7 +316,12 @@ final jellyfin = ChatGroup("jellyfin", "Jellyfin Testing Commands", checks: [
               includeSeries: false),
       ];
 
-      final paginator = await pagination.builders(await buildMediaInfoBuilders(results, client).toList());
+      final builders = await buildMediaInfoBuilders(results, client).toList();
+      if (builders.isEmpty) {
+        return context.respond(MessageBuilder(content: 'No results...'));
+      }
+
+      final paginator = await pagination.builders(builders);
       return context.respond(paginator);
     }),
   ),

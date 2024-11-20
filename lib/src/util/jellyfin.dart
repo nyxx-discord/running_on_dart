@@ -4,6 +4,7 @@ import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/src/external/sonarr.dart';
 import 'package:running_on_dart/src/modules/jellyfin.dart';
+import 'package:running_on_dart/src/util/audio_channel_layout.dart';
 import 'package:running_on_dart/src/util/util.dart';
 import 'package:tentacle/tentacle.dart';
 
@@ -46,12 +47,42 @@ Iterable<EmbedBuilder> getSonarrCalendarEmbeds(Iterable<CalendarItem> calendarIt
 
 Iterable<EmbedFieldBuilder> getMediaInfoEmbedFields(Iterable<MediaStream> mediaStreams) sync* {
   for (final mediaStream in mediaStreams) {
-    final bitrate = ((mediaStream.bitRate ?? 0) / 1024 / 1024).toStringAsFixed(2);
-    final trackTitle = (mediaStream.title ?? mediaStream.displayTitle)?.replaceFirst("- Default", "").trim();
+    final displayTitle = getMediaInfoEmbedDisplayTitle(mediaStream);
+    if (displayTitle == null) {
+      continue;
+    }
 
-    yield EmbedFieldBuilder(
-        name: "Media Info (${mediaStream.type!.name})", value: "$trackTitle ($bitrate Mbps)", isInline: true);
+    yield EmbedFieldBuilder(name: "Media Info (${mediaStream.type!.name})", value: displayTitle, isInline: true);
   }
+}
+
+String? getMediaInfoEmbedDisplayTitle(MediaStream mediaStream) {
+  final bitrate = ((mediaStream.bitRate ?? 0) / 1024 / 1024).toStringAsFixed(2);
+
+  String? titlePrefix;
+
+  switch (mediaStream.type) {
+    case MediaStreamType.audio:
+      String? channelLayout = AudioChannelLayout.parse(mediaStream.channelLayout)?.toStringWithPrefix();
+      channelLayout ??= toBeginningOfSentenceCase(mediaStream.channelLayout);
+
+      String? codec = mediaStream.profile;
+      codec ??= switch (mediaStream.codec) {
+        'eac3' => 'Dolby Digital',
+        _ => mediaStream.codec?.toUpperCase(),
+      };
+      codec = stripNonAscii(codec ?? '');
+
+      titlePrefix = '$channelLayout $codec';
+      break;
+    case MediaStreamType.video:
+      titlePrefix =
+          '${mediaStream.height}p ${mediaStream.videoRange?.name.toUpperCase()} ${mediaStream.codec?.toUpperCase()}';
+    default:
+      break;
+  }
+
+  return "$titlePrefix ($bitrate Mbps)";
 }
 
 EmbedFieldBuilder getExternalUrlsEmbedField(Iterable<ExternalUrl> externalUrls) {
@@ -78,8 +109,13 @@ Iterable<EmbedFieldBuilder> getMediaPlaybackInfoFields(SessionInfoDto sessionInf
   final transcodingInfo = sessionInfo.transcodingInfo!;
 
   final finalBitrate = ((transcodingInfo.bitrate ?? 0) / 1024 / 1024).toStringAsFixed(2);
+
+  final completionInfo = transcodingInfo.completionPercentage != null && transcodingInfo.framerate != null
+      ? ' - ${transcodingInfo.completionPercentage!.toStringAsFixed(2)}% (${transcodingInfo.framerate} fps)'
+      : '';
+
   final transCodingInfoString =
-      '${transcodingInfo.height}p (${transcodingInfo.videoCodec} ${transcodingInfo.audioCodec} ${transcodingInfo.container}) $finalBitrate Mbps - ${transcodingInfo.completionPercentage!.toStringAsFixed(2)}% (${transcodingInfo.framerate} fps)';
+      '${transcodingInfo.height}p (${transcodingInfo.videoCodec} ${transcodingInfo.audioCodec} ${transcodingInfo.container}) $finalBitrate Mbps$completionInfo';
 
   return [EmbedFieldBuilder(name: "Transcoding", value: transCodingInfoString, isInline: false)];
 }
@@ -91,7 +127,7 @@ EmbedBuilder? buildSessionEmbed(SessionInfoDto sessionInfo, AuthenticatedJellyfi
   }
 
   final progress = formatProgress(sessionInfo.playState!.positionTicks ?? 1, nowPlayingItem.runTimeTicks ?? 1);
-  final premiereDateString = nowPlayingItem.premiereDate!.format(TimestampStyle.shortDateTime);
+  final premiereDateString = nowPlayingItem.premiereDate!.format(TimestampStyle.shortDate);
 
   var mediaPlaybackInfo = getMediaPlaybackInfoFields(sessionInfo);
 

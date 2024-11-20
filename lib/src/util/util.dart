@@ -6,6 +6,8 @@ import 'package:human_duration_parser/human_duration_parser.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 
+final nonAsciiRegex = RegExp(r'[^\x00-\x7F]');
+
 final random = Random();
 const _chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
 
@@ -78,3 +80,7 @@ Map<String, String?> getModalDataIndexed(List<MessageComponent> components) {
 }
 
 Snowflake getParentIdFromContext(ContextData context) => context.guild?.id ?? context.user.id;
+
+String stripNonAscii(String input) {
+  return input.replaceAll(nonAsciiRegex, '');
+}
