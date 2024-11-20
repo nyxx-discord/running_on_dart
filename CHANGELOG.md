@@ -1,3 +1,7 @@
+## 4.9.3
+- Fix jellyfin current sessions transcoding output
+- Rework media info output
+
 ## 4.9.2
 - Fix jellyfin model deserialization
 
