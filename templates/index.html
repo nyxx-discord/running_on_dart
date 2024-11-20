@@ -2,124 +2,169 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Test</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+    <title>Running on Dart</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </head>
 <body>
-<nav class="navbar is-primary" role="navigation" aria-label="main navigation">
-    <div class="navbar-brand">
-        <a class="navbar-item" href="/">Running on Dart</a>
-    </div>
-
-    <div id="navbarBasicExample" class="navbar-menu">
-        <div class="navbar-start">
-            {{#is_admin}}
-            <a class="navbar-item" href="/guilds">Guilds</a>
-            {{/is_admin}}
-        </div>
-
-        <div class="navbar-end">
-            {{^user_data}}
-            <div class="navbar-item">
-                <div class="buttons">
-                    <a class="button is-light" href="https://discord.com/oauth2/authorize?response_type=code&client_id={{clientId}}&redirect_uri={{redirectUri}}&scope=identify">Log in</a>
-                </div>
-            </div>
-            {{/user_data}}
-
-            {{#user_data}}
-            <div class="navbar-item has-dropdown is-hoverable navbar-brand">
-                <figure class="image is-32x32">
-                    <img class="is-rounded" src="https://media.discordapp.net/avatars/{{id}}/{{avatar}}.png?size=32" alt="Avatar of currently logged in user" />
-                </figure>
-                <div class="navbar-dropdown is-boxed">
-                    <div class="navbar-item">
-                        <a class="button is-light" href="/logout">Log out</a>
-                    </div>
-                </div>
-            </div>
-            {{/user_data}}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">Running on Dart</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/">Home</a>
+                </li>
+                {{#is_admin}}
+                <li class="nav-item">
+                    <a class="nav-link" href="/guilds">Guilds</a>
+                </li>
+                {{/is_admin}}
+            </ul>
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 profile-menu">
+                {{#user_data}}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="https://media.discordapp.net/avatars/{{id}}/{{avatar}}.png?size=3" alt="Profile Picture" class="rounded-circle">
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-sliders-h fa-fw"></i> Profile</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog fa-fw"></i> Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt fa-fw"></i> Log Out</a></li>
+                    </ul>
+                </li>
+                {{/user_data}}
+                {{^user_data}}
+                <li class="navbar-item justify-content-start">
+                    <a class="btn btn-outline-success" href="https://discord.com/oauth2/authorize?response_type=code&client_id={{clientId}}&redirect_uri={{redirectUri}}&scope=identify">Log in</a>
+                </li>
+                {{/user_data}}
+            </ul>
         </div>
     </div>
 </nav>
 
-<div class="container block mt-4">
-    <div class="notification is-danger">
-        Experimental version
+<div class="container">
+    <div class="alert alert-danger mt-4" role="alert">
+        <span class="bold">Experimental version</span>
     </div>
-</div>
 
-<div class="container block">
-    <h1 class="title">Cache Info</h1>
-    <div class="grid">
-        <div class="hero-body cell">
-            <p class="title">{{cached_channels}}</p>
-            <p class="subtitle">Cached channels</p>
+    <div class="container">
+        <div class="m-1">
+            <h1>Cache Info</h1>
         </div>
-        <div class="hero-body cell">
-            <p class="title">{{cached_messages}}</p>
-            <p class="subtitle">Cached messages</p>
-        </div>
-        <div class="hero-body cell">
-            <p class="title">{{cached_guilds}}</p>
-            <p class="subtitle">Cached guilds</p>
-        </div>
-        <div class="hero-body cell">
-            <p class="title">{{cached_users}}</p>
-            <p class="subtitle">Cached Users</p>
-        </div>
-        <div class="hero-body cell">
-            <p class="title">{{cached_voice_states}}</p>
-            <p class="subtitle">Cached voice states</p>
-        </div>
-    </div>
-</div>
+        <div class="container row">
+            <div class="card col m-1">
+                <div class="card-body">
+                    <h5 class="card-title">{{cached_channels}}</h5>
+                    <h6 class="card-subtitle text-body-secondary">Cached channels</h6>
+                </div>
+            </div>
 
-<div class="container block">
-    <h1 class="title">Modules Info</h1>
-    <div class="grid">
-        <div class="hero-body cell">
-            <p class="title">{{total_tags_count}}</p>
-            <p class="subtitle">Total tags</p>
-        </div>
-        <div class="hero-body cell">
-            <p class="title">{{total_reminder_count}}</p>
-            <p class="subtitle">Total reminders</p>
-        </div>
-        <div class="hero-body cell">
-            <p class="title">n/a</p>
-            <!--        <p class="title">{{docs_update}}</p>-->
-            <p class="subtitle">Last docs update</p>
+            <div class="card col m-1">
+                <div class="card-body">
+                    <h5 class="card-title">{{cached_messages}}</h5>
+                    <h6 class="card-subtitle text-body-secondary">Cached messages</h6>
+                </div>
+            </div>
+
+            <div class="card col m-1">
+                <div class="card-body">
+                    <h5 class="card-title">{{cached_guilds}}</h5>
+                    <h6 class="card-subtitle text-body-secondary">Cached guilds</h6>
+                </div>
+            </div>
+
+            <div class="card col m-1">
+                <div class="card-body">
+                    <h5 class="card-title">{{cached_users}}</h5>
+                    <h6 class="card-subtitle text-body-secondary">Cached Users</h6>
+                </div>
+            </div>
+
+            <div class="card col m-1">
+                <div class="card-body">
+                    <h5 class="card-title">{{cached_voice_states}}</h5>
+                    <h6 class="card-subtitle text-body-secondary">Cached voice states</h6>
+                </div>
+            </div>
         </div>
     </div>
-</div>
+    <div class="container">
+        <div class="m-1">
+            <h1>Modules Info</h1>
+        </div>
+        <div class="container row">
+            <div class="card col m-1">
+                <div class="card-body">
+                    <h5 class="card-title">{{total_tags_count}}</h5>
+                    <h6 class="card-subtitle text-body-secondary">Total tags</h6>
+                </div>
+            </div>
 
-<div class="container block">
-    <h1 class="title">Program Info</h1>
-    <div class="grid">
-        <div class="hero-body cell">
-            <p class="title">{{nyxx_version}}</p>
-            <p class="subtitle">Nyxx Version</p>
+            <div class="card col m-1">
+                <div class="card-body">
+                    <h5 class="card-title">{{total_reminder_count}}</h5>
+                    <h6 class="card-subtitle text-body-secondary">Total reminders</h6>
+                </div>
+            </div>
+
+            <div class="card col m-1">
+                <div class="card-body">
+<!--                    <h5 class="card-title">{{docs_update}}</h5>-->
+                    <h5 class="card-title">n/a</h5>
+                    <h6 class="card-subtitle text-body-secondary">Last docs update</h6>
+                </div>
+            </div>
         </div>
-        <div class="hero-body cell">
-            <p class="title">{{version}}</p>
-            <p class="subtitle">Bot Version</p>
+    </div>
+    <div class="container">
+        <div class="m-1">
+            <h1>Program Info</h1>
         </div>
-        <div class="hero-body cell">
-            <p class="title">{{platform}}</p>
-            <p class="subtitle">Dart Version</p>
+        <div class="container row">
+            <div class="card col m-1">
+                <div class="card-body">
+                    <h5 class="card-title">{{nyxx_version}}</h5>
+                    <h6 class="card-subtitle text-body-secondary">Nyxx Version</h6>
+                </div>
+            </div>
+
+            <div class="card col m-1">
+                <div class="card-body">
+                    <h5 class="card-title">{{version}}</h5>
+                    <h6 class="card-subtitle text-body-secondary">Bot Version</h6>
+                </div>
+            </div>
+
+            <div class="card col m-1">
+                <div class="card-body">
+                    <h5 class="card-title">{{platform}}</h5>
+                    <h6 class="card-subtitle text-body-secondary">Dart Version</h6>
+                </div>
+            </div>
+
+            <div class="card col m-1">
+                <div class="card-body">
+                    <h5 class="card-title">{{memory_usage_string}}</h5>
+                    <h6 class="card-subtitle text-body-secondary">Memory usage</h6>
+                </div>
+            </div>
         </div>
-        <div class="hero-body cell">
-            <p class="title">{{memory_usage_string}}</p>
-            <p class="subtitle">Memory usage</p>
-        </div>
-        <div class="hero-body cell is-col-start-1">
-            <p class="title">n/a</p>
-            <!--        <p class="title">{{uptime}}</p>-->
-            <p class="subtitle">Uptime</p>
+        <div class="container row">
+            <div class="card col-3 m-1">
+                <div class="card-body">
+                    <!--                    <h5 class="card-title">{{uptime}}</h5>-->
+                    <h5 class="card-title">n/a</h5>
+                    <h6 class="card-subtitle text-body-secondary">Uptime</h6>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-
 </body>
 </html>
