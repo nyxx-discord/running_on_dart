@@ -21,6 +21,8 @@ final clientSecret = getEnv('DISCORD_CLIENT_SECRET');
 final clientRedirectUri = getEnv('DISCORD_REDIRECT_URI');
 
 class WebServer {
+  final Logger _logger = Logger('WebServer');
+
   Future<shelf.Response> _handleGuilds(shelf.Request request) async {
     if (!isAdminFromSession(request)) {
       return shelf.Response.forbidden(null);
@@ -123,11 +125,17 @@ class WebServer {
       shelf.Pipeline().addMiddleware(cookiesMiddleware()).addMiddleware(sessionMiddleware()).addHandler(inner);
 
   Future<void> startServer() async {
+    if (!webServerEnabled) {
+      _logger.info("Web server not enabled skipping");
+      return;
+    }
+
     final router = await _setupRouter();
 
     final app =
         const shelf.Pipeline().addMiddleware(shelf.logRequests()).addMiddleware(corsHeaders()).addHandler(router.call);
 
-    await shelf_io.serve(app, "0.0.0.0", 8088);
+    _logger.info("Starting server at: http://$webServerHost:$webServerPort/");
+    await shelf_io.serve(app, webServerHost, webServerPort);
   }
 }

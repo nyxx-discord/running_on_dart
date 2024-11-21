@@ -17,6 +17,9 @@ String getEnv(String key, [String? def]) =>
 /// instead of throwing an exception.
 bool getEnvBool(String key, [bool? def]) => ['true', '1'].contains(getEnv(key, def?.toString()).toLowerCase());
 
+/// Get a [int] from an environment variable, throwing an exception if cannot be parsed to int.
+int getEnvInt(String key, [int? def]) => int.tryParse(getEnv(key, key.toString())) ?? (throw Exception('Environment variable `$key` cannot be parsed as int'));
+
 /// Name of the bot
 final String botName = getEnv('BOT_NAME', 'Running on Dart');
 
@@ -67,7 +70,17 @@ __Package repositories__:
 ${docsPackages.map((packageName) => '- $packageName: <https://github.com/nyxx-discord/$packageName>').join('\n')}
 ''');
 
+/// The custom content for web server alert box
 final String webServerAlertContent = getEnv('WEB_SERVER_ALERT_CONTENT', '<span class="bold">Experimental version</span>');
+
+/// Whether web server should be enabled
+final bool webServerEnabled = getEnvBool('WEB_SERVER_ENABLE', false);
+
+/// The host of web server
+final String webServerHost = getEnv("WEB_SERVER_HOST", 'localhost');
+
+/// The port of web server
+final int webServerPort = getEnvInt('WEB_SERVER_PORT', 8088);
 
 /// The GitHub account to use when no other account is specified.
 final String githubAccount = getEnv('ROD_GITHUB_ACCOUNT', 'nyxx-discord');
