@@ -127,7 +127,7 @@ EmbedBuilder? buildSessionEmbed(SessionInfoDto sessionInfo, AuthenticatedJellyfi
   }
 
   final progress = formatProgress(sessionInfo.playState!.positionTicks ?? 1, nowPlayingItem.runTimeTicks ?? 1);
-  final premiereDateString = nowPlayingItem.premiereDate!.format(TimestampStyle.shortDate);
+  final premiereDateString = nowPlayingItem.premiereDate!.format(TimestampStyle.longDate);
 
   var mediaPlaybackInfo = getMediaPlaybackInfoFields(sessionInfo);
 
