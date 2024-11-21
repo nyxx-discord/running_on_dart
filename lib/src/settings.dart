@@ -67,6 +67,8 @@ __Package repositories__:
 ${docsPackages.map((packageName) => '- $packageName: <https://github.com/nyxx-discord/$packageName>').join('\n')}
 ''');
 
+final String webServerAlertContent = getEnv('WEB_SERVER_ALERT_CONTENT', '<span class="bold">Experimental version</span>');
+
 /// The GitHub account to use when no other account is specified.
 final String githubAccount = getEnv('ROD_GITHUB_ACCOUNT', 'nyxx-discord');
 

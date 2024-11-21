@@ -51,10 +51,21 @@ class WebServer {
       return shelf.Response.badRequest();
     }
 
+    final additionalParameters = switch (templateName) {
+      'navigation' => {
+        'clientId': clientId,
+        'redirectUri': clientRedirectUri,
+      },
+      'alert' => {
+        'inner_content': webServerAlertContent,
+      },
+      _ => {},
+    };
+
+
     return createTwigResponse('component/$templateName.html', parameters: {
       ...getCustomDataFromSession(request),
-      'clientId': clientId,
-      'redirectUri': clientRedirectUri,
+      ...additionalParameters,
     });
   }
 
