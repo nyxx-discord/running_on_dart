@@ -16,10 +16,13 @@
     <div class="container">
         <div class="grid">
         {{#guilds}}
-            <div class="card col">
-<!--                <img src="..." class="card-img-top" alt="...">-->
+            <div class="card col m-1">
                 <div class="card-body">
-                    <h5 class="card-title"><img src="https://media.discordapp.net/icons/{{id}}/{{icon}}.png?size=32" alt="Profile Picture" class="rounded-circle inline m-1">{{name}}</h5>
+                    <h5 class="card-title">
+                        <img src="https://media.discordapp.net/icons/{{id}}/{{icon}}.png?size=32" alt="Profile Picture" class="rounded-circle inline m-1" onerror="this.style.display='none'">
+                        {{name}}
+                    </h5>
+
                     <p class="card-text"><span class="fw-bold">{{cached_members}}</span> Cached members <span class="fw-bold ms-3">{{cached_channels}}</span> Cached channels</p>
                 </div>
             </div>
