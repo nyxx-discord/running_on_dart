@@ -7,7 +7,15 @@ import 'package:shelf_session/session_middleware.dart';
 class SessionManagerPlugin extends NyxxPlugin<NyxxGateway> {
   static const _sessionsFile = '/sessions/sessions.json';
 
-  void _restoreSessions() async {
+  void _saveSessions() async {
+    await saveSessions((sessionData) async {
+      logger.info("Saving session file");
+      await File(_sessionsFile).writeAsString(sessionData);
+    });
+  }
+
+  @override
+  FutureOr<void> afterConnect(NyxxGateway client) {
     restoreSessions(() async {
       final file = File(_sessionsFile);
       if (await file.exists()) {
@@ -21,17 +29,9 @@ class SessionManagerPlugin extends NyxxPlugin<NyxxGateway> {
   }
 
   @override
-  FutureOr<void> afterConnect(NyxxGateway client) {
-    _restoreSessions();
-
-    Timer.periodic(Duration(minutes: 15), (timer) => _restoreSessions());
-  }
-
-  @override
   FutureOr<void> afterClose() async {
-    await saveSessions((sessionData) async {
-      logger.info("Saving session file");
-      await File(_sessionsFile).writeAsString(sessionData);
-    });
+    _saveSessions();
+
+    Timer.periodic(Duration(minutes: 15), (timer) => _saveSessions());
   }
 }
