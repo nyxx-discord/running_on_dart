@@ -5,48 +5,10 @@
     <title>Running on Dart</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.3"></script>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="/">Running on Dart</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="/">Home</a>
-                </li>
-                {{#is_admin}}
-                <li class="nav-item">
-                    <a class="nav-link" href="/guilds">Guilds</a>
-                </li>
-                {{/is_admin}}
-            </ul>
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 profile-menu">
-                {{#user_data}}
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="https://media.discordapp.net/avatars/{{id}}/{{avatar}}.png?size=3" alt="Profile Picture" class="rounded-circle">
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-sliders-h fa-fw"></i> Profile</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog fa-fw"></i> Settings</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt fa-fw"></i> Log Out</a></li>
-                    </ul>
-                </li>
-                {{/user_data}}
-                {{^user_data}}
-                <li class="navbar-item justify-content-start">
-                    <a class="btn btn-outline-success" href="https://discord.com/oauth2/authorize?response_type=code&client_id={{clientId}}&redirect_uri={{redirectUri}}&scope=identify">Log in</a>
-                </li>
-                {{/user_data}}
-            </ul>
-        </div>
-    </div>
-</nav>
+<nav hx-get="/hx?c=navigation" hx-swap="outerHTML" hx-trigger="load"></nav>
 
 <div class="container">
     <div class="alert alert-danger mt-4" role="alert">

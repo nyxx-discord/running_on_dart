@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:injector/injector.dart';
+import 'package:nyxx/nyxx.dart';
 
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/web_app/utils.dart';
@@ -20,14 +21,48 @@ final clientSecret = getEnv('DISCORD_CLIENT_SECRET');
 final clientRedirectUri = getEnv('DISCORD_REDIRECT_URI');
 
 class WebServer {
+  Future<shelf.Response> _handleGuilds(shelf.Request request) async {
+    if (!isAdminFromSession(request)) {
+      return shelf.Response.forbidden(null);
+    }
+
+    final client = Injector.appInstance.get<NyxxGateway>();
+
+    final guildData = client.guilds.cache.values
+        .map((entry) => {
+              'id': entry.id.toString(),
+              'name': entry.name,
+              'banner': entry.bannerHash,
+              'icon': entry.iconHash,
+              'cached_members': entry.members.cache.length,
+              'cached_channels':
+                  client.channels.cache.values.whereType<GuildChannel>().where((c) => c.guildId == entry.id).length,
+            })
+        .toList();
+
+    return createTwigResponse("guilds.html", parameters: {
+      'guilds': guildData,
+    });
+  }
+
+  Future<shelf.Response> _handleHx(shelf.Request request) async {
+    final templateName = request.url.queryParameters['c'];
+    if (templateName == null) {
+      return shelf.Response.badRequest();
+    }
+
+    return createTwigResponse('component/$templateName.html', parameters: {
+      ...getCustomDataFromSession(request),
+      'clientId': clientId,
+      'redirectUri': clientRedirectUri,
+    });
+  }
+
   Future<shelf.Response> _handleIndex(shelf.Request request) async {
     final data = await Injector.appInstance.get<BotInfoService>().getCurrentBotInfo();
 
     return createTwigResponse("index.html", parameters: {
       ...data.toJson(),
-      'clientId': clientId,
-      'redirectUri': clientRedirectUri,
-      ...getCustomDataFromSession(request),
     });
   }
 
@@ -67,6 +102,8 @@ class WebServer {
   Future<shelf_router.Router> _setupRouter() async {
     return shelf_router.Router()
       ..get("/", _sessionAware(_handleIndex))
+      ..get("/guilds", _sessionAware(_handleGuilds))
+      ..get("/hx", _sessionAware(_handleHx))
       ..get("/redirect", _sessionAware(_handleRedirect))
       ..get("/logout", _sessionAware(_handleLogOut));
   }

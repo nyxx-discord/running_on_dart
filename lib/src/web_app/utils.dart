@@ -49,6 +49,12 @@ void deleteSession(shelf.Request request) {
   Session.deleteSession(request);
 }
 
+bool isAdminFromSession(shelf.Request request) {
+  final session = Session.getSession(request);
+
+  return session?.data['is_admin'] as bool? ?? false;
+}
+
 Map<String, dynamic> getCustomDataFromSession(shelf.Request request) {
   final session = Session.getSession(request);
 

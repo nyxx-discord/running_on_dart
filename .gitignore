@@ -22,3 +22,4 @@ doc/api/
 *.db
 
 lib_old/
+sessions/

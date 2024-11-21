@@ -517,10 +517,11 @@ packages:
   shelf_session:
     dependency: "direct main"
     description:
-      name: shelf_session
-      sha256: "5c658d16ddac1ad364d047e9a22e1023fcb383f2f32d5b621feb57c6c3ca8748"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: "1cc10d0723ed7de0a75e44e896a7cd0380b4bd0f"
+      url: "https://github.com/l7ssha/shelf_session.git"
+    source: git
     version: "0.1.2"
   shelf_static:
     dependency: transitive
