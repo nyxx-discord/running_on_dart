@@ -15,8 +15,8 @@ class SessionManagerPlugin extends NyxxPlugin<NyxxGateway> {
   }
 
   @override
-  FutureOr<void> afterConnect(NyxxGateway client) {
-    restoreSessions(() async {
+  FutureOr<void> afterConnect(NyxxGateway client) async {
+    await restoreSessions(() async {
       final file = File(_sessionsFile);
       if (await file.exists()) {
         logger.info("Loading session file.");
@@ -26,12 +26,12 @@ class SessionManagerPlugin extends NyxxPlugin<NyxxGateway> {
       logger.info("Session file missing. Returning default");
       return '{}';
     });
+
+    Timer.periodic(Duration(minutes: 15), (timer) => _saveSessions());
   }
 
   @override
   FutureOr<void> afterClose() async {
     _saveSessions();
-
-    Timer.periodic(Duration(minutes: 15), (timer) => _saveSessions());
   }
 }
