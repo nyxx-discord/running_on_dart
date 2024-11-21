@@ -19,7 +19,7 @@ bool getEnvBool(String key, [bool? def]) => ['true', '1'].contains(getEnv(key, d
 
 /// Get a [int] from an environment variable, throwing an exception if cannot be parsed to int.
 int getEnvInt(String key, [int? def]) =>
-    int.tryParse(getEnv(key, key.toString())) ??
+    int.tryParse(getEnv(key, def.toString())) ??
     (throw Exception('Environment variable `$key` cannot be parsed as int'));
 
 /// Name of the bot
