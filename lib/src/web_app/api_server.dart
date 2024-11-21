@@ -55,15 +55,14 @@ class WebServer {
 
     final additionalParameters = switch (templateName) {
       'navigation' => {
-        'clientId': clientId,
-        'redirectUri': clientRedirectUri,
-      },
+          'clientId': clientId,
+          'redirectUri': clientRedirectUri,
+        },
       'alert' => {
-        'inner_content': webServerAlertContent,
-      },
+          'inner_content': webServerAlertContent,
+        },
       _ => {},
     };
-
 
     return createTwigResponse('component/$templateName.html', parameters: {
       ...getCustomDataFromSession(request),

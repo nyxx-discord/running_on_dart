@@ -18,7 +18,9 @@ String getEnv(String key, [String? def]) =>
 bool getEnvBool(String key, [bool? def]) => ['true', '1'].contains(getEnv(key, def?.toString()).toLowerCase());
 
 /// Get a [int] from an environment variable, throwing an exception if cannot be parsed to int.
-int getEnvInt(String key, [int? def]) => int.tryParse(getEnv(key, key.toString())) ?? (throw Exception('Environment variable `$key` cannot be parsed as int'));
+int getEnvInt(String key, [int? def]) =>
+    int.tryParse(getEnv(key, key.toString())) ??
+    (throw Exception('Environment variable `$key` cannot be parsed as int'));
 
 /// Name of the bot
 final String botName = getEnv('BOT_NAME', 'Running on Dart');
@@ -71,7 +73,8 @@ ${docsPackages.map((packageName) => '- $packageName: <https://github.com/nyxx-di
 ''');
 
 /// The custom content for web server alert box
-final String webServerAlertContent = getEnv('WEB_SERVER_ALERT_CONTENT', '<span class="bold">Experimental version</span>');
+final String webServerAlertContent =
+    getEnv('WEB_SERVER_ALERT_CONTENT', '<span class="bold">Experimental version</span>');
 
 /// Whether web server should be enabled
 final bool webServerEnabled = getEnvBool('WEB_SERVER_ENABLE', false);
