@@ -19,11 +19,15 @@
             <div class="card col m-1">
                 <div class="card-body">
                     <h5 class="card-title">
-                        <img src="https://media.discordapp.net/icons/{{id}}/{{icon}}.png?size=32" alt="Profile Picture" class="rounded-circle inline m-1" onerror="this.style.display='none'">
+                        <img src="https://media.discordapp.net/icons/{{id}}/{{icon}}.png?size=32" alt="Guild icon" class="rounded-circle inline m-1" onerror="this.style.display='none'">
                         {{name}}
                     </h5>
 
-                    <p class="card-text"><span class="fw-bold">{{cached_members}}</span> Cached members <span class="fw-bold ms-3">{{cached_channels}}</span> Cached channels</p>
+                    <p class="card-text">
+                        <span class="fw-bold">{{cached_members}}</span> Cached members
+                        <span class="fw-bold ms-3">{{cached_channels}}</span> Cached channels
+                        <span class="fw-bold ms-3">{{cached_messages}}</span> Cached messages
+                    </p>
                 </div>
             </div>
         {{/guilds}}

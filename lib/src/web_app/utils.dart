@@ -27,7 +27,7 @@ shelf.Response createUnauthorizedResponse(String errorMessage) => createJsonErro
 
 shelf.Response createForbiddenResponse() => shelf.Response.forbidden(null);
 
-void initSession(shelf.Request request, Map<String, dynamic> userDataJson, Map<String, dynamic> tokenDataJson) {
+void initSession(shelf.Request request, Map<String, dynamic> userDataJson) {
   var session = Session.getSession(request);
   session ??= Session.createSession(request);
 
@@ -38,11 +38,10 @@ void initSession(shelf.Request request, Map<String, dynamic> userDataJson, Map<S
     'name': userDataJson['user']['global_name'] ?? userDataJson['user']['username'],
     'avatar': userDataJson['user']['avatar'],
     'expires_t': userDataJson['expires'],
-    'token': tokenDataJson['access_token'],
   };
   session.data['is_admin'] = adminIds.contains(Snowflake.parse(userId));
 
-  session.expires = DateTime.now().add(Duration(seconds: tokenDataJson['expires_in']));
+  session.expires = DateTime.now().add(Duration(days: 3));
 }
 
 void deleteSession(shelf.Request request) {
@@ -50,16 +49,34 @@ void deleteSession(shelf.Request request) {
 }
 
 bool isAdminFromSession(shelf.Request request) {
-  final session = Session.getSession(request);
+  final session = getSession(request);
 
   return session?.data['is_admin'] as bool? ?? false;
 }
 
 Map<String, dynamic> getCustomDataFromSession(shelf.Request request) {
-  final session = Session.getSession(request);
+  final session = getSession(request);
 
   return {
     'user_data': session?.data['user_data'] as Map<String, dynamic>? ?? false,
     'is_admin': session?.data['is_admin'] ?? false,
   };
+}
+
+Session? getSession(shelf.Request request) {
+  final session = Session.getSession(request);
+  if (session == null) {
+    return null;
+  }
+
+  final now = DateTime.now();
+  if (session.data['user_data'] != null) {
+    final nowPlusOneDay = now.add(Duration(days: 1));
+
+    if (session.expires.isBefore(nowPlusOneDay)) {
+      session.expires = now.add(Duration(days: 1, hours: 12));
+    }
+  }
+
+  return session;
 }

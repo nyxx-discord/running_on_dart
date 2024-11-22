@@ -30,17 +30,23 @@ class WebServer {
 
     final client = Injector.appInstance.get<NyxxGateway>();
 
-    final guildData = client.guilds.cache.values
-        .map((entry) => {
-              'id': entry.id.toString(),
-              'name': entry.name,
-              'banner': entry.bannerHash,
-              'icon': entry.iconHash,
-              'cached_members': entry.members.cache.length,
-              'cached_channels':
-                  client.channels.cache.values.whereType<GuildChannel>().where((c) => c.guildId == entry.id).length,
-            })
-        .toList();
+    final guildData = client.guilds.cache.values.map((entry) {
+      final guildChannels = client.channels.cache.values.whereType<GuildChannel>().where((c) => c.guildId == entry.id);
+
+      final guildCachedMessages = guildChannels
+          .whereType<TextChannel>()
+          .fold(0, (previous, channel) => previous = channel.messages.cache.length);
+
+      return {
+        'id': entry.id.toString(),
+        'name': entry.name,
+        'banner': entry.bannerHash,
+        'icon': entry.iconHash,
+        'cached_members': entry.members.cache.length,
+        'cached_channels': guildChannels.length,
+        'cached_messages': guildCachedMessages,
+      };
+    }).toList();
 
     return createTwigResponse("guilds.html", parameters: {
       'guilds': guildData,
@@ -100,7 +106,7 @@ class WebServer {
     });
     final userDataJson = jsonDecode(userData.body);
 
-    initSession(request, userDataJson, tokenBodyJson);
+    initSession(request, userDataJson);
 
     return shelf.Response.seeOther("/");
   }
