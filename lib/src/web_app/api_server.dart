@@ -35,7 +35,7 @@ class WebServer {
 
       final guildCachedMessages = guildChannels
           .whereType<TextChannel>()
-          .fold(0, (previous, channel) => previous = channel.messages.cache.length);
+          .fold(0, (previous, channel) => previous + channel.messages.cache.length);
 
       return {
         'id': entry.id.toString(),
