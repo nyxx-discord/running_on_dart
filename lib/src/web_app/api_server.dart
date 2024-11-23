@@ -4,6 +4,7 @@ import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 
 import 'package:running_on_dart/running_on_dart.dart';
+import 'package:running_on_dart/src/repository/feature_settings.dart';
 import 'package:running_on_dart/src/web_app/utils.dart';
 import 'package:running_on_dart/src/services/bot_info.dart';
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
@@ -30,12 +31,15 @@ class WebServer {
 
     final client = Injector.appInstance.get<NyxxGateway>();
 
-    final guildData = client.guilds.cache.values.map((entry) {
+    final guildData = Stream.fromIterable(client.guilds.cache.values).asyncMap((entry) async {
       final guildChannels = client.channels.cache.values.whereType<GuildChannel>().where((c) => c.guildId == entry.id);
 
       final guildCachedMessages = guildChannels
           .whereType<TextChannel>()
           .fold(0, (previous, channel) => previous + channel.messages.cache.length);
+
+      final enabledFeatures =
+          await Injector.appInstance.get<FeatureSettingsRepository>().fetchSettingsForGuild(entry.id);
 
       return {
         'id': entry.id.toString(),
@@ -45,11 +49,13 @@ class WebServer {
         'cached_members': entry.members.cache.length,
         'cached_channels': guildChannels.length,
         'cached_messages': guildCachedMessages,
+        'cached_roles': entry.roles.cache.length,
+        'enabled_features': enabledFeatures.map((s) => s.setting.name).join(", "),
       };
-    }).toList();
+    });
 
     return createTwigResponse("guilds.html", parameters: {
-      'guilds': guildData,
+      'guilds': await guildData.toList(),
     });
   }
 

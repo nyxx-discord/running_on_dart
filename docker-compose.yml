@@ -12,6 +12,7 @@ services:
       - db
     volumes:
       - "./sessions:/sessions"
+      - "./templates:/templates"
 
   db:
     image: postgres:17

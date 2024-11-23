@@ -85,6 +85,9 @@ final String webServerHost = getEnv("WEB_SERVER_HOST", 'localhost');
 /// The port of web server
 final int webServerPort = getEnvInt('WEB_SERVER_PORT', 8088);
 
+/// Path to templates directory
+final String webServerTemplatesDirectory = getEnv('WEB_SERVER_TEMPLATES_DIRECTORY', "./templates");
+
 /// The GitHub account to use when no other account is specified.
 final String githubAccount = getEnv('ROD_GITHUB_ACCOUNT', 'nyxx-discord');
 

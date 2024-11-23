@@ -14,20 +14,39 @@
     <div hx-get="/hx?c=alert" hx-swap="outerHTML" hx-trigger="load"></div>
 
     <div class="container">
-        <div class="grid">
+        <div class="accordion" id="guildsAccordion">
         {{#guilds}}
-            <div class="card col m-1">
-                <div class="card-body">
-                    <h5 class="card-title">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading{{id}}">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{id}}" aria-expanded="true" aria-controls="collapse{{id}}">
                         <img src="https://media.discordapp.net/icons/{{id}}/{{icon}}.png?size=32" alt="Guild icon" class="rounded-circle inline m-1" onerror="this.style.display='none'">
                         {{name}}
-                    </h5>
-
-                    <p class="card-text">
-                        <span class="fw-bold">{{cached_members}}</span> Cached members
-                        <span class="fw-bold ms-3">{{cached_channels}}</span> Cached channels
-                        <span class="fw-bold ms-3">{{cached_messages}}</span> Cached messages
-                    </p>
+                    </button>
+                </h2>
+                <div id="collapse{{id}}" class="accordion-collapse collapse" aria-labelledby="heading{{id}}" data-bs-parent="#guildsAccordion">
+                    <div class="accordion-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th scope="col">Cached members</th>
+                                <th scope="col">Cached channels</th>
+                                <th scope="col">Cached messages</th>
+                                <th scope="col">Cached roles</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>{{cached_members}}</td>
+                                <td>{{cached_channels}}</td>
+                                <td>{{cached_messages}}</td>
+                                <td>{{cached_roles}}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <p class="card-text">
+                            Features: <span class="fw-bold">{{enabled_features}}</span>
+                        </p>
+                    </div>
                 </div>
             </div>
         {{/guilds}}
