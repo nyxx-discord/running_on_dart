@@ -13,11 +13,13 @@ class ModLogsModule implements RequiresInitialization {
   final FeatureSettingsModule _featureSettingsService = Injector.appInstance.get();
   final Logger _logger = Logger('ROD.ModLogs');
 
-  final handledEventTypes = [
-    AuditLogEvent.memberUpdate,
-    AuditLogEvent.memberBanAdd,
-    AuditLogEvent.memberKick,
-  ];
+  Map<AuditLogEvent, List<String>> handledEventTypes = {
+    AuditLogEvent.memberUpdate: [
+      'communication_disabled_until',
+    ],
+    AuditLogEvent.memberBanAdd: [],
+    AuditLogEvent.memberKick: [],
+  };
 
   @override
   Future<void> init() async {
@@ -36,7 +38,9 @@ class ModLogsModule implements RequiresInitialization {
     }
 
     final entry = event.entry;
-    if (!handledEventTypes.contains(entry.actionType)) {
+    final handledEventType = handledEventTypes[entry.actionType];
+    if (handledEventType == null ||
+        (handledEventType.isNotEmpty && !handledEventType.contains(entry.changes?.firstOrNull?.key))) {
       return;
     }
 
@@ -62,25 +66,29 @@ class ModLogsModule implements RequiresInitialization {
       _ => throw UnimplementedError(),
     };
 
-    var timeoutUntilMessage = "";
+    final messageBuffer = StringBuffer('$eventTypeName | ${DateTime.now().format(TimestampStyle.longDateTime)}')
+      ..writeln('User: ${targetUser.username} (${targetUser.mention})');
+
     final auditLogChange = auditLogEntry.changes?.first;
-    if (auditLogEntry.actionType == AuditLogEvent.memberUpdate &&
-        auditLogChange?.key == 'communication_disabled_until') {
+    if (isMemberTimeoutEntry(auditLogEntry, auditLogChange)) {
       final timeoutUntil = DateTime.parse(auditLogChange!.newValue as String);
-      timeoutUntilMessage = "\nUntil: ${timeoutUntil.format(TimestampStyle.relativeTime)}";
+      messageBuffer.writeln("Until: ${timeoutUntil.format(TimestampStyle.relativeTime)}");
     }
 
-    final messageContent = """$eventTypeName | ${DateTime.now().format(TimestampStyle.longDateTime)}
-User: ${targetUser.username} (${targetUser.mention})$timeoutUntilMessage
-Reason: ${auditLogEntry.reason}
-Moderator: ${modUser.username} (${modUser.mention})
-""";
+    if (auditLogEntry.reason != null) {
+      messageBuffer.writeln('Reason: ${auditLogEntry.reason}');
+    }
+
+    messageBuffer.writeln('Moderator: ${modUser.username} (${modUser.mention})');
 
     return MessageBuilder(
-      content: messageContent,
+      content: messageBuffer.toString(),
       allowedMentions: AllowedMentions.users([targetUser.id]),
     );
   }
+
+  bool isMemberTimeoutEntry(AuditLogEntry auditLogEntry, AuditLogChange? auditLogChange) =>
+      auditLogEntry.actionType == AuditLogEvent.memberUpdate && auditLogChange?.key == 'communication_disabled_until';
 
   Future<bool> _isEnabledForGuild(Snowflake guildId) async {
     if (!intentFeaturesEnabled) {
