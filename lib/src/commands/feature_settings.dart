@@ -69,16 +69,11 @@ final featureSettings = ChatGroup(
               await Injector.appInstance.get<FeatureSettingsRepository>().fetchSettingsForGuild(context.guild!.id);
 
           final messageBuilders = settings.map((setting) {
-            // final dataFieldValue = switch (setting.setting.type) {
-            //   DataType.channelMention => channelMention(Snowflake.parse(setting.data!)),
-            //   _ => setting.data ?? '[EMPTY]'
-            // };
-
             final embed = EmbedBuilder(title: setting.setting.name, description: setting.setting.description, fields: [
               EmbedFieldBuilder(
                   name: 'Added at', value: setting.addedAt.format(TimestampStyle.shortDate), isInline: true),
               EmbedFieldBuilder(name: 'Added by', value: userMention(setting.whoEnabled), isInline: true),
-              EmbedFieldBuilder(name: 'Additional data', value: setting.rawData ?? '[EMPTY]', isInline: false),
+              if (settings is! Setting<NoData>) EmbedFieldBuilder(name: 'Additional data', value: setting.rawData ?? '[EMPTY]', isInline: false),
             ]);
 
             return MessageBuilder(embeds: [embed]);
@@ -95,10 +90,11 @@ final featureSettings = ChatGroup(
       id('settings-list', (ChatContext context) async {
         final embeds = Setting.values.map((s) {
           return EmbedBuilder(title: s.name, description: s.description, fields: [
-            // if (s.requiresData)
-            //   EmbedFieldBuilder(name: 'Example data (if requires)', value: s.example!, isInline: true),
-            // if (s.requiresData)
-            //   EmbedFieldBuilder(name: 'Data type (if requires)', value: s.type.toString(), isInline: true),
+            if (s is! Setting<NoData>)
+              EmbedFieldBuilder(
+                  name: 'Data fields',
+                  value: s.getConfigurationFields().map((e) => e.customId).join(", "),
+                  isInline: false)
           ]);
         });
 
