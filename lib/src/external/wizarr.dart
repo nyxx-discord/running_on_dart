@@ -79,9 +79,6 @@ class WizarrClient {
       return true;
     }
 
-    if (response is http.StreamedResponse) {
-      print(await response.stream.toStringStream().join('\n'));
-    }
     return false;
   }
 

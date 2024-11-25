@@ -30,8 +30,8 @@ class JoinLogsModule implements RequiresInitialization {
       return;
     }
 
-    final channelId = setting.data!;
-    final channel = await _client.channels.get(Snowflake.parse(channelId));
+    final channelId = setting.parseData<GenericSnowflakeData>()!.value;
+    final channel = await _client.channels.get(channelId);
     if (channel is! TextChannel) {
       _logger.warning('Channel $channelId is not a text channel.');
       return;
