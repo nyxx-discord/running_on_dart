@@ -73,7 +73,8 @@ final featureSettings = ChatGroup(
               EmbedFieldBuilder(
                   name: 'Added at', value: setting.addedAt.format(TimestampStyle.shortDate), isInline: true),
               EmbedFieldBuilder(name: 'Added by', value: userMention(setting.whoEnabled), isInline: true),
-              if (settings is! Setting<NoData>) EmbedFieldBuilder(name: 'Additional data', value: setting.rawData ?? '[EMPTY]', isInline: false),
+              if (settings is! Setting<NoData>)
+                EmbedFieldBuilder(name: 'Additional data', value: setting.rawData ?? '[EMPTY]', isInline: false),
             ]);
 
             return MessageBuilder(embeds: [embed]);
