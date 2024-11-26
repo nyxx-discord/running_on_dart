@@ -20,7 +20,7 @@ class MustacheResponse extends shelf.Response {
   final String name;
   final Map<String, dynamic>? parameters;
 
-  MustacheResponse({required this.name, this.parameters}) : super(200);
+  MustacheResponse({required this.name, this.parameters}) : super(501, body: 'Cannot process mustache template');
 
   Future<shelf.Response> process() async {
     final processor = MustachexProcessor(initialVariables: {
@@ -32,7 +32,7 @@ class MustacheResponse extends shelf.Response {
 
     final templateData = await File("$webServerTemplatesDirectory/$name").readAsString();
 
-    return shelf.Response(statusCode,
+    return shelf.Response(200,
         body: await processor.process(templateData), headers: {"Content-Type": 'text/html'});
   }
 }
