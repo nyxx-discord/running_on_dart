@@ -32,8 +32,7 @@ class MustacheResponse extends shelf.Response {
 
     final templateData = await File("$webServerTemplatesDirectory/$name").readAsString();
 
-    return shelf.Response(200,
-        body: await processor.process(templateData), headers: {"Content-Type": 'text/html'});
+    return shelf.Response(200, body: await processor.process(templateData), headers: {"Content-Type": 'text/html'});
   }
 }
 
