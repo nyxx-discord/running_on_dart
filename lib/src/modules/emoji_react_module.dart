@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
@@ -9,38 +8,13 @@ import 'package:running_on_dart/src/util/util.dart';
 
 import 'package:nyxx/src/models/emoji.dart'; // TODO: This should be imported
 
-enum Mode {
-  react('react'),
-  message('message');
-
-  final String name;
-
-  const Mode(this.name);
-}
-
-class EmojiFeatureSetting {
-  final bool useBuiltin;
-  final Mode mode;
-  final bool processOtherBots;
-
-  EmojiFeatureSetting({required this.useBuiltin, required this.mode, required this.processOtherBots});
-
-  factory EmojiFeatureSetting.fromJson(Map<String, dynamic> raw) {
-    return EmojiFeatureSetting(
-      useBuiltin: raw['use_builtin'] ?? true,
-      mode: Mode.values.singleWhereOrNull((e) => e.name == raw['mode']) ?? Mode.message,
-      processOtherBots: raw['process_other_bots'] ?? true,
-    );
-  }
-}
-
 class EmojiReactModule implements RequiresInitialization {
   final NyxxGateway _client = Injector.appInstance.get();
   final FeatureSettingsRepository _featureSettingsRepository = Injector.appInstance.get();
   final FeatureSettingsModule _featureSettingsService = Injector.appInstance.get();
 
   late Set<ApplicationEmoji> _emojis;
-  late Map<Snowflake, EmojiFeatureSetting> _emojiFeatureSettingsCache;
+  late Map<Snowflake, EmojiReactData> _emojiFeatureSettingsCache;
 
   @override
   Future<void> init() async {
@@ -49,7 +23,7 @@ class EmojiReactModule implements RequiresInitialization {
     }
 
     _emojiFeatureSettingsCache = (await _featureSettingsRepository.fetchSettingsForType(Setting.emojiReact))
-        .map((setting) => MapEntry(setting.guildId, EmojiFeatureSetting.fromJson(setting.dataAsJson!)))
+        .map((setting) => MapEntry(setting.guildId, setting.parseData<EmojiReactData>()!))
         .toMap();
     _emojis = (await _client.application.emojis.list())
         .toSet(); // TODO: Add ability to reload module (download new emojis in this case)
@@ -58,7 +32,7 @@ class EmojiReactModule implements RequiresInitialization {
 
     _featureSettingsService.onFeatureEnabled
         .where((s) => s.setting == Setting.emojiReact)
-        .listen((s) => _emojiFeatureSettingsCache[s.guildId] = (EmojiFeatureSetting.fromJson(s.dataAsJson!)));
+        .listen((s) => _emojiFeatureSettingsCache[s.guildId] = s.parseData<EmojiReactData>()!);
     _featureSettingsService.onFeatureDisabled
         .where((s) => s.setting == Setting.emojiReact)
         .listen((s) => _emojiFeatureSettingsCache.remove(s.guildId));
@@ -91,12 +65,12 @@ class EmojiReactModule implements RequiresInitialization {
     }
 
     switch (data.mode) {
-      case Mode.react:
+      case EmojiReactType.react:
         for (final emoji in matchingEmojis) {
           event.message.react(ReactionBuilder(name: emoji.name, id: emoji.id));
         }
         break;
-      case Mode.message:
+      case EmojiReactType.message:
         final content = matchingEmojis.map((emoji) => emoji.mention).join(' ');
 
         event.message.channel.sendMessage(MessageBuilder(content: content));
@@ -106,7 +80,7 @@ class EmojiReactModule implements RequiresInitialization {
 
   Iterable<ApplicationEmoji> _findBuiltinEmojis(String messageContent) =>
       _emojis.where((emoji) => messageContent.contains(emoji.name));
-  (bool, EmojiFeatureSetting?) _fetchSettingForGuild(Snowflake guildId) {
+  (bool, EmojiReactData?) _fetchSettingForGuild(Snowflake guildId) {
     final result = _emojiFeatureSettingsCache[guildId];
 
     return (result != null, result);

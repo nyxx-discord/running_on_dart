@@ -84,3 +84,29 @@ Snowflake getParentIdFromContext(ContextData context) => context.guild?.id ?? co
 String stripNonAscii(String input) {
   return input.replaceAll(nonAsciiRegex, '');
 }
+
+bool boolValue(dynamic value) {
+  if (value is bool) {
+    return value;
+  }
+
+  if (value is num) {
+    return value >= 0;
+  }
+
+  if (value is String) {
+    return ['1', 'yes', 'true'].contains(value.toLowerCase().trim());
+  }
+
+  return false;
+}
+
+extension ModalDataAsMap on ModalContext {
+  Map<String, String?> asMap() {
+    return interaction.data.components
+        .expand((component) => component is ActionRowComponent ? component.components : [component])
+        .whereType<TextInputComponent>()
+        .map((c) => MapEntry(c.customId, c.value))
+        .toMap();
+  }
+}

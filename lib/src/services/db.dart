@@ -200,7 +200,10 @@ class DatabaseService implements RequiresInitialization {
       ..enqueueMigration(
           "2.17", 'CREATE UNIQUE INDEX idx_kavita_user_configs_id ON kavita_user_configs(user_id, kavita_config_id);')
       ..enqueueMigration("2.18",
-          'ALTER TABLE kavita_user_configs ADD CONSTRAINT kavita_user_configs_user_id_unique UNIQUE (user_id, kavita_config_id);');
+          'ALTER TABLE kavita_user_configs ADD CONSTRAINT kavita_user_configs_user_id_unique UNIQUE (user_id, kavita_config_id);')
+      ..enqueueMigration("2.19", """
+      UPDATE feature_settings SET additional_data = CONCAT('{"value":"', additional_data, '"}') WHERE name = 'join_logs' OR name = 'mod_logs';
+      """);
 
     await migrator.runMigrations();
 

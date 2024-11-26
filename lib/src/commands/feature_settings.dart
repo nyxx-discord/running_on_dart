@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:collection/collection.dart';
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
@@ -8,6 +6,7 @@ import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
 import 'package:running_on_dart/src/repository/feature_settings.dart';
 import 'package:running_on_dart/src/modules/feature_settings.dart';
+import 'package:running_on_dart/src/util/util.dart';
 
 final featureSettings = ChatGroup(
   'settings',
@@ -20,32 +19,23 @@ final featureSettings = ChatGroup(
     ChatCommand(
       'enable',
       'Enable or update a setting for this guild',
-      id('settings-enable', (ChatContext context, @Description('The setting to enable') Setting setting,
-          [@Description('Additional data for features that require it') String? data]) async {
-        if (setting.requiresData && data == null) {
-          final embed = EmbedBuilder(
-              title: 'Missing required data',
-              color: DiscordColor.parseHexString("#FF0000"),
-              description: 'The setting `${setting.name}` requires the `data` argument to be specified.'
-                  ' Please re-run the command and specify the additional data required, or contact a developer for more details.');
+      id('settings-enable',
+          (InteractionChatContext context, @Description('The setting to enable') Setting setting) async {
+        SettingData? data;
+        if (setting is! Setting<NoData>) {
+          final modal = await context.getModal(title: "Configuration", components: setting.getConfigurationFields());
 
-          return context.respond(MessageBuilder(embeds: [embed]));
-        }
-
-        if (setting.type == DataType.json) {
-          try {
-            final decodedData = jsonDecode(data!);
-            data = jsonEncode(decodedData);
-          } on FormatException {
-            return context.respond(MessageBuilder(content: 'Setting requires valid json as data'));
+          data = setting.parseData(modal.asMap());
+          if (data == null) {
+            return context
+                .respond(MessageBuilder(content: "Cannot properly parse settings data. Please contact administrator"));
           }
         }
 
-        final featureSetting = FeatureSetting(
+        final featureSetting = FeatureSetting.create(
           setting: setting,
           guildId: context.guild!.id,
           whoEnabled: context.user.id,
-          addedAt: DateTime.now(),
           data: data,
         );
 
@@ -79,16 +69,12 @@ final featureSettings = ChatGroup(
               await Injector.appInstance.get<FeatureSettingsRepository>().fetchSettingsForGuild(context.guild!.id);
 
           final messageBuilders = settings.map((setting) {
-            final dataFieldValue = switch (setting.setting.type) {
-              DataType.channelMention => channelMention(Snowflake.parse(setting.data!)),
-              _ => setting.data ?? '[EMPTY]'
-            };
-
             final embed = EmbedBuilder(title: setting.setting.name, description: setting.setting.description, fields: [
               EmbedFieldBuilder(
                   name: 'Added at', value: setting.addedAt.format(TimestampStyle.shortDate), isInline: true),
               EmbedFieldBuilder(name: 'Added by', value: userMention(setting.whoEnabled), isInline: true),
-              EmbedFieldBuilder(name: 'Additional data', value: dataFieldValue, isInline: false),
+              if (settings is! Setting<NoData>)
+                EmbedFieldBuilder(name: 'Additional data', value: setting.rawData ?? '[EMPTY]', isInline: false),
             ]);
 
             return MessageBuilder(embeds: [embed]);
@@ -105,10 +91,11 @@ final featureSettings = ChatGroup(
       id('settings-list', (ChatContext context) async {
         final embeds = Setting.values.map((s) {
           return EmbedBuilder(title: s.name, description: s.description, fields: [
-            if (s.requiresData)
-              EmbedFieldBuilder(name: 'Example data (if requires)', value: s.example!, isInline: true),
-            if (s.requiresData)
-              EmbedFieldBuilder(name: 'Data type (if requires)', value: s.type.toString(), isInline: true),
+            if (s is! Setting<NoData>)
+              EmbedFieldBuilder(
+                  name: 'Data fields',
+                  value: s.getConfigurationFields().map((e) => e.customId).join(", "),
+                  isInline: false)
           ]);
         });
 

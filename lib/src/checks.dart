@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:injector/injector.dart';
-import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
 import 'package:running_on_dart/src/repository/feature_settings.dart';
@@ -42,7 +41,7 @@ Future<(bool?, FeatureSetting?)> fetchAndCheckSetting(CommandContext context, Se
     return (false, null);
   }
 
-  if (setting.dataAsJson == null) {
+  if (setting.rawData == null) {
     return (false, null);
   }
 
@@ -60,8 +59,8 @@ final jellyfinFeatureCreateInstanceCommandCheck = Check(
       return true;
     }
 
-    final roleId = Snowflake.parse(setting!.dataAsJson!['create_instance_role']);
-    return context.member!.roleIds.contains(roleId);
+    final data = setting?.parseData<GenericInstanceData>();
+    return context.member!.roleIds.contains(data?.createInstanceRole);
   },
 );
 
@@ -76,7 +75,7 @@ final kavitaFeatureCreateInstanceCommandCheck = Check(
       return true;
     }
 
-    final roleId = Snowflake.parse(setting!.dataAsJson!['create_instance_role']);
-    return context.member!.roleIds.contains(roleId);
+    final data = setting?.parseData<GenericInstanceData>();
+    return context.member!.roleIds.contains(data?.createInstanceRole);
   },
 );
