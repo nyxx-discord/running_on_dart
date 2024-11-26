@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 
 import 'package:running_on_dart/running_on_dart.dart';
+import 'package:running_on_dart/src/modules/tag.dart';
 import 'package:running_on_dart/src/repository/feature_settings.dart';
+import 'package:running_on_dart/src/web_app/mustache.dart';
 import 'package:running_on_dart/src/web_app/utils.dart';
 import 'package:running_on_dart/src/services/bot_info.dart';
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
@@ -30,6 +33,7 @@ class WebServer {
     }
 
     final client = Injector.appInstance.get<NyxxGateway>();
+    final tagModule = Injector.appInstance.get<TagModule>();
 
     final guildData = Stream.fromIterable(client.guilds.cache.values).asyncMap((entry) async {
       final guildChannels = client.channels.cache.values.whereType<GuildChannel>().where((c) => c.guildId == entry.id);
@@ -41,6 +45,8 @@ class WebServer {
       final enabledFeatures =
           await Injector.appInstance.get<FeatureSettingsRepository>().fetchSettingsForGuild(entry.id);
 
+      final tagsCount = tagModule.getGuildTags(entry.id).length;
+
       return {
         'id': entry.id.toString(),
         'name': entry.name,
@@ -51,41 +57,19 @@ class WebServer {
         'cached_messages': guildCachedMessages,
         'cached_roles': entry.roles.cache.length,
         'enabled_features': enabledFeatures.map((s) => s.setting.name).join(", "),
+        'tags_count': tagsCount,
       };
     });
 
-    return createTwigResponse("guilds.html", parameters: {
+    return MustacheResponse(name: "guilds.html", parameters: {
       'guilds': await guildData.toList(),
-    });
-  }
-
-  Future<shelf.Response> _handleHx(shelf.Request request) async {
-    final templateName = request.url.queryParameters['c'];
-    if (templateName == null) {
-      return shelf.Response.badRequest();
-    }
-
-    final additionalParameters = switch (templateName) {
-      'navigation' => {
-          'clientId': clientId,
-          'redirectUri': clientRedirectUri,
-        },
-      'alert' => {
-          'inner_content': webServerAlertContent,
-        },
-      _ => {},
-    };
-
-    return createTwigResponse('component/$templateName.html', parameters: {
-      ...getCustomDataFromSession(request),
-      ...additionalParameters,
     });
   }
 
   Future<shelf.Response> _handleIndex(shelf.Request request) async {
     final data = await Injector.appInstance.get<BotInfoService>().getCurrentBotInfo();
 
-    return createTwigResponse("index.html", parameters: {
+    return MustacheResponse(name: "index.html", parameters: {
       ...data.toJson(),
     });
   }
@@ -125,12 +109,14 @@ class WebServer {
 
   Future<shelf_router.Router> _setupRouter() async {
     return shelf_router.Router()
-      ..get("/", _sessionAware(_handleIndex))
-      ..get("/guilds", _sessionAware(_handleGuilds))
-      ..get("/hx", _sessionAware(_handleHx))
+      ..get("/", _sessionAware(_processMustache(_handleIndex)))
+      ..get("/guilds", _sessionAware(_processMustache(_handleGuilds)))
       ..get("/redirect", _sessionAware(_handleRedirect))
       ..get("/logout", _sessionAware(_handleLogOut));
   }
+
+  shelf.Handler _processMustache(shelf.Handler inner) =>
+      shelf.Pipeline().addMiddleware(processMustache()).addHandler(inner);
 
   shelf.Handler _sessionAware(shelf.Handler inner) =>
       shelf.Pipeline().addMiddleware(cookiesMiddleware()).addMiddleware(sessionMiddleware()).addHandler(inner);

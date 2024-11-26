@@ -114,8 +114,11 @@ Iterable<EmbedFieldBuilder> getMediaPlaybackInfoFields(SessionInfoDto sessionInf
       ? ' - ${transcodingInfo.completionPercentage!.toStringAsFixed(2)}% (${transcodingInfo.framerate} fps)'
       : '';
 
+  final transcodingReason = (transcodingInfo.transcodeReasons?.toList() ?? []).map((r) => r.name).join(",");
+  final reasonInfo = transcodingReason.isNotEmpty ? " ($transcodingReason)" : '';
+
   final transCodingInfoString =
-      '${transcodingInfo.height}p (${transcodingInfo.videoCodec} ${transcodingInfo.audioCodec} ${transcodingInfo.container}) $finalBitrate Mbps$completionInfo';
+      '${transcodingInfo.height}p (${transcodingInfo.videoCodec} ${transcodingInfo.audioCodec} ${transcodingInfo.container}) $finalBitrate Mbps$completionInfo$reasonInfo';
 
   return [EmbedFieldBuilder(name: "Transcoding", value: transCodingInfoString, isInline: false)];
 }
