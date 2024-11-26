@@ -86,7 +86,7 @@ class FeatureSettingsRepository {
       'guild_id': setting.guildId.toString(),
       'add_date': setting.addedAt,
       'who_enabled': setting.whoEnabled.toString(),
-      'additional_data': setting.data?.toString(),
+      'additional_data': setting.rawData?.toString(),
     });
   }
 

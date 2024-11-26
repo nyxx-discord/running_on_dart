@@ -21,5 +21,4 @@ doc/api/
 *.exe
 *.db
 
-lib_old/
 sessions/
