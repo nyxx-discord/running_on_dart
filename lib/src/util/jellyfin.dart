@@ -114,10 +114,37 @@ Iterable<EmbedFieldBuilder> getMediaPlaybackInfoFields(SessionInfoDto sessionInf
       ? ' - ${transcodingInfo.completionPercentage!.toStringAsFixed(2)}% (${transcodingInfo.framerate} fps)'
       : '';
 
+  final transcodingReason = getTranscodingReason(transcodingInfo);
+  final reasonInfo = transcodingReason != null ? " ($transcodingReason)" : '';
+
   final transCodingInfoString =
-      '${transcodingInfo.height}p (${transcodingInfo.videoCodec} ${transcodingInfo.audioCodec} ${transcodingInfo.container}) $finalBitrate Mbps$completionInfo';
+      '${transcodingInfo.height}p (${transcodingInfo.videoCodec} ${transcodingInfo.audioCodec} ${transcodingInfo.container}) $finalBitrate Mbps$completionInfo$reasonInfo';
 
   return [EmbedFieldBuilder(name: "Transcoding", value: transCodingInfoString, isInline: false)];
+}
+
+String? getTranscodingReason(TranscodingInfo transcodingInfo) {
+  if ((transcodingInfo.isVideoDirect ?? false) && !(transcodingInfo.isAudioDirect ?? true)) {
+    return 'Repackaging';
+  }
+
+  final transcodingReason = (transcodingInfo.transcodeReasons?.toList() ?? []).map((r) {
+    return switch (r) {
+      TranscodingInfoTranscodeReasonsEnum(:final name) when name == 'containerNotSupported' =>
+        'Container not supported',
+      TranscodingInfoTranscodeReasonsEnum(:final name) when name == 'containerBitrateExceedsLimit' =>
+        'Bitrate exceeds Limit',
+      TranscodingInfoTranscodeReasonsEnum(:final name) when name.contains('video') => 'Video not supported',
+      TranscodingInfoTranscodeReasonsEnum(:final name) when name.contains('audio') => 'Audio not supported',
+      _ => 'Other'
+    };
+  });
+
+  if (transcodingReason.isNotEmpty) {
+    return null;
+  }
+
+  return transcodingReason.join(", ");
 }
 
 EmbedBuilder? buildSessionEmbed(SessionInfoDto sessionInfo, AuthenticatedJellyfinClient client) {
