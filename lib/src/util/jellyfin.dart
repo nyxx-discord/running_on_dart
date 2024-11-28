@@ -118,7 +118,7 @@ Iterable<EmbedFieldBuilder> getMediaPlaybackInfoFields(SessionInfoDto sessionInf
   final reasonInfo = transcodingReason != null ? " ($transcodingReason)" : '';
 
   final transCodingInfoString =
-      '${transcodingInfo.height}p (${transcodingInfo.videoCodec} ${transcodingInfo.audioCodec} ${transcodingInfo.container}) $finalBitrate Mbps$completionInfo';
+      '${transcodingInfo.height}p (${transcodingInfo.videoCodec} ${transcodingInfo.audioCodec} ${transcodingInfo.container}) $finalBitrate Mbps$completionInfo$reasonInfo';
 
   return [EmbedFieldBuilder(name: "Transcoding", value: transCodingInfoString, isInline: false)];
 }
