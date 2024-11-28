@@ -16,6 +16,7 @@ import 'package:running_on_dart/src/repository/jellyfin_config.dart';
 import 'package:running_on_dart/src/repository/kavita.dart';
 import 'package:running_on_dart/src/repository/reminder.dart';
 import 'package:running_on_dart/src/repository/tag.dart';
+import 'package:running_on_dart/src/services/bot_info.dart';
 import 'package:running_on_dart/src/services/db.dart';
 import 'package:running_on_dart/src/modules/feature_settings.dart';
 
@@ -39,7 +40,8 @@ Future<void> setupContainer(NyxxGateway client) async {
     ..registerSingleton(() => JellyfinModuleV2())
     ..registerSingleton(() => MentionsMonitoringModule())
     ..registerSingleton(() => KavitaModule())
-    ..registerSingleton(() => EmojiReactModule());
+    ..registerSingleton(() => EmojiReactModule())
+    ..registerSingleton(() => BotInfoService());
 
   await Injector.appInstance.get<DatabaseService>().init();
   await Injector.appInstance.get<FeatureSettingsModule>().init();

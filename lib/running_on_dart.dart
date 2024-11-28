@@ -15,3 +15,6 @@ export 'src/settings.dart';
 export 'src/converter.dart';
 export 'src/error_handler.dart';
 export 'src/init.dart';
+
+export 'src/web_app/api_server.dart' show WebServer;
+export 'src/web_app/session_manager_plugin.dart' show SessionManagerPlugin;

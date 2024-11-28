@@ -43,8 +43,11 @@ void main() async {
           IgnoreExceptions(),
           commands,
           pagination,
+          SessionManagerPlugin(),
         ],
       ));
 
   await setupContainer(client);
+
+  WebServer().startServer();
 }

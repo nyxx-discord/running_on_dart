@@ -209,6 +209,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.2"
+  http_methods:
+    dependency: transitive
+    description:
+      name: http_methods
+      sha256: "6bccce8f1ec7b5d701e7921dca35e202d425b57e317ba1a37f2638590e29e566"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
   http_multi_server:
     dependency: transitive
     description:
@@ -314,6 +322,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+  mustache_recase:
+    dependency: transitive
+    description:
+      name: mustache_recase
+      sha256: "63a339ebdc67305444e465519df27cbc5beb59fb69f7fe43c0f16c2b376a5d43"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
+  mustachex:
+    dependency: "direct main"
+    description:
+      name: mustachex
+      sha256: "6a9ea0861f3d8eb0db0862ee0dd3f1c6e4f623bb9fa47d13485c10f2fc946ca3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   node_preamble:
     dependency: transitive
     description:
@@ -398,10 +422,10 @@ packages:
     dependency: "direct main"
     description:
       name: postgres
-      sha256: e9802d4c9d78e432c4d4e57be9a91d99cf1552d45f17b17792f8e595060376a2
+      sha256: d646bdc6f093babfa3337071c6f4ca2feabefdb7a6d18fc89f0f517c8d2e0819
       url: "https://pub.dev"
     source: hosted
-    version: "3.4.3"
+    version: "3.4.4"
   pub_semver:
     dependency: transitive
     description:
@@ -418,6 +442,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.2.2"
+  recase:
+    dependency: transitive
+    description:
+      name: recase
+      sha256: e4eb4ec2dcdee52dcf99cb4ceabaffc631d7424ee55e56f280bc039737f89213
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.1.0"
   retry:
     dependency: transitive
     description:
@@ -451,13 +483,21 @@ packages:
     source: hosted
     version: "1.0.3"
   shelf:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: shelf
       sha256: e7dd780a7ffb623c57850b33f43309312fc863fb6aa3d276a754bb299839ef12
       url: "https://pub.dev"
     source: hosted
     version: "1.4.2"
+  shelf_cors_headers:
+    dependency: "direct main"
+    description:
+      name: shelf_cors_headers
+      sha256: a127c80f99bbef3474293db67a7608e3a0f1f0fcdb171dad77fa9bd2cd123ae4
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.5"
   shelf_packages_handler:
     dependency: transitive
     description:
@@ -466,6 +506,23 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  shelf_router:
+    dependency: "direct main"
+    description:
+      name: shelf_router
+      sha256: f5e5d492440a7fb165fe1e2e1a623f31f734d3370900070b2b1e0d0428d59864
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.4"
+  shelf_session:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "69aadbbd7572afcd076e122ae2ba63f1839a710e"
+      url: "https://github.com/l7ssha/shelf_session.git"
+    source: git
+    version: "0.1.2"
   shelf_static:
     dependency: transitive
     description:
@@ -478,10 +535,10 @@ packages:
     dependency: transitive
     description:
       name: shelf_web_socket
-      sha256: "073c147238594ecd0d193f3456a5fe91c4b0abbcc68bf5cd95b36c4e194ac611"
+      sha256: cc36c297b52866d203dbf9332263c94becc2fe0ceaa9681d07b6ef9807023b67
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.1"
   source_map_stack_trace:
     dependency: transitive
     description:
