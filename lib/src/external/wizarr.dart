@@ -45,8 +45,6 @@ class CreateInvitationRequest {
         if (duration != null) 'duration': duration!.inMinutes.toString(),
         if (expires != null) 'expires': expires!.inMinutes.toString(),
         'live_tv': 'false',
-        'plex_allow_sync': 'false',
-        'plex_home': 'false',
         'sessions': sessions.toString(),
         'unlimited': unlimited ? 'true' : 'false',
         'specific_libraries': jsonEncode(specificLibraries),
