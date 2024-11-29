@@ -20,6 +20,7 @@ FROM scratch AS prod
 WORKDIR /app
 
 COPY --from=build_prod /runtime /
-COPY --from=build_prod /app/** /app
+COPY --from=build_prod /app/templates /app/templates
+COPY --from=build_prod /app/bot.exe /app
 
 CMD [ "./bot.exe" ]
