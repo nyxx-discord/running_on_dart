@@ -60,12 +60,12 @@ final tag = ChatGroup(
     ),
     ChatCommand(
         'preview',
-        'View a tag, without making it publically visible',
+        'View a tag, without making it publicly visible',
         id('tag-preview', (
           ChatContext context,
           @Description('The tag to preview') Tag tag,
         ) async {
-          await context.respond(MessageBuilder(content: tag.content));
+          context.respond(MessageBuilder(content: tag.content));
 
           await Injector.appInstance.get<TagModule>().registerTagUsedEvent(TagUsedEvent.fromTag(
                 tag: tag,
