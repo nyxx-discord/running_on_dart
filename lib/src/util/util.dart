@@ -35,10 +35,6 @@ extension EmojiToMention on Emoji {
   String get mention => "<:$name:${this.id}>";
 }
 
-abstract class RequiresInitialization {
-  Future<void> init();
-}
-
 String? valueOrNull(String? value) {
   if (value == null) {
     return null;

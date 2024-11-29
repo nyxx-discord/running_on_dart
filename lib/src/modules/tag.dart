@@ -4,7 +4,7 @@ import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/models/tag.dart';
 import 'package:running_on_dart/src/repository/tag.dart';
 import 'package:running_on_dart/src/settings.dart';
-import 'package:running_on_dart/src/util/util.dart';
+import 'package:running_on_dart/src/init.dart';
 
 class TagModule implements RequiresInitialization {
   final List<Tag> tags = [];

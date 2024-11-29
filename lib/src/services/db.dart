@@ -7,7 +7,7 @@ import 'package:postgres/postgres.dart';
 
 import 'package:running_on_dart/src/settings.dart';
 import 'package:running_on_dart/src/util/query_builder.dart';
-import 'package:running_on_dart/src/util/util.dart';
+import 'package:running_on_dart/src/init.dart';
 
 /// The user to use when connecting to the database.
 String user = getEnv('POSTGRES_USER');

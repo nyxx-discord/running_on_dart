@@ -4,7 +4,7 @@ import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
 import 'package:running_on_dart/src/modules/feature_settings.dart';
-import 'package:running_on_dart/src/util/util.dart';
+import 'package:running_on_dart/src/init.dart';
 
 extension MapExtensions<K, V> on Map<K, V> {
   Iterable<(K, V)> get keyValues => entries.map((entry) => (entry.key, entry.value));

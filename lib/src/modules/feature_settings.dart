@@ -4,7 +4,7 @@ import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
 import 'package:running_on_dart/src/repository/feature_settings.dart';
-import 'package:running_on_dart/src/util/util.dart';
+import 'package:running_on_dart/src/init.dart';
 
 class FeatureSettingsModule implements RequiresInitialization {
   final _featureSettingsRepository = Injector.appInstance.get<FeatureSettingsRepository>();

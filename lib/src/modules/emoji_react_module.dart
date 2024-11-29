@@ -5,16 +5,23 @@ import 'package:running_on_dart/src/repository/feature_settings.dart';
 import 'package:running_on_dart/src/modules/feature_settings.dart';
 import 'package:running_on_dart/src/settings.dart';
 import 'package:running_on_dart/src/util/util.dart';
+import 'package:running_on_dart/src/init.dart';
 
 import 'package:nyxx/src/models/emoji.dart'; // TODO: This should be imported
 
-class EmojiReactModule implements RequiresInitialization {
+class EmojiReactModule implements RequiresInitialization, Reloadable {
   final NyxxGateway _client = Injector.appInstance.get();
   final FeatureSettingsRepository _featureSettingsRepository = Injector.appInstance.get();
   final FeatureSettingsModule _featureSettingsService = Injector.appInstance.get();
 
-  late Set<ApplicationEmoji> _emojis;
-  late Map<Snowflake, EmojiReactData> _emojiFeatureSettingsCache;
+  final Set<ApplicationEmoji> _emojis = {};
+  final Map<Snowflake, EmojiReactData> _emojiFeatureSettingsCache = {};
+
+  @override
+  Future<void> reload() async {
+    _emojis.clear();
+    _emojis.addAll(await _client.application.emojis.list());
+  }
 
   @override
   Future<void> init() async {
@@ -22,11 +29,11 @@ class EmojiReactModule implements RequiresInitialization {
       return;
     }
 
-    _emojiFeatureSettingsCache = (await _featureSettingsRepository.fetchSettingsForType(Setting.emojiReact))
+    _emojiFeatureSettingsCache.addAll((await _featureSettingsRepository.fetchSettingsForType(Setting.emojiReact))
         .map((setting) => MapEntry(setting.guildId, setting.parseData<EmojiReactData>()!))
-        .toMap();
-    _emojis = (await _client.application.emojis.list())
-        .toSet(); // TODO: Add ability to reload module (download new emojis in this case)
+        .toMap());
+
+    await reload();
 
     _client.onMessageCreate.listen(_handleMessage);
 

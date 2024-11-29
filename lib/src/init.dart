@@ -20,6 +20,19 @@ import 'package:running_on_dart/src/services/bot_info.dart';
 import 'package:running_on_dart/src/services/db.dart';
 import 'package:running_on_dart/src/modules/feature_settings.dart';
 
+abstract class RequiresInitialization {
+  Future<void> init();
+}
+
+abstract class Reloadable {
+  Future<void> reload();
+}
+
+final reloadableModules = <String, Reloadable Function()>{
+  'EmojiReactModule': () => Injector.appInstance.get<EmojiReactModule>(),
+  'DocsModule': () => Injector.appInstance.get<DocsModule>(),
+};
+
 Future<void> setupContainer(NyxxGateway client) async {
   Injector.appInstance
     ..registerSingleton(() => client)

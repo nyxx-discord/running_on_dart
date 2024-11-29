@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:fuzzy/fuzzy.dart';
-import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/models/docs.dart';
-import 'package:running_on_dart/src/util/util.dart';
+import 'package:running_on_dart/src/init.dart';
+import 'package:running_on_dart/src/settings.dart';
 
-class DocsModule implements RequiresInitialization {
+class DocsModule implements RequiresInitialization, Reloadable {
   final Map<String, PackageDocs> _cache = {};
   DateTime? lastUpdate;
 
@@ -15,11 +15,12 @@ class DocsModule implements RequiresInitialization {
       _cache[package] = PackageDocs(packageName: package);
     }
 
-    updateCache();
-    Timer.periodic(docsUpdateInterval, (timer) => updateCache());
+    reload();
+    Timer.periodic(docsUpdateInterval, (timer) => reload());
   }
 
-  Future<void> updateCache() async {
+  @override
+  Future<void> reload() async {
     await Future.wait(_cache.values.map((e) => e.update()));
     lastUpdate = DateTime.now();
   }

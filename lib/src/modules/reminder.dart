@@ -6,7 +6,7 @@ import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/src/models/reminder.dart';
 import 'package:running_on_dart/src/repository/reminder.dart';
-import 'package:running_on_dart/src/util/util.dart';
+import 'package:running_on_dart/src/init.dart';
 
 class ReminderModuleComponentId {
   static String identifier = 'ReminderModuleComponentId';

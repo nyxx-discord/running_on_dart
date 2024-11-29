@@ -1,4 +1,4 @@
-import 'package:running_on_dart/src/util/util.dart';
+import 'package:running_on_dart/src/init.dart';
 
 class BotStartDuration implements RequiresInitialization {
   late final DateTime startDate;
