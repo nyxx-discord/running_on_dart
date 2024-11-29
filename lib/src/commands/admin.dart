@@ -3,6 +3,7 @@ import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
+import 'package:running_on_dart/src/checks.dart';
 import 'package:running_on_dart/src/modules/poop_name.dart';
 import 'package:running_on_dart/src/init.dart';
 import 'package:running_on_dart/src/util/util.dart';
@@ -88,24 +89,29 @@ final admin = ChatGroup(
           GuildCheck.all(),
           PermissionsCheck(Permissions.manageNicknames),
         ]),
-    ChatCommand(
-      'reload-modules',
-      'Reload modules',
-      id('admin-reload-modules', (InteractionChatContext context) async {
-        final modulesToReload = await context.getMultiSelection(
-          reloadableModules.keys.toList(),
-          MessageBuilder(content: 'Select modules to reload'),
-          toSelectMenuOption: (value) => SelectMenuOptionBuilder(label: value, value: value),
-        );
+    ChatGroup("system", "System administration commands", checks: [
+      administratorCheck,
+      administratorGuildCheck,
+    ], children: [
+      ChatCommand(
+        'reload-modules',
+        'Reload modules',
+        id('admin-reload-modules', (InteractionChatContext context) async {
+          final modulesToReload = await context.getMultiSelection(
+            reloadableModules.keys.toList(),
+            MessageBuilder(content: 'Select modules to reload'),
+            toSelectMenuOption: (value) => SelectMenuOptionBuilder(label: value, value: value),
+          );
 
-        final stopwatch = Stopwatch()..start();
-        final reloadFunctions =
-            modulesToReload.map((m) => reloadableModules[m]).nonNulls.map((m) => m()).map((r) => r.reload());
-        await Future.wait(reloadFunctions);
+          final stopwatch = Stopwatch()..start();
+          final reloadFunctions =
+              modulesToReload.map((m) => reloadableModules[m]).nonNulls.map((m) => m()).map((r) => r.reload());
+          await Future.wait(reloadFunctions);
 
-        return context.respond(MessageBuilder(
-            content: 'Reloaded ${reloadFunctions.length} modules. Took ${stopwatch.elapsed.formatShort()}'));
-      }),
-    )
+          return context.respond(MessageBuilder(
+              content: 'Reloaded ${reloadFunctions.length} modules. Took ${stopwatch.elapsed.formatShort()}'));
+        }),
+      )
+    ]),
   ],
 );
