@@ -1,7 +1,7 @@
 version: '3.9'
 services:
   running_on_dart:
-    image: ghcr.io/nyxx-discord/running_on_dart:4.10.0-dev.10
+    image: ghcr.io/nyxx-discord/running_on_dart:4.10.0-dev.11
     container_name: running_on_dart
     env_file:
      - .env
