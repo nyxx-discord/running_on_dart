@@ -7,12 +7,19 @@ RUN dart pub get
 COPY . /app
 RUN dart pub get --offline
 
-FROM build as dev
+FROM build AS dev
 
 CMD [ "dart", "run", "bin/running_on_dart.dart" ]
 
-FROM build as prod
+FROM build AS build_prod
 
 RUN dart run nyxx_commands:compile bin/running_on_dart.dart -o bot
+
+FROM scratch AS prod
+
+WORKDIR /app
+
+COPY --from=build_prod /runtime /
+COPY --from=build_prod /app/** /app
 
 CMD [ "./bot.exe" ]
