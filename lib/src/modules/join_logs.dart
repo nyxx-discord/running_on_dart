@@ -32,7 +32,7 @@ class JoinLogsModule implements RequiresInitialization {
     _logger.fine('Sending join message for member ${event.member.id} in channel ${channel.id}');
 
     final descriptionBuffer = StringBuffer('**Member joined**');
-    if (event.member.id.timestamp.difference(DateTime.now()).inDays < 30) {
+    if (DateTime.now().difference(event.member.id.timestamp).inDays < 30) {
       descriptionBuffer.write(" (New user)");
     }
 
@@ -55,7 +55,7 @@ class JoinLogsModule implements RequiresInitialization {
       return;
     }
 
-    if (event.removedMember != null && event.removedMember!.joinedAt.difference(DateTime.now()).inDays > 7) {
+    if (event.removedMember != null && DateTime.now().difference(event.removedMember!.joinedAt).inDays > 7) {
       return;
     }
 

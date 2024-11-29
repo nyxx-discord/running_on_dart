@@ -47,7 +47,7 @@ class MentionsMonitoringModule implements RequiresInitialization {
         _kickMemberForKey(key, value.count);
       }
 
-      if (value.lastUpdated.difference(DateTime.now()).inSeconds > 3) {
+      if (DateTime.now().difference(value.lastUpdated).inSeconds > 3) {
         toRemove.add(key);
       }
     }
