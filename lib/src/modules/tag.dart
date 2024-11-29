@@ -6,7 +6,7 @@ import 'package:running_on_dart/src/repository/tag.dart';
 import 'package:running_on_dart/src/settings.dart';
 import 'package:running_on_dart/src/init.dart';
 
-class TagModule implements RequiresInitialization {
+class TagModule implements RequiresInitialization, Reloadable {
   final List<Tag> tags = [];
   final List<TagUsedEvent> usedEvents = [];
 
@@ -16,6 +16,14 @@ class TagModule implements RequiresInitialization {
   Future<void> init() async {
     _tagRepository.fetchAllActiveTags().then((tags) => this.tags.addAll(tags));
     _tagRepository.fetchTagUsage().then((events) => usedEvents.addAll(events));
+  }
+
+  @override
+  Future<void> reload() {
+    tags.clear();
+    usedEvents.clear();
+
+    return init();
   }
 
   /// Create a new tag.

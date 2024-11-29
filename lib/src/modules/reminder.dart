@@ -65,17 +65,12 @@ class ReminderModule implements RequiresInitialization {
   @override
   Future<void> init() async {
     reminders.addAll(await _reminderRepository.fetchReminders());
-    await _processCurrent();
+
+    Timer.periodic(const Duration(seconds: 1), (t) => _executeScheduled());
 
     _client.onMessageComponentInteraction
         .where((event) => event.interaction.data.type == MessageComponentType.button)
         .listen(_listenForReminderButtonEvent);
-  }
-
-  Future<void> _processCurrent() async {
-    await _executeScheduled();
-
-    Timer(const Duration(seconds: 1), _processCurrent);
   }
 
   Future<void> _executeScheduled() async {
