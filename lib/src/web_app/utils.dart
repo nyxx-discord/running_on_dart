@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:shelf/shelf.dart' as shelf;
@@ -33,6 +34,8 @@ void initSession(shelf.Request request, Map<String, dynamic> userDataJson) {
   session.data['is_admin'] = adminIds.contains(Snowflake.parse(userId));
 
   session.expires = DateTime.now().add(Duration(days: 3));
+
+  Injector.appInstance.get<SessionManagerPlugin>().triggerSaveSessions();
 }
 
 void deleteSession(shelf.Request request) {

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
@@ -8,6 +9,7 @@ import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/modules/tag.dart';
 import 'package:running_on_dart/src/repository/feature_settings.dart';
 import 'package:running_on_dart/src/web_app/mustache.dart';
+import 'package:running_on_dart/src/web_app/session_manager_plugin.dart';
 import 'package:running_on_dart/src/web_app/utils.dart';
 import 'package:running_on_dart/src/services/bot_info.dart';
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
@@ -25,7 +27,19 @@ final clientSecret = getEnv('DISCORD_CLIENT_SECRET');
 final clientRedirectUri = getEnv('DISCORD_REDIRECT_URI');
 
 class WebServer {
-  final Logger _logger = Logger('WebServer');
+  final Logger _logger = Logger('ROD.WebServer');
+
+  Future<shelf.Response> _handleSessions(shelf.Request request) async {
+    if (!isAdminFromSession(request)) {
+      return shelf.Response.forbidden(null);
+    }
+
+    final sessions = jsonDecode(await File(sessionsFile).readAsString()) as Map<String, dynamic>;
+
+    return MustacheResponse(name: "sessions.html", parameters: {
+      'sessions': sessions.values.toList(),
+    });
+  }
 
   Future<shelf.Response> _handleGuilds(shelf.Request request) async {
     if (!isAdminFromSession(request)) {
@@ -43,7 +57,9 @@ class WebServer {
           .fold(0, (previous, channel) => previous + channel.messages.cache.length);
 
       final enabledFeatures =
-          await Injector.appInstance.get<FeatureSettingsRepository>().fetchSettingsForGuild(entry.id);
+          (await Injector.appInstance.get<FeatureSettingsRepository>().fetchSettingsForGuild(entry.id))
+              .map((s) => s.setting.name)
+              .join(", ");
 
       final tagsCount = tagModule.getGuildTags(entry.id).length;
 
@@ -56,7 +72,7 @@ class WebServer {
         'cached_channels': guildChannels.length,
         'cached_messages': guildCachedMessages,
         'cached_roles': entry.roles.cache.length,
-        'enabled_features': enabledFeatures.map((s) => s.setting.name).join(", "),
+        'enabled_features': enabledFeatures.isNotEmpty ? enabledFeatures : "None enabled",
         'tags_count': tagsCount,
       };
     });
@@ -110,6 +126,7 @@ class WebServer {
   Future<shelf_router.Router> _setupRouter() async {
     return shelf_router.Router()
       ..get("/", _sessionAware(_processMustache(_handleIndex)))
+      ..get('/sessions', _sessionAware(_processMustache(_handleSessions)))
       ..get("/guilds", _sessionAware(_processMustache(_handleGuilds)))
       ..get("/redirect", _sessionAware(_handleRedirect))
       ..get("/logout", _sessionAware(_handleLogOut));
