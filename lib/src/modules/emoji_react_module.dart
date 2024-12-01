@@ -87,6 +87,7 @@ class EmojiReactModule implements RequiresInitialization, Reloadable {
 
   Iterable<ApplicationEmoji> _findBuiltinEmojis(String messageContent) =>
       _emojis.where((emoji) => messageContent.contains(emoji.name));
+
   (bool, EmojiReactData?) _fetchSettingForGuild(Snowflake guildId) {
     final result = _emojiFeatureSettingsCache[guildId];
 
