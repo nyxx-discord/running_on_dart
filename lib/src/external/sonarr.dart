@@ -1,8 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-
-String _boolToString(bool boolValue) => boolValue ? 'true' : 'false';
+import 'package:running_on_dart/src/util/util.dart';
 
 class Image {
   final String coverType;
@@ -80,7 +79,7 @@ class SonarrClient {
     final response = await _get("/api/v3/calendar", parameters: {
       if (start != null) 'start': start.toIso8601String(),
       if (end != null) 'end': end.toIso8601String(),
-      if (includeSeries != null) 'includeSeries': _boolToString(includeSeries),
+      if (includeSeries != null) 'includeSeries': boolToString(includeSeries),
     });
 
     final body = jsonDecode(response.body) as List<dynamic>;

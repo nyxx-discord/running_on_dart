@@ -97,6 +97,8 @@ bool boolValue(dynamic value) {
   return false;
 }
 
+String boolToString(bool boolValue) => boolValue ? 'true' : 'false';
+
 extension ModalDataAsMap on ModalContext {
   Map<String, String?> asMap() {
     return interaction.data.components
