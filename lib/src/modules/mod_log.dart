@@ -63,16 +63,16 @@ class ModLogsModule implements RequiresInitialization {
       AuditLogEvent.memberKick => 'Kick',
       AuditLogEvent.memberBanAdd => 'Ban',
       AuditLogEvent.memberUpdate => 'Timeout Added',
+      AuditLogEvent.memberPrune => 'Members Pruned',
       _ => throw UnimplementedError(),
     };
 
     final messageBuffer = StringBuffer('$eventTypeName | ${DateTime.now().format(TimestampStyle.longDateTime)}')
       ..writeln('User: ${targetUser.username} (${targetUser.mention})');
 
-    final auditLogChange = auditLogEntry.changes?.first;
-    if (isMemberTimeoutEntry(auditLogEntry, auditLogChange)) {
-      final timeoutUntil = DateTime.parse(auditLogChange!.newValue as String);
-      messageBuffer.writeln("Until: ${timeoutUntil.format(TimestampStyle.relativeTime)}");
+    final additionalMessageData = getAdditionalMessageData(auditLogEntry);
+    if (additionalMessageData != null) {
+      messageBuffer.writeln(additionalMessageData);
     }
 
     if (auditLogEntry.reason != null) {
@@ -85,6 +85,23 @@ class ModLogsModule implements RequiresInitialization {
       content: messageBuffer.toString(),
       allowedMentions: AllowedMentions.users([targetUser.id]),
     );
+  }
+
+  String? getAdditionalMessageData(AuditLogEntry auditLogEntry) {
+    final auditLogChange = auditLogEntry.changes?.first;
+    if (isMemberTimeoutEntry(auditLogEntry, auditLogChange)) {
+      final timeoutUntil = DateTime.parse(auditLogChange!.newValue as String);
+
+      return "Until: ${timeoutUntil.format(TimestampStyle.relativeTime)}";
+    }
+
+    if (auditLogEntry.actionType == AuditLogEvent.memberPrune) {
+      final membersRemoved = auditLogEntry.options?.membersRemoved ?? '???';
+
+      return "Pruned count: $membersRemoved";
+    }
+
+    return null;
   }
 
   bool isMemberTimeoutEntry(AuditLogEntry auditLogEntry, AuditLogChange? auditLogChange) =>
