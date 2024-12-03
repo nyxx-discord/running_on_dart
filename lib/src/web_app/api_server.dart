@@ -49,6 +49,9 @@ class WebServer {
     final client = Injector.appInstance.get<NyxxGateway>();
     final tagModule = Injector.appInstance.get<TagModule>();
 
+    final sessionJoinedGuilds =
+        (getCustomDataFromSession(request)['user_data']?['joined_guilds'] ?? []) as Iterable<dynamic>;
+
     final guildData = Stream.fromIterable(client.guilds.cache.values).asyncMap((entry) async {
       final guildChannels = client.channels.cache.values.whereType<GuildChannel>().where((c) => c.guildId == entry.id);
 
@@ -74,6 +77,7 @@ class WebServer {
         'cached_roles': entry.roles.cache.length,
         'enabled_features': enabledFeatures.isNotEmpty ? enabledFeatures : "None enabled",
         'tags_count': tagsCount,
+        'is_member': sessionJoinedGuilds.contains(entry.id.toString()),
       };
     });
 
@@ -112,7 +116,13 @@ class WebServer {
     });
     final userDataJson = jsonDecode(userData.body);
 
-    initSession(request, userDataJson);
+    final guildsData = await http.get(Uri.https('discord.com', '/api/users/@me/guilds'), headers: {
+      "Accept": "application/json",
+      "Authorization": "Bearer $token",
+    });
+    final guildsDataJson = jsonDecode(guildsData.body);
+
+    initSession(request, userDataJson, guildsDataJson);
 
     return shelf.Response.seeOther("/");
   }

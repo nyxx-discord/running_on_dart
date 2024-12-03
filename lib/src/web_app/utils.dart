@@ -19,7 +19,7 @@ shelf.Response createUnauthorizedResponse(String errorMessage) => createJsonErro
 
 shelf.Response createForbiddenResponse() => shelf.Response.forbidden(null);
 
-void initSession(shelf.Request request, Map<String, dynamic> userDataJson) {
+void initSession(shelf.Request request, Map<String, dynamic> userDataJson, List<dynamic> guildsDataJson) {
   var session = Session.getSession(request);
   session ??= Session.createSession(request);
 
@@ -30,9 +30,11 @@ void initSession(shelf.Request request, Map<String, dynamic> userDataJson) {
     'name': userDataJson['user']['global_name'] ?? userDataJson['user']['username'],
     'avatar': userDataJson['user']['avatar'],
     'expires_t': userDataJson['expires'],
+    'user_agent': request.headers['user-agent'],
+    'joined_guilds': guildsDataJson.map((guildData) => guildData['id']).toList(),
   };
-  session.data['is_admin'] = adminIds.contains(Snowflake.parse(userId));
 
+  session.data['is_admin'] = adminIds.contains(Snowflake.parse(userId));
   session.expires = DateTime.now().add(Duration(days: 3));
 
   Injector.appInstance.get<SessionManagerPlugin>().triggerSaveSessions();
