@@ -1,6 +1,5 @@
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
-import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/modules/bot_start_duration.dart';
 import 'package:running_on_dart/src/modules/docs.dart';
 import 'package:running_on_dart/src/modules/emoji_react_module.dart';
@@ -56,8 +55,7 @@ Future<void> setupContainer(NyxxGateway client) async {
     ..registerSingleton(() => MentionsMonitoringModule())
     ..registerSingleton(() => KavitaModule())
     ..registerSingleton(() => EmojiReactModule())
-    ..registerSingleton(() => BotInfoService())
-    ..registerDependency<SessionManagerPlugin>(() => client.options.plugins.whereType<SessionManagerPlugin>().first);
+    ..registerSingleton(() => BotInfoService());
 
   await Injector.appInstance.get<DatabaseService>().init();
   await Injector.appInstance.get<FeatureSettingsModule>().init();

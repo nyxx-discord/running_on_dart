@@ -7,8 +7,6 @@ services:
      - .env
     depends_on:
       - db
-    volumes:
-      - "rod_sessions:/sessions"
     networks:
       - internal
       - nginx-proxy_default

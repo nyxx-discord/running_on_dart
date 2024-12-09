@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
@@ -8,8 +7,7 @@ import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/modules/tag.dart';
 import 'package:running_on_dart/src/repository/feature_settings.dart';
-import 'package:running_on_dart/src/web_app/mustache.dart';
-import 'package:running_on_dart/src/web_app/session_manager_plugin.dart';
+import 'package:running_on_dart/src/web_app/jwt.dart';
 import 'package:running_on_dart/src/web_app/utils.dart';
 import 'package:running_on_dart/src/services/bot_info.dart';
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
@@ -19,8 +17,6 @@ import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 
 import 'package:http/http.dart' as http;
-import 'package:shelf_session/cookies_middleware.dart';
-import 'package:shelf_session/session_middleware.dart';
 
 final clientId = getEnv('DISCORD_CLIENT_ID');
 final clientSecret = getEnv('DISCORD_CLIENT_SECRET');
@@ -29,28 +25,9 @@ final clientRedirectUri = getEnv('DISCORD_REDIRECT_URI');
 class WebServer {
   final Logger _logger = Logger('ROD.WebServer');
 
-  Future<shelf.Response> _handleSessions(shelf.Request request) async {
-    if (!isAdminFromSession(request)) {
-      return shelf.Response.forbidden(null);
-    }
-
-    final sessions = jsonDecode(await File(sessionsFile).readAsString()) as Map<String, dynamic>;
-
-    return MustacheResponse(name: "sessions.html", parameters: {
-      'sessions': sessions.values.toList(),
-    });
-  }
-
   Future<shelf.Response> _handleGuilds(shelf.Request request) async {
-    if (!isAdminFromSession(request)) {
-      return shelf.Response.forbidden(null);
-    }
-
     final client = Injector.appInstance.get<NyxxGateway>();
     final tagModule = Injector.appInstance.get<TagModule>();
-
-    final sessionJoinedGuilds =
-        (getCustomDataFromSession(request)['user_data']?['joined_guilds'] ?? []) as Iterable<dynamic>;
 
     final guildData = Stream.fromIterable(client.guilds.cache.values).asyncMap((entry) async {
       final guildChannels = client.channels.cache.values.whereType<GuildChannel>().where((c) => c.guildId == entry.id);
@@ -61,8 +38,7 @@ class WebServer {
 
       final enabledFeatures =
           (await Injector.appInstance.get<FeatureSettingsRepository>().fetchSettingsForGuild(entry.id))
-              .map((s) => s.setting.name)
-              .join(", ");
+              .map((s) => s.setting.name);
 
       final tagsCount = tagModule.getGuildTags(entry.id).length;
 
@@ -71,30 +47,25 @@ class WebServer {
         'name': entry.name,
         'banner': entry.bannerHash,
         'icon': entry.iconHash,
-        'cached_members': entry.members.cache.length,
-        'cached_channels': guildChannels.length,
-        'cached_messages': guildCachedMessages,
-        'cached_roles': entry.roles.cache.length,
-        'enabled_features': enabledFeatures.isNotEmpty ? enabledFeatures : "None enabled",
-        'tags_count': tagsCount,
-        'is_member': sessionJoinedGuilds.contains(entry.id.toString()),
+        'cachedMembers': entry.members.cache.length,
+        'cachedChannels': guildChannels.length,
+        'cachedMessages': guildCachedMessages,
+        'cachedRoles': entry.roles.cache.length,
+        'enabledFeatures': enabledFeatures.toList(),
+        'tagsCount': tagsCount,
       };
     });
 
-    return MustacheResponse(name: "guilds.html", parameters: {
-      'guilds': await guildData.toList(),
-    });
+    return createOkResponse(await guildData.toList());
   }
 
-  Future<shelf.Response> _handleIndex(shelf.Request request) async {
+  Future<shelf.Response> _handleServerInfo(shelf.Request request) async {
     final data = await Injector.appInstance.get<BotInfoService>().getCurrentBotInfo();
 
-    return MustacheResponse(name: "index.html", parameters: {
-      ...data.toJson(),
-    });
+    return createOkResponse(data.toJson());
   }
 
-  Future<shelf.Response> _handleRedirect(shelf.Request request) async {
+  Future<shelf.Response> _handleValidateCode(shelf.Request request) async {
     final authCode = request.url.queryParameters['code'];
 
     final tokenResponse = await http.post(Uri.https('discord.com', '/api/oauth2/token'), body: {
@@ -122,31 +93,31 @@ class WebServer {
     });
     final guildsDataJson = jsonDecode(guildsData.body);
 
-    initSession(request, userDataJson, guildsDataJson);
+    final userId = userDataJson['user']['id'] as String;
 
-    return shelf.Response.seeOther("/");
-  }
+    final permissions = adminIds.contains(Snowflake.parse(userId)) ? JwtPermission.intValues() : <int>[];
 
-  Future<shelf.Response> _handleLogOut(shelf.Request request) async {
-    deleteSession(request);
+    final jwtResponse = generateJwtResponse(userId,
+        userData: {
+          'id': userDataJson['user']['id'],
+          'name': userDataJson['user']['global_name'] ?? userDataJson['user']['username'],
+          'avatar': userDataJson['user']['avatar'],
+          'guilds': guildsDataJson.map((guildData) => guildData['id']).toList(),
+        },
+        permissions: permissions);
 
-    return shelf.Response.seeOther("/");
+    return createOkResponse(jwtResponse);
   }
 
   Future<shelf_router.Router> _setupRouter() async {
     return shelf_router.Router()
-      ..get("/", _sessionAware(_processMustache(_handleIndex)))
-      ..get('/sessions', _sessionAware(_processMustache(_handleSessions)))
-      ..get("/guilds", _sessionAware(_processMustache(_handleGuilds)))
-      ..get("/redirect", _sessionAware(_handleRedirect))
-      ..get("/logout", _sessionAware(_handleLogOut));
+      ..get("/api/server-info", _handleServerInfo)
+      ..get("/api/guilds", _requireJwt(_handleGuilds, [JwtPermission.guilds]))
+      ..get("/api/validate-oauth", _handleValidateCode);
   }
 
-  shelf.Handler _processMustache(shelf.Handler inner) =>
-      shelf.Pipeline().addMiddleware(processMustache()).addHandler(inner);
-
-  shelf.Handler _sessionAware(shelf.Handler inner) =>
-      shelf.Pipeline().addMiddleware(cookiesMiddleware()).addMiddleware(sessionMiddleware()).addHandler(inner);
+  shelf.Handler _requireJwt(shelf.Handler inner, [List<JwtPermission> permissions = const []]) =>
+      shelf.Pipeline().addMiddleware(processJwt(permissions)).addHandler(inner);
 
   Future<void> startServer() async {
     if (!webServerEnabled) {

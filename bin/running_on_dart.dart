@@ -43,7 +43,6 @@ void main() async {
           IgnoreExceptions(),
           commands,
           pagination,
-          SessionManagerPlugin(),
         ],
       ));
 
