@@ -124,7 +124,7 @@ class WebServer {
       ..get("/api/server-info", _handleServerInfo)
       ..get("/api/guilds", _requireJwt(_handleGuilds, [JwtPermission.guilds]))
       ..get("/api/validate-oauth", _handleValidateCode)
-      ..all(r"/<ignored|static/.*.\w+|[^/]+.\w+>", staticHandler)
+      ..all(r"/<ignored|.+\w+\.\w+$>", staticHandler)
       ..all("/<ignored|.*>", _handleIndex);
   }
 
