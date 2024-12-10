@@ -17,6 +17,7 @@ import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 
 import 'package:http/http.dart' as http;
+import 'package:shelf_static/shelf_static.dart';
 
 final clientId = getEnv('DISCORD_CLIENT_ID');
 final clientSecret = getEnv('DISCORD_CLIENT_SECRET');
@@ -110,7 +111,7 @@ class WebServer {
   }
 
   Future<shelf_router.Router> _setupRouter() async {
-    return shelf_router.Router()
+    return shelf_router.Router(notFoundHandler: createStaticHandler('public', defaultDocument: 'index.html'))
       ..get("/api/server-info", _handleServerInfo)
       ..get("/api/guilds", _requireJwt(_handleGuilds, [JwtPermission.guilds]))
       ..get("/api/validate-oauth", _handleValidateCode);

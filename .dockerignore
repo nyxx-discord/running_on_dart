@@ -19,3 +19,5 @@ build/
 .idea/
 
 lib_old/
+
+**/node_modules/**
