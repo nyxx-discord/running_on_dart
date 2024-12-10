@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
@@ -110,11 +111,21 @@ class WebServer {
     return createOkResponse(jwtResponse);
   }
 
+  Future<shelf.Response> _handleIndex(shelf.Request request) async {
+    final content = await File('public/index.html').readAsString();
+
+    return shelf.Response.ok(content, headers: {'content-type': 'text/html'});
+  }
+
   Future<shelf_router.Router> _setupRouter() async {
-    return shelf_router.Router(notFoundHandler: createStaticHandler('public', defaultDocument: 'index.html'))
+    final staticHandler = createStaticHandler('public');
+
+    return shelf_router.Router()
       ..get("/api/server-info", _handleServerInfo)
       ..get("/api/guilds", _requireJwt(_handleGuilds, [JwtPermission.guilds]))
-      ..get("/api/validate-oauth", _handleValidateCode);
+      ..get("/api/validate-oauth", _handleValidateCode)
+      ..all(r"/<ignored|static/.*.\w+|[^/]+.\w+>", staticHandler)
+      ..all("/<ignored|.*>", _handleIndex);
   }
 
   shelf.Handler _requireJwt(shelf.Handler inner, [List<JwtPermission> permissions = const []]) =>
