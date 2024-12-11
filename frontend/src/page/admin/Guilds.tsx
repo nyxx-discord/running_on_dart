@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from 'react';
+import React, {Suspense, use, useEffect, useState} from 'react';
 import {Base} from "../../component/Base";
-import {Guild, useApi} from "../../service/useApi";
+import {fetchGuilds, Guild} from "../../service/api";
 import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import {Alert, Avatar, Stack, Typography} from "@mui/material";
 import {getGuildIcon} from "../../constants";
@@ -54,22 +54,21 @@ function mapApiDataToRows(guilds: Guild[]): GuildRowDef[] {
     });
 }
 
-export default function Guilds() {
-    const [rows, setRows] = useState<GuildRowDef[]>([]);
-    const {fetchGuilds} = useApi();
+const guildDataPromise = fetchGuilds().then(guilds => {
+    return mapApiDataToRows(guilds);
+});
 
-    useEffect(() => {
-        fetchGuilds().then(guilds => {
-            setRows(mapApiDataToRows(guilds));
-        });
-    }, []);
+export default function Guilds() {
+    const rows = use(guildDataPromise);
 
     return (
         <Base>
-            <Stack direction="column" spacing={1}>
-                <Alert severity="error">Table represents cached data, that is available for bot at the moment.</Alert>
-                <DataGrid rows={rows} columns={columns}/>
-            </Stack>
+            <Suspense fallback={<div>Loading...</div>}>
+                <Stack direction="column" spacing={1}>
+                    <Alert severity="error">Table represents cached data, that is available for bot at the moment.</Alert>
+                    <DataGrid rows={rows} columns={columns}/>
+                </Stack>
+            </Suspense>
         </Base>
     );
 }

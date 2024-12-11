@@ -8,5 +8,5 @@ export const ProtectedRoute = (props: Props) => {
         );
     }
 
-    return <div children={props.children} />
+    return <div>{props.children}</div>;
 };

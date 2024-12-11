@@ -1,14 +1,14 @@
 import {Container, Grid2, Paper, Typography} from "@mui/material";
-import React from "react";
-import {BotInfo} from "../../service/useApi";
+import React, {use} from "react";
+import {BotInfo, fetchBotInfo} from "../../service/api";
 import {BotInfoElement} from "./BotInfoElement";
 import {parseISO, formatRelative} from "date-fns";
 
-type BotInfoGridProps = {
-    botInfoStats: BotInfo,
-};
+const botInfoStatusPromise = fetchBotInfo();
 
-export function BotInfoGrid({botInfoStats}: BotInfoGridProps) {
+export function BotInfoGrid() {
+    const botInfoStats = use(botInfoStatusPromise);
+
     const docsUpdatedAt = formatRelative(parseISO(botInfoStats.docsUpdate), new Date());
     const uptime = formatRelative(parseISO(botInfoStats.uptime), new Date());
 

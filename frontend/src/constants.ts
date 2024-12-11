@@ -1,6 +1,6 @@
 import React from "react";
 
-export type Props = {
+export interface Props {
     children: string | React.JSX.Element | React.JSX.Element[]
 }
 

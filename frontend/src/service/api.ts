@@ -30,18 +30,14 @@ export type Guild = {
     tagsCount: number,
 };
 
-export class Api {
-    async fetchBotInfo(): Promise<BotInfo> {
-        const response = await axiosAuthenticated.get<BotInfo>("/api/server-info", {data: {useAuth: false}});
+export async function fetchBotInfo(): Promise<BotInfo> {
+    const response = await axiosAuthenticated.get<BotInfo>("/api/server-info", {data: {useAuth: false}});
 
-        return response.data;
-    }
-
-    async fetchGuilds(): Promise<Guild[]> {
-        const response = await axiosAuthenticated.get<Guild[]>("/api/guilds", {data: {useAuth: true}})
-
-        return response.data;
-    }
+    return response.data;
 }
 
-export const useApi = () => new Api();
+export async function fetchGuilds(): Promise<Guild[]> {
+    const response = await axiosAuthenticated.get<Guild[]>("/api/guilds", {data: {useAuth: true}})
+
+    return response.data;
+}

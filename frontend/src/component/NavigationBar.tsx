@@ -26,11 +26,8 @@ export default function NavigationBar() {
     const userPermissions = getCurrentUserPermissions();
 
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
-    const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorElUser(event.currentTarget);
-    };
-    const handleCloseUserMenu = () => {
-        setAnchorElUser(null);
+    const toggleUserMenu = (event?: React.MouseEvent<HTMLElement>) => {
+        setAnchorElUser(event?.currentTarget ?? null);
     };
 
     const logoutAndRedirect = () => {
@@ -40,14 +37,11 @@ export default function NavigationBar() {
 
     let userElement = <Button href={discordLoginUri}>Login</Button>;
     if (userLoggedIn) {
-        const user = getUser();
-        if (user === null) {
-            throw new Error("User cannot possibly be null");
-        }
+        const user = getUser()!;
 
         userElement = <Box sx={{flexGrow: 0}}>
             <Tooltip title="Open settings">
-                <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
+                <IconButton onClick={toggleUserMenu} sx={{p: 0}}>
                     <Typography sx={{color: 'white', fontSize: 20}} marginInlineEnd="0.5em">{user.name}</Typography>
                     <Avatar alt="User's avatar" src={getUserAvatar(user.id, user.avatar as string)}/>
                 </IconButton>
@@ -66,7 +60,7 @@ export default function NavigationBar() {
                     horizontal: 'right',
                 }}
                 open={Boolean(anchorElUser)}
-                onClose={handleCloseUserMenu}
+                onClose={() => toggleUserMenu()}
             >
                 <MenuItem key="color-mode">
                     <FormControl>

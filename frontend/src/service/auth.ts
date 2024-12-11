@@ -59,11 +59,7 @@ export function getUser(): UserData|null {
 
 export function isLoggedIn(): boolean {
     const tokenPayload = getTokenPayload();
-    if (tokenPayload == null) {
-        return false;
-    }
-
-    if (tokenPayload.exp == null) {
+    if (!tokenPayload?.exp) {
         return false;
     }
 
@@ -72,7 +68,8 @@ export function isLoggedIn(): boolean {
         return false;
 
     }
-    return true
+
+    return true;
 }
 
 export function setAuthData(authData: AuthData) {

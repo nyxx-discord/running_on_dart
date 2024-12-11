@@ -1,11 +1,11 @@
 import {Box, Grid2, Paper, Typography} from "@mui/material";
 import React from "react";
 
-type BotInfoElementProps = {
+interface BotInfoElementProps {
     name: string,
     value: string|number|undefined,
     size?: number,
-};
+}
 
 export function BotInfoElement({name, value, size = 3}:  BotInfoElementProps) {
     return (
