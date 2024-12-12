@@ -1,7 +1,8 @@
-import {Suspense} from 'react';
+import {lazy, Suspense} from 'react';
 
 import {Base} from "../component/Base";
-import {BotInfoGrid} from "../component/botInfo/BotInfoGrid";
+
+const BotInfoGrid = lazy(() => import("../component/botInfo/BotInfoGrid"));
 
 export default function Home() {
     return (

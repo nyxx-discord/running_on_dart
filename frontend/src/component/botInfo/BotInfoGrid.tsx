@@ -1,12 +1,12 @@
 import {Container, Grid2, Paper, Typography} from "@mui/material";
 import React, {use} from "react";
-import {BotInfo, fetchBotInfo} from "../../service/api";
+import {fetchBotInfo} from "../../service/api";
 import {BotInfoElement} from "./BotInfoElement";
 import {parseISO, formatRelative} from "date-fns";
 
 const botInfoStatusPromise = fetchBotInfo();
 
-export function BotInfoGrid() {
+export default function BotInfoGrid() {
     const botInfoStats = use(botInfoStatusPromise);
 
     const docsUpdatedAt = formatRelative(parseISO(botInfoStats.docsUpdate), new Date());

@@ -1,10 +1,11 @@
-import React from 'react';
+import React, {lazy} from 'react';
 import ReactDOM from 'react-dom/client';
 import {BrowserRouter, Route, Routes} from "react-router-dom";
-import Guilds from "./page/admin/Guilds";
 import Home from "./page/Home";
 import Redirect from "./page/Redirect";
 import {ProtectedRoute} from "./component/ProtectedRoute";
+
+const Guilds = lazy(() => import("./page/admin/Guilds"));
 
 ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement
