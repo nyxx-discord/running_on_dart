@@ -1,4 +1,4 @@
-import {axiosAuthenticated} from "./axios";
+import {request} from "./httpClient";
 
 export type BotInfo = {
     nyxxVersion: string;
@@ -31,13 +31,9 @@ export type Guild = {
 };
 
 export async function fetchBotInfo(): Promise<BotInfo> {
-    const response = await axiosAuthenticated.get<BotInfo>("/api/server-info", {data: {useAuth: false}});
-
-    return response.data;
+    return await request<BotInfo>({path: "/api/server-info"});
 }
 
 export async function fetchGuilds(): Promise<Guild[]> {
-    const response = await axiosAuthenticated.get<Guild[]>("/api/guilds", {data: {useAuth: true}})
-
-    return response.data;
+    return await request<Guild[]>({path: "/api/guilds", auth: true});
 }

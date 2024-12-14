@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {Navigate, useSearchParams} from 'react-router-dom';
-import {axios} from "../service/axios";
 import {AuthData, setAuthData} from "../service/auth";
+import {request} from "../service/httpClient";
 
 export default function Redirect() {
     const [searchParams] = useSearchParams();
@@ -9,11 +9,11 @@ export default function Redirect() {
     const [isSuccess, setIsSuccess] = useState(false);
 
     useEffect(() => {
-        axios.get<AuthData>(`/api/validate-oauth?code=${searchParams.get('code')}`).then(result => {
-            if (result.status === 200) {
-                setAuthData(result.data);
-                setIsSuccess(true);
-            }
+        request<AuthData>({path: `/api/validate-oauth?code=${searchParams.get('code')}`}).then(result => {
+            setAuthData(result);
+            setIsSuccess(true);
+        }).catch(_ => {
+            setIsSuccess(false);
         });
     }, []);
 
