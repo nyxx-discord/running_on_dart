@@ -1,6 +1,6 @@
 {
   "name": "fr",
-  "version": "0.1.0",
+  "version": "4.10.0-dev.21",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.13.5",
