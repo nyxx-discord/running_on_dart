@@ -61,6 +61,10 @@ shelf.Middleware processJwt(List<JwtPermission> permissions) => (innerHandler) {
           return createUnauthorizedResponse("Invalid jwt token");
         }
 
+        if (claim.expiry?.isBefore(DateTime.now()) ?? true) {
+          return createUnauthorizedResponse("Token expired");
+        }
+
         final permissions = Set.of(claim.payload['permissions'] ?? []);
         if (!permissions.containsAll(permissionsIntValues)) {
           return createForbiddenResponse("Missing permissions");
