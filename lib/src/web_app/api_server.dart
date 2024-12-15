@@ -42,8 +42,8 @@ class WebServer {
       return createBadRequestResponse("Missing id param");
     }
 
-    final includeRoles = request.requestedUri.queryParameters['includeRoles'] ?? null;
-    final includeChannels = request.requestedUri.queryParameters['includeChannels'] ?? null;
+    final includeRoles = request.requestedUri.queryParameters['includeRoles'];
+    final includeChannels = request.requestedUri.queryParameters['includeChannels'];
 
     try {
       final guild = await client.guilds.get(Snowflake.parse(guildParam));

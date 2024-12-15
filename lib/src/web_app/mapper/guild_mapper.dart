@@ -95,24 +95,28 @@ Stream<JsonApiResponse> mapGuildsToGuildReducedData(Iterable<Guild> guilds) asyn
 Future<JsonApiResponse> mapGuildToDetailsData(Guild guild, String? includeRoles, String? includeChannels) async {
   final client = Injector.appInstance.get<NyxxGateway>();
 
-  final roles = includeRoles != null ? guild.roles.cache.values
-      .map((r) => {
-            "id": r.id.toString(),
-            "name": r.name.toString(),
-            "position": r.position,
-            "isHoisted": r.isHoisted,
-            "color": r.color.toHexString(),
-            "icon": r.iconHash,
-            "flags": r.flags.value,
-            "permission": r.permissions.value
-          })
-      .toList() : [];
+  final roles = includeRoles != null
+      ? guild.roles.cache.values
+          .map((r) => {
+                "id": r.id.toString(),
+                "name": r.name.toString(),
+                "position": r.position,
+                "isHoisted": r.isHoisted,
+                "color": r.color.toHexString(),
+                "icon": r.iconHash,
+                "flags": r.flags.value,
+                "permission": r.permissions.value
+              })
+          .toList()
+      : [];
 
-  final channels = includeChannels != null ? client.channels.cache.values
-      .whereType<GuildChannel>()
-      .where((c) => c.guildId == guild.id)
-      .map((c) => _mapChannelToData(c))
-      .toList() : [];
+  final channels = includeChannels != null
+      ? client.channels.cache.values
+          .whereType<GuildChannel>()
+          .where((c) => c.guildId == guild.id)
+          .map((c) => _mapChannelToData(c))
+          .toList()
+      : [];
 
   return {
     'id': guild.id.toString(),

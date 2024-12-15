@@ -9,7 +9,7 @@ import 'package:running_on_dart/src/web_app/utils.dart';
 Stream<JsonApiResponse> _mapJellyfinInstances(Snowflake guildId) async* {
   final jellyfinConfigRepository = Injector.appInstance.get<JellyfinConfigRepository>();
 
-  for (final instance in await jellyfinConfigRepository.getConfigsForParent(guildId.toString()))  {
+  for (final instance in await jellyfinConfigRepository.getConfigsForParent(guildId.toString())) {
     yield {
       'id': instance.id,
       'name': instance.name,
@@ -26,12 +26,14 @@ Future<JsonApiResponse> mapGuildFeaturesToData(Snowflake guildId) async {
 
   final features = await featuresRepository.fetchSettingsForGuild(guildId);
 
-  final enabledFeaturesData = features.map((f) => {
-    'name': f.setting.name,
-    'data': f.rawData != null ? jsonDecode(f.rawData!) : null,
-    'enabledBy': f.whoEnabled.toString(),
-    'enabledAt': f.addedAt.toIso8601String(),
-  }).toList();
+  final enabledFeaturesData = features
+      .map((f) => {
+            'name': f.setting.name,
+            'data': f.rawData != null ? jsonDecode(f.rawData!) : null,
+            'enabledBy': f.whoEnabled.toString(),
+            'enabledAt': f.addedAt.toIso8601String(),
+          })
+      .toList();
 
   return {
     'enabledFeatures': enabledFeaturesData,
