@@ -6,9 +6,8 @@ import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 
 import 'package:running_on_dart/running_on_dart.dart';
-import 'package:running_on_dart/src/modules/tag.dart';
-import 'package:running_on_dart/src/repository/feature_settings.dart';
 import 'package:running_on_dart/src/web_app/jwt.dart';
+import 'package:running_on_dart/src/web_app/mapper/guild_mapper.dart';
 import 'package:running_on_dart/src/web_app/utils.dart';
 import 'package:running_on_dart/src/services/bot_info.dart';
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
@@ -29,36 +28,30 @@ class WebServer {
 
   Future<shelf.Response> _handleGuilds(shelf.Request request) async {
     final client = Injector.appInstance.get<NyxxGateway>();
-    final tagModule = Injector.appInstance.get<TagModule>();
 
-    final guildData = Stream.fromIterable(client.guilds.cache.values).asyncMap((entry) async {
-      final guildChannels = client.channels.cache.values.whereType<GuildChannel>().where((c) => c.guildId == entry.id);
+    final guildData = await mapGuildsToGuildReducedData(client.guilds.cache.values).toList();
 
-      final guildCachedMessages = guildChannels
-          .whereType<TextChannel>()
-          .fold(0, (previous, channel) => previous + channel.messages.cache.length);
+    return createOkResponse(guildData);
+  }
 
-      final enabledFeatures =
-          (await Injector.appInstance.get<FeatureSettingsRepository>().fetchSettingsForGuild(entry.id))
-              .map((s) => s.setting.name);
+  Future<shelf.Response> _handleGuildDetails(shelf.Request request) async {
+    final client = Injector.appInstance.get<NyxxGateway>();
 
-      final tagsCount = tagModule.getGuildTags(entry.id).length;
+    final guildParam = request.params['id'];
+    if (guildParam == null) {
+      return createBadRequestResponse("Missing id param");
+    }
 
-      return {
-        'id': entry.id.toString(),
-        'name': entry.name,
-        'banner': entry.bannerHash,
-        'icon': entry.iconHash,
-        'cachedMembers': entry.members.cache.length,
-        'cachedChannels': guildChannels.length,
-        'cachedMessages': guildCachedMessages,
-        'cachedRoles': entry.roles.cache.length,
-        'enabledFeatures': enabledFeatures.toList(),
-        'tagsCount': tagsCount,
-      };
-    });
+    final includeRoles = request.requestedUri.queryParameters['includeRoles'] ?? null;
+    final includeChannels = request.requestedUri.queryParameters['includeChannels'] ?? null;
 
-    return createOkResponse(await guildData.toList());
+    try {
+      final guild = await client.guilds.get(Snowflake.parse(guildParam));
+
+      return createOkResponse(await mapGuildToDetailsData(guild, includeRoles, includeChannels));
+    } on HttpResponseError {
+      return createNotFoundResponse();
+    }
   }
 
   Future<shelf.Response> _handleServerInfo(shelf.Request request) async {
@@ -123,6 +116,8 @@ class WebServer {
     return shelf_router.Router()
       ..get("/api/server-info", _handleServerInfo)
       ..get("/api/guilds", _requireJwt(_handleGuilds, [JwtPermission.guilds]))
+      // ..get("/api/guilds/<id>", _requireJwt(_handleGuildDetails, [JwtPermission.guilds]))
+      ..get("/api/guilds/<id>", _handleGuildDetails)
       ..get("/api/validate-oauth", _handleValidateCode)
       ..all(r"/<ignored|.+\w+\.\w+$>", staticHandler)
       ..all("/<ignored|.*>", _handleIndex);

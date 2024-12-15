@@ -4,6 +4,7 @@ import {BrowserRouter, Route, Routes} from "react-router-dom";
 import Redirect from "./page/Redirect";
 import {ProtectedRoute} from "./component/ProtectedRoute";
 
+const GuildDetails = lazy(()=> import('./page/admin/GuildDetails'));
 const Guilds = lazy(() => import("./page/admin/Guilds"));
 const Home = lazy(() => import("./page/Home"));
 
@@ -13,6 +14,7 @@ ReactDOM.createRoot(
     <BrowserRouter>
         <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/guilds/:id" element={<ProtectedRoute><GuildDetails /></ProtectedRoute>} />
             <Route path="/guilds" element={<ProtectedRoute><Guilds /></ProtectedRoute>} />
             <Route path="/redirect" element={<Redirect />}/>
         </Routes>

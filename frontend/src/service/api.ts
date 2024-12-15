@@ -1,6 +1,6 @@
 import {request} from "./httpClient";
 
-export type BotInfo = {
+export interface BotInfo {
     nyxxVersion: string;
     version: string;
     platform: string;
@@ -15,9 +15,9 @@ export type BotInfo = {
     totalReminderCount: number;
     uptime: string;
     docsUpdate: string;
-};
+}
 
-export type Guild = {
+export interface GuildSummary {
     id: string,
     name: string,
     banner?: string,
@@ -28,12 +28,59 @@ export type Guild = {
     cachedRoles: number,
     enabledFeatures: string[],
     tagsCount: number,
-};
+}
+
+export interface Channel {
+    id: string,
+    type: ChannelType,
+    name: string,
+    position: number,
+    isNfsw: boolean,
+    parentId: string,
+}
+
+enum ChannelType {
+    GuildText = 0,
+    Dm,
+    GuildVoice,
+    GroupDm,
+    GuildCategory,
+    GuildAnnouncement,
+    AnnouncementThread,
+    PublicThread,
+    PrivateThread,
+    GuildStageVoice,
+    GuildDirectory,
+    GuildForum,
+    GuildMedia
+}
+
+export interface GuildDetails {
+    id: string,
+    name: string,
+    banner?: string,
+    icon?: string,
+    position: number,
+    isNsfw: boolean,
+    parentId: string,
+    rateLimitPerUser?: string,
+    lastPinTimestamp?: string,
+    cachedMessages?: number,
+    bitrate?: string,
+    userLimit?: string,
+    rtcRegion: string,
+    videoQualityMode: string,
+    channels: Channel[],
+}
 
 export async function fetchBotInfo(): Promise<BotInfo> {
     return await request<BotInfo>({path: "/api/server-info"});
 }
 
-export async function fetchGuilds(): Promise<Guild[]> {
-    return await request<Guild[]>({path: "/api/guilds", auth: true});
+export async function fetchGuilds(): Promise<GuildSummary[]> {
+    return await request<GuildSummary[]>({path: "/api/guilds", auth: true});
+}
+
+export async function fetchGuildDetails(id: string): Promise<GuildDetails> {
+    return await request<GuildDetails>({path: `/api/guilds/${id}`, auth: true});
 }
