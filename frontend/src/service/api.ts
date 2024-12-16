@@ -30,16 +30,7 @@ export interface GuildSummary {
     tagsCount: number,
 }
 
-export interface Channel {
-    id: string,
-    type: ChannelType,
-    name: string,
-    position: number,
-    isNfsw: boolean,
-    parentId: string,
-}
-
-enum ChannelType {
+export enum ChannelType {
     GuildText = 0,
     Dm,
     GuildVoice,
@@ -53,6 +44,63 @@ enum ChannelType {
     GuildDirectory,
     GuildForum,
     GuildMedia
+}
+
+export interface Channel {
+    id: string,
+    type: ChannelType,
+    name: string,
+    position: number,
+    isNfsw: boolean,
+    parentId: string,
+}
+
+export interface Role {
+    id: string,
+    name: string,
+    position: number,
+    isHoisted: boolean,
+    color: string,
+    icon?: string,
+    flags: number,
+    permissions: number,
+}
+
+export interface Tag {
+    id: number,
+    name: string,
+    content: string,
+    enabled: boolean,
+    authorId: boolean,
+}
+
+export interface Feature {
+    name: string,
+    data: any,
+    enableBy: string,
+    enabledAt: string,
+}
+
+export interface JellyfinInstance {
+    id: string,
+    name: string,
+    isDefault: string,
+    basePath: string,
+    sonarrBasePath: string,
+    wizarrBasePath: string,
+}
+
+export interface KavitaInstance {
+    id: string,
+    name: string,
+    isDefault: string,
+    basePath: string,
+}
+
+export interface FeaturesDetails {
+    enabledFeatures: Feature[],
+    jellyfinInstances: JellyfinInstance[],
+    kavitaInstances: KavitaInstance[]
 }
 
 export interface GuildDetails {
@@ -70,7 +118,10 @@ export interface GuildDetails {
     userLimit?: string,
     rtcRegion: string,
     videoQualityMode: string,
+    roles: Role[],
     channels: Channel[],
+    features: FeaturesDetails,
+    tags: Tag[],
 }
 
 export async function fetchBotInfo(): Promise<BotInfo> {

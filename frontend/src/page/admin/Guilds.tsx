@@ -10,6 +10,7 @@ import {getUser} from "../../service/auth";
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 import {useNavigate} from "react-router-dom";
 import {NavigateFunction} from "react-router/dist/development";
+import {getGuildNameElement} from "../../guildUtil";
 
 interface GuildRowDef {
     id: string,
@@ -21,18 +22,6 @@ interface GuildRowDef {
     cachedRoles: number,
     enabledFeatures: string[],
     tagsCount: number,
-}
-
-function getGuildNameElement(guild: GuildSummary): React.JSX.Element|string {
-    const elements = [<Typography>{guild.name}</Typography>];
-
-    if (guild.icon != null) {
-        elements.push(<Avatar src={getGuildIcon(guild.id, guild.icon as string)}/>);
-    }
-
-    return <Stack direction="row" spacing={2} alignItems="center" height={'100%'}>
-        {elements.reverse()}
-    </Stack>;
 }
 
 function mapApiDataToRows(guilds: GuildSummary[]): GuildRowDef[] {

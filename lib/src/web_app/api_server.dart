@@ -42,13 +42,21 @@ class WebServer {
       return createBadRequestResponse("Missing id param");
     }
 
-    final includeRoles = request.requestedUri.queryParameters['includeRoles'];
-    final includeChannels = request.requestedUri.queryParameters['includeChannels'];
+    final channelsLimit = int.tryParse(request.requestedUri.queryParameters['channelsLimit'] ?? '0') ?? 0;
+    final rolesLimit = int.tryParse(request.requestedUri.queryParameters['rolesLimit'] ?? '0')?? 0;
+    final tagsLimit = int.tryParse(request.requestedUri.queryParameters['tagsLimit'] ?? '5') ?? 5;
 
     try {
       final guild = await client.guilds.get(Snowflake.parse(guildParam));
 
-      return createOkResponse(await mapGuildToDetailsData(guild, includeRoles, includeChannels));
+      return createOkResponse(
+          await mapGuildToDetailsData(
+              guild,
+              channelsLimit,
+              rolesLimit,
+              tagsLimit
+          )
+      );
     } on HttpResponseError {
       return createNotFoundResponse();
     }
