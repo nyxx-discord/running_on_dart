@@ -1,6 +1,6 @@
-import {fetchGuildDetails, GuildDetails as GuildDetailsDto, Tag} from "../../service/api";
+import {fetchGuildDetails, GuildDetails as GuildDetailsDto} from "../../service/api";
 import {Base} from "../../component/Base";
-import {Box, Container, Paper, Stack, TextField, Typography} from "@mui/material";
+import {Container, Paper, Stack, TextField, Typography} from "@mui/material";
 import {useParams} from "react-router-dom";
 import React, {Suspense, use} from "react";
 import {getGuildNameElement} from "../../guildUtil";
@@ -10,11 +10,9 @@ interface GuildDetailsDataProps {
     dataPromise: Promise<GuildDetailsDto>
 }
 
-interface TagsDataGridProps {
-    tags: Tag[]
-}
+function TagsDataPaper({dataPromise}: GuildDetailsDataProps) {
+    const data = use(dataPromise);
 
-function TagsDataGrid({tags}: TagsDataGridProps) {
     const columns: GridColDef[] = [
         { field: 'name', headerName: 'Name' },
         { field: 'content', headerName: 'Content', flex: 1 },
@@ -22,48 +20,36 @@ function TagsDataGrid({tags}: TagsDataGridProps) {
         { field: 'authorId', headerName: 'Author', minWidth: 200},
     ];
 
-    return <Container>
-        <DataGrid rows={tags} columns={columns}/>
-    </Container>
+    return <Stack direction="column">
+        <Stack direction='row' spacing={{sm: 5}} sx={{p: '5px'}}>
+            <Typography variant='h5'>Tags</Typography>
+            <TextField id="tag-name-filter" label="Name..." variant="outlined" size='small' />
+        </Stack>
+        <DataGrid rows={data.tags} columns={columns}/>
+    </Stack>;
 }
 
 function GuildDetailsData({dataPromise}: GuildDetailsDataProps) {
     const data = use(dataPromise);
-
     const guildName = getGuildNameElement(data);
 
-    return <Box>
-        <Paper elevation={1} sx={{p: '5px', mb: '5px'}}>
-            <Stack direction="row">
-                <Container>
-                    {guildName}
-                </Container>
-                <Container>
-                    <Typography fontWeight="bold">ID: </Typography>
-                    <Typography>{data.id}</Typography>
-                </Container>
-                <Container>
-                    <Typography fontWeight="bold">Features enabled: </Typography>
-                    <Typography>{data.features.enabledFeatures.length}</Typography>
-                </Container>
-                <Container>
-                    <Typography fontWeight="bold">Tags: </Typography>
-                    <Typography>{data.tags.length}</Typography>
-                </Container>
-            </Stack>
-        </Paper>
-        <Paper elevation={1} sx={{p: '5px'}}>
-            <Stack direction="column">
-                <Container sx={{mb: '5px'}}>
-                    <Stack direction='row' spacing={{sm: 5}}>
-                        <Typography variant='h5'>Tags</Typography>
-                        <TextField id="tag-name-filter" label="Name..." variant="outlined" size='small' />
-                    </Stack>
-                </Container>
-                <TagsDataGrid tags={data.tags} />
-            </Stack>
-        </Paper>
-    </Box>
+    return <Stack direction="row">
+        <Container>
+            {guildName}
+        </Container>
+        <Container>
+            <Typography fontWeight="bold">ID: </Typography>
+            <Typography>{data.id}</Typography>
+        </Container>
+        <Container>
+            <Typography fontWeight="bold">Features enabled: </Typography>
+            <Typography>{data.features.enabledFeatures.length}</Typography>
+        </Container>
+        <Container>
+            <Typography fontWeight="bold">Tags: </Typography>
+            <Typography>{data.tags.length}</Typography>
+        </Container>
+    </Stack>
 }
 
 export default function GuildDetails() {
@@ -71,8 +57,15 @@ export default function GuildDetails() {
     const promise = fetchGuildDetails(id as string);
 
     return <Base>
-        <Suspense fallback={<div>Loading...</div>}>
-            <GuildDetailsData dataPromise={promise} />
-        </Suspense>
+        <Paper elevation={1} sx={{p: '5px', mb: '5px'}}>
+            <Suspense fallback={<span>Loading...</span>}>
+                <GuildDetailsData dataPromise={promise} />
+            </Suspense>
+        </Paper>
+        <Paper elevation={1} sx={{p: '5px'}}>
+            <Suspense fallback={<span>Loading...</span>}>
+                <TagsDataPaper dataPromise={promise} />
+            </Suspense>
+        </Paper>
     </Base>
 }
