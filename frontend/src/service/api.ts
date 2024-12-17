@@ -77,7 +77,7 @@ export interface Tag {
 export interface Feature {
     name: string,
     data: any,
-    enableBy: string,
+    enabledBy: string,
     enabledAt: string,
 }
 

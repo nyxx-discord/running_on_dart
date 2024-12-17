@@ -1,13 +1,50 @@
 import {fetchGuildDetails, GuildDetails as GuildDetailsDto} from "../../service/api";
 import {Base} from "../../component/Base";
-import {Container, Paper, Stack, TextField, Typography} from "@mui/material";
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    Container,
+    Paper,
+    Stack,
+    TextField,
+    Typography
+} from "@mui/material";
 import {useParams} from "react-router-dom";
 import React, {Suspense, use} from "react";
 import {getGuildNameElement} from "../../guildUtil";
 import {DataGrid, GridColDef} from "@mui/x-data-grid";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import {parseISO} from "date-fns";
+import {format} from "date-fns/format";
 
 interface GuildDetailsDataProps {
     dataPromise: Promise<GuildDetailsDto>
+}
+
+function FeaturesPaper({dataPromise}: GuildDetailsDataProps) {
+    const data = use(dataPromise).features;
+
+    const enabledFeatures = data.enabledFeatures.map(f => {
+        const enabledAt = format(parseISO(f.enabledAt), 'MM/dd/yyyy');
+
+        return <Accordion>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                {f.name} (enabled: {enabledAt})
+            </AccordionSummary>
+            <AccordionDetails>
+                <Typography><Typography fontWeight="bold" display="inline">Enabled by: </Typography> {f.enabledBy}</Typography>
+                <Typography><Typography fontWeight="bold" display="inline">Data: </Typography> {JSON.stringify(f.data)}</Typography>
+            </AccordionDetails>
+        </Accordion>;
+    });
+
+    return  <Stack direction="column">
+        <Typography variant='h5'>Features</Typography>
+        <div>
+            {enabledFeatures}
+        </div>
+    </Stack>;
 }
 
 function TagsDataPaper({dataPromise}: GuildDetailsDataProps) {
@@ -62,9 +99,14 @@ export default function GuildDetails() {
                 <GuildDetailsData dataPromise={promise} />
             </Suspense>
         </Paper>
-        <Paper elevation={1} sx={{p: '5px'}}>
+        <Paper elevation={1} sx={{p: '5px', mb: '5px'}}>
             <Suspense fallback={<span>Loading...</span>}>
                 <TagsDataPaper dataPromise={promise} />
+            </Suspense>
+        </Paper>
+        <Paper elevation={1} sx={{p: '5px'}}>
+            <Suspense fallback={<span>Loading...</span>}>
+                <FeaturesPaper dataPromise={promise} />
             </Suspense>
         </Paper>
     </Base>
