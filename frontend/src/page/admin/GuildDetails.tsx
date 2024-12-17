@@ -1,4 +1,4 @@
-import {fetchGuildDetails, GuildDetails as GuildDetailsDto} from "../../service/api";
+import {fetchGuildDetails, fetchGuildTags, GuildDetails as GuildDetailsDto} from "../../service/api";
 import {Base} from "../../component/Base";
 import {
     Accordion,
@@ -11,12 +11,13 @@ import {
     Typography
 } from "@mui/material";
 import {useParams} from "react-router-dom";
-import React, {Suspense, use} from "react";
+import React, {Suspense, use, useEffect, useState} from "react";
 import {getGuildNameElement} from "../../guildUtil";
 import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {parseISO} from "date-fns";
 import {format} from "date-fns/format";
+import {useDebounce} from "use-debounce";
 
 interface GuildDetailsDataProps {
     dataPromise: Promise<GuildDetailsDto>
@@ -33,13 +34,13 @@ function FeaturesPaper({dataPromise}: GuildDetailsDataProps) {
                 {f.name} (enabled: {enabledAt})
             </AccordionSummary>
             <AccordionDetails>
-                <Typography><Typography fontWeight="bold" display="inline">Enabled by: </Typography> {f.enabledBy}</Typography>
-                <Typography><Typography fontWeight="bold" display="inline">Data: </Typography> {JSON.stringify(f.data)}</Typography>
+                <Typography fontWeight="bold" display="inline">Enabled by: </Typography><Typography display="inline">{f.enabledBy}</Typography>
+                <Typography fontWeight="bold">Data: </Typography><Typography>{JSON.stringify(f.data)}</Typography>
             </AccordionDetails>
         </Accordion>;
     });
 
-    return  <Stack direction="column">
+    return <Stack direction="column">
         <Typography variant='h5'>Features</Typography>
         <div>
             {enabledFeatures}
@@ -49,6 +50,18 @@ function FeaturesPaper({dataPromise}: GuildDetailsDataProps) {
 
 function TagsDataPaper({dataPromise}: GuildDetailsDataProps) {
     const data = use(dataPromise);
+
+    const [tags, setTags] = useState(data.tags);
+    const [searchQuery, setSearchQuery] = useState<string|null>(null);
+    const [searchQueryDebounced] = useDebounce(searchQuery, 500);
+
+    useEffect(() => {
+        if (searchQueryDebounced == null) {
+            return;
+        }
+
+        fetchGuildTags({id: data.id, query: searchQueryDebounced}).then((t) => setTags(t));
+    }, [searchQueryDebounced]);
 
     const columns: GridColDef[] = [
         { field: 'name', headerName: 'Name' },
@@ -60,9 +73,9 @@ function TagsDataPaper({dataPromise}: GuildDetailsDataProps) {
     return <Stack direction="column">
         <Stack direction='row' spacing={{sm: 5}} sx={{p: '5px'}}>
             <Typography variant='h5'>Tags</Typography>
-            <TextField id="tag-name-filter" label="Name..." variant="outlined" size='small' />
+            <TextField id="tag-name-filter" label="Name..." variant="outlined" size='small' onChange={(e) => setSearchQuery(e.target.value)} />
         </Stack>
-        <DataGrid rows={data.tags} columns={columns}/>
+        <DataGrid rows={tags} columns={columns} />
     </Stack>;
 }
 

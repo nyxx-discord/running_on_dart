@@ -135,3 +135,18 @@ export async function fetchGuilds(): Promise<GuildSummary[]> {
 export async function fetchGuildDetails(id: string): Promise<GuildDetails> {
     return await request<GuildDetails>({path: `/api/guilds/${id}`, auth: true});
 }
+
+interface FetchGuildTags {
+    id: string,
+    perPage?: number,
+    query?: string,
+}
+
+export async function fetchGuildTags({id, perPage = 5, query}: FetchGuildTags): Promise<Tag[]> {
+    const params = [["perPage", perPage.toString()]];
+    if (query != null && query !== '') {
+        params.push(["query", query])
+    }
+
+    return await request<Tag[]>({path: `/api/guilds/${id}/tags`, auth: true, searchParams: params});
+}

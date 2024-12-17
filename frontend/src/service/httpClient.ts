@@ -6,13 +6,14 @@ export interface FetchParams {
     path: string,
     method?: string,
     auth?: boolean
+    searchParams?: string|string[][]|URLSearchParams|Record<string, string>
 }
 
 interface ErrorResponse {
     message: string
 }
 
-export async function request<T extends object>({path, method = 'GET', auth = false}: FetchParams) {
+export async function request<T extends object>({path, method = 'GET', auth = false, searchParams}: FetchParams) {
     const headers = new Headers();
     headers.append('Accept', 'application/json');
 
@@ -20,8 +21,13 @@ export async function request<T extends object>({path, method = 'GET', auth = fa
         headers.append('authorization', `Bearer ${getToken()}`)
     }
 
+    const url = new URL(`${API_SERVER}${path}`);
+    if (searchParams != undefined) {
+        url.search = new URLSearchParams(searchParams).toString();
+    }
+
     const response = await fetch(
-        `${API_SERVER}${path}`,
+        url,
         {
             method: method,
             headers: headers,
@@ -33,7 +39,7 @@ export async function request<T extends object>({path, method = 'GET', auth = fa
         return responseBody as T;
     }
 
-    if ([400, 401].includes(response.status)) {
+    if ([401, 403].includes(response.status)) {
         logout();
     }
 

@@ -8,6 +8,7 @@ import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/web_app/jwt.dart';
 import 'package:running_on_dart/src/web_app/mapper/guild_mapper.dart';
+import 'package:running_on_dart/src/web_app/mapper/tags_mapper.dart';
 import 'package:running_on_dart/src/web_app/utils.dart';
 import 'package:running_on_dart/src/services/bot_info.dart';
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
@@ -34,6 +35,20 @@ class WebServer {
     return createOkResponse(guildData);
   }
 
+  Future<shelf.Response> _handleGuildTags(shelf.Request request) async {
+    final guildParam = request.params['id'];
+    if (guildParam == null) {
+      return createBadRequestResponse("Missing id param");
+    }
+
+    final searchQuery = request.requestedUri.queryParameters['query'];
+    final tagsLimit = int.tryParse(request.requestedUri.queryParameters['perPage'] ?? '5') ?? 5;
+
+    return createOkResponse(
+      await mapGuildTagsToData(Snowflake.parse(guildParam), tagsLimit, searchQuery: searchQuery).toList(),
+    );
+  }
+
   Future<shelf.Response> _handleGuildDetails(shelf.Request request) async {
     final client = Injector.appInstance.get<NyxxGateway>();
 
@@ -43,20 +58,13 @@ class WebServer {
     }
 
     final channelsLimit = int.tryParse(request.requestedUri.queryParameters['channelsLimit'] ?? '0') ?? 0;
-    final rolesLimit = int.tryParse(request.requestedUri.queryParameters['rolesLimit'] ?? '0')?? 0;
+    final rolesLimit = int.tryParse(request.requestedUri.queryParameters['rolesLimit'] ?? '0') ?? 0;
     final tagsLimit = int.tryParse(request.requestedUri.queryParameters['tagsLimit'] ?? '5') ?? 5;
 
     try {
       final guild = await client.guilds.get(Snowflake.parse(guildParam));
 
-      return createOkResponse(
-          await mapGuildToDetailsData(
-              guild,
-              channelsLimit,
-              rolesLimit,
-              tagsLimit
-          )
-      );
+      return createOkResponse(await mapGuildToDetailsData(guild, channelsLimit, rolesLimit, tagsLimit));
     } on HttpResponseError {
       return createNotFoundResponse();
     }
@@ -126,6 +134,7 @@ class WebServer {
       ..get("/api/guilds", _requireJwt(_handleGuilds, [JwtPermission.guilds]))
       // ..get("/api/guilds/<id>", _requireJwt(_handleGuildDetails, [JwtPermission.guilds]))
       ..get("/api/guilds/<id>", _handleGuildDetails)
+      ..get("/api/guilds/<id>/tags", _handleGuildTags)
       ..get("/api/validate-oauth", _handleValidateCode)
       ..all(r"/<ignored|.+\w+\.\w+$>", staticHandler)
       ..all("/<ignored|.*>", _handleIndex);
@@ -142,8 +151,12 @@ class WebServer {
 
     final router = await _setupRouter();
 
-    final app =
-        const shelf.Pipeline().addMiddleware(shelf.logRequests()).addMiddleware(corsHeaders()).addHandler(router.call);
+    final corsChecker = dev ? originAllowAll : originOneOf(webServerAllowedOrigins.split(','));
+
+    final app = const shelf.Pipeline()
+        .addMiddleware(shelf.logRequests())
+        .addMiddleware(corsHeaders(originChecker: corsChecker))
+        .addHandler(router.call);
 
     _logger.info("Starting server at: http://$webServerHost:$webServerPort/");
     await shelf_io.serve(app, webServerHost, webServerPort);
