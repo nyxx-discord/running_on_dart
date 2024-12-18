@@ -30,7 +30,12 @@ class WebServer {
   Future<shelf.Response> _handleGuilds(shelf.Request request) async {
     final client = Injector.appInstance.get<NyxxGateway>();
 
-    final guildData = await mapGuildsToGuildReducedData(client.guilds.cache.values).toList();
+    final perPage = int.tryParse(request.requestedUri.queryParameters['perPage'] ?? '10') ?? 10;
+    final page = int.tryParse(request.requestedUri.queryParameters['page'] ?? '1') ?? 1;
+
+    final guilds = client.guilds.cache.values.skip(perPage * (page - 1)).take(page);
+
+    final guildData = await mapGuildsToGuildReducedData(guilds).toList();
 
     return createOkResponse(guildData);
   }
@@ -42,10 +47,11 @@ class WebServer {
     }
 
     final searchQuery = request.requestedUri.queryParameters['query'];
-    final tagsLimit = int.tryParse(request.requestedUri.queryParameters['perPage'] ?? '5') ?? 5;
+    final perPage = int.tryParse(request.requestedUri.queryParameters['perPage'] ?? '5') ?? 5;
+    final page = int.tryParse(request.requestedUri.queryParameters['page'] ?? '1') ?? 1;
 
     return createOkResponse(
-      await mapGuildTagsToData(Snowflake.parse(guildParam), tagsLimit, searchQuery: searchQuery).toList(),
+      await mapGuildTagsToData(Snowflake.parse(guildParam), perPage, searchQuery: searchQuery, page: page).toList(),
     );
   }
 

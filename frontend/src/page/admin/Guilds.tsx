@@ -1,15 +1,13 @@
-import React, {Suspense, use} from 'react';
+import React, {Suspense, use, useEffect, useState} from 'react';
 import {Base} from "../../component/Base";
-import {fetchGuilds, GuildSummary} from "../../service/api";
+import {fetchGuilds, fetchGuildTags, GuildSummary} from "../../service/api";
 import {DataGrid, GridActionsCellItem, GridColDef, GridRowParams} from "@mui/x-data-grid";
-import {Alert, Avatar, Stack, Tooltip, Typography} from "@mui/material";
-import {getGuildIcon} from "../../constants";
+import {Alert, Stack, Tooltip, Typography} from "@mui/material";
 import {GridCell} from "../../component/GridCell";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import {getUser} from "../../service/auth";
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 import {useNavigate} from "react-router-dom";
-import {NavigateFunction} from "react-router/dist/development";
 import {getGuildNameElement} from "../../guildUtil";
 
 interface GuildRowDef {
@@ -47,8 +45,20 @@ const guildDataPromise = fetchGuilds().then(guilds => {
 });
 
 function Grid() {
-    const rows = use(guildDataPromise);
     const navigate = useNavigate();
+    const initialRows = use(guildDataPromise);
+
+    const [paginationModel, setPaginationModel] = useState({
+        pageSize: 25,
+        page: 0,
+    });
+    const [rows, setRows] = useState(initialRows);
+
+    useEffect(() => {
+        fetchGuilds({page: paginationModel.page, perPage: paginationModel.pageSize}).then(guilds => {
+            return mapApiDataToRows(guilds);
+        }).then((r) => setRows(r));
+    }, [paginationModel]);
 
     const columns: GridColDef[] = [
         { field: 'name', headerName: 'Name', flex: 1, renderCell: params => params.value},
@@ -83,7 +93,7 @@ function Grid() {
     ];
 
     return (
-        <DataGrid rows={rows} columns={columns}/>
+        <DataGrid rows={rows} columns={columns} paginationModel={paginationModel} onPaginationModelChange={setPaginationModel} />
     );
 }
 
@@ -93,7 +103,7 @@ export default function Guilds() {
             <Stack direction="column" spacing={1}>
             <Alert severity="error">Table represents cached data that is available for bot at the moment</Alert>
                 <Suspense fallback={<div>Loading...</div>}>
-                    <Grid/>
+                    <Grid />
                 </Suspense>
             </Stack>
         </Base>

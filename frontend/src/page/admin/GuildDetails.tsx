@@ -18,6 +18,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {parseISO} from "date-fns";
 import {format} from "date-fns/format";
 import {useDebounce} from "use-debounce";
+import useUpdateEffect from "../../util";
 
 interface GuildDetailsDataProps {
     dataPromise: Promise<GuildDetailsDto>
@@ -54,14 +55,18 @@ function TagsDataPaper({dataPromise}: GuildDetailsDataProps) {
     const [tags, setTags] = useState(data.tags);
     const [searchQuery, setSearchQuery] = useState<string|null>(null);
     const [searchQueryDebounced] = useDebounce(searchQuery, 500);
+    const [paginationModel, setPaginationModel] = useState({
+        pageSize: 5,
+        page: 0,
+    });
 
-    useEffect(() => {
+    useUpdateEffect(() => {
         if (searchQueryDebounced == null) {
             return;
         }
 
-        fetchGuildTags({id: data.id, query: searchQueryDebounced}).then((t) => setTags(t));
-    }, [searchQueryDebounced]);
+        fetchGuildTags({id: data.id, query: searchQueryDebounced, page: paginationModel.page, perPage: paginationModel.pageSize}).then((t) => setTags(t));
+    }, [searchQueryDebounced, paginationModel]);
 
     const columns: GridColDef[] = [
         { field: 'name', headerName: 'Name' },
@@ -75,7 +80,7 @@ function TagsDataPaper({dataPromise}: GuildDetailsDataProps) {
             <Typography variant='h5'>Tags</Typography>
             <TextField id="tag-name-filter" label="Name..." variant="outlined" size='small' onChange={(e) => setSearchQuery(e.target.value)} />
         </Stack>
-        <DataGrid rows={tags} columns={columns} />
+        <DataGrid rows={tags} columns={columns} paginationModel={paginationModel} onPaginationModelChange={setPaginationModel} />
     </Stack>;
 }
 
