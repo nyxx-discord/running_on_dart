@@ -3,7 +3,8 @@ import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/modules/tag.dart';
 import 'package:running_on_dart/src/web_app/utils.dart';
 
-Stream<JsonApiResponse> mapGuildTagsToData(Snowflake guildId, int tagsLimit, {String? searchQuery, int page = 1}) async* {
+Stream<JsonApiResponse> mapGuildTagsToData(Snowflake guildId, int tagsLimit,
+    {String? searchQuery, int page = 1}) async* {
   final tagsModule = Injector.appInstance.get<TagModule>();
 
   var tags = tagsModule.getGuildTags(guildId);
