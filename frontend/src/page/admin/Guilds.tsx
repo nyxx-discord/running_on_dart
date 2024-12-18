@@ -94,7 +94,7 @@ function Grid() {
     ];
 
     return (
-        <DataGrid rows={rows} columns={columns} paginationModel={paginationModel} onPaginationModelChange={setPaginationModel} />
+        <DataGrid rows={rows} columns={columns} paginationModel={paginationModel} onPaginationModelChange={setPaginationModel} paginationMode="server" rowCount={-1} />
     );
 }
 

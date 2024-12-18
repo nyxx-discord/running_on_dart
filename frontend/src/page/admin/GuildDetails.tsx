@@ -61,11 +61,7 @@ function TagsDataPaper({dataPromise}: GuildDetailsDataProps) {
     });
 
     useUpdateEffect(() => {
-        if (searchQueryDebounced == null) {
-            return;
-        }
-
-        fetchGuildTags({id: data.id, query: searchQueryDebounced, page: paginationModel.page, perPage: paginationModel.pageSize}).then((t) => setTags(t));
+        fetchGuildTags({id: data.id, query: searchQueryDebounced ?? '', page: paginationModel.page, perPage: paginationModel.pageSize}).then((t) => setTags(t));
     }, [searchQueryDebounced, paginationModel]);
 
     const columns: GridColDef[] = [
@@ -80,7 +76,7 @@ function TagsDataPaper({dataPromise}: GuildDetailsDataProps) {
             <Typography variant='h5'>Tags</Typography>
             <TextField id="tag-name-filter" label="Name..." variant="outlined" size='small' onChange={(e) => setSearchQuery(e.target.value)} />
         </Stack>
-        <DataGrid rows={tags} columns={columns} paginationModel={paginationModel} onPaginationModelChange={setPaginationModel} />
+        <DataGrid rows={tags} columns={columns} paginationModel={paginationModel} onPaginationModelChange={setPaginationModel} paginationMode="server" rowCount={-1} />
     </Stack>;
 }
 
