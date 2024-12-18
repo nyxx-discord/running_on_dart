@@ -3,7 +3,6 @@ import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/modules/tag.dart';
 import 'package:running_on_dart/src/repository/feature_settings.dart';
 import 'package:running_on_dart/src/web_app/mapper/features_mapper.dart';
-import 'package:running_on_dart/src/web_app/mapper/tags_mapper.dart';
 import 'package:running_on_dart/src/web_app/utils.dart';
 
 JsonApiResponse _mapChannelToData(Channel channel) {
@@ -129,6 +128,5 @@ Future<JsonApiResponse> mapGuildToDetailsData(Guild guild, int channelsLimit, in
     'roles': roles,
     'channels': channels,
     'features': await mapGuildFeaturesToData(guild.id),
-    'tags': await mapGuildTagsToData(guild.id, tagsLimit).toList(),
   };
 }

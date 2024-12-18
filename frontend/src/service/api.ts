@@ -121,7 +121,13 @@ export interface GuildDetails {
     roles: Role[],
     channels: Channel[],
     features: FeaturesDetails,
-    tags: Tag[],
+}
+
+export interface PaginationResponse<T> {
+    page: number,
+    perPage: number,
+    total: number,
+    data: T[],
 }
 
 interface PaginationParameters {
@@ -138,21 +144,21 @@ export async function fetchBotInfo(): Promise<BotInfo> {
     return await request<BotInfo>({path: "/api/server-info"});
 }
 
-export async function fetchGuilds({perPage = 25, page = 0}: PaginationParameters = {}): Promise<GuildSummary[]> {
+export async function fetchGuilds({perPage = 25, page = 0}: PaginationParameters = {}): Promise<PaginationResponse<GuildSummary>> {
     const params = [["perPage", perPage.toString()], ["page", (page + 1).toString()]];
 
-    return await request<GuildSummary[]>({path: "/api/guilds", auth: true, searchParams: params});
+    return await request<PaginationResponse<GuildSummary>>({path: "/api/guilds", auth: true, searchParams: params});
 }
 
 export async function fetchGuildDetails(id: string): Promise<GuildDetails> {
     return await request<GuildDetails>({path: `/api/guilds/${id}`, auth: true});
 }
 
-export async function fetchGuildTags({id, perPage = 5, page = 0, query}: FetchGuildTagsParameters): Promise<Tag[]> {
+export async function fetchGuildTags({id, perPage = 5, page = 0, query}: FetchGuildTagsParameters): Promise<PaginationResponse<Tag>> {
     const params = [["perPage", perPage.toString()], ["page", (page + 1).toString()]];
     if (query != null && query !== '') {
         params.push(["query", query])
     }
 
-    return await request<Tag[]>({path: `/api/guilds/${id}/tags`, auth: true, searchParams: params});
+    return await request<PaginationResponse<Tag>>({path: `/api/guilds/${id}/tags`, auth: true, searchParams: params});
 }

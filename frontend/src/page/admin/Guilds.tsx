@@ -1,6 +1,6 @@
-import React, {Suspense, use, useEffect, useState} from 'react';
+import React, {Suspense, useEffect, useState} from 'react';
 import {Base} from "../../component/Base";
-import {fetchGuilds, fetchGuildTags, GuildSummary} from "../../service/api";
+import {fetchGuilds, GuildSummary} from "../../service/api";
 import {DataGrid, GridActionsCellItem, GridColDef, GridRowParams} from "@mui/x-data-grid";
 import {Alert, Stack, Tooltip, Typography} from "@mui/material";
 import {GridCell} from "../../component/GridCell";
@@ -9,7 +9,6 @@ import {getUser} from "../../service/auth";
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 import {useNavigate} from "react-router-dom";
 import {getGuildNameElement} from "../../guildUtil";
-import useUpdateEffect from "../../util";
 
 interface GuildRowDef {
     id: string,
@@ -41,23 +40,21 @@ function mapApiDataToRows(guilds: GuildSummary[]): GuildRowDef[] {
     });
 }
 
-const guildDataPromise = fetchGuilds().then(guilds => {
-    return mapApiDataToRows(guilds);
-});
-
 function Grid() {
     const navigate = useNavigate();
-    const initialRows = use(guildDataPromise);
 
     const [paginationModel, setPaginationModel] = useState({
         pageSize: 25,
         page: 0,
     });
-    const [rows, setRows] = useState(initialRows);
+    const [rows, setRows] = useState<GuildRowDef[]>([]);
+    const [totalRows, setTotalRows] = useState(-1);
 
-    useUpdateEffect(() => {
+    useEffect(() => {
         fetchGuilds({page: paginationModel.page, perPage: paginationModel.pageSize}).then(guilds => {
-            return mapApiDataToRows(guilds);
+            setTotalRows(guilds.total);
+
+            return mapApiDataToRows(guilds.data);
         }).then((r) => setRows(r));
     }, [paginationModel]);
 
@@ -94,7 +91,7 @@ function Grid() {
     ];
 
     return (
-        <DataGrid rows={rows} columns={columns} paginationModel={paginationModel} onPaginationModelChange={setPaginationModel} paginationMode="server" rowCount={-1} />
+        <DataGrid rows={rows} columns={columns} paginationModel={paginationModel} onPaginationModelChange={setPaginationModel} paginationMode="server" rowCount={totalRows} />
     );
 }
 

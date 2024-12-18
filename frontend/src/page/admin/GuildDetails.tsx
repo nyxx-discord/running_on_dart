@@ -1,4 +1,10 @@
-import {fetchGuildDetails, fetchGuildTags, GuildDetails as GuildDetailsDto} from "../../service/api";
+import {
+    fetchGuildDetails,
+    fetchGuildTags,
+    GuildDetails as GuildDetailsDto,
+    PaginationResponse,
+    Tag
+} from "../../service/api";
 import {Base} from "../../component/Base";
 import {
     Accordion,
@@ -11,15 +17,18 @@ import {
     Typography
 } from "@mui/material";
 import {useParams} from "react-router-dom";
-import React, {Suspense, use, useState} from "react";
+import React, {Suspense, use, useEffect, useState} from "react";
 import {getGuildNameElement} from "../../guildUtil";
 import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {useDebounce} from "use-debounce";
-import useUpdateEffect from "../../util";
 
 interface GuildDetailsDataProps {
     dataPromise: Promise<GuildDetailsDto>
+}
+
+interface TagsDataPaperProps {
+    id: string,
 }
 
 const dateFormat = new Intl.DateTimeFormat('en-GB', { dateStyle: 'short', timeStyle: 'short' });
@@ -49,10 +58,8 @@ function FeaturesPaper({dataPromise}: GuildDetailsDataProps) {
     </Stack>;
 }
 
-function TagsDataPaper({dataPromise}: GuildDetailsDataProps) {
-    const data = use(dataPromise);
-
-    const [tags, setTags] = useState(data.tags);
+function TagsDataPaper({id}: TagsDataPaperProps) {
+    const [tags, setTags] = useState<PaginationResponse<Tag>|null>(null);
     const [searchQuery, setSearchQuery] = useState<string|null>(null);
     const [searchQueryDebounced] = useDebounce(searchQuery, 500);
     const [paginationModel, setPaginationModel] = useState({
@@ -60,8 +67,8 @@ function TagsDataPaper({dataPromise}: GuildDetailsDataProps) {
         page: 0,
     });
 
-    useUpdateEffect(() => {
-        fetchGuildTags({id: data.id, query: searchQueryDebounced ?? '', page: paginationModel.page, perPage: paginationModel.pageSize}).then((t) => setTags(t));
+    useEffect(() => {
+        fetchGuildTags({id: id, query: searchQueryDebounced ?? '', page: paginationModel.page, perPage: paginationModel.pageSize}).then((t) => setTags(t));
     }, [searchQueryDebounced, paginationModel]);
 
     const columns: GridColDef[] = [
@@ -76,7 +83,7 @@ function TagsDataPaper({dataPromise}: GuildDetailsDataProps) {
             <Typography variant='h5'>Tags</Typography>
             <TextField id="tag-name-filter" label="Name..." variant="outlined" size='small' onChange={(e) => setSearchQuery(e.target.value)} />
         </Stack>
-        <DataGrid rows={tags} columns={columns} paginationModel={paginationModel} onPaginationModelChange={setPaginationModel} paginationMode="server" rowCount={-1} />
+        <DataGrid rows={tags?.data ?? []} columns={columns} paginationModel={paginationModel} onPaginationModelChange={setPaginationModel} paginationMode="server" rowCount={tags?.total ?? -1} />
     </Stack>;
 }
 
@@ -96,16 +103,12 @@ function GuildDetailsData({dataPromise}: GuildDetailsDataProps) {
             <Typography fontWeight="bold">Features enabled: </Typography>
             <Typography>{data.features.enabledFeatures.length}</Typography>
         </Container>
-        <Container>
-            <Typography fontWeight="bold">Tags: </Typography>
-            <Typography>{data.tags.length}</Typography>
-        </Container>
     </Stack>
 }
 
 export default function GuildDetails() {
     const {id} = useParams()
-    const promise = fetchGuildDetails(id as string);
+    const promise = fetchGuildDetails(id!);
 
     return <Base>
         <Paper elevation={1} sx={{p: '5px', mb: '5px'}}>
@@ -115,7 +118,7 @@ export default function GuildDetails() {
         </Paper>
         <Paper elevation={1} sx={{p: '5px', mb: '5px'}}>
             <Suspense fallback={<span>Loading...</span>}>
-                <TagsDataPaper dataPromise={promise} />
+                <TagsDataPaper id={id!} />
             </Suspense>
         </Paper>
         <Paper elevation={1} sx={{p: '5px'}}>

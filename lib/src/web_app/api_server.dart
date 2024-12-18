@@ -8,6 +8,7 @@ import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/web_app/jwt.dart';
 import 'package:running_on_dart/src/web_app/mapper/guild_mapper.dart';
+import 'package:running_on_dart/src/web_app/mapper/pagination_mapper.dart';
 import 'package:running_on_dart/src/web_app/mapper/tags_mapper.dart';
 import 'package:running_on_dart/src/web_app/utils.dart';
 import 'package:running_on_dart/src/services/bot_info.dart';
@@ -35,9 +36,12 @@ class WebServer {
 
     final guilds = client.guilds.cache.values.skip(perPage * (page - 1)).take(perPage);
 
-    final guildData = await mapGuildsToGuildReducedData(guilds).toList();
-
-    return createOkResponse(guildData);
+    return createOkResponse(createPaginationResponse(
+      data: await mapGuildsToGuildReducedData(guilds).toList(),
+      page: page,
+      perPage: perPage,
+      total: client.guilds.cache.length,
+    ));
   }
 
   Future<shelf.Response> _handleGuildTags(shelf.Request request) async {
@@ -51,7 +55,7 @@ class WebServer {
     final page = int.tryParse(request.requestedUri.queryParameters['page'] ?? '1') ?? 1;
 
     return createOkResponse(
-      await mapGuildTagsToData(Snowflake.parse(guildParam), perPage, searchQuery: searchQuery, page: page).toList(),
+      await mapGuildTagsToData(Snowflake.parse(guildParam), perPage, searchQuery: searchQuery, page: page),
     );
   }
 
