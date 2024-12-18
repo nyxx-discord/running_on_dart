@@ -33,7 +33,7 @@ class WebServer {
     final perPage = int.tryParse(request.requestedUri.queryParameters['perPage'] ?? '10') ?? 10;
     final page = int.tryParse(request.requestedUri.queryParameters['page'] ?? '1') ?? 1;
 
-    final guilds = client.guilds.cache.values.skip(perPage * (page - 1)).take(page);
+    final guilds = client.guilds.cache.values.skip(perPage * (page - 1)).take(perPage);
 
     final guildData = await mapGuildsToGuildReducedData(guilds).toList();
 

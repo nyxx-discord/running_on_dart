@@ -3,15 +3,15 @@ import React, {Suspense, use} from 'react';
 import {Base} from "../component/Base";
 import {Container, Grid2, Paper, Typography} from "@mui/material";
 import {BotInfoElement} from "../component/BotInfoElement";
-import {formatRelative, parseISO} from "date-fns";
 import {fetchBotInfo} from "../service/api";
+import {formatRelativeTime} from "../util";
 
 const botInfoStatusPromise = fetchBotInfo();
 
 function BotInfoWidget() {
     const botInfoStats = use(botInfoStatusPromise);
 
-    const uptime = formatRelative(parseISO(botInfoStats.uptime), new Date());
+    const uptime = formatRelativeTime(new Date(botInfoStats.uptime));
 
     return <>
         <Typography>Bot Info</Typography>
@@ -43,7 +43,7 @@ function CacheInfoWidget() {
 function ModuleInfoWidget() {
     const botInfoStats = use(botInfoStatusPromise);
 
-    const docsUpdatedAt = formatRelative(parseISO(botInfoStats.docsUpdate), new Date());
+    const docsUpdatedAt = formatRelativeTime(new Date(botInfoStats.docsUpdate));
 
     return <>
         <Typography>Module Info</Typography>

@@ -11,12 +11,10 @@ import {
     Typography
 } from "@mui/material";
 import {useParams} from "react-router-dom";
-import React, {Suspense, use, useEffect, useState} from "react";
+import React, {Suspense, use, useState} from "react";
 import {getGuildNameElement} from "../../guildUtil";
 import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {parseISO} from "date-fns";
-import {format} from "date-fns/format";
 import {useDebounce} from "use-debounce";
 import useUpdateEffect from "../../util";
 
@@ -24,11 +22,13 @@ interface GuildDetailsDataProps {
     dataPromise: Promise<GuildDetailsDto>
 }
 
+const dateFormat = new Intl.DateTimeFormat('en-GB', { dateStyle: 'short', timeStyle: 'short' });
+
 function FeaturesPaper({dataPromise}: GuildDetailsDataProps) {
     const data = use(dataPromise).features;
 
     const enabledFeatures = data.enabledFeatures.map(f => {
-        const enabledAt = format(parseISO(f.enabledAt), 'MM/dd/yyyy');
+        const enabledAt = dateFormat.format(new Date(f.enabledAt))
 
         return <Accordion>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>

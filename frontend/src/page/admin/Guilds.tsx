@@ -9,6 +9,7 @@ import {getUser} from "../../service/auth";
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 import {useNavigate} from "react-router-dom";
 import {getGuildNameElement} from "../../guildUtil";
+import useUpdateEffect from "../../util";
 
 interface GuildRowDef {
     id: string,
@@ -54,7 +55,7 @@ function Grid() {
     });
     const [rows, setRows] = useState(initialRows);
 
-    useEffect(() => {
+    useUpdateEffect(() => {
         fetchGuilds({page: paginationModel.page, perPage: paginationModel.pageSize}).then(guilds => {
             return mapApiDataToRows(guilds);
         }).then((r) => setRows(r));

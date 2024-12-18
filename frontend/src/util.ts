@@ -15,3 +15,29 @@ export default function useUpdateEffect(effect: Function, dependencies = <any>[]
         }
     }, dependencies);
 }
+
+const millisecondsPerSecond = 1000;
+const secondsPerMinute = 60;
+const minutesPerHour = 60;
+const hoursPerDay = 24;
+const daysPerWeek = 7;
+const intervals = {
+    'week':         millisecondsPerSecond * secondsPerMinute * minutesPerHour * hoursPerDay * daysPerWeek,
+    'day':          millisecondsPerSecond * secondsPerMinute * minutesPerHour * hoursPerDay,
+    'hour':         millisecondsPerSecond * secondsPerMinute * minutesPerHour,
+    'minute':       millisecondsPerSecond * secondsPerMinute,
+    'second':       millisecondsPerSecond,
+}
+const relativeDateFormat = new Intl.RelativeTimeFormat('en', { style: 'long' });
+
+export function formatRelativeTime(createTime: Date) {
+    const diff = createTime.valueOf() - new Date().valueOf();
+    for (const interval in intervals) {
+        // @ts-ignore
+        if (intervals[interval] <= Math.abs(diff)) {
+            // @ts-ignore
+            return relativeDateFormat.format(Math.trunc(diff / intervals[interval]), interval);
+        }
+    }
+    return relativeDateFormat.format(diff / 1000, 'second');
+}
