@@ -152,8 +152,18 @@ interface FetchGuildTagsParameters extends PaginationParameters{
     query?: string,
 }
 
+const cache = new Map<string, Promise<MemberDetails>>();
+
 export function fetchMemberDetails(guildId: string, userId: string): Promise<MemberDetails> {
-    return request<MemberDetails>({path: `/api/guilds/${guildId}/members/${userId}`, auth: true});
+    const key = `${guildId}_${userId}`;
+    if (cache.has(key)) {
+        return cache.get(key)!;
+    }
+
+    const response = request<MemberDetails>({path: `/api/guilds/${guildId}/members/${userId}`, auth: true});
+    cache.set(key, response);
+
+    return response;
 }
 
 export function fetchBotInfo(): Promise<BotInfo> {

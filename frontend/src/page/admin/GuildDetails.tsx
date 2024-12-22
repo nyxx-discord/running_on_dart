@@ -22,7 +22,7 @@ import {getGuildNameElement} from "../../guildUtil";
 import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {useDebounce} from "use-debounce";
-import {DiscordUsername} from "../../component/DiscordUsername";
+import {DiscordUserName} from "../../component/DiscordUserName";
 
 interface GuildDetailsDataProps {
     dataPromise: Promise<GuildDetailsDto>
@@ -46,7 +46,10 @@ function FeaturesPaper({dataPromise}: GuildDetailsDataProps) {
                 {f.name} (enabled: {enabledAt})
             </AccordionSummary>
             <AccordionDetails>
-                <Typography fontWeight="bold" display="inline">Enabled by: </Typography><Typography display="inline"><DiscordUsername guildId={originalData.id} userId={f.enabledBy} /></Typography>
+                <Stack direction="row" spacing={2} alignItems="center" height={'100%'}>
+                    <Typography fontWeight="bold" display="inline">Enabled by: </Typography>
+                    <DiscordUserName guildId={originalData.id} userId={f.enabledBy} />
+                </Stack>
                 <Typography fontWeight="bold">Data: </Typography><Typography>{JSON.stringify(f.data)}</Typography>
             </AccordionDetails>
         </Accordion>;
@@ -77,7 +80,7 @@ function TagsDataPaper({id}: TagsDataPaperProps) {
         { field: 'name', headerName: 'Name' },
         { field: 'content', headerName: 'Content', flex: 1 },
         { field: 'enabled', headerName: 'Enabled?'},
-        { field: 'authorId', headerName: 'Author', minWidth: 200},
+        { field: 'authorId', headerName: 'Author', minWidth: 200, renderCell: params => <DiscordUserName guildId={id} userId={params.value} />},
     ];
 
     return <Stack direction="column">
