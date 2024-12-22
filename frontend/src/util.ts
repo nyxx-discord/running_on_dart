@@ -4,7 +4,7 @@ export function containsAll<T>(haystack: T[], required: T[]): boolean {
     return required.every(ai => haystack.includes(ai));
 }
 
-export default function useUpdateEffect(effect: Function, dependencies = <any>[]) {
+export default function useUpdateEffect(effect: Function, dependencies = [] as any) {
     const isInitialMount = useRef(true);
 
     useEffect(() => {
