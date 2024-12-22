@@ -80,6 +80,29 @@ class WebServer {
     }
   }
 
+  Future<shelf.Response> _handleGuildMember(shelf.Request request) async {
+    final client = Injector.appInstance.get<NyxxGateway>();
+
+    final guildParam = request.params['id'];
+    if (guildParam == null) {
+      return createBadRequestResponse("Missing id param");
+    }
+
+    final memberParam = request.params['member_id'];
+    if (memberParam == null) {
+      return createBadRequestResponse("Missing member_id param");
+    }
+
+    try {
+      final guild = await client.guilds.get(Snowflake.parse(guildParam));
+      final member = await guild.members.get(Snowflake.parse(memberParam));
+
+      return createOkResponse(mapMemberToData(guild, member));
+    } on HttpResponseError {
+      return createNotFoundResponse();
+    }
+  }
+
   Future<shelf.Response> _handleServerInfo(shelf.Request request) async {
     final data = await Injector.appInstance.get<BotInfoService>().getCurrentBotInfo();
 
@@ -144,6 +167,7 @@ class WebServer {
       ..get("/api/guilds", _requireJwt(_handleGuilds, [JwtPermission.guilds]))
       ..get("/api/guilds/<id>", _requireJwt(_handleGuildDetails, [JwtPermission.guilds]))
       ..get("/api/guilds/<id>/tags", _requireJwt(_handleGuildTags, [JwtPermission.guilds]))
+      ..get("/api/guilds/<id>/members/<member_id>", _requireJwt(_handleGuildMember, [JwtPermission.guilds]))
       ..get("/api/validate-oauth", _handleValidateCode)
       ..all(r"/<ignored|.+\w+\.\w+$>", staticHandler)
       ..all("/<ignored|.*>", _handleIndex);

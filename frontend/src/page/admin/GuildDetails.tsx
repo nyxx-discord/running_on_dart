@@ -22,6 +22,7 @@ import {getGuildNameElement} from "../../guildUtil";
 import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {useDebounce} from "use-debounce";
+import {DiscordUsername} from "../../component/DiscordUsername";
 
 interface GuildDetailsDataProps {
     dataPromise: Promise<GuildDetailsDto>
@@ -34,7 +35,8 @@ interface TagsDataPaperProps {
 const dateFormat = new Intl.DateTimeFormat('en-GB', { dateStyle: 'short', timeStyle: 'short' });
 
 function FeaturesPaper({dataPromise}: GuildDetailsDataProps) {
-    const data = use(dataPromise).features;
+    const originalData = use(dataPromise);
+    const data = originalData.features;
 
     const enabledFeatures = data.enabledFeatures.map(f => {
         const enabledAt = dateFormat.format(new Date(f.enabledAt))
@@ -44,7 +46,7 @@ function FeaturesPaper({dataPromise}: GuildDetailsDataProps) {
                 {f.name} (enabled: {enabledAt})
             </AccordionSummary>
             <AccordionDetails>
-                <Typography fontWeight="bold" display="inline">Enabled by: </Typography><Typography display="inline">{f.enabledBy}</Typography>
+                <Typography fontWeight="bold" display="inline">Enabled by: </Typography><Typography display="inline"><DiscordUsername guildId={originalData.id} userId={f.enabledBy} /></Typography>
                 <Typography fontWeight="bold">Data: </Typography><Typography>{JSON.stringify(f.data)}</Typography>
             </AccordionDetails>
         </Accordion>;

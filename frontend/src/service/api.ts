@@ -123,6 +123,18 @@ export interface GuildDetails {
     features: FeaturesDetails,
 }
 
+export interface MemberUser {
+    avatar?: string,
+    username: string,
+}
+
+export interface MemberDetails {
+    id: string,
+    nick?: string,
+    avatar?: string,
+    user: MemberUser,
+}
+
 export interface PaginationResponse<T> {
     page: number,
     perPage: number,
@@ -140,25 +152,29 @@ interface FetchGuildTagsParameters extends PaginationParameters{
     query?: string,
 }
 
-export async function fetchBotInfo(): Promise<BotInfo> {
-    return await request<BotInfo>({path: "/api/server-info"});
+export function fetchMemberDetails(guildId: string, userId: string): Promise<MemberDetails> {
+    return request<MemberDetails>({path: `/api/guilds/${guildId}/members/${userId}`, auth: true});
 }
 
-export async function fetchGuilds({perPage = 25, page = 0}: PaginationParameters = {}): Promise<PaginationResponse<GuildSummary>> {
+export function fetchBotInfo(): Promise<BotInfo> {
+    return request<BotInfo>({path: "/api/server-info"});
+}
+
+export function fetchGuilds({perPage = 25, page = 0}: PaginationParameters = {}): Promise<PaginationResponse<GuildSummary>> {
     const params = [["perPage", perPage.toString()], ["page", (page + 1).toString()]];
 
-    return await request<PaginationResponse<GuildSummary>>({path: "/api/guilds", auth: true, searchParams: params});
+    return request<PaginationResponse<GuildSummary>>({path: "/api/guilds", auth: true, searchParams: params});
 }
 
-export async function fetchGuildDetails(id: string): Promise<GuildDetails> {
-    return await request<GuildDetails>({path: `/api/guilds/${id}`, auth: true});
+export function fetchGuildDetails(id: string): Promise<GuildDetails> {
+    return request<GuildDetails>({path: `/api/guilds/${id}`, auth: true});
 }
 
-export async function fetchGuildTags({id, perPage = 5, page = 0, query}: FetchGuildTagsParameters): Promise<PaginationResponse<Tag>> {
+export function fetchGuildTags({id, perPage = 5, page = 0, query}: FetchGuildTagsParameters): Promise<PaginationResponse<Tag>> {
     const params = [["perPage", perPage.toString()], ["page", (page + 1).toString()]];
     if (query != null && query !== '') {
         params.push(["query", query])
     }
 
-    return await request<PaginationResponse<Tag>>({path: `/api/guilds/${id}/tags`, auth: true, searchParams: params});
+    return request<PaginationResponse<Tag>>({path: `/api/guilds/${id}/tags`, auth: true, searchParams: params});
 }

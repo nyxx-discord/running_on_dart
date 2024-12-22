@@ -130,3 +130,15 @@ Future<JsonApiResponse> mapGuildToDetailsData(Guild guild, int channelsLimit, in
     'features': await mapGuildFeaturesToData(guild.id),
   };
 }
+
+JsonApiResponse mapMemberToData(Guild guild, Member member) {
+  return {
+    'id': member.id.toString(),
+    'nick': member.nick,
+    'avatar': member.avatarHash,
+    'user': {
+      'avatar': member.user?.avatarHash,
+      'username': member.user?.globalName ?? member.user?.username,
+    }
+  };
+}
