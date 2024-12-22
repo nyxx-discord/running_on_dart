@@ -142,9 +142,8 @@ class WebServer {
     return shelf_router.Router()
       ..get("/api/server-info", _handleServerInfo)
       ..get("/api/guilds", _requireJwt(_handleGuilds, [JwtPermission.guilds]))
-      // ..get("/api/guilds/<id>", _requireJwt(_handleGuildDetails, [JwtPermission.guilds]))
-      ..get("/api/guilds/<id>", _handleGuildDetails)
-      ..get("/api/guilds/<id>/tags", _handleGuildTags)
+      ..get("/api/guilds/<id>", _requireJwt(_handleGuildDetails, [JwtPermission.guilds]))
+      ..get("/api/guilds/<id>/tags", _requireJwt(_handleGuildTags, [JwtPermission.guilds]))
       ..get("/api/validate-oauth", _handleValidateCode)
       ..all(r"/<ignored|.+\w+\.\w+$>", staticHandler)
       ..all("/<ignored|.*>", _handleIndex);
