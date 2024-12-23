@@ -490,6 +490,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.5"
+  shelf_limiter:
+    dependency: "direct main"
+    description:
+      name: shelf_limiter
+      sha256: adcd253c5121ca70100928cc8f4fcd4c842395777fb7b4782bacbc7f491384d5
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.1"
   shelf_packages_handler:
     dependency: transitive
     description:

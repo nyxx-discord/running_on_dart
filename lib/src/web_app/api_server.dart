@@ -14,6 +14,7 @@ import 'package:running_on_dart/src/web_app/utils.dart';
 import 'package:running_on_dart/src/services/bot_info.dart';
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
 
+import 'package:shelf_limiter/shelf_limiter.dart' as shelf_limiter;
 import 'package:shelf_router/shelf_router.dart' as shelf_router;
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
@@ -186,9 +187,23 @@ class WebServer {
 
     final corsChecker = dev ? originAllowAll : originOneOf(webServerAllowedOrigins.split(','));
 
+    final limiter = shelf_limiter.shelfLimiterByEndpoint(
+      endpointLimits: {
+        '/api/*': shelf_limiter.RateLimiterOptions(
+          maxRequests: 10,
+          windowSize: const Duration(seconds: 10),
+        ),
+      },
+      defaultOptions: shelf_limiter.RateLimiterOptions(
+        maxRequests: 120,
+        windowSize: const Duration(minutes: 1),
+      ),
+    );
+
     final app = const shelf.Pipeline()
         .addMiddleware(shelf.logRequests())
         .addMiddleware(corsHeaders(originChecker: corsChecker))
+        .addMiddleware(limiter)
         .addHandler(router.call);
 
     _logger.info("Starting server at: http://$webServerHost:$webServerPort/");
