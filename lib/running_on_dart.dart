@@ -15,5 +15,6 @@ export 'src/settings.dart';
 export 'src/converter.dart';
 export 'src/error_handler.dart';
 export 'src/init.dart';
+export 'src/cli.dart';
 
 export 'src/web_app/api_server.dart' show WebServer;

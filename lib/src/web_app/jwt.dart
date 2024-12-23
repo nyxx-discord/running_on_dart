@@ -15,12 +15,16 @@ enum JwtPermission {
 
 String get jwtSecret => getEnv('JWT_SECRET');
 
-String generateJwt(String subject, {Duration maxAge = const Duration(days: 3), Map<String, dynamic>? payload}) {
+String generateJwt(String subject,
+    {Duration maxAge = const Duration(days: 3), Map<String, dynamic>? payload, List<int> permissions = const []}) {
   final claimSet = JwtClaim(
     subject: subject,
     issuer: 'Running on Dart',
     maxAge: maxAge,
-    payload: payload,
+    payload: {
+      ...?payload,
+      'permissions': permissions,
+    },
   );
 
   return issueJwtHS256(claimSet, jwtSecret);
@@ -28,9 +32,7 @@ String generateJwt(String subject, {Duration maxAge = const Duration(days: 3), M
 
 Map<String, dynamic> generateJwtResponse(String subject,
     {List<int> permissions = const [], Map<String, dynamic>? userData}) {
-  final token = generateJwt(subject, payload: {
-    'permissions': permissions,
-  });
+  final token = generateJwt(subject, permissions: permissions);
 
   return {
     "token": token,
@@ -44,6 +46,14 @@ JwtClaim? validateJwtToken(String token) {
   } on JwtException {
     return null;
   }
+}
+
+List<int> _getPermissionsFromClaimPayload(JwtClaim claim) {
+  if (!claim.claimNames().contains('pld')) {
+    return [];
+  }
+
+  return claim.payload['permissions'].cast<int>() ?? [];
 }
 
 shelf.Middleware processJwt(List<JwtPermission> permissions) => (innerHandler) {
@@ -65,7 +75,7 @@ shelf.Middleware processJwt(List<JwtPermission> permissions) => (innerHandler) {
           return createUnauthorizedResponse("Token expired");
         }
 
-        final permissions = Set.of(claim.payload['permissions'] ?? []);
+        final permissions = Set.of(_getPermissionsFromClaimPayload(claim));
         if (!permissions.containsAll(permissionsIntValues)) {
           return createForbiddenResponse("Missing permissions");
         }

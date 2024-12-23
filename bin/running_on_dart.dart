@@ -3,7 +3,11 @@ import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 
-void main() async {
+void main(List<String> args) async {
+  if (handleCli(args)) {
+    return;
+  }
+
   final commands = CommandsPlugin(
     prefix: null,
     guild: devGuildId,

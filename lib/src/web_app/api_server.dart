@@ -9,6 +9,7 @@ import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/web_app/jwt.dart';
 import 'package:running_on_dart/src/web_app/mapper/guild_mapper.dart';
 import 'package:running_on_dart/src/web_app/mapper/pagination_mapper.dart';
+import 'package:running_on_dart/src/web_app/mapper/reminders_mapper.dart';
 import 'package:running_on_dart/src/web_app/mapper/tags_mapper.dart';
 import 'package:running_on_dart/src/web_app/utils.dart';
 import 'package:running_on_dart/src/services/bot_info.dart';
@@ -26,14 +27,16 @@ final clientId = getEnv('DISCORD_CLIENT_ID');
 final clientSecret = getEnv('DISCORD_CLIENT_SECRET');
 final clientRedirectUri = getEnv('DISCORD_REDIRECT_URI');
 
+int _intOrDefault(String? value, int def) => int.tryParse(value ?? '$def') ?? def;
+
 class WebServer {
   final Logger _logger = Logger('ROD.WebServer');
 
   Future<shelf.Response> _handleGuilds(shelf.Request request) async {
     final client = Injector.appInstance.get<NyxxGateway>();
 
-    final perPage = int.tryParse(request.requestedUri.queryParameters['perPage'] ?? '10') ?? 10;
-    final page = int.tryParse(request.requestedUri.queryParameters['page'] ?? '1') ?? 1;
+    final perPage = _intOrDefault(request.requestedUri.queryParameters['perPage'], 25);
+    final page = _intOrDefault(request.requestedUri.queryParameters['page'], 1);
 
     final guilds = client.guilds.cache.values.skip(perPage * (page - 1)).take(perPage);
 
@@ -60,6 +63,23 @@ class WebServer {
     );
   }
 
+  Future<shelf.Response> _handleGuildReminders(shelf.Request request) async {
+    final guildParam = request.params['id'];
+    if (guildParam == null) {
+      return createBadRequestResponse("Missing id param");
+    }
+
+    final searchQuery = request.requestedUri.queryParameters['query'];
+    final createdBy = request.requestedUri.queryParameters['created_by'];
+    final perPage = int.tryParse(request.requestedUri.queryParameters['perPage'] ?? '5') ?? 5;
+    final page = int.tryParse(request.requestedUri.queryParameters['page'] ?? '1') ?? 1;
+
+    return createOkResponse(
+      await mapRemindersToData(Snowflake.parse(guildParam), perPage,
+          searchQuery: searchQuery, page: page, createdBy: createdBy),
+    );
+  }
+
   Future<shelf.Response> _handleGuildDetails(shelf.Request request) async {
     final client = Injector.appInstance.get<NyxxGateway>();
 
@@ -68,9 +88,9 @@ class WebServer {
       return createBadRequestResponse("Missing id param");
     }
 
-    final channelsLimit = int.tryParse(request.requestedUri.queryParameters['channelsLimit'] ?? '0') ?? 0;
-    final rolesLimit = int.tryParse(request.requestedUri.queryParameters['rolesLimit'] ?? '0') ?? 0;
-    final tagsLimit = int.tryParse(request.requestedUri.queryParameters['tagsLimit'] ?? '5') ?? 5;
+    final channelsLimit = _intOrDefault(request.requestedUri.queryParameters['channelsLimit'], 0);
+    final rolesLimit = _intOrDefault(request.requestedUri.queryParameters['rolesLimit'], 0);
+    final tagsLimit = _intOrDefault(request.requestedUri.queryParameters['tagsLimit'], 5);
 
     try {
       final guild = await client.guilds.get(Snowflake.parse(guildParam));
@@ -168,6 +188,7 @@ class WebServer {
       ..get("/api/guilds", _requireJwt(_handleGuilds, [JwtPermission.guilds]))
       ..get("/api/guilds/<id>", _requireJwt(_handleGuildDetails, [JwtPermission.guilds]))
       ..get("/api/guilds/<id>/tags", _requireJwt(_handleGuildTags, [JwtPermission.guilds]))
+      ..get("/api/guilds/<id>/reminders", _requireJwt(_handleGuildReminders, [JwtPermission.guilds]))
       ..get("/api/guilds/<id>/members/<member_id>", _requireJwt(_handleGuildMember, [JwtPermission.guilds]))
       ..get("/api/validate-oauth", _handleValidateCode)
       ..all(r"/<ignored|.+\w+\.\w+$>", staticHandler)
@@ -200,11 +221,15 @@ class WebServer {
       ),
     );
 
-    final app = const shelf.Pipeline()
+    var pipeline = const shelf.Pipeline()
         .addMiddleware(shelf.logRequests())
-        .addMiddleware(corsHeaders(originChecker: corsChecker))
-        .addMiddleware(limiter)
-        .addHandler(router.call);
+        .addMiddleware(corsHeaders(originChecker: corsChecker));
+
+    if (!dev) {
+      pipeline = pipeline.addMiddleware(limiter);
+    }
+
+    final app = pipeline.addHandler(router.call);
 
     _logger.info("Starting server at: http://$webServerHost:$webServerPort/");
     await shelf_io.serve(app, webServerHost, webServerPort);
