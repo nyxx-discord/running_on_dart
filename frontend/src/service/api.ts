@@ -135,6 +135,16 @@ export interface MemberDetails {
     user: MemberUser,
 }
 
+export interface Reminder {
+    id: number,
+    channelId: string,
+    userId: string,
+    messageId: string,
+    triggerAt: string,
+    addedAt: string,
+    message: string,
+}
+
 export interface PaginationResponse<T> {
     page: number,
     perPage: number,
@@ -147,23 +157,18 @@ interface PaginationParameters {
     page?: number,
 }
 
-interface FetchGuildTagsParameters extends PaginationParameters{
+interface FetchGuildDataParameters extends PaginationParameters {
     id: string,
     query?: string,
 }
 
-const cache = new Map<string, Promise<MemberDetails>>();
 
 export function fetchMemberDetails(guildId: string, userId: string): Promise<MemberDetails> {
-    const key = `${guildId}_${userId}`;
-    if (cache.has(key)) {
-        return cache.get(key)!;
-    }
+    return request<MemberDetails>({path: `/api/guilds/${guildId}/members/${userId}`, auth: true});
+}
 
-    const response = request<MemberDetails>({path: `/api/guilds/${guildId}/members/${userId}`, auth: true});
-    cache.set(key, response);
-
-    return response;
+export function fetchChannelDetails(guildId: string, channelId: string): Promise<Channel> {
+    return request<Channel>({path: `/api/guilds/${guildId}/channels/${channelId}`, auth: true});
 }
 
 export function fetchBotInfo(): Promise<BotInfo> {
@@ -180,7 +185,16 @@ export function fetchGuildDetails(id: string): Promise<GuildDetails> {
     return request<GuildDetails>({path: `/api/guilds/${id}`, auth: true});
 }
 
-export function fetchGuildTags({id, perPage = 5, page = 0, query}: FetchGuildTagsParameters): Promise<PaginationResponse<Tag>> {
+export function fetchGuildReminders({id, perPage = 5, page = 0, query}: FetchGuildDataParameters): Promise<PaginationResponse<Reminder>> {
+    const params = [["perPage", perPage.toString()], ["page", (page + 1).toString()]];
+    if (query != null && query !== '') {
+        params.push(["query", query])
+    }
+
+    return request<PaginationResponse<Reminder>>({path: `/api/guilds/${id}/reminders`, auth: true, searchParams: params});
+}
+
+export function fetchGuildTags({id, perPage = 5, page = 0, query}: FetchGuildDataParameters): Promise<PaginationResponse<Tag>> {
     const params = [["perPage", perPage.toString()], ["page", (page + 1).toString()]];
     if (query != null && query !== '') {
         params.push(["query", query])

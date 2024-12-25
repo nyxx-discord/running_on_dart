@@ -1,8 +1,8 @@
 import {
-    fetchGuildDetails,
+    fetchGuildDetails, fetchGuildReminders,
     fetchGuildTags,
     GuildDetails as GuildDetailsDto,
-    PaginationResponse,
+    PaginationResponse, Reminder,
     Tag
 } from "../../service/api";
 import {Base} from "../../component/Base";
@@ -23,6 +23,8 @@ import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {useDebounce} from "use-debounce";
 import {DiscordUserName} from "../../component/DiscordUserName";
+import {formatRelativeTime} from "../../util";
+import {DiscordChannel} from "../../component/DiscordChannel";
 
 interface GuildDetailsDataProps {
     dataPromise: Promise<GuildDetailsDto>
@@ -92,6 +94,37 @@ function TagsDataPaper({id}: TagsDataPaperProps) {
     </Stack>;
 }
 
+function ReminderDataPaper({id}: TagsDataPaperProps) {
+    const [reminders, setReminders] = useState<PaginationResponse<Reminder>|null>(null);
+    const [searchQuery, setSearchQuery] = useState<string|null>(null);
+    const [searchQueryDebounced] = useDebounce(searchQuery, 500);
+    const [paginationModel, setPaginationModel] = useState({
+        pageSize: 5,
+        page: 0,
+    });
+
+    useEffect(() => {
+        fetchGuildReminders({id: id, query: searchQueryDebounced ?? '', page: paginationModel.page, perPage: paginationModel.pageSize}).then((t) => setReminders(t));
+    }, [searchQueryDebounced, paginationModel]);
+
+    const columns: GridColDef[] = [
+        { field: 'id', headerName: 'Id' },
+        { field: 'message', headerName: 'Message', flex: 1 },
+        { field: 'userId', headerName: 'Created by', minWidth: 200, renderCell: params => <DiscordUserName guildId={id} userId={params.value} />},
+        { field: 'channelId', headerName: 'Channel', flex: 1, renderCell: params => <DiscordChannel guildId={id} channelId={params.value} />},
+        { field: 'triggerAt', headerName: 'Triggers', flex: 1, renderCell: params => formatRelativeTime(new Date(params.value))},
+        { field: 'addedAt', headerName: 'Created', flex: 1, renderCell: params => formatRelativeTime(new Date(params.value))},
+    ];
+
+    return <Stack direction="column">
+        <Stack direction='row' spacing={{sm: 5}} sx={{p: '5px'}}>
+            <Typography variant='h5'>Tags</Typography>
+            <TextField id="tag-name-filter" label="Name..." variant="outlined" size='small' onChange={(e) => setSearchQuery(e.target.value)} />
+        </Stack>
+        <DataGrid rows={reminders?.data ?? []} columns={columns} paginationModel={paginationModel} onPaginationModelChange={setPaginationModel} paginationMode="server" rowCount={reminders?.total ?? -1} />
+    </Stack>;
+}
+
 function GuildDetailsData({dataPromise}: GuildDetailsDataProps) {
     const data = use(dataPromise);
     const guildName = getGuildNameElement(data);
@@ -122,9 +155,10 @@ export default function GuildDetails() {
             </Suspense>
         </Paper>
         <Paper elevation={1} sx={{p: '5px', mb: '5px'}}>
-            <Suspense fallback={<span>Loading...</span>}>
-                <TagsDataPaper id={id!} />
-            </Suspense>
+            <TagsDataPaper id={id!} />
+        </Paper>
+        <Paper elevation={1} sx={{p: '5px', mb: '5px'}}>
+            <ReminderDataPaper id={id!} />
         </Paper>
         <Paper elevation={1} sx={{p: '5px'}}>
             <Suspense fallback={<span>Loading...</span>}>

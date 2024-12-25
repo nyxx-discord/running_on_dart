@@ -5,7 +5,7 @@ import 'package:running_on_dart/src/repository/feature_settings.dart';
 import 'package:running_on_dart/src/web_app/mapper/features_mapper.dart';
 import 'package:running_on_dart/src/web_app/utils.dart';
 
-JsonApiResponse _mapChannelToData(Channel channel) {
+JsonApiResponse mapChannelToData(Channel channel) {
   final data = <String, dynamic>{
     'id': channel.id.toString(),
     'type': channel.type.value,
@@ -116,7 +116,7 @@ Future<JsonApiResponse> mapGuildToDetailsData(Guild guild, int channelsLimit, in
           .whereType<GuildChannel>()
           .where((c) => c.guildId == guild.id)
           .take(channelsLimit)
-          .map((c) => _mapChannelToData(c))
+          .map((c) => mapChannelToData(c))
           .toList()
       : [];
 

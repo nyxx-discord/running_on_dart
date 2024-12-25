@@ -8,9 +8,9 @@ import 'package:running_on_dart/src/web_app/utils.dart';
 JsonApiResponse _mapReminder(Reminder reminder) {
   return {
     'id': reminder.id,
-    'channelId': reminder.channelId,
-    'userId': reminder.userId,
-    'messageId': reminder.userId,
+    'channelId': reminder.channelId.toString(),
+    'userId': reminder.userId.toString(),
+    'messageId': reminder.userId.toString(),
     'triggerAt': reminder.triggerAt.toIso8601String(),
     'addedAt': reminder.addedAt.toIso8601String(),
     'message': reminder.message,

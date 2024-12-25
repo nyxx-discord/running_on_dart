@@ -124,6 +124,35 @@ class WebServer {
     }
   }
 
+  Future<shelf.Response> _handleGuildChannel(shelf.Request request) async {
+    final client = Injector.appInstance.get<NyxxGateway>();
+
+    final guildParam = request.params['id'];
+    if (guildParam == null) {
+      return createBadRequestResponse("Missing id param");
+    }
+
+    final channelParam = request.params['channel_id'];
+    if (channelParam == null) {
+      return createBadRequestResponse("Missing channel_id param");
+    }
+
+    try {
+      final channel = await client.channels.get(Snowflake.parse(channelParam));
+      if (channel is! GuildChannel) {
+        return createBadRequestResponse("Channel is not guild channel");
+      }
+
+      if ((channel).guildId != Snowflake.parse(guildParam)) {
+        return createBadRequestResponse("Channel doesnt belong to provided guild");
+      }
+
+      return createOkResponse(mapChannelToData(channel));
+    } on HttpResponseError {
+      return createNotFoundResponse();
+    }
+  }
+
   Future<shelf.Response> _handleServerInfo(shelf.Request request) async {
     final data = await Injector.appInstance.get<BotInfoService>().getCurrentBotInfo();
 
@@ -190,6 +219,7 @@ class WebServer {
       ..get("/api/guilds/<id>/tags", _requireJwt(_handleGuildTags, [JwtPermission.guilds]))
       ..get("/api/guilds/<id>/reminders", _requireJwt(_handleGuildReminders, [JwtPermission.guilds]))
       ..get("/api/guilds/<id>/members/<member_id>", _requireJwt(_handleGuildMember, [JwtPermission.guilds]))
+      ..get("/api/guilds/<id>/channels/<channel_id>", _requireJwt(_handleGuildChannel, [JwtPermission.guilds]))
       ..get("/api/validate-oauth", _handleValidateCode)
       ..all(r"/<ignored|.+\w+\.\w+$>", staticHandler)
       ..all("/<ignored|.*>", _handleIndex);
