@@ -74,8 +74,18 @@ export interface Tag {
     authorId: boolean,
 }
 
+export enum FeatureName {
+    poopName = 'poop_name',
+    joinLogs = 'join_logs',
+    modLogs = 'mod_logs',
+    jellyfin = 'jellyfin',
+    mentions = 'mentions',
+    kavita = 'kavita',
+    emojiReact = 'emoji_react',
+}
+
 export interface Feature {
-    name: string,
+    name: FeatureName,
     data: any,
     enabledBy: string,
     enabledAt: string,

@@ -1,4 +1,4 @@
-import {Avatar, Stack, Typography} from "@mui/material";
+import {Avatar, Stack, Tooltip, Typography} from "@mui/material";
 import React, {useEffect, useState} from "react";
 import {fetchMemberDetails, MemberDetails} from "../service/api";
 import {getUserAvatar} from "../constants";
@@ -22,8 +22,10 @@ export function DiscordUserName({guildId, userId}: DiscordUsernameProps) {
         </Stack>;
     }
 
-    return <Stack direction="row" spacing={2} alignItems="center" height={'100%'}>
-        <Avatar src={getUserAvatar(member?.id, member?.user.avatar as string)} sx={{ width: 24, height: 24 }}/>
-        <Typography>{member?.nick ?? member?.user.username}</Typography>
-    </Stack>;
+    return <Tooltip title={userId} arrow placement="bottom-start">
+        <Stack direction="row" spacing={2} alignItems="center" height={'100%'}>
+            <Avatar src={getUserAvatar(member?.id, member?.user.avatar as string)} sx={{ width: 24, height: 24 }}/>
+            <Typography>{member?.nick ?? member?.user.username}</Typography>
+        </Stack>
+    </Tooltip>;
 }

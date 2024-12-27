@@ -1,4 +1,4 @@
-import {Stack, Typography} from "@mui/material";
+import {Stack, Tooltip, Typography} from "@mui/material";
 import React, {useEffect, useState} from "react";
 import {Channel, fetchChannelDetails} from "../service/api";
 import {cache} from "../service/cache";
@@ -21,7 +21,9 @@ export function DiscordChannel({guildId, channelId}: DiscordChannelProps) {
         </Stack>;
     }
 
-    return <Stack direction="row" spacing={2} alignItems="center" height={'100%'}>
-        <Typography>{channel?.name}</Typography>
-    </Stack>;
+    return <Tooltip title={channelId} arrow placement="bottom-start">
+        <Stack direction="row" spacing={2} alignItems="center" height={'100%'}>
+            <Typography>{channel?.name}</Typography>
+        </Stack>
+    </Tooltip>;
 }

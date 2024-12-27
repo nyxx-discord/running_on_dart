@@ -25,6 +25,7 @@ import {useDebounce} from "use-debounce";
 import {DiscordUserName} from "../../component/DiscordUserName";
 import {formatRelativeTime} from "../../util";
 import {DiscordChannel} from "../../component/DiscordChannel";
+import {FeatureData} from "../../component/FeatureData";
 
 interface GuildDetailsDataProps {
     dataPromise: Promise<GuildDetailsDto>
@@ -52,7 +53,7 @@ function FeaturesPaper({dataPromise}: GuildDetailsDataProps) {
                     <Typography fontWeight="bold" display="inline">Enabled by: </Typography>
                     <DiscordUserName guildId={originalData.id} userId={f.enabledBy} />
                 </Stack>
-                <Typography fontWeight="bold">Data: </Typography><Typography>{JSON.stringify(f.data)}</Typography>
+                <FeatureData feature={f} guildId={originalData.id} />
             </AccordionDetails>
         </Accordion>;
     });
@@ -118,7 +119,7 @@ function ReminderDataPaper({id}: TagsDataPaperProps) {
 
     return <Stack direction="column">
         <Stack direction='row' spacing={{sm: 5}} sx={{p: '5px'}}>
-            <Typography variant='h5'>Tags</Typography>
+            <Typography variant='h5'>Reminders</Typography>
             <TextField id="tag-name-filter" label="Name..." variant="outlined" size='small' onChange={(e) => setSearchQuery(e.target.value)} />
         </Stack>
         <DataGrid rows={reminders?.data ?? []} columns={columns} paginationModel={paginationModel} onPaginationModelChange={setPaginationModel} paginationMode="server" rowCount={reminders?.total ?? -1} />

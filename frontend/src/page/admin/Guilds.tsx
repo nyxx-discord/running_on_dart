@@ -72,7 +72,7 @@ function Grid() {
                     <Tooltip title={params.value.join(', ')} arrow placement="bottom-start">
                         <Typography>{params.value.length}</Typography>
                     </Tooltip>
-                </GridCell>
+                </GridCell>;
             }
         },
         { field: 'tagsCount', headerName: 'Tags', minWidth: 100 },
