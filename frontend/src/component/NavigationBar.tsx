@@ -1,6 +1,6 @@
 import React from "react";
 import {discordLoginUri, getUserAvatar} from "../constants";
-import {isLoggedIn, getUser, logout, getCurrentUserPermissions} from "../service/auth";
+import {isLoggedIn, getUser, logout} from "../service/auth";
 
 import {
     AppBar,
@@ -23,7 +23,6 @@ export default function NavigationBar() {
     const navigate = useNavigate();
 
     const userLoggedIn = isLoggedIn();
-    const userPermissions = getCurrentUserPermissions();
 
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
     const toggleUserMenu = (event?: React.MouseEvent<HTMLElement>) => {
@@ -109,7 +108,7 @@ export default function NavigationBar() {
                         Running on Dart
                     </Typography>
                     <Box sx={{flexGrow: 1, display: {xs: 'none', md: 'flex'}}}>
-                        <ProtectedRouteButton permissions={userPermissions} label="Guilds" navigateTo="/guilds" requiredPermissions={[1]} />
+                        <ProtectedRouteButton label="Guilds" navigateTo="/guilds" />
                     </Box>
 
                     {userElement}

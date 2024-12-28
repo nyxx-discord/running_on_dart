@@ -1,7 +1,10 @@
+import 'package:injector/injector.dart';
 import 'package:jaguar_jwt/jaguar_jwt.dart';
+import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/running_on_dart.dart';
 import 'package:running_on_dart/src/web_app/utils.dart';
 import 'package:shelf/shelf.dart' as shelf;
+import 'package:shelf_router/shelf_router.dart';
 
 enum JwtPermission {
   guilds(1);
@@ -80,6 +83,53 @@ shelf.Middleware processJwt(List<JwtPermission> permissions) => (innerHandler) {
           return createForbiddenResponse("Missing permissions");
         }
 
+        final updatedRequest = request.change(context: {
+          'jwt_permissions': permissions,
+          'user_id': claim.subject.toString(),
+        });
+
+        return innerHandler(updatedRequest);
+      };
+    };
+
+shelf.Middleware processGuildUser({List<int> orPermissions = const []}) => (innerHandler) {
+      return (request) {
+        if (orPermissions.isNotEmpty) {
+          final jwtPermissions = getJwtPermissionsFromRequest(request);
+
+          if (jwtPermissions.containsAll(orPermissions)) {
+            return innerHandler(request);
+          }
+        }
+
+        final guildId = request.params['id'];
+        if (guildId == null) {
+          return createForbiddenResponse();
+        }
+
+        final guild = Injector.appInstance.get<NyxxGateway>().guilds.cache[Snowflake.parse(guildId)];
+        if (guild == null) {
+          return createForbiddenResponse();
+        }
+
+        final userId = getLoggedInUserIdFromRequest(request);
+        if (userId == null) {
+          return createForbiddenResponse();
+        }
+
+        final member = guild.members.cache[Snowflake.parse(userId)];
+        if (member == null) {
+          return createForbiddenResponse();
+        }
+
+        if (!(member.permissions?.isAdministrator ?? false)) {
+          return createForbiddenResponse();
+        }
+
         return innerHandler(request);
       };
     };
+
+Set<int> getJwtPermissionsFromRequest(shelf.Request request) => (request.context['jwt_permissions'] as Set<int>?) ?? {};
+
+String? getLoggedInUserIdFromRequest(shelf.Request request) => request.context['user_id'] as String?;

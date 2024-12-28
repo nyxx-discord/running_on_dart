@@ -2,18 +2,19 @@ import {Button} from "@mui/material";
 import React from "react";
 import {useNavigate} from "react-router-dom";
 import {containsAll} from "../util";
+import {getCurrentUserPermissions} from "../service/auth";
 
 export type ProtectedRouteButtonProps = {
-    permissions: number[]|null,
     label: string,
     navigateTo: string,
-    requiredPermissions: number[]
+    requiredPermissions?: number[]
 }
 
-export function ProtectedRouteButton({permissions, label, navigateTo, requiredPermissions}: ProtectedRouteButtonProps) {
+export function ProtectedRouteButton({label, navigateTo, requiredPermissions}: ProtectedRouteButtonProps) {
     const navigate = useNavigate();
+    const userPermissions = getCurrentUserPermissions();
 
-    if (permissions == null || !containsAll(permissions, requiredPermissions)) {
+    if (userPermissions == null || (requiredPermissions != null && !containsAll(userPermissions, requiredPermissions))) {
         return <span></span>;
     }
 

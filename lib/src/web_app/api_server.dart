@@ -38,13 +38,38 @@ class WebServer {
     final perPage = _intOrDefault(request.requestedUri.queryParameters['perPage'], 25);
     final page = _intOrDefault(request.requestedUri.queryParameters['page'], 1);
 
-    final guilds = client.guilds.cache.values.skip(perPage * (page - 1)).take(perPage);
+    final jwtPermissions = getJwtPermissionsFromRequest(request);
+
+    var guilds = client.guilds.cache.values;
+    var total = client.guilds.cache.length;
+    if (!jwtPermissions.contains(JwtPermission.guilds.value)) {
+      final userId = getLoggedInUserIdFromRequest(request);
+      if (userId == null) {
+        guilds = [];
+        total = 0;
+      } else {
+        final userIdSnowflake = Snowflake.parse(userId);
+
+        guilds = guilds.where((guild) {
+          final member = guild.members.cache[userIdSnowflake];
+          if (member == null) {
+            return false;
+          }
+
+          return member.permissions?.isAdministrator ?? false;
+        });
+
+        total = guilds.length;
+      }
+    }
+
+    guilds = guilds.skip(perPage * (page - 1)).take(perPage);
 
     return createOkResponse(createPaginationResponse(
       data: await mapGuildsToGuildReducedData(guilds).toList(),
       page: page,
       perPage: perPage,
-      total: client.guilds.cache.length,
+      total: total,
     ));
   }
 
@@ -214,12 +239,15 @@ class WebServer {
 
     return shelf_router.Router()
       ..get("/api/server-info", _handleServerInfo)
-      ..get("/api/guilds", _requireJwt(_handleGuilds, [JwtPermission.guilds]))
-      ..get("/api/guilds/<id>", _requireJwt(_handleGuildDetails, [JwtPermission.guilds]))
-      ..get("/api/guilds/<id>/tags", _requireJwt(_handleGuildTags, [JwtPermission.guilds]))
-      ..get("/api/guilds/<id>/reminders", _requireJwt(_handleGuildReminders, [JwtPermission.guilds]))
-      ..get("/api/guilds/<id>/members/<member_id>", _requireJwt(_handleGuildMember, [JwtPermission.guilds]))
-      ..get("/api/guilds/<id>/channels/<channel_id>", _requireJwt(_handleGuildChannel, [JwtPermission.guilds]))
+      ..get("/api/guilds", _requireJwt(_handleGuilds))
+      ..get("/api/guilds/<id>", _requireJwt(_requireAdminUserOrPerms(_handleGuildDetails, [JwtPermission.guilds])))
+      ..get("/api/guilds/<id>/tags", _requireJwt(_requireAdminUserOrPerms(_handleGuildTags, [JwtPermission.guilds])))
+      ..get("/api/guilds/<id>/reminders",
+          _requireJwt(_requireAdminUserOrPerms(_handleGuildReminders, [JwtPermission.guilds])))
+      ..get("/api/guilds/<id>/members/<member_id>",
+          _requireJwt(_requireAdminUserOrPerms(_handleGuildMember, [JwtPermission.guilds])))
+      ..get("/api/guilds/<id>/channels/<channel_id>",
+          _requireJwt(_requireAdminUserOrPerms(_handleGuildChannel, [JwtPermission.guilds])))
       ..get("/api/validate-oauth", _handleValidateCode)
       ..all(r"/<ignored|.+\w+\.\w+$>", staticHandler)
       ..all("/<ignored|.*>", _handleIndex);
@@ -227,6 +255,11 @@ class WebServer {
 
   shelf.Handler _requireJwt(shelf.Handler inner, [List<JwtPermission> permissions = const []]) =>
       shelf.Pipeline().addMiddleware(processJwt(permissions)).addHandler(inner);
+
+  shelf.Handler _requireAdminUserOrPerms(shelf.Handler inner, [List<JwtPermission> orPermissions = const []]) =>
+      shelf.Pipeline()
+          .addMiddleware(processGuildUser(orPermissions: orPermissions.map((e) => e.value).toList()))
+          .addHandler(inner);
 
   Future<void> startServer() async {
     if (!webServerEnabled) {

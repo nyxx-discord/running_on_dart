@@ -5,7 +5,7 @@ bool handleCli(List<String> args) {
   if (args.isNotEmpty && dev) {
     final commandArg = args.first;
     if (commandArg == 'generate-test-jwt') {
-      print(generateJwt('test', maxAge: Duration(days: 31), permissions: JwtPermission.intValues()));
+      print(generateJwt('1300543841996374131', maxAge: Duration(days: 31), permissions: []));
       return true;
     }
   }
