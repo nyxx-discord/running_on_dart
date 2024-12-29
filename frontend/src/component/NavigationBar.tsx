@@ -16,7 +16,7 @@ import {
     Typography, useColorScheme
 } from "@mui/material";
 import {useNavigate} from "react-router-dom";
-import {ProtectedRouteButton} from "./ProtectedRouteButton";
+import {ProtectedElement} from "./ProtectedElement";
 
 export default function NavigationBar() {
     const { mode, setMode } = useColorScheme();
@@ -108,7 +108,9 @@ export default function NavigationBar() {
                         Running on Dart
                     </Typography>
                     <Box sx={{flexGrow: 1, display: {xs: 'none', md: 'flex'}}}>
-                        <ProtectedRouteButton label="Guilds" navigateTo="/guilds" />
+                        <ProtectedElement requiresLogin={true}>
+                            <Button onClick={() => navigate('/guilds')} sx={{my: 2, color: 'white', display: 'block'}}>Guilds</Button>
+                        </ProtectedElement>
                     </Box>
 
                     {userElement}
