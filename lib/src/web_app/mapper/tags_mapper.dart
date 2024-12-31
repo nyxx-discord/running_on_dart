@@ -5,7 +5,7 @@ import 'package:running_on_dart/src/modules/tag.dart';
 import 'package:running_on_dart/src/web_app/mapper/pagination_mapper.dart';
 import 'package:running_on_dart/src/web_app/utils.dart';
 
-JsonApiResponse _mapGuildTag(Tag tag) {
+JsonApiResponse mapGuildTag(Tag tag) {
   return {
     'id': tag.id,
     'name': tag.name,
@@ -25,7 +25,7 @@ Future<JsonApiResponse> mapGuildTagsToData(Snowflake guildId, int tagsLimit,
   }
 
   return createPaginationResponse(
-    data: tags.skip(tagsLimit * (page - 1)).take(tagsLimit).map(_mapGuildTag).toList(),
+    data: tags.skip(tagsLimit * (page - 1)).take(tagsLimit).map(mapGuildTag).toList(),
     total: tags.length,
     perPage: tagsLimit,
     page: page,

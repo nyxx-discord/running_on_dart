@@ -22,9 +22,13 @@ export function DiscordUserName({guildId, userId}: DiscordUsernameProps) {
         </Stack>;
     }
 
+    const avatarSrc = member.user.avatar
+        ? getUserAvatar(member?.id, member?.user.avatar as string)
+        : undefined;
+
     return <Tooltip title={userId} arrow placement="bottom-start">
         <Stack direction="row" spacing={2} alignItems="center" height={'100%'}>
-            <Avatar src={getUserAvatar(member?.id, member?.user.avatar as string)} sx={{ width: 24, height: 24 }}/>
+            <Avatar src={avatarSrc} sx={{ width: 24, height: 24 }}/>
             <Typography>{member?.nick ?? member?.user.username}</Typography>
         </Stack>
     </Tooltip>;

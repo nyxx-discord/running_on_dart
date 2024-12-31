@@ -212,3 +212,7 @@ export function fetchGuildTags({id, perPage = 5, page = 0, query}: FetchGuildDat
 
     return request<PaginationResponse<Tag>>({path: `/api/guilds/${id}/tags`, auth: true, searchParams: params});
 }
+
+export function createTag(id: string, body: any): Promise<Tag> {
+    return request<Tag>({path: `/api/guilds/${id}/tags`, method: 'POST', body: body, auth: true});
+}

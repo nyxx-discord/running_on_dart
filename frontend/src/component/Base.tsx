@@ -1,10 +1,10 @@
 import React from 'react';
 
-import {Props} from "../constants";
+import {DefaultAppProps} from "../constants";
 import AppBar from "./NavigationBar";
 import {Container, createTheme, CssBaseline, ThemeProvider} from "@mui/material"
 
-export function Base({children}: Props) {
+export function Base({children}: DefaultAppProps) {
     const theme = createTheme({
         colorSchemes: {
             dark: true,

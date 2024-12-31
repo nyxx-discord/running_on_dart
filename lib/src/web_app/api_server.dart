@@ -6,6 +6,8 @@ import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 
 import 'package:running_on_dart/running_on_dart.dart';
+import 'package:running_on_dart/src/models/tag.dart';
+import 'package:running_on_dart/src/modules/tag.dart';
 import 'package:running_on_dart/src/web_app/jwt.dart';
 import 'package:running_on_dart/src/web_app/mapper/guild_mapper.dart';
 import 'package:running_on_dart/src/web_app/mapper/pagination_mapper.dart';
@@ -19,15 +21,45 @@ import 'package:shelf_limiter/shelf_limiter.dart' as shelf_limiter;
 import 'package:shelf_router/shelf_router.dart' as shelf_router;
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
+import 'package:shelf_static/shelf_static.dart';
 
 import 'package:http/http.dart' as http;
-import 'package:shelf_static/shelf_static.dart';
+
+import 'package:acanthis/acanthis.dart' as acanthis;
 
 final clientId = getEnv('DISCORD_CLIENT_ID');
 final clientSecret = getEnv('DISCORD_CLIENT_SECRET');
 final clientRedirectUri = getEnv('DISCORD_REDIRECT_URI');
 
 int _intOrDefault(String? value, int def) => int.tryParse(value ?? '$def') ?? def;
+
+Snowflake? tryParseSnowflake(dynamic value) {
+  if (value == null) {
+    return null;
+  }
+
+  try {
+    return Snowflake.parse(value);
+  } on Exception {
+    return null;
+  }
+}
+
+extension SnowflakeValidion on acanthis.AcanthisString {
+  acanthis.AcanthisString snowflake() {
+    addCheck(acanthis.AcanthisCheck<String>(
+        onCheck: (value) => tryParseSnowflake(value) != null,
+        error: 'Value is not valid snowflake',
+        name: 'snowflake'));
+    return this;
+  }
+}
+
+final tagPostSchema = acanthis.object({
+  'name': acanthis.string().required().min(3).max(255),
+  'content': acanthis.string().required().min(1).max(1024),
+  'authorId': acanthis.string().required().snowflake(),
+});
 
 class WebServer {
   final Logger _logger = Logger('ROD.WebServer');
@@ -86,6 +118,40 @@ class WebServer {
     return createOkResponse(
       await mapGuildTagsToData(Snowflake.parse(guildParam), perPage, searchQuery: searchQuery, page: page),
     );
+  }
+
+  Future<shelf.Response> _handleCreateGuildTag(shelf.Request request) async {
+    final guildParam = request.params['id'];
+    if (guildParam == null) {
+      return createBadRequestResponse("Missing id param");
+    }
+
+    final body = await request.readAsString();
+    final bodyJson = jsonDecode(body);
+
+    final validationResult = tagPostSchema.tryParse(bodyJson);
+    if (!validationResult.success) {
+      return createValidationErrorResponse(validationResult.errors);
+    }
+
+    final authorId = tryParseSnowflake(bodyJson['authorId']);
+    if (authorId == null) {
+      return createValidationErrorResponse({
+        if (authorId == null) 'authorId': 'Not a valid snowflake',
+      });
+    }
+
+    final tag = Tag(
+        name: bodyJson['name'],
+        content: bodyJson['content'],
+        enabled: true,
+        guildId: Snowflake.parse(guildParam),
+        authorId: authorId);
+
+    final tagModule = Injector.appInstance.get<TagModule>();
+    await tagModule.createTag(tag);
+
+    return createOkResponse(mapGuildTag(tag));
   }
 
   Future<shelf.Response> _handleGuildReminders(shelf.Request request) async {
@@ -242,6 +308,8 @@ class WebServer {
       ..get("/api/guilds", _requireJwt(_handleGuilds))
       ..get("/api/guilds/<id>", _requireJwt(_requireAdminUserOrPerms(_handleGuildDetails, [JwtPermission.guilds])))
       ..get("/api/guilds/<id>/tags", _requireJwt(_requireAdminUserOrPerms(_handleGuildTags, [JwtPermission.guilds])))
+      ..post(
+          "/api/guilds/<id>/tags", _requireJwt(_requireAdminUserOrPerms(_handleCreateGuildTag, [JwtPermission.guilds])))
       ..get("/api/guilds/<id>/reminders",
           _requireJwt(_requireAdminUserOrPerms(_handleGuildReminders, [JwtPermission.guilds])))
       ..get("/api/guilds/<id>/members/<member_id>",

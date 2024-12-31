@@ -1,9 +1,9 @@
 import {getCurrentUserPermissions} from "../service/auth";
 import {containsAll} from "../util";
 import React from "react";
-import {Props} from "../constants";
+import {DefaultAppProps} from "../constants";
 
-export interface ProtectedElementProps extends Props {
+export interface ProtectedElementProps extends DefaultAppProps {
     requiredPermissions?: number[],
     requiresLogin?: boolean
 }

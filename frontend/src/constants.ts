@@ -1,7 +1,7 @@
-import React from "react";
+import {ReactNode} from "react";
 
-export interface Props {
-    children: React.ReactNode
+export interface DefaultAppProps {
+    children: ReactNode
 }
 
 export const discordLoginUri = encodeURI(`https://discord.com/oauth2/authorize?client_id=${process.env.REACT_APP_CLIENT_ID}&response_type=code&redirect_uri=${process.env.REACT_APP_REDIRECT_URL}&scope=identify+guilds`);

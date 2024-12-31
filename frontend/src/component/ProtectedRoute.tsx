@@ -1,7 +1,7 @@
 import {isLoggedIn} from "../service/auth";
-import {Props} from "../constants";
+import {DefaultAppProps} from "../constants";
 
-export const ProtectedRoute = (props: Props) => {
+export const ProtectedRoute = (props: DefaultAppProps) => {
     if (!isLoggedIn()) {
         return (
             <div>Not logged in</div>

@@ -19,6 +19,14 @@ shelf.Response createBadRequestResponse(String errorMessage) => createJsonErrorR
 
 shelf.Response createUnauthorizedResponse(String errorMessage) => createJsonErrorResponse(403, errorMessage);
 
+shelf.Response createValidationErrorResponse(JsonApiResponse errors) => shelf.Response(
+      422,
+      body: jsonEncode({
+        'errors': errors,
+      }),
+      headers: {"Content-Type": 'application/json'},
+    );
+
 shelf.Response createForbiddenResponse([String? errorMessage]) {
   if (errorMessage != null) {
     return createJsonErrorResponse(401, errorMessage);

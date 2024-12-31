@@ -1,4 +1,5 @@
 import {
+    createTag,
     fetchGuildDetails, fetchGuildReminders,
     fetchGuildTags,
     GuildDetails as GuildDetailsDto,
@@ -9,8 +10,8 @@ import {Base} from "../../component/Base";
 import {
     Accordion,
     AccordionDetails,
-    AccordionSummary,
-    Container,
+    AccordionSummary, Button,
+    Container, DialogContent, DialogTitle,
     Paper,
     Stack,
     TextField,
@@ -26,6 +27,8 @@ import {DiscordUserName} from "../../component/DiscordUserName";
 import {formatRelativeTime} from "../../util";
 import {DiscordChannel} from "../../component/DiscordChannel";
 import {FeatureData} from "../../component/FeatureData";
+import {FormDialog, useFormDialog} from "../../component/FormDialog";
+import {getUser} from "../../service/auth";
 
 interface GuildDetailsDataProps {
     dataPromise: Promise<GuildDetailsDto>
@@ -86,12 +89,29 @@ function TagsDataPaper({id}: TagsDataPaperProps) {
         { field: 'authorId', headerName: 'Author', minWidth: 200, renderCell: params => <DiscordUserName guildId={id} userId={params.value} />},
     ];
 
+    const dialog = useFormDialog();
+
+    const onSubmit = async (data: Record<string, string>) => {
+        data['authorId'] = getUser()!.id;
+
+        await createTag(id, data);
+        fetchGuildTags({id: id, query: searchQueryDebounced ?? '', page: paginationModel.page, perPage: paginationModel.pageSize}).then((t) => setTags(t));
+    };
+
     return <Stack direction="column">
         <Stack direction='row' spacing={{sm: 5}} sx={{p: '5px'}}>
             <Typography variant='h5'>Tags</Typography>
             <TextField id="tag-name-filter" label="Name..." variant="outlined" size='small' onChange={(e) => setSearchQuery(e.target.value)} />
+            <Button variant='outlined' onClick={() => dialog.open()}>Create tag</Button>
         </Stack>
         <DataGrid rows={tags?.data ?? []} columns={columns} paginationModel={paginationModel} onPaginationModelChange={setPaginationModel} paginationMode="server" rowCount={tags?.total ?? -1} />
+        <FormDialog onSubmit={onSubmit} {...dialog} >
+            <DialogTitle>Create new Tag</DialogTitle>
+            <DialogContent>
+                <TextField autoFocus required margin="dense" id="name" name="name" label="Name" type="text" fullWidth variant="standard" />
+                <TextField autoFocus required margin="dense" id="content" name="content" label="Content" type="text" fullWidth variant="standard" multiline maxRows={3} />
+            </DialogContent>
+        </FormDialog>
     </Stack>;
 }
 

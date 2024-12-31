@@ -29,12 +29,12 @@ function getCustomizedElement(feature: Feature, guildId: string) {
     }
 }
 
-export interface FeatureData {
+export interface FeatureDataProps {
     feature: Feature,
     guildId: string
 }
 
-export function FeatureData({feature, guildId}: FeatureData) {
+export function FeatureData({feature, guildId}: FeatureDataProps) {
     return <Stack direction="column">
         <Typography fontWeight="bold">Data: </Typography>
         <Typography>{getCustomizedElement(feature, guildId)}</Typography>
