@@ -2,11 +2,8 @@ import {DefaultAppProps} from "../constants";
 import React, {useState} from "react";
 import {Button, Dialog, DialogActions} from "@mui/material";
 
-export interface FormDialogProps extends DefaultAppProps {
-    onSubmit: (data: Record<string, string>) => Promise<void>;
-    isOpen: boolean;
-    open: () => void;
-    close: () => void;
+export interface FormDialogProps extends DefaultAppProps, FormDialogHookResult {
+    onSubmit: (data: Record<string, string>) => Promise<void>
 }
 
 export interface FormDialogHookResult {
@@ -29,6 +26,8 @@ export function useFormDialog(): FormDialogHookResult {
 }
 
 export function FormDialog({onSubmit, children, isOpen, close}: FormDialogProps) {
+    const [loading, setLoading] = useState<boolean>(false);
+
     return <Dialog
         open={isOpen}
         onClose={close}
@@ -36,18 +35,22 @@ export function FormDialog({onSubmit, children, isOpen, close}: FormDialogProps)
             component: 'form',
             onSubmit: (event: any) => {
                 event.preventDefault();
+                setLoading(true);
+
                 const formData = new FormData(event.currentTarget);
                 const formJson = Object.fromEntries(formData.entries());
 
                 onSubmit(formJson as Record<string, string>)
-                    .then(_ => close());
+                    .then(() => {
+                        close();
+                    });
             },
         }}
     >
-        {children}
+        {loading ? <span>Loading...</span> : children}
         <DialogActions>
-            <Button onClick={close}>Cancel</Button>
-            <Button type="submit">Submit</Button>
+            <Button onClick={close} disabled={loading}>Cancel</Button>
+            <Button type="submit" disabled={loading}>Submit</Button>
         </DialogActions>
     </Dialog>
 }
