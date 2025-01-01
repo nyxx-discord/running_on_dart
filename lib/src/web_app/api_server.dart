@@ -111,12 +111,12 @@ class WebServer {
       return createBadRequestResponse("Missing id param");
     }
 
-    final searchQuery = request.requestedUri.queryParameters['query'];
     final perPage = int.tryParse(request.requestedUri.queryParameters['perPage'] ?? '5') ?? 5;
     final page = int.tryParse(request.requestedUri.queryParameters['page'] ?? '1') ?? 1;
 
     return createOkResponse(
-      await mapGuildTagsToData(Snowflake.parse(guildParam), perPage, searchQuery: searchQuery, page: page),
+      await mapGuildTagsToData(Snowflake.parse(guildParam), perPage,
+          filters: request.requestedUri.queryParameters, page: page),
     );
   }
 
@@ -160,14 +160,12 @@ class WebServer {
       return createBadRequestResponse("Missing id param");
     }
 
-    final searchQuery = request.requestedUri.queryParameters['query'];
-    final createdBy = request.requestedUri.queryParameters['created_by'];
     final perPage = int.tryParse(request.requestedUri.queryParameters['perPage'] ?? '5') ?? 5;
     final page = int.tryParse(request.requestedUri.queryParameters['page'] ?? '1') ?? 1;
 
     return createOkResponse(
       await mapRemindersToData(Snowflake.parse(guildParam), perPage,
-          searchQuery: searchQuery, page: page, createdBy: createdBy),
+          filters: request.requestedUri.queryParameters, page: page),
     );
   }
 

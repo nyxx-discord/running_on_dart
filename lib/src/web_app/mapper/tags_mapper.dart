@@ -16,12 +16,20 @@ JsonApiResponse mapGuildTag(Tag tag) {
 }
 
 Future<JsonApiResponse> mapGuildTagsToData(Snowflake guildId, int tagsLimit,
-    {String? searchQuery, int page = 1}) async {
+    {Map<String, String> filters = const {}, int page = 1}) async {
   final tagsModule = Injector.appInstance.get<TagModule>();
 
   var tags = tagsModule.getGuildTags(guildId);
-  if (searchQuery != null) {
-    tags = tags.where((tag) => tag.name.contains(searchQuery));
+
+  for (final entry in filters.entries) {
+    switch (entry.key) {
+      case 'name':
+        tags = tags.where((t) => t.name.contains(entry.value));
+        break;
+      case 'content':
+        tags = tags.where((t) => t.content.contains(entry.value));
+        break;
+    }
   }
 
   return createPaginationResponse(

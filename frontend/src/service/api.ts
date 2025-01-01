@@ -1,4 +1,5 @@
 import {request} from "./httpClient";
+import {GridFilterModel} from "@mui/x-data-grid/models/gridFilterModel";
 
 export interface BotInfo {
     nyxxVersion: string;
@@ -169,9 +170,8 @@ interface PaginationParameters {
 
 interface FetchGuildDataParameters extends PaginationParameters {
     id: string,
-    query?: string,
+    filterModel?: GridFilterModel|null,
 }
-
 
 export function fetchMemberDetails(guildId: string, userId: string): Promise<MemberDetails> {
     return request<MemberDetails>({path: `/api/guilds/${guildId}/members/${userId}`, auth: true});
@@ -195,19 +195,19 @@ export function fetchGuildDetails(id: string): Promise<GuildDetails> {
     return request<GuildDetails>({path: `/api/guilds/${id}`, auth: true});
 }
 
-export function fetchGuildReminders({id, perPage = 5, page = 0, query}: FetchGuildDataParameters): Promise<PaginationResponse<Reminder>> {
+export function fetchGuildReminders({id, perPage = 5, page = 0, filterModel}: FetchGuildDataParameters): Promise<PaginationResponse<Reminder>> {
     const params = [["perPage", perPage.toString()], ["page", (page + 1).toString()]];
-    if (query != null && query !== '') {
-        params.push(["query", query])
+    if (filterModel != null) {
+        params.push(...mapFilters(filterModel))
     }
 
     return request<PaginationResponse<Reminder>>({path: `/api/guilds/${id}/reminders`, auth: true, searchParams: params});
 }
 
-export function fetchGuildTags({id, perPage = 5, page = 0, query}: FetchGuildDataParameters): Promise<PaginationResponse<Tag>> {
+export function fetchGuildTags({id, perPage = 5, page = 0, filterModel}: FetchGuildDataParameters): Promise<PaginationResponse<Tag>> {
     const params = [["perPage", perPage.toString()], ["page", (page + 1).toString()]];
-    if (query != null && query !== '') {
-        params.push(["query", query])
+    if (filterModel != null) {
+        params.push(...mapFilters(filterModel))
     }
 
     return request<PaginationResponse<Tag>>({path: `/api/guilds/${id}/tags`, auth: true, searchParams: params});
@@ -215,4 +215,8 @@ export function fetchGuildTags({id, perPage = 5, page = 0, query}: FetchGuildDat
 
 export function createTag(id: string, body: any): Promise<Tag> {
     return request<Tag>({path: `/api/guilds/${id}/tags`, method: 'POST', body: body, auth: true});
+}
+
+function mapFilters(filterModel: GridFilterModel): string[][] {
+    return filterModel.items.filter((item) => typeof item.value !== 'undefined').map((item) => [item.field, item.value]);
 }

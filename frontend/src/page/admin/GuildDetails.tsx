@@ -22,13 +22,13 @@ import React, {Suspense, use, useEffect, useState} from "react";
 import {getGuildNameElement} from "../../guildUtil";
 import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {useDebounce} from "use-debounce";
 import {DiscordUserName} from "../../component/DiscordUserName";
 import {formatRelativeTime} from "../../util";
 import {DiscordChannel} from "../../component/DiscordChannel";
 import {FeatureData} from "../../component/FeatureData";
 import {FormDialog, useFormDialog} from "../../component/FormDialog";
 import {getUser} from "../../service/auth";
+import {GridFilterModel} from "@mui/x-data-grid/models/gridFilterModel";
 
 interface GuildDetailsDataProps {
     dataPromise: Promise<GuildDetailsDto>
@@ -71,22 +71,21 @@ function FeaturesPaper({dataPromise}: GuildDetailsDataProps) {
 
 function TagsDataPaper({id}: TagsDataPaperProps) {
     const [tags, setTags] = useState<PaginationResponse<Tag>|null>(null);
-    const [searchQuery, setSearchQuery] = useState<string|null>(null);
-    const [searchQueryDebounced] = useDebounce(searchQuery, 500);
+    const [filterModel, setFilterModel] = useState<GridFilterModel|null>(null);
     const [paginationModel, setPaginationModel] = useState({
         pageSize: 5,
         page: 0,
     });
 
     useEffect(() => {
-        fetchGuildTags({id: id, query: searchQueryDebounced ?? '', page: paginationModel.page, perPage: paginationModel.pageSize}).then((t) => setTags(t));
-    }, [searchQueryDebounced, paginationModel]);
+        fetchGuildTags({id: id, filterModel: filterModel, page: paginationModel.page, perPage: paginationModel.pageSize}).then((t) => setTags(t));
+    }, [filterModel, paginationModel]);
 
     const columns: GridColDef[] = [
         { field: 'name', headerName: 'Name' },
         { field: 'content', headerName: 'Content', flex: 1 },
-        { field: 'enabled', headerName: 'Enabled?'},
-        { field: 'authorId', headerName: 'Author', minWidth: 200, renderCell: params => <DiscordUserName guildId={id} userId={params.value} />},
+        { field: 'enabled', headerName: 'Enabled?', filterable: false },
+        { field: 'authorId', headerName: 'Author', minWidth: 200, filterable: false, renderCell: params => <DiscordUserName guildId={id} userId={params.value} />},
     ];
 
     const dialog = useFormDialog();
@@ -95,16 +94,24 @@ function TagsDataPaper({id}: TagsDataPaperProps) {
         data['authorId'] = getUser()!.id;
 
         await createTag(id, data);
-        fetchGuildTags({id: id, query: searchQueryDebounced ?? '', page: paginationModel.page, perPage: paginationModel.pageSize}).then((t) => setTags(t));
+        fetchGuildTags({id: id, filterModel: filterModel, page: paginationModel.page, perPage: paginationModel.pageSize}).then((t) => setTags(t));
     };
 
     return <Stack direction="column">
         <Stack direction='row' spacing={{sm: 5}} sx={{p: '5px'}}>
             <Typography variant='h5'>Tags</Typography>
-            <TextField id="tag-name-filter" label="Name..." variant="outlined" size='small' onChange={(e) => setSearchQuery(e.target.value)} />
             <Button variant='outlined' onClick={() => dialog.open()}>Create tag</Button>
         </Stack>
-        <DataGrid rows={tags?.data ?? []} columns={columns} paginationModel={paginationModel} onPaginationModelChange={setPaginationModel} paginationMode="server" rowCount={tags?.total ?? -1} />
+        <DataGrid
+            onFilterModelChange={(model) => setFilterModel(model)}
+            filterMode="server"
+            rows={tags?.data ?? []}
+            columns={columns}
+            paginationModel={paginationModel}
+            onPaginationModelChange={setPaginationModel}
+            paginationMode="server"
+            rowCount={tags?.total ?? -1}
+        />
         <FormDialog onSubmit={onSubmit} {...dialog} >
             <DialogTitle>Create new Tag</DialogTitle>
             <DialogContent>
@@ -117,32 +124,39 @@ function TagsDataPaper({id}: TagsDataPaperProps) {
 
 function ReminderDataPaper({id}: TagsDataPaperProps) {
     const [reminders, setReminders] = useState<PaginationResponse<Reminder>|null>(null);
-    const [searchQuery, setSearchQuery] = useState<string|null>(null);
-    const [searchQueryDebounced] = useDebounce(searchQuery, 500);
+    const [filterModel, setFilterModel] = useState<GridFilterModel|null>(null);
     const [paginationModel, setPaginationModel] = useState({
         pageSize: 5,
         page: 0,
     });
 
     useEffect(() => {
-        fetchGuildReminders({id: id, query: searchQueryDebounced ?? '', page: paginationModel.page, perPage: paginationModel.pageSize}).then((t) => setReminders(t));
-    }, [searchQueryDebounced, paginationModel]);
+        fetchGuildReminders({id: id, filterModel: filterModel, page: paginationModel.page, perPage: paginationModel.pageSize}).then((t) => setReminders(t));
+    }, [filterModel, paginationModel]);
 
     const columns: GridColDef[] = [
-        { field: 'id', headerName: 'Id' },
-        { field: 'message', headerName: 'Message', flex: 1 },
-        { field: 'userId', headerName: 'Created by', minWidth: 200, renderCell: params => <DiscordUserName guildId={id} userId={params.value} />},
-        { field: 'channelId', headerName: 'Channel', flex: 1, renderCell: params => <DiscordChannel guildId={id} channelId={params.value} />},
-        { field: 'triggerAt', headerName: 'Triggers', flex: 1, renderCell: params => formatRelativeTime(new Date(params.value))},
-        { field: 'addedAt', headerName: 'Created', flex: 1, renderCell: params => formatRelativeTime(new Date(params.value))},
+        { field: 'id', headerName: 'Id', filterable: false},
+        { field: 'message', headerName: 'Message', flex: 1},
+        { field: 'userId', headerName: 'Created by', minWidth: 200, filterable: false, renderCell: params => <DiscordUserName guildId={id} userId={params.value} />},
+        { field: 'channelId', headerName: 'Channel', flex: 1, filterable: false, renderCell: params => <DiscordChannel guildId={id} channelId={params.value} />},
+        { field: 'triggerAt', headerName: 'Triggers', flex: 1, filterable: false, renderCell: params => formatRelativeTime(new Date(params.value))},
+        { field: 'addedAt', headerName: 'Created', flex: 1, filterable: false, renderCell: params => formatRelativeTime(new Date(params.value))},
     ];
 
     return <Stack direction="column">
         <Stack direction='row' spacing={{sm: 5}} sx={{p: '5px'}}>
             <Typography variant='h5'>Reminders</Typography>
-            <TextField id="tag-name-filter" label="Name..." variant="outlined" size='small' onChange={(e) => setSearchQuery(e.target.value)} />
         </Stack>
-        <DataGrid rows={reminders?.data ?? []} columns={columns} paginationModel={paginationModel} onPaginationModelChange={setPaginationModel} paginationMode="server" rowCount={reminders?.total ?? -1} />
+        <DataGrid
+            onFilterModelChange={(model) => setFilterModel(model)}
+            filterMode="server"
+            rows={reminders?.data ?? []}
+            columns={columns}
+            paginationModel={paginationModel}
+            onPaginationModelChange={setPaginationModel}
+            paginationMode="server"
+            rowCount={reminders?.total ?? -1}
+        />
     </Stack>;
 }
 

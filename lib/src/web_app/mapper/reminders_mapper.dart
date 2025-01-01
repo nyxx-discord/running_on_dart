@@ -18,12 +18,17 @@ JsonApiResponse _mapReminder(Reminder reminder) {
 }
 
 Future<JsonApiResponse> mapRemindersToData(Snowflake guildId, int limit,
-    {String? searchQuery, int page = 1, String? createdBy}) async {
+    {Map<String, String> filters = const {}, int page = 1, String? createdBy}) async {
   final reminderModule = Injector.appInstance.get<ReminderModule>();
 
   var reminders = reminderModule.getRemindersForGuild(guildId);
-  if (searchQuery != null) {
-    reminders = reminders.where((r) => r.message.contains(searchQuery));
+
+  for (final entry in filters.entries) {
+    switch (entry.key) {
+      case 'message':
+        reminders = reminders.where((r) => r.message.contains(entry.value));
+        break;
+    }
   }
 
   return createPaginationResponse(
