@@ -1,3 +1,7 @@
+## 4.10.0
+- Implement frontend
+- Fix member left annotations
+
 ## 4.9.3
 - Fix jellyfin current sessions transcoding output
 - Rework media info output
