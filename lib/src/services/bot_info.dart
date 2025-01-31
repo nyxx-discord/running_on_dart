@@ -38,20 +38,20 @@ class BotInfo {
       required this.docsUpdate});
 
   Map<String, dynamic> toJson() => {
-        'nyxx_version': nyxxVersion,
+        'nyxxVersion': nyxxVersion,
         'version': version,
         'platform': dartPlatform,
-        'memory_usage_string': memoryUserString,
-        'cached_channels': cachedChannels,
-        'cached_messages': cachedMessages,
-        'cached_guilds': cachedGuilds,
-        'cached_users': cachedUsers,
-        'cached_voice_states': cachedVoiceStates,
-        'shard_count': shardCount,
-        'total_tags_count': totalTagsCount,
-        'total_reminder_count': totalRemainderCount,
+        'memoryUsageString': memoryUserString,
+        'cachedChannels': cachedChannels,
+        'cachedMessages': cachedMessages,
+        'cachedGuilds': cachedGuilds,
+        'cachedUsers': cachedUsers,
+        'cachedVoiceStates': cachedVoiceStates,
+        'shardCount': shardCount,
+        'totalTagsCount': totalTagsCount,
+        'totalReminderCount': totalRemainderCount,
         'uptime': uptime.toIso8601String(),
-        'docs_update': docsUpdate?.toIso8601String(),
+        'docsUpdate': docsUpdate?.toIso8601String(),
       };
 }
 

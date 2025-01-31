@@ -19,6 +19,10 @@ run: ## Run dev project
 upgrade: ## Run dart pub upgrade
 	dart pub upgrade
 
+build-frontend-dev: ## Build dev frontend
+	cd frontend/; env-cmd -f .env.development.local yarn build
+	cp -r frontend/build/** public/
+
 fix-project: fix analyze format ## Fix whole project
 
 check-project: fix-project tests ## Run all checks

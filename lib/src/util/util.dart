@@ -87,7 +87,7 @@ bool boolValue(dynamic value) {
   }
 
   if (value is num) {
-    return value >= 0;
+    return value > 0;
   }
 
   if (value is String) {

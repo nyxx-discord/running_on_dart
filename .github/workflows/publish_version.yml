@@ -39,6 +39,10 @@ jobs:
           context: .
           target: prod
           push: true
+          build-args: |
+            REACT_APP_CLIENT_ID=${{ secrets.REACT_APP_CLIENT_ID }}
+            REACT_APP_REDIRECT_URL=${{ secrets.REACT_APP_REDIRECT_URL }}
+            REACT_APP_API_SERVER=${{ secrets.REACT_APP_API_SERVER }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 

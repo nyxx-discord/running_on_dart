@@ -1,5 +1,5 @@
 name: running_on_dart
-version: 4.10.0-dev.15
+version: 4.10.0-dev.28
 description: Discord Bot for nyxx development
 homepage: https://github.com/nyxx-discord/running_on_dart
 repository: https://github.com/nyxx-discord/running_on_dart
@@ -35,10 +35,11 @@ dependencies:
   shelf: ^1.4.2
   shelf_router: ^1.1.4
   shelf_cors_headers: ^0.1.0
-  shelf_session:
-    git: https://github.com/l7ssha/shelf_session.git
-  mustachex: ^1.0.0
+  shelf_static: ^1.1.3
+  shelf_limiter: ^2.0.1
+  jaguar_jwt: ^3.0.0
+  acanthis: ^1.0.0
 
 dev_dependencies:
   lints: ^5.0.0
-  test: ^1.25.8
+  test: ^1.25.0

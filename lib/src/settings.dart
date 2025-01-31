@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:nyxx/nyxx.dart';
 
-String get version => '4.10.0-dev.15';
+String get version => '4.10.0-dev.28';
 
 /// Get a [String] from an environment variable, throwing an exception if it is not set.
 ///
@@ -87,6 +87,9 @@ final int webServerPort = getEnvInt('WEB_SERVER_PORT', 8088);
 
 /// Path to templates directory
 final String webServerTemplatesDirectory = getEnv('WEB_SERVER_TEMPLATES_DIRECTORY', "./templates");
+
+/// Allowed origins for cors headers
+final String webServerAllowedOrigins = getEnv('WEB_SERVER_ALLOWED_ORIGIN', 'rod.l7ssha.xyz');
 
 /// The GitHub account to use when no other account is specified.
 final String githubAccount = getEnv('ROD_GITHUB_ACCOUNT', 'nyxx-discord');

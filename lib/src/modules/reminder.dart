@@ -205,6 +205,18 @@ class ReminderModule implements RequiresInitialization {
   /// Get all the reminders for a specific user.
   Iterable<Reminder> getUserReminders(Snowflake userId) => reminders.where((reminder) => reminder.userId == userId);
 
+  /// Get all reminder for a specific guild
+  Iterable<Reminder> getRemindersForGuild(Snowflake guildId) {
+    final guild = _client.guilds.cache[guildId];
+    if (guild == null) {
+      return [];
+    }
+
+    final guildChannelIds = guild.cachedChannels.map((c) => c.id);
+
+    return reminders.where((reminder) => guildChannelIds.contains(reminder.channelId));
+  }
+
   /// Search reminders for a specific user
   Iterable<Reminder> search(Snowflake userId, String query) {
     final results = Fuzzy<Reminder>(
