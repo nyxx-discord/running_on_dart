@@ -77,6 +77,10 @@ class JoinLogsModule implements RequiresInitialization {
     }
 
     final embed = message.embeds.first.toEmbedBuilder();
+    if (embed.description?.contains("(Left") ?? true) {
+      return;
+    }
+
     embed.description = "${embed.description} (Left)";
 
     message.update(MessageUpdateBuilder(embeds: [embed]));
