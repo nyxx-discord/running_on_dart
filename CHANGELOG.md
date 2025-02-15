@@ -1,3 +1,6 @@
+## 4.10.1
+- Fix /avatar command
+
 ## 4.10.0
 - Implement frontend
 - Fix member left annotations

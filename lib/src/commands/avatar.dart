@@ -6,23 +6,17 @@ final avatar = ChatCommand(
   "Get a user's avatar",
   id('avatar', (
     ChatContext context, [
-    @Description('The user to fetch the avatar for') Member? target,
-    @Description("Whether to show the user's guild profile, if they have one") bool showGuildProfile = true,
+    @Description('The user to fetch the avatar for') User? target,
+    @Description("Whether to show the user's guild profile, if they have one") bool showGuildProfile = false,
   ]) async {
-    // Default to the user who invoked the command
-    target ??= context.member;
+    final targetUser = target ?? context.user;
 
-    Uri? avatarUrl;
+    if (showGuildProfile && context.guild != null) {
+      final targetMember = await context.guild?.members.get(targetUser.id);
 
-    // Try to fetch the guild profile
-    if (showGuildProfile) {
-      avatarUrl = target?.avatar?.url;
+      return context.respond(MessageBuilder(content: targetMember?.avatar?.url.toString() ?? 'Cannot get member avatar.'));
     }
 
-    // Default to the user avatar
-    avatarUrl ??= target?.user?.avatar.url;
-
-    final content = avatarUrl?.toString() ?? "Cannot obtain avatar Url";
-    await context.respond(MessageBuilder(content: content));
+    return context.respond(MessageBuilder(content: targetUser.avatar.url.toString()));
   }),
 );
