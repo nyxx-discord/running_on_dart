@@ -14,7 +14,8 @@ final avatar = ChatCommand(
     if (showGuildProfile && context.guild != null) {
       final targetMember = await context.guild?.members.get(targetUser.id);
 
-      return context.respond(MessageBuilder(content: targetMember?.avatar?.url.toString() ?? 'Cannot get member avatar.'));
+      return context
+          .respond(MessageBuilder(content: targetMember?.avatar?.url.toString() ?? 'Cannot get member avatar.'));
     }
 
     return context.respond(MessageBuilder(content: targetUser.avatar.url.toString()));

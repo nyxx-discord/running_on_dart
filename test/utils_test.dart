@@ -55,7 +55,8 @@ void main() {
     });
   });
 
-  group("Utility Functions (New Tests)", () {  // Group for the new tests
+  group("Utility Functions (New Tests)", () {
+    // Group for the new tests
 
     test('getCurrentMemoryString returns a string with memory usage', () {
       final memoryString = getCurrentMemoryString();
@@ -66,7 +67,6 @@ void main() {
       final platform = getDartPlatform();
       expect(platform, isNotEmpty);
     });
-
 
     test('ToMapExtension converts Iterable<MapEntry> to Map', () {
       final entries = [MapEntry('a', 1), MapEntry('b', 2)];
