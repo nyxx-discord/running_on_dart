@@ -5,7 +5,7 @@ services:
     container_name: running_on_dart
     restart: unless-stopped
     ports:
-      - "8088"
+      - "44333:8088"
     depends_on:
       - db
     env_file:
