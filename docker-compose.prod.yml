@@ -17,8 +17,6 @@ services:
       - stack.env
     volumes:
       - "rod_db_17:/var/lib/postgresql/data"
-    networks:
-      - internal
 
 volumes:
   rod_db_17:
