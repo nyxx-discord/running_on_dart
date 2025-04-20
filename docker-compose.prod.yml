@@ -7,14 +7,11 @@ services:
       - db
     networks:
       - internal
-      - nginx-proxy_default
 
   db:
     image: postgres:17
     container_name: running_on_dart_db
     restart: always
-    env_file:
-      - .env
     volumes:
       - "rod_db_17:/var/lib/postgresql/data"
     networks:
@@ -25,7 +22,4 @@ volumes:
   rod_sessions:
 
 networks:
-  nginx-proxy_default:
-    name: nginx-proxy_default
-    external: true
   internal:
