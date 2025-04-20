@@ -6,14 +6,14 @@ services:
     restart: unless_stopped
     depends_on:
       - db
-    env:
+    env_file:
       - stack.env
 
   db:
     image: postgres:17
     container_name: running_on_dart_db
     restart: unless_stopped
-    env:
+    env_file:
       - stack.env
     volumes:
       - "rod_db_17:/var/lib/postgresql/data"
