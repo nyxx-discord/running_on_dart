@@ -4,6 +4,8 @@ services:
     image: ghcr.io/nyxx-discord/running_on_dart:4.10.1
     container_name: running_on_dart
     restart: unless-stopped
+    ports:
+      - "8088"
     depends_on:
       - db
     env_file:
