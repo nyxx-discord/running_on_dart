@@ -3,8 +3,6 @@ services:
   running_on_dart:
     image: ghcr.io/nyxx-discord/running_on_dart:4.10.1
     container_name: running_on_dart
-    env_file:
-     - .env
     depends_on:
       - db
     networks:
