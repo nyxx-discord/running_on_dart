@@ -1,3 +1,7 @@
+## 4.10.2
+- Upgrade nyxx
+- List frontend version
+
 ## 4.10.1
 - Fix /avatar command
 

@@ -47,11 +47,10 @@ Snowflake? tryParseSnowflake(dynamic value) {
 
 extension SnowflakeValidion on acanthis.AcanthisString {
   acanthis.AcanthisString snowflake() {
-    addCheck(acanthis.AcanthisCheck<String>(
+    return withCheck(acanthis.AcanthisCheck<String>(
         onCheck: (value) => tryParseSnowflake(value) != null,
         error: 'Value is not valid snowflake',
         name: 'snowflake'));
-    return this;
   }
 }
 

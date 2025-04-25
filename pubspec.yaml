@@ -1,5 +1,5 @@
 name: running_on_dart
-version: 4.10.1
+version: 4.10.2
 description: Discord Bot for nyxx development
 homepage: https://github.com/nyxx-discord/running_on_dart
 repository: https://github.com/nyxx-discord/running_on_dart
@@ -17,7 +17,7 @@ dependencies:
   logging: ^1.0.2
   migent:
     git: https://github.com/nyxx-discord/migent.git
-  nyxx: ^6.3.0
+  nyxx: ^6.6.1
   nyxx_commands: ^6.0.3
   nyxx_extensions: ^4.1.0
   postgres: ^3.4.0

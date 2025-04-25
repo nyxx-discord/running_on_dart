@@ -27,7 +27,8 @@ final info = ChatCommand(
       ),
       footer: EmbedFooterBuilder(
           text: 'nyxx ${botInfo.nyxxVersion}'
-              ' | ROD ${botInfo.version}'
+              ' | Bot ${botInfo.version}'
+              ' | Frontend ${botInfo.frontendVersion}'
               ' | Dart SDK ${botInfo.dartPlatform}'),
       fields: [
         EmbedFieldBuilder(name: 'Cached guilds', value: botInfo.cachedGuilds.toString(), isInline: true),

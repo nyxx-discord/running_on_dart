@@ -11,6 +11,7 @@ import 'package:running_on_dart/src/util/util.dart';
 class BotInfo {
   String get nyxxVersion => ApiOptions.nyxxVersion;
   String get version => settings.version;
+  String get frontendVersion => settings.frontendVersion;
   String get dartPlatform => getDartPlatform();
   String get memoryUserString => getCurrentMemoryString();
 
