@@ -88,6 +88,31 @@ class EmojiReactData implements SettingData {
   }
 }
 
+class BanRelayData implements SettingData {
+  final Iterable<Snowflake> relayedGuilds;
+
+  BanRelayData({required this.relayedGuilds});
+
+  factory BanRelayData.fromConfiguration(Map<String, dynamic> raw) {
+    return BanRelayData(
+      relayedGuilds: (raw['relayed_guilds'] as String).split(',').map((s) => s.trim()).map((s) => Snowflake.parse(s)),
+    );
+  }
+
+  factory BanRelayData.fromJson(Map<String, dynamic> raw) {
+    return BanRelayData(
+      relayedGuilds: (raw['relayed_guilds'] as Iterable).map((e) => Snowflake.parse(e)),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'relayed_guilds': relayedGuilds.map((e) => e.toString()).toList(),
+    };
+  }
+}
+
 enum Setting<T extends SettingData> {
   poopName<NoData>(
       'poop_name', 'Replace nickname of a member with poop emoji if the member tries to hoist itself', false),
@@ -96,7 +121,8 @@ enum Setting<T extends SettingData> {
   jellyfin<GenericInstanceData>('jellyfin', 'Allows usage of jellyfin commands', true),
   mentions<NoData>('mentions', 'Monitors messages for mention abuse', false),
   kavita<GenericInstanceData>('kavita', 'Allows usage of jellyfin command', true),
-  emojiReact<EmojiReactData>('emoji_react', 'React to predefined words with emojis', true);
+  emojiReact<EmojiReactData>('emoji_react', 'React to predefined words with emojis', true),
+  banRelay<BanRelayData>('ban_relay', 'Relay ban from other guilds to this', true);
 
   /// name of setting
   final String name;
@@ -118,6 +144,19 @@ enum Setting<T extends SettingData> {
       const (GenericSnowflakeData) => GenericSnowflakeData.fromJson(raw),
       const (GenericInstanceData) => GenericInstanceData.fromJson(raw),
       const (EmojiReactData) => EmojiReactData.fromJson(raw),
+      const (BanRelayData) => BanRelayData.fromJson(raw),
+      _ => null,
+    } as T?;
+  }
+
+  T? parseFromConfiguration(Map<String, dynamic>? raw) {
+    if (raw == null) {
+      return null;
+    }
+
+    return switch (T) {
+      const (GenericSnowflakeData) || const (GenericInstanceData) || const (EmojiReactData) => parseData(raw),
+      const (BanRelayData) => BanRelayData.fromConfiguration(raw),
       _ => null,
     } as T?;
   }
@@ -141,6 +180,12 @@ enum Setting<T extends SettingData> {
               customId: 'process_other_bots',
               style: TextInputStyle.short,
               label: "Process messages of other bots (yes/no)"),
+        ],
+      const (BanRelayData) => [
+          TextInputBuilder(
+              customId: 'relayed_guilds',
+              style: TextInputStyle.paragraph,
+              label: "List of guilds ids (comma separated)"),
         ],
       _ => throw Error(),
     };

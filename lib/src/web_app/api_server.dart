@@ -328,7 +328,7 @@ class WebServer {
 
   Future<void> startServer() async {
     if (!webServerEnabled) {
-      _logger.info("Web server not enabled skipping");
+      _logger.info("Web server not enabled, skipping...");
       return;
     }
 
