@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/util/util.dart';
@@ -90,18 +91,24 @@ class EmojiReactData implements SettingData {
 
 class BanRelayData implements SettingData {
   final Iterable<Snowflake> relayedGuilds;
+  final bool unban;
+  final bool ensureBan;
 
-  BanRelayData({required this.relayedGuilds});
+  BanRelayData({required this.relayedGuilds, required this.unban, required this.ensureBan});
 
   factory BanRelayData.fromConfiguration(Map<String, dynamic> raw) {
     return BanRelayData(
       relayedGuilds: (raw['relayed_guilds'] as String).split(',').map((s) => s.trim()).map((s) => Snowflake.parse(s)),
+      unban: boolValue(raw['unban']),
+      ensureBan: boolValue(raw['ensure_ban']),
     );
   }
 
   factory BanRelayData.fromJson(Map<String, dynamic> raw) {
     return BanRelayData(
       relayedGuilds: (raw['relayed_guilds'] as Iterable).map((e) => Snowflake.parse(e)),
+      unban: boolValue(raw['unban']),
+      ensureBan: boolValue(raw['ensure_ban']),
     );
   }
 
@@ -186,6 +193,8 @@ enum Setting<T extends SettingData> {
               customId: 'relayed_guilds',
               style: TextInputStyle.paragraph,
               label: "List of guilds ids (comma separated)"),
+          TextInputBuilder(customId: 'unban', style: TextInputStyle.short, label: "Also unban when unbanned from target guild (yes/no)"),
+          TextInputBuilder(customId: 'ensure_ban', style: TextInputStyle.short, label: "When = yes, then it would go beyond cache to ban user (yes/no)"),
         ],
       _ => throw Error(),
     };
