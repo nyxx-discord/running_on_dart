@@ -1,0 +1,229 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:injector/injector.dart';
+import 'package:mqtt_client/mqtt_client.dart';
+import 'package:mqtt_client/mqtt_server_client.dart';
+import 'package:nyxx/nyxx.dart';
+import 'package:running_on_dart/src/services/bot_info.dart';
+import 'package:running_on_dart/src/settings.dart';
+import 'package:running_on_dart/src/init.dart';
+import 'package:running_on_dart/src/util/util.dart';
+import 'package:typed_data/typed_buffers.dart';
+
+final String botDeviceId = "${botName}_device_id";
+final String availabilityTopic = "$botName/status";
+const String discoveryPrefix = "homeassistant"; // Default HA discovery prefix
+
+typedef ExtractValueCallback = String Function(BotInfo botInfo);
+typedef ContextValueCallback = String Function(DynamicMetricContext context);
+typedef StaticDiagnosticValueCallback = String Function();
+
+class Metric {
+  final String objectId;
+  final String name;
+  final String? unit;
+  final String? icon;
+  final String? stateClass;
+  final String? deviceClass;
+  final bool isDiagnostic;
+
+  late String stateTopic = "$botName/metrics/$objectId";
+
+  Metric(this.objectId, this.name,
+      {this.unit, this.icon, this.isDiagnostic = false, this.stateClass, this.deviceClass});
+}
+
+class DynamicMetricContext {
+  var messages = 0;
+}
+
+class DynamicMetric extends Metric {
+  final ContextValueCallback extractValue;
+
+  DynamicMetric(super.objectId, super.name, this.extractValue, {super.unit, super.icon, super.isDiagnostic = false})
+      : super(stateClass: 'measurement', deviceClass: 'data_size');
+}
+
+class DiagnosticMetric extends Metric {
+  final StaticDiagnosticValueCallback extractValue;
+
+  DiagnosticMetric(super.objectId, super.name, this.extractValue,
+      {super.unit, super.icon, super.stateClass, super.deviceClass})
+      : super(isDiagnostic: true);
+}
+
+class BotInfoMetric extends Metric {
+  final ExtractValueCallback extractValue;
+
+  BotInfoMetric(super.objectId, super.name, this.extractValue, {super.unit, super.icon, super.isDiagnostic = false})
+      : super(stateClass: 'measurement', deviceClass: 'data_size');
+}
+
+final List<DiagnosticMetric> oneTimeMetrics = [
+  DiagnosticMetric('nyxx_version', 'Nyxx Version', () => ApiOptions.nyxxVersion),
+  DiagnosticMetric('bot_version', 'Bot Version', () => version),
+  DiagnosticMetric('frontend_version', 'Frontend Version', () => frontendVersion),
+  DiagnosticMetric('dart_version', 'Dart Version', getDartPlatform),
+];
+
+final List<Metric> periodicMetrics = [
+  BotInfoMetric('cached_guilds', 'Cached Guilds', (BotInfo info) => info.cachedGuilds.toString()),
+  BotInfoMetric('cached_users', 'Cached Users', (BotInfo info) => info.cachedUsers.toString()),
+  BotInfoMetric('cached_channels', 'Cached Channels', (BotInfo info) => info.cachedChannels.toString()),
+  BotInfoMetric('cached_voice_states', 'Cached Voice States', (BotInfo info) => info.cachedVoiceStates.toString()),
+  BotInfoMetric('shard_count', 'Shard Count', (BotInfo info) => info.shardCount.toString()),
+  BotInfoMetric('total_tags_count', 'Total Tags Count', (BotInfo info) => info.totalTagsCount.toString()),
+  BotInfoMetric(
+      'total_reminders_count', 'Total Reminders Count', (BotInfo info) => info.totalRemainderCount.toString()),
+  DiagnosticMetric(
+      'memory_usage_current', 'Memory Usage', () => (ProcessInfo.currentRss / 1024 / 1024).toStringAsFixed(2),
+      unit: 'MB'),
+  DynamicMetric('messages_per_second', 'Messages', (context) {
+    final value = (context.messages / 60).toStringAsFixed(2);
+
+    context.messages = 0;
+
+    return value;
+  }, unit: 'msg/s')
+];
+
+class MetricsModule implements RequiresInitialization {
+  final _logger = Logger('ROD.Metrics');
+
+  late MqttServerClient client;
+
+  final DynamicMetricContext dynamicMetricContext = DynamicMetricContext();
+
+  @override
+  Future<void> init() async {
+    if (!homeAssistantMetricsMqttEnabled) {
+      _logger.info("Metrics not enabled skipping");
+      return;
+    }
+
+    client = MqttServerClient(metricsMqttPath, botName);
+    client.onConnected = _onConnected;
+
+    await client.connect(metricsMqttUsername, metricsMqttPassword);
+
+    Injector.appInstance.get<NyxxGateway>().onMessageCreate.listen((e) => dynamicMetricContext.messages++);
+  }
+
+  Future<void> _onConnected() async {
+    _logger.info("Connected. Starting processes...");
+
+    publishAvailability();
+    publishConfig();
+
+    publishOneTimeMetrics();
+
+    ProcessSignal.sigint.watch().listen(close);
+    ProcessSignal.sigterm.watch().listen(close);
+
+    Timer.periodic(Duration(seconds: 60), publishState);
+  }
+
+  Future<void> close(ProcessSignal signal) async {
+    publishAvailability(false);
+
+    await Future.delayed(Duration(milliseconds: 200));
+    client.disconnect();
+  }
+
+  Future<void> publishOneTimeMetrics() async {
+    for (final metric in oneTimeMetrics) {
+      final currentValue = metric.extractValue();
+
+      final buffer = Uint8Buffer();
+      buffer.addAll(utf8.encode(currentValue.toString()));
+
+      client.publishMessage(
+        metric.stateTopic,
+        MqttQos.atMostOnce,
+        buffer,
+        retain: true,
+      );
+    }
+  }
+
+  Future<void> publishState(Timer timer) async {
+    final botInfo = await Injector.appInstance.get<BotInfoService>().getCurrentBotInfo();
+
+    for (final metric in periodicMetrics) {
+      final currentValue = switch (metric) {
+        BotInfoMetric(:final extractValue) => extractValue(botInfo),
+        DiagnosticMetric(:final extractValue) => extractValue(),
+        DynamicMetric(:final extractValue) => extractValue(dynamicMetricContext),
+        _ => throw StateError("Invalid metric type"),
+      };
+
+      final buffer = Uint8Buffer();
+      buffer.addAll(utf8.encode(currentValue.toString()));
+
+      client.publishMessage(
+        metric.stateTopic,
+        MqttQos.atMostOnce,
+        buffer,
+        retain: false,
+      );
+    }
+
+    _logger.fine("Published state for ${periodicMetrics.length} metrics");
+  }
+
+  void publishAvailability([bool isOnline = true]) {
+    final statusPayload = isOnline ? "online" : "offline";
+
+    final payloadBuilder = Uint8Buffer();
+    payloadBuilder.addAll(utf8.encode(statusPayload));
+
+    client.publishMessage(
+      availabilityTopic,
+      MqttQos.atLeastOnce,
+      payloadBuilder,
+      retain: true,
+    );
+
+    _logger.fine("Published availability: $statusPayload");
+  }
+
+  void publishConfig() {
+    for (final metric in [...oneTimeMetrics, ...periodicMetrics]) {
+      final configTopic = "$discoveryPrefix/sensor/$botName/${metric.objectId}/config";
+
+      final buffer = Uint8Buffer();
+      buffer.addAll(utf8.encode(getConfigPayload(metric)));
+
+      client.publishMessage(configTopic, MqttQos.atLeastOnce, buffer);
+    }
+
+    _logger.fine("Published sensor configs");
+  }
+
+  String getConfigPayload(Metric metric) {
+    final Map<String, dynamic> payload = {
+      "name": metric.name,
+      "state_topic": metric.stateTopic,
+      "unique_id": "${botName}_${metric.objectId}",
+      "device": {
+        "identifiers": [botDeviceId],
+        "name": botName,
+        "manufacturer": "l7ssha.xyz",
+        "model": "Running On Dart $version",
+        "sw_version": version
+      },
+      "availability_topic": availabilityTopic,
+      "payload_available": "online",
+      "payload_not_available": "offline",
+      if (metric.stateClass != null) "state_class": metric.stateClass,
+      if (metric.deviceClass != null) "device_class": metric.deviceClass,
+      if (metric.unit != null) "unit_of_measurement": metric.unit,
+      if (metric.icon != null) "icon": metric.icon,
+      if (metric.isDiagnostic) "entity_category": "diagnostic",
+    };
+
+    return jsonEncode(payload);
+  }
+}
