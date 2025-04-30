@@ -114,13 +114,16 @@ class MetricsModule implements RequiresInitialization {
   Future<void> _onConnected() async {
     _logger.info("Connected. Starting processes...");
 
-    publishAvailability();
-    publishConfig();
-
-    publishOneTimeMetrics();
-
     ProcessSignal.sigint.watch().listen(close);
     ProcessSignal.sigterm.watch().listen(close);
+
+    publishAvailability();
+    await Future.delayed(Duration(milliseconds: 200));
+
+    publishConfig();
+    await Future.delayed(Duration(milliseconds: 200));
+
+    publishOneTimeMetrics();
 
     Timer.periodic(Duration(seconds: 60), publishState);
   }
