@@ -1,3 +1,6 @@
+## 4.11.0
+- Implement home assistant metrics support
+
 ## 4.10.2
 - Upgrade nyxx
 - List frontend version

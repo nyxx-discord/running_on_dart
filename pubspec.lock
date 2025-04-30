@@ -13,10 +13,10 @@ packages:
     dependency: "direct main"
     description:
       name: acanthis
-      sha256: f83a7bbdce1816b8de1a123744afbc8f64fe10814b81e48eafda3f3ce8ac3434
+      sha256: "805ef97c12c35c3923a44153333a97d0332c51c5e53749a04caab37965e51d24"
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.0"
+    version: "1.2.1"
   analyzer:
     dependency: transitive
     description:
@@ -185,14 +185,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
-  fast_immutable_collections:
+  event_bus:
     dependency: transitive
     description:
-      name: fast_immutable_collections
-      sha256: d1aa3d7788fab06cce7f303f4969c7a16a10c865e1bd2478291a8ebcbee084e5
+      name: event_bus
+      sha256: "1a55e97923769c286d295240048fc180e7b0768902c3c2e869fe059aafa15304"
       url: "https://pub.dev"
     source: hosted
-    version: "11.0.4"
+    version: "2.0.1"
   file:
     dependency: transitive
     description:
@@ -370,6 +370,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+  mqtt_client:
+    dependency: "direct main"
+    description:
+      name: mqtt_client
+      sha256: "85fa7e9aad03fbd6a54fcaf46127579f3e049b4834557a06e49aea7869b04c94"
+      url: "https://pub.dev"
+    source: hosted
+    version: "10.8.0"
   nanoid2:
     dependency: transitive
     description:
@@ -668,7 +676,7 @@ packages:
     source: hosted
     version: "0.6.5"
   typed_data:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: typed_data
       sha256: f9049c039ebfeb4cf7a7104a675823cd72dba8297f264b6637062516699fa006

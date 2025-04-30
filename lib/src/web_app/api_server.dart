@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:acanthis/src/operations/checks.dart';
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 
@@ -45,12 +46,16 @@ Snowflake? tryParseSnowflake(dynamic value) {
   }
 }
 
+class SnowflakeCheck extends AcanthisCheck<String> {
+  const SnowflakeCheck() : super(error: 'Value is not valid snowflake', name: 'snowflake');
+
+  @override
+  bool call(String value) => tryParseSnowflake(value) != null;
+}
+
 extension SnowflakeValidion on acanthis.AcanthisString {
   acanthis.AcanthisString snowflake() {
-    return withCheck(acanthis.AcanthisCheck<String>(
-        onCheck: (value) => tryParseSnowflake(value) != null,
-        error: 'Value is not valid snowflake',
-        name: 'snowflake'));
+    return withCheck(SnowflakeCheck());
   }
 }
 
