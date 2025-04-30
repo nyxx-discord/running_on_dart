@@ -1,3 +1,6 @@
+## 4.11.2
+- Improve metric publish handling
+
 ## 4.11.1
 - Improve metric publish handling
 

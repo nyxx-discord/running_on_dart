@@ -12,8 +12,10 @@ import 'package:running_on_dart/src/init.dart';
 import 'package:running_on_dart/src/util/util.dart';
 import 'package:typed_data/typed_buffers.dart';
 
-final String botDeviceId = "${botName}_device_id";
-final String availabilityTopic = "$botName/status";
+final String deviceName = botName.toLowerCase().replaceAll(' ', '_');
+
+final String botDeviceId = "${deviceName}_device_id";
+final String availabilityTopic = "$deviceName/status";
 const String discoveryPrefix = "homeassistant"; // Default HA discovery prefix
 
 typedef ExtractValueCallback = String Function(BotInfo botInfo);
@@ -29,7 +31,7 @@ class Metric {
   final String? deviceClass;
   final bool isDiagnostic;
 
-  late String stateTopic = "$botName/metrics/$objectId";
+  late String stateTopic = "$deviceName/metrics/$objectId";
 
   Metric(this.objectId, this.name,
       {this.unit, this.icon, this.isDiagnostic = false, this.stateClass, this.deviceClass});
@@ -103,7 +105,7 @@ class MetricsModule implements RequiresInitialization {
       return;
     }
 
-    client = MqttServerClient(metricsMqttPath, botName);
+    client = MqttServerClient(metricsMqttPath, deviceName);
     client.onConnected = _onConnected;
 
     await client.connect(metricsMqttUsername, metricsMqttPassword);
@@ -194,7 +196,7 @@ class MetricsModule implements RequiresInitialization {
 
   void publishConfig() {
     for (final metric in [...oneTimeMetrics, ...periodicMetrics]) {
-      final configTopic = "$discoveryPrefix/sensor/$botName/${metric.objectId}/config";
+      final configTopic = "$discoveryPrefix/sensor/$deviceName/${metric.objectId}/config";
 
       final buffer = Uint8Buffer();
       buffer.addAll(utf8.encode(getConfigPayload(metric)));
@@ -209,7 +211,7 @@ class MetricsModule implements RequiresInitialization {
     final Map<String, dynamic> payload = {
       "name": metric.name,
       "state_topic": metric.stateTopic,
-      "unique_id": "${botName}_${metric.objectId}",
+      "unique_id": "${deviceName}_${metric.objectId}",
       "device": {
         "identifiers": [botDeviceId],
         "name": botName,
