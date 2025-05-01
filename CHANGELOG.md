@@ -1,3 +1,6 @@
+## 4.11.5
+- Add latency metrics
+
 ## 4.11.4
 - Fix joins per minute metric
 
