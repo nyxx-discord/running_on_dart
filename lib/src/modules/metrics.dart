@@ -92,7 +92,7 @@ final List<Metric> periodicMetrics = [
   }, unit: 'msg/s'),
   DynamicMetric('joins_per_minute', 'Guild joins', (context) {
     final value = context.joins.toString();
-    context.messages = 0;
+    context.joins = 0;
 
     return value;
   }, unit: 'joins/min'),

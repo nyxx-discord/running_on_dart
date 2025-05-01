@@ -1,3 +1,6 @@
+## 4.11.4
+- Fix joins per minute metric
+
 ## 4.11.3
 - Add joins per minute metric
 
