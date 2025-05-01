@@ -20,7 +20,7 @@ const String discoveryPrefix = "homeassistant"; // Default HA discovery prefix
 
 typedef ExtractValueCallback = String Function(BotInfo botInfo);
 typedef ContextValueCallback = String Function(DynamicMetricContext context);
-typedef StaticDiagnosticValueCallback = String Function();
+typedef StaticValueCallback = String Function();
 
 class Metric {
   final String objectId;
@@ -42,6 +42,13 @@ class DynamicMetricContext {
   var joins = 0;
 }
 
+class StaticMetric extends Metric {
+  final StaticValueCallback extractValue;
+
+  StaticMetric(super.objectId, super.name, this.extractValue, {super.unit, super.icon, super.deviceClass})
+      : super(stateClass: 'measurement');
+}
+
 class DynamicMetric extends Metric {
   final ContextValueCallback extractValue;
 
@@ -50,7 +57,7 @@ class DynamicMetric extends Metric {
 }
 
 class DiagnosticMetric extends Metric {
-  final StaticDiagnosticValueCallback extractValue;
+  final StaticValueCallback extractValue;
 
   DiagnosticMetric(super.objectId, super.name, this.extractValue,
       {super.unit, super.icon, super.stateClass, super.deviceClass})
@@ -96,6 +103,16 @@ final List<Metric> periodicMetrics = [
 
     return value;
   }, unit: 'joins/min'),
+  StaticMetric('gateway_latency', 'Gateway Latency', () {
+    final nyxxGateway = Injector.appInstance.get<NyxxGateway>();
+
+    return nyxxGateway.gateway.latency.inMilliseconds.toString();
+  }, deviceClass: 'duration', unit: 'ms'),
+  StaticMetric('rest_latency', 'REST Latency', () {
+    final nyxxGateway = Injector.appInstance.get<NyxxGateway>();
+
+    return nyxxGateway.httpHandler.latency.inMilliseconds.toString();
+  }, deviceClass: 'duration', unit: 'ms'),
 ];
 
 class MetricsModule implements RequiresInitialization {
