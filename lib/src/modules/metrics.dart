@@ -186,6 +186,7 @@ class MetricsModule implements RequiresInitialization {
         BotInfoMetric(:final extractValue) => extractValue(botInfo),
         DiagnosticMetric(:final extractValue) => extractValue(),
         DynamicMetric(:final extractValue) => extractValue(dynamicMetricContext),
+        StaticMetric(:final extractValue) => extractValue(),
         _ => throw StateError("Invalid metric type"),
       };
 

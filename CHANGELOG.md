@@ -1,3 +1,6 @@
+## 4.11.6
+- Fix latency metrics 
+
 ## 4.11.5
 - Add latency metrics
 
