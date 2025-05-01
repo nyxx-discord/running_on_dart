@@ -39,6 +39,7 @@ class Metric {
 
 class DynamicMetricContext {
   var messages = 0;
+  var joins = 0;
 }
 
 class DynamicMetric extends Metric {
@@ -88,7 +89,13 @@ final List<Metric> periodicMetrics = [
     context.messages = 0;
 
     return value;
-  }, unit: 'msg/s')
+  }, unit: 'msg/s'),
+  DynamicMetric('joins_per_minute', 'Guild joins', (context) {
+    final value = context.joins.toString();
+    context.messages = 0;
+
+    return value;
+  }, unit: 'joins/min'),
 ];
 
 class MetricsModule implements RequiresInitialization {
@@ -111,6 +118,7 @@ class MetricsModule implements RequiresInitialization {
     await client.connect(metricsMqttUsername, metricsMqttPassword);
 
     Injector.appInstance.get<NyxxGateway>().onMessageCreate.listen((e) => dynamicMetricContext.messages++);
+    Injector.appInstance.get<NyxxGateway>().onGuildMemberAdd.listen((e) => dynamicMetricContext.joins++);
   }
 
   Future<void> _onConnected() async {
