@@ -119,6 +119,7 @@ class MetricsModule implements RequiresInitialization {
   final _logger = Logger('ROD.Metrics');
 
   late MqttServerClient client;
+  Timer? publishStateTimer;
 
   final DynamicMetricContext dynamicMetricContext = DynamicMetricContext();
 
@@ -131,11 +132,19 @@ class MetricsModule implements RequiresInitialization {
 
     client = MqttServerClient(metricsMqttPath, deviceName);
     client.onConnected = _onConnected;
+    client.onAutoReconnected = _onAutoReconnected;
+    client.onDisconnected = _onDisconnected;
 
     await client.connect(metricsMqttUsername, metricsMqttPassword);
 
     Injector.appInstance.get<NyxxGateway>().onMessageCreate.listen((e) => dynamicMetricContext.messages++);
     Injector.appInstance.get<NyxxGateway>().onGuildMemberAdd.listen((e) => dynamicMetricContext.joins++);
+  }
+
+  Future<void> _onDisconnected() async {
+    _logger.info("Disconnected. Stopping sending statistics...");
+
+    publishStateTimer?.cancel();
   }
 
   Future<void> _onConnected() async {
@@ -144,6 +153,16 @@ class MetricsModule implements RequiresInitialization {
     ProcessSignal.sigint.watch().listen(close);
     ProcessSignal.sigterm.watch().listen(close);
 
+    initialize();
+  }
+
+  Future<void> _onAutoReconnected() async {
+    _logger.info("Reconnected. Re-starting processes...");
+
+    initialize();
+  }
+
+  Future<void> initialize() async {
     publishAvailability();
     await Future.delayed(Duration(milliseconds: 200));
 
@@ -152,10 +171,12 @@ class MetricsModule implements RequiresInitialization {
 
     publishOneTimeMetrics();
 
-    Timer.periodic(Duration(seconds: 60), publishState);
+    publishStateTimer = Timer.periodic(Duration(seconds: 60), publishState);
   }
 
   Future<void> close(ProcessSignal signal) async {
+    publishStateTimer?.cancel();
+
     publishAvailability(false);
 
     await Future.delayed(Duration(milliseconds: 200));
