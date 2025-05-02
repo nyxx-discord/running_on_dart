@@ -87,6 +87,7 @@ final List<Metric> periodicMetrics = [
   BotInfoMetric('total_tags_count', 'Total Tags Count', (BotInfo info) => info.totalTagsCount.toString()),
   BotInfoMetric(
       'total_reminders_count', 'Total Reminders Count', (BotInfo info) => info.totalRemainderCount.toString()),
+  BotInfoMetric('cached_messages', 'Cached Messages', (BotInfo info) => info.cachedMessages.toString()),
   DiagnosticMetric(
       'memory_usage_current', 'Memory Usage', () => (ProcessInfo.currentRss / 1024 / 1024).toStringAsFixed(2),
       unit: 'MB'),
