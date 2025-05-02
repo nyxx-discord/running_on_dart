@@ -1,3 +1,8 @@
+## 4.12.0
+- Add metric reconnection logic
+- Add cached messages metric
+- Upgrade deps
+
 ## 4.11.6
 - Fix latency metrics 
 
