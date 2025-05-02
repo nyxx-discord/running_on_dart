@@ -130,7 +130,7 @@ class MetricsModule implements RequiresInitialization {
       return;
     }
 
-    client = MqttServerClient(metricsMqttPath, deviceName);
+    client = MqttServerClient(metricsMqttPath, deviceName, maxConnectionAttempts: 30);
     client.onConnected = _onConnected;
     client.onAutoReconnected = _onAutoReconnected;
     client.onDisconnected = _onDisconnected;
