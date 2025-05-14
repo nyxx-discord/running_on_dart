@@ -1,3 +1,8 @@
+## 4.13.0
+- Improve reconnection logic
+- Replace messages per second with messages per minute metric
+- Add events per minute metric
+
 ## 4.12.0
 - Add metric reconnection logic
 - Add cached messages metric
