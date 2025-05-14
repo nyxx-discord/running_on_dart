@@ -8,7 +8,7 @@ issue_tracker: https://github.com/nyxx-discord/running_on_dart/issues
 publish_to: none
 
 environment:
-  sdk: ^3.5.0
+  sdk: ^3.7.0
 
 dependencies:
   http: ^1.0.0
