@@ -40,6 +40,7 @@ class Metric {
 class DynamicMetricContext {
   var messages = 0;
   var joins = 0;
+  var events = 0;
 }
 
 class StaticMetric extends Metric {
@@ -91,19 +92,24 @@ final List<Metric> periodicMetrics = [
   DiagnosticMetric(
       'memory_usage_current', 'Memory Usage', () => (ProcessInfo.currentRss / 1024 / 1024).toStringAsFixed(2),
       unit: 'MB'),
-  DynamicMetric('messages_per_second', 'Messages', (context) {
-    final value = (context.messages / 60).toStringAsFixed(2);
-
+  DynamicMetric('messages_per_minute', 'Messages', (context) {
+    final value = context.messages.toString();
     context.messages = 0;
 
     return value;
-  }, unit: 'msg/s'),
+  }, unit: 'msg/min'),
   DynamicMetric('joins_per_minute', 'Guild joins', (context) {
     final value = context.joins.toString();
     context.joins = 0;
 
     return value;
   }, unit: 'joins/min'),
+  DynamicMetric('events_per_minute', 'Events', (context) {
+    final value = context.events.toString();
+    context.events = 0;
+
+    return value;
+  }, unit: 'events/min'),
   StaticMetric('gateway_latency', 'Gateway Latency', () {
     final nyxxGateway = Injector.appInstance.get<NyxxGateway>();
 
@@ -136,16 +142,34 @@ class MetricsModule implements RequiresInitialization {
     client.onAutoReconnected = _onAutoReconnected;
     client.onDisconnected = _onDisconnected;
 
-    await client.connect(metricsMqttUsername, metricsMqttPassword);
+    _connect();
 
     Injector.appInstance.get<NyxxGateway>().onMessageCreate.listen((e) => dynamicMetricContext.messages++);
     Injector.appInstance.get<NyxxGateway>().onGuildMemberAdd.listen((e) => dynamicMetricContext.joins++);
+    Injector.appInstance.get<NyxxGateway>().onEvent.listen((e) => dynamicMetricContext.events++);
+  }
+
+  Future<void> _connect() async {
+    await client.connect(metricsMqttUsername, metricsMqttPassword);
   }
 
   Future<void> _onDisconnected() async {
-    _logger.info("Disconnected. Stopping sending statistics...");
+    _logger.warning("Disconnected. Stopping sending statistics...");
 
     publishStateTimer?.cancel();
+
+    _logger.info("Trying to reconnect manually...");
+    for (final _ in Iterable.generate(5)) {
+      await Future.delayed(Duration(seconds: 15));
+
+      try {
+        await _connect();
+      } on SocketException {
+        _logger.warning("Reconnection failed...");
+      }
+    }
+
+    _logger.severe("Cannot reconnect to metrics server. Exiting...");
   }
 
   Future<void> _onConnected() async {
@@ -249,7 +273,7 @@ class MetricsModule implements RequiresInitialization {
       final buffer = Uint8Buffer();
       buffer.addAll(utf8.encode(getConfigPayload(metric)));
 
-      client.publishMessage(configTopic, MqttQos.atLeastOnce, buffer);
+      client.publishMessage(configTopic, MqttQos.atLeastOnce, buffer, retain: true);
     }
 
     _logger.fine("Published sensor configs");

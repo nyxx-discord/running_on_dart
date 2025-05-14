@@ -8,12 +8,12 @@ import 'package:running_on_dart/src/modules/poop_name.dart';
 import 'package:running_on_dart/src/init.dart';
 import 'package:running_on_dart/src/util/util.dart';
 
-Future<MessageBuilder> createMessageBuilder(String messageString, String messageHeader) async {
-  if (messageString.isEmpty) {
+Future<MessageBuilder> createMessageBuilder(List<String> nicknames, String messageHeader) async {
+  if (nicknames.isEmpty) {
     return MessageBuilder(content: "-/-");
   }
 
-  return pagination.split(messageString, buildChunk: (String chunk) => MessageBuilder(content: """
+  return pagination.split(nicknames.join(','), buildChunk: (String chunk) => MessageBuilder(content: """
 $messageHeader:
 ```
 $chunk
@@ -81,7 +81,7 @@ final admin = ChatGroup(
           }
 
           final outPutMessageHeader = "Pooping nicknames ${dryRun ? "[DRY RUN]" : ""}";
-          final messageBuilder = await createMessageBuilder(nickNamesToRemove.join(","), outPutMessageHeader);
+          final messageBuilder = await createMessageBuilder(nickNamesToRemove, outPutMessageHeader);
 
           await context.respond(messageBuilder);
         }),
