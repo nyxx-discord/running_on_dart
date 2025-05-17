@@ -26,7 +26,10 @@ class AudioChannelLayout {
     }
 
     return AudioChannelLayout(
-        mainSpeakersCount: mainSpeakersCount, subwoofersCount: subwoofersCount, auxChannelsCount: auxChannelsCount);
+      mainSpeakersCount: mainSpeakersCount,
+      subwoofersCount: subwoofersCount,
+      auxChannelsCount: auxChannelsCount,
+    );
   }
 
   String toStringWithPrefix() {

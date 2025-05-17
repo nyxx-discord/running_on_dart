@@ -33,8 +33,15 @@ class Metric {
 
   late String stateTopic = "$deviceName/metrics/$objectId";
 
-  Metric(this.objectId, this.name,
-      {this.unit, this.icon, this.isDiagnostic = false, this.stateClass, this.deviceClass});
+  Metric(
+    this.objectId,
+    this.name, {
+    this.unit,
+    this.icon,
+    this.isDiagnostic = false,
+    this.stateClass,
+    this.deviceClass,
+  });
 }
 
 class DynamicMetricContext {
@@ -47,29 +54,35 @@ class StaticMetric extends Metric {
   final StaticValueCallback extractValue;
 
   StaticMetric(super.objectId, super.name, this.extractValue, {super.unit, super.icon, super.deviceClass})
-      : super(stateClass: 'measurement');
+    : super(stateClass: 'measurement');
 }
 
 class DynamicMetric extends Metric {
   final ContextValueCallback extractValue;
 
   DynamicMetric(super.objectId, super.name, this.extractValue, {super.unit, super.icon, super.isDiagnostic = false})
-      : super(stateClass: 'measurement', deviceClass: 'data_size');
+    : super(stateClass: 'measurement', deviceClass: 'data_size');
 }
 
 class DiagnosticMetric extends Metric {
   final StaticValueCallback extractValue;
 
-  DiagnosticMetric(super.objectId, super.name, this.extractValue,
-      {super.unit, super.icon, super.stateClass, super.deviceClass})
-      : super(isDiagnostic: true);
+  DiagnosticMetric(
+    super.objectId,
+    super.name,
+    this.extractValue, {
+    super.unit,
+    super.icon,
+    super.stateClass,
+    super.deviceClass,
+  }) : super(isDiagnostic: true);
 }
 
 class BotInfoMetric extends Metric {
   final ExtractValueCallback extractValue;
 
   BotInfoMetric(super.objectId, super.name, this.extractValue, {super.unit, super.icon, super.isDiagnostic = false})
-      : super(stateClass: 'measurement', deviceClass: 'data_size');
+    : super(stateClass: 'measurement', deviceClass: 'data_size');
 }
 
 final List<DiagnosticMetric> oneTimeMetrics = [
@@ -87,11 +100,17 @@ final List<Metric> periodicMetrics = [
   BotInfoMetric('shard_count', 'Shard Count', (BotInfo info) => info.shardCount.toString()),
   BotInfoMetric('total_tags_count', 'Total Tags Count', (BotInfo info) => info.totalTagsCount.toString()),
   BotInfoMetric(
-      'total_reminders_count', 'Total Reminders Count', (BotInfo info) => info.totalRemainderCount.toString()),
+    'total_reminders_count',
+    'Total Reminders Count',
+    (BotInfo info) => info.totalRemainderCount.toString(),
+  ),
   BotInfoMetric('cached_messages', 'Cached Messages', (BotInfo info) => info.cachedMessages.toString()),
   DiagnosticMetric(
-      'memory_usage_current', 'Memory Usage', () => (ProcessInfo.currentRss / 1024 / 1024).toStringAsFixed(2),
-      unit: 'MB'),
+    'memory_usage_current',
+    'Memory Usage',
+    () => (ProcessInfo.currentRss / 1024 / 1024).toStringAsFixed(2),
+    unit: 'MB',
+  ),
   DynamicMetric('messages_per_minute', 'Messages', (context) {
     final value = context.messages.toString();
     context.messages = 0;
@@ -110,16 +129,28 @@ final List<Metric> periodicMetrics = [
 
     return value;
   }, unit: 'events/min'),
-  StaticMetric('gateway_latency', 'Gateway Latency', () {
-    final nyxxGateway = Injector.appInstance.get<NyxxGateway>();
+  StaticMetric(
+    'gateway_latency',
+    'Gateway Latency',
+    () {
+      final nyxxGateway = Injector.appInstance.get<NyxxGateway>();
 
-    return nyxxGateway.gateway.latency.inMilliseconds.toString();
-  }, deviceClass: 'duration', unit: 'ms'),
-  StaticMetric('rest_latency', 'REST Latency', () {
-    final nyxxGateway = Injector.appInstance.get<NyxxGateway>();
+      return nyxxGateway.gateway.latency.inMilliseconds.toString();
+    },
+    deviceClass: 'duration',
+    unit: 'ms',
+  ),
+  StaticMetric(
+    'rest_latency',
+    'REST Latency',
+    () {
+      final nyxxGateway = Injector.appInstance.get<NyxxGateway>();
 
-    return nyxxGateway.httpHandler.latency.inMilliseconds.toString();
-  }, deviceClass: 'duration', unit: 'ms'),
+      return nyxxGateway.httpHandler.latency.inMilliseconds.toString();
+    },
+    deviceClass: 'duration',
+    unit: 'ms',
+  ),
 ];
 
 class MetricsModule implements RequiresInitialization {
@@ -215,12 +246,7 @@ class MetricsModule implements RequiresInitialization {
       final buffer = Uint8Buffer();
       buffer.addAll(utf8.encode(currentValue.toString()));
 
-      client.publishMessage(
-        metric.stateTopic,
-        MqttQos.atMostOnce,
-        buffer,
-        retain: true,
-      );
+      client.publishMessage(metric.stateTopic, MqttQos.atMostOnce, buffer, retain: true);
     }
   }
 
@@ -239,12 +265,7 @@ class MetricsModule implements RequiresInitialization {
       final buffer = Uint8Buffer();
       buffer.addAll(utf8.encode(currentValue.toString()));
 
-      client.publishMessage(
-        metric.stateTopic,
-        MqttQos.atMostOnce,
-        buffer,
-        retain: false,
-      );
+      client.publishMessage(metric.stateTopic, MqttQos.atMostOnce, buffer, retain: false);
     }
 
     _logger.fine("Published state for ${periodicMetrics.length} metrics");
@@ -256,12 +277,7 @@ class MetricsModule implements RequiresInitialization {
     final payloadBuilder = Uint8Buffer();
     payloadBuilder.addAll(utf8.encode(statusPayload));
 
-    client.publishMessage(
-      availabilityTopic,
-      MqttQos.atLeastOnce,
-      payloadBuilder,
-      retain: true,
-    );
+    client.publishMessage(availabilityTopic, MqttQos.atLeastOnce, payloadBuilder, retain: true);
 
     _logger.fine("Published availability: $statusPayload");
   }
@@ -289,7 +305,7 @@ class MetricsModule implements RequiresInitialization {
         "name": botName,
         "manufacturer": "l7ssha.xyz",
         "model": "Running On Dart $version",
-        "sw_version": version
+        "sw_version": version,
       },
       "availability_topic": availabilityTopic,
       "payload_available": "online",

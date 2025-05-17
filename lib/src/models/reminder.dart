@@ -53,11 +53,12 @@ class Reminder {
 
   factory Reminder.fromOther(Reminder reminder, DateTime triggerAt) {
     return Reminder(
-        userId: reminder.userId,
-        channelId: reminder.channelId,
-        messageId: reminder.messageId,
-        triggerAt: triggerAt,
-        addedAt: DateTime.now(),
-        message: reminder.message);
+      userId: reminder.userId,
+      channelId: reminder.channelId,
+      messageId: reminder.messageId,
+      triggerAt: triggerAt,
+      addedAt: DateTime.now(),
+      message: reminder.message,
+    );
   }
 }

@@ -59,8 +59,10 @@ class MentionsMonitoringModule implements RequiresInitialization {
     _logger.info("Kicking member. Spammed $spammedMentionsCount mentions");
 
     final (guildId, userId) = _decomposeCacheKey(cacheKey);
-    await _client.guilds[guildId].members
-        .delete(userId, auditLogReason: "ROD.MentionsModule automatic action. Spammed $spammedMentionsCount mentions");
+    await _client.guilds[guildId].members.delete(
+      userId,
+      auditLogReason: "ROD.MentionsModule automatic action. Spammed $spammedMentionsCount mentions",
+    );
   }
 
   Future<void> _handleMessage(MessageCreateEvent event) async {
@@ -77,7 +79,8 @@ class MentionsMonitoringModule implements RequiresInitialization {
       return;
     }
 
-    final shouldBeSkippedByPermissions = (member.permissions?.isAdministrator ?? false) ||
+    final shouldBeSkippedByPermissions =
+        (member.permissions?.isAdministrator ?? false) ||
         (member.permissions?.canManageMessages ?? false) ||
         (member.permissions?.canManageChannels ?? false);
     if (shouldBeSkippedByPermissions) {

@@ -9,22 +9,20 @@ class FeatureSettingsRepository {
 
   Future<bool> isEnabled(Setting setting, Snowflake guildId) async {
     final result = await _database.getConnection().execute(
-        Sql.named('SELECT name FROM feature_settings WHERE name = @name AND guild_id = @guild_id'),
-        parameters: {
-          'name': setting.name,
-          'guild_id': guildId.toString(),
-        });
+      Sql.named('SELECT name FROM feature_settings WHERE name = @name AND guild_id = @guild_id'),
+      parameters: {'name': setting.name, 'guild_id': guildId.toString()},
+    );
 
     return result.isNotEmpty;
   }
 
   Future<FeatureSetting?> fetchSetting(Setting setting, Snowflake guildId) async {
-    final result = await _database.getConnection().execute(Sql.named('''
+    final result = await _database.getConnection().execute(
+      Sql.named('''
       SELECT * FROM feature_settings WHERE name = @name AND guild_id = @guild_id
-    '''), parameters: {
-      'name': setting.name,
-      'guild_id': guildId.toString(),
-    });
+    '''),
+      parameters: {'name': setting.name, 'guild_id': guildId.toString()},
+    );
 
     if (result.isEmpty) {
       return null;
@@ -44,25 +42,32 @@ class FeatureSettingsRepository {
 
   /// Fetch all settings for all guilds from the database.
   Future<Iterable<FeatureSetting>> fetchSettingsForType(Setting setting) async {
-    final result = await _database.getConnection().execute(Sql.named('''
+    final result = await _database.getConnection().execute(
+      Sql.named('''
       SELECT * FROM feature_settings WHERE name = @name;
-    '''), parameters: {'name': setting.name});
+    '''),
+      parameters: {'name': setting.name},
+    );
 
     return result.map((row) => row.toColumnMap()).map(FeatureSetting.fromRow);
   }
 
   /// Fetch all settings for all guilds from the database.
   Future<Iterable<FeatureSetting>> fetchSettingsForGuild(Snowflake guild) async {
-    final result = await _database.getConnection().execute(Sql.named('''
+    final result = await _database.getConnection().execute(
+      Sql.named('''
       SELECT * FROM feature_settings WHERE guild_id = @guildId;
-    '''), parameters: {'guildId': guild.toString()});
+    '''),
+      parameters: {'guildId': guild.toString()},
+    );
 
     return result.map((row) => row.toColumnMap()).map(FeatureSetting.fromRow);
   }
 
   /// Enable or update a setting in the database.
   Future<void> enableSetting(FeatureSetting setting) async {
-    await _database.getConnection().execute(Sql.named('''
+    await _database.getConnection().execute(
+      Sql.named('''
       INSERT INTO feature_settings (
         name,
         guild_id,
@@ -81,22 +86,24 @@ class FeatureSettingsRepository {
         additional_data = @additional_data
       WHERE
         feature_settings.guild_id = @guild_id AND feature_settings.name = @name
-    '''), parameters: {
-      'name': setting.setting.name,
-      'guild_id': setting.guildId.toString(),
-      'add_date': setting.addedAt,
-      'who_enabled': setting.whoEnabled.toString(),
-      'additional_data': setting.rawData?.toString(),
-    });
+    '''),
+      parameters: {
+        'name': setting.setting.name,
+        'guild_id': setting.guildId.toString(),
+        'add_date': setting.addedAt,
+        'who_enabled': setting.whoEnabled.toString(),
+        'additional_data': setting.rawData?.toString(),
+      },
+    );
   }
 
   /// Disable a setting in (remove it from) the database.
   Future<void> disableSetting(FeatureSetting setting) async {
-    await _database.getConnection().execute(Sql.named('''
+    await _database.getConnection().execute(
+      Sql.named('''
       DELETE FROM feature_settings WHERE name = @name AND guild_id = @guild_id
-    '''), parameters: {
-      'name': setting.setting.name,
-      'guild_id': setting.guildId.toString(),
-    });
+    '''),
+      parameters: {'name': setting.setting.name, 'guild_id': setting.guildId.toString()},
+    );
   }
 }

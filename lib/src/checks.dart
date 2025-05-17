@@ -35,8 +35,10 @@ Future<(bool?, FeatureSetting?)> fetchAndCheckSetting(CommandContext context, Se
     return (true, null);
   }
 
-  final setting =
-      await Injector.appInstance.get<FeatureSettingsRepository>().fetchSetting(settingToCheck, context.guild!.id);
+  final setting = await Injector.appInstance.get<FeatureSettingsRepository>().fetchSetting(
+    settingToCheck,
+    context.guild!.id,
+  );
   if (setting == null) {
     return (false, null);
   }
@@ -48,34 +50,30 @@ Future<(bool?, FeatureSetting?)> fetchAndCheckSetting(CommandContext context, Se
   return (null, setting);
 }
 
-final jellyfinFeatureCreateInstanceCommandCheck = Check(
-  (CommandContext context) async {
-    final (checkResult, setting) = await fetchAndCheckSetting(context, Setting.jellyfin);
-    if (checkResult != null) {
-      return checkResult;
-    }
+final jellyfinFeatureCreateInstanceCommandCheck = Check((CommandContext context) async {
+  final (checkResult, setting) = await fetchAndCheckSetting(context, Setting.jellyfin);
+  if (checkResult != null) {
+    return checkResult;
+  }
 
-    if (context.member?.permissions?.isAdministrator ?? false) {
-      return true;
-    }
+  if (context.member?.permissions?.isAdministrator ?? false) {
+    return true;
+  }
 
-    final data = setting?.parseData<GenericInstanceData>();
-    return context.member!.roleIds.contains(data?.createInstanceRole);
-  },
-);
+  final data = setting?.parseData<GenericInstanceData>();
+  return context.member!.roleIds.contains(data?.createInstanceRole);
+});
 
-final kavitaFeatureCreateInstanceCommandCheck = Check(
-  (CommandContext context) async {
-    final (checkResult, setting) = await fetchAndCheckSetting(context, Setting.kavita);
-    if (checkResult != null) {
-      return checkResult;
-    }
+final kavitaFeatureCreateInstanceCommandCheck = Check((CommandContext context) async {
+  final (checkResult, setting) = await fetchAndCheckSetting(context, Setting.kavita);
+  if (checkResult != null) {
+    return checkResult;
+  }
 
-    if (context.member?.permissions?.isAdministrator ?? false) {
-      return true;
-    }
+  if (context.member?.permissions?.isAdministrator ?? false) {
+    return true;
+  }
 
-    final data = setting?.parseData<GenericInstanceData>();
-    return context.member!.roleIds.contains(data?.createInstanceRole);
-  },
-);
+  final data = setting?.parseData<GenericInstanceData>();
+  return context.member!.roleIds.contains(data?.createInstanceRole);
+});

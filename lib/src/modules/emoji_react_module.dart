@@ -29,9 +29,11 @@ class EmojiReactModule implements RequiresInitialization, Reloadable {
       return;
     }
 
-    _emojiFeatureSettingsCache.addAll((await _featureSettingsRepository.fetchSettingsForType(Setting.emojiReact))
-        .map((setting) => MapEntry(setting.guildId, setting.parseData<EmojiReactData>()!))
-        .toMap());
+    _emojiFeatureSettingsCache.addAll(
+      (await _featureSettingsRepository.fetchSettingsForType(
+        Setting.emojiReact,
+      )).map((setting) => MapEntry(setting.guildId, setting.parseData<EmojiReactData>()!)).toMap(),
+    );
 
     await reload();
 
@@ -63,9 +65,7 @@ class EmojiReactModule implements RequiresInitialization, Reloadable {
       return;
     }
 
-    final matchingEmojis = [
-      if (data.useBuiltin) ..._findBuiltinEmojis(event.message.content.toLowerCase()),
-    ];
+    final matchingEmojis = [if (data.useBuiltin) ..._findBuiltinEmojis(event.message.content.toLowerCase())];
 
     if (matchingEmojis.isEmpty) {
       return;

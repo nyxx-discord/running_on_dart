@@ -26,12 +26,7 @@ Stream<JsonApiResponse> _mapKavitaInstances(Snowflake guildId) async* {
   final kavitaConfigRepository = Injector.appInstance.get<KavitaRepository>();
 
   for (final instance in await kavitaConfigRepository.findAllForParent(guildId.toString())) {
-    yield {
-      'id': instance.id,
-      'name': instance.name,
-      'isDefault': instance.isDefault,
-      'basePath': instance.basePath,
-    };
+    yield {'id': instance.id, 'name': instance.name, 'isDefault': instance.isDefault, 'basePath': instance.basePath};
   }
 }
 
@@ -40,14 +35,17 @@ Future<JsonApiResponse> mapGuildFeaturesToData(Snowflake guildId) async {
 
   final features = await featuresRepository.fetchSettingsForGuild(guildId);
 
-  final enabledFeaturesData = features
-      .map((f) => {
-            'name': f.setting.name,
-            'data': f.rawData != null ? jsonDecode(f.rawData!) : null,
-            'enabledBy': f.whoEnabled.toString(),
-            'enabledAt': f.addedAt.toIso8601String(),
-          })
-      .toList();
+  final enabledFeaturesData =
+      features
+          .map(
+            (f) => {
+              'name': f.setting.name,
+              'data': f.rawData != null ? jsonDecode(f.rawData!) : null,
+              'enabledBy': f.whoEnabled.toString(),
+              'enabledAt': f.addedAt.toIso8601String(),
+            },
+          )
+          .toList();
 
   return {
     'enabledFeatures': enabledFeaturesData,

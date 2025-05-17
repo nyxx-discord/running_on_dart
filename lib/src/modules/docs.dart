@@ -43,21 +43,9 @@ class DocsModule implements RequiresInitialization, Reloadable {
       (package?.elements ?? getAllEntries()).toList(),
       options: FuzzyOptions(
         keys: [
-          WeightedKey(
-            name: 'qualifiedName',
-            getter: (entry) => entry.qualifiedName,
-            weight: 1,
-          ),
-          WeightedKey(
-            name: 'name',
-            getter: (entry) => entry.name,
-            weight: 2,
-          ),
-          WeightedKey(
-            name: 'displayName',
-            getter: (entry) => entry.displayName,
-            weight: 3,
-          ),
+          WeightedKey(name: 'qualifiedName', getter: (entry) => entry.qualifiedName, weight: 1),
+          WeightedKey(name: 'name', getter: (entry) => entry.name, weight: 2),
+          WeightedKey(name: 'displayName', getter: (entry) => entry.displayName, weight: 3),
         ],
         // We perform our own sort later
         shouldSort: false,

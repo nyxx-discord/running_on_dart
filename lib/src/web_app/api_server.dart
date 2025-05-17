@@ -101,12 +101,14 @@ class WebServer {
 
     guilds = guilds.skip(perPage * (page - 1)).take(perPage);
 
-    return createOkResponse(createPaginationResponse(
-      data: await mapGuildsToGuildReducedData(guilds).toList(),
-      page: page,
-      perPage: perPage,
-      total: total,
-    ));
+    return createOkResponse(
+      createPaginationResponse(
+        data: await mapGuildsToGuildReducedData(guilds).toList(),
+        page: page,
+        perPage: perPage,
+        total: total,
+      ),
+    );
   }
 
   Future<shelf.Response> _handleGuildTags(shelf.Request request) async {
@@ -119,8 +121,12 @@ class WebServer {
     final page = int.tryParse(request.requestedUri.queryParameters['page'] ?? '1') ?? 1;
 
     return createOkResponse(
-      await mapGuildTagsToData(Snowflake.parse(guildParam), perPage,
-          filters: request.requestedUri.queryParameters, page: page),
+      await mapGuildTagsToData(
+        Snowflake.parse(guildParam),
+        perPage,
+        filters: request.requestedUri.queryParameters,
+        page: page,
+      ),
     );
   }
 
@@ -140,17 +146,16 @@ class WebServer {
 
     final authorId = tryParseSnowflake(bodyJson['authorId']);
     if (authorId == null) {
-      return createValidationErrorResponse({
-        if (authorId == null) 'authorId': 'Not a valid snowflake',
-      });
+      return createValidationErrorResponse({if (authorId == null) 'authorId': 'Not a valid snowflake'});
     }
 
     final tag = Tag(
-        name: bodyJson['name'],
-        content: bodyJson['content'],
-        enabled: true,
-        guildId: Snowflake.parse(guildParam),
-        authorId: authorId);
+      name: bodyJson['name'],
+      content: bodyJson['content'],
+      enabled: true,
+      guildId: Snowflake.parse(guildParam),
+      authorId: authorId,
+    );
 
     final tagModule = Injector.appInstance.get<TagModule>();
     await tagModule.createTag(tag);
@@ -168,8 +173,12 @@ class WebServer {
     final page = int.tryParse(request.requestedUri.queryParameters['page'] ?? '1') ?? 1;
 
     return createOkResponse(
-      await mapRemindersToData(Snowflake.parse(guildParam), perPage,
-          filters: request.requestedUri.queryParameters, page: page),
+      await mapRemindersToData(
+        Snowflake.parse(guildParam),
+        perPage,
+        filters: request.requestedUri.queryParameters,
+        page: page,
+      ),
     );
   }
 
@@ -255,43 +264,47 @@ class WebServer {
   Future<shelf.Response> _handleValidateCode(shelf.Request request) async {
     final authCode = request.url.queryParameters['code'];
 
-    final tokenResponse = await http.post(Uri.https('discord.com', '/api/oauth2/token'), body: {
-      'client_id': clientId,
-      'client_secret': clientSecret,
-      'redirect_uri': clientRedirectUri,
-      'grant_type': 'authorization_code',
-      'code': authCode,
-    }, headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    });
+    final tokenResponse = await http.post(
+      Uri.https('discord.com', '/api/oauth2/token'),
+      body: {
+        'client_id': clientId,
+        'client_secret': clientSecret,
+        'redirect_uri': clientRedirectUri,
+        'grant_type': 'authorization_code',
+        'code': authCode,
+      },
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    );
 
     final tokenBodyJson = jsonDecode(tokenResponse.body);
     final token = tokenBodyJson['access_token'];
 
-    final userData = await http.get(Uri.https('discord.com', '/api/oauth2/@me'), headers: {
-      "Accept": "application/json",
-      "Authorization": "Bearer $token",
-    });
+    final userData = await http.get(
+      Uri.https('discord.com', '/api/oauth2/@me'),
+      headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
+    );
     final userDataJson = jsonDecode(userData.body);
 
-    final guildsData = await http.get(Uri.https('discord.com', '/api/users/@me/guilds'), headers: {
-      "Accept": "application/json",
-      "Authorization": "Bearer $token",
-    });
+    final guildsData = await http.get(
+      Uri.https('discord.com', '/api/users/@me/guilds'),
+      headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
+    );
     final guildsDataJson = jsonDecode(guildsData.body);
 
     final userId = userDataJson['user']['id'] as String;
 
     final permissions = adminIds.contains(Snowflake.parse(userId)) ? JwtPermission.intValues() : <int>[];
 
-    final jwtResponse = generateJwtResponse(userId,
-        userData: {
-          'id': userDataJson['user']['id'],
-          'name': userDataJson['user']['global_name'] ?? userDataJson['user']['username'],
-          'avatar': userDataJson['user']['avatar'],
-          'guilds': guildsDataJson.map((guildData) => guildData['id']).toList(),
-        },
-        permissions: permissions);
+    final jwtResponse = generateJwtResponse(
+      userId,
+      userData: {
+        'id': userDataJson['user']['id'],
+        'name': userDataJson['user']['global_name'] ?? userDataJson['user']['username'],
+        'avatar': userDataJson['user']['avatar'],
+        'guilds': guildsDataJson.map((guildData) => guildData['id']).toList(),
+      },
+      permissions: permissions,
+    );
 
     return createOkResponse(jwtResponse);
   }
@@ -311,13 +324,21 @@ class WebServer {
       ..get("/api/guilds/<id>", _requireJwt(_requireAdminUserOrPerms(_handleGuildDetails, [JwtPermission.guilds])))
       ..get("/api/guilds/<id>/tags", _requireJwt(_requireAdminUserOrPerms(_handleGuildTags, [JwtPermission.guilds])))
       ..post(
-          "/api/guilds/<id>/tags", _requireJwt(_requireAdminUserOrPerms(_handleCreateGuildTag, [JwtPermission.guilds])))
-      ..get("/api/guilds/<id>/reminders",
-          _requireJwt(_requireAdminUserOrPerms(_handleGuildReminders, [JwtPermission.guilds])))
-      ..get("/api/guilds/<id>/members/<member_id>",
-          _requireJwt(_requireAdminUserOrPerms(_handleGuildMember, [JwtPermission.guilds])))
-      ..get("/api/guilds/<id>/channels/<channel_id>",
-          _requireJwt(_requireAdminUserOrPerms(_handleGuildChannel, [JwtPermission.guilds])))
+        "/api/guilds/<id>/tags",
+        _requireJwt(_requireAdminUserOrPerms(_handleCreateGuildTag, [JwtPermission.guilds])),
+      )
+      ..get(
+        "/api/guilds/<id>/reminders",
+        _requireJwt(_requireAdminUserOrPerms(_handleGuildReminders, [JwtPermission.guilds])),
+      )
+      ..get(
+        "/api/guilds/<id>/members/<member_id>",
+        _requireJwt(_requireAdminUserOrPerms(_handleGuildMember, [JwtPermission.guilds])),
+      )
+      ..get(
+        "/api/guilds/<id>/channels/<channel_id>",
+        _requireJwt(_requireAdminUserOrPerms(_handleGuildChannel, [JwtPermission.guilds])),
+      )
       ..get("/api/validate-oauth", _handleValidateCode)
       ..all(r"/<ignored|.+\w+\.\w+$>", staticHandler)
       ..all("/<ignored|.*>", _handleIndex);
@@ -343,15 +364,9 @@ class WebServer {
 
     final limiter = shelf_limiter.shelfLimiterByEndpoint(
       endpointLimits: {
-        '/api/*': shelf_limiter.RateLimiterOptions(
-          maxRequests: 10,
-          windowSize: const Duration(seconds: 10),
-        ),
+        '/api/*': shelf_limiter.RateLimiterOptions(maxRequests: 10, windowSize: const Duration(seconds: 10)),
       },
-      defaultOptions: shelf_limiter.RateLimiterOptions(
-        maxRequests: 120,
-        windowSize: const Duration(minutes: 1),
-      ),
+      defaultOptions: shelf_limiter.RateLimiterOptions(maxRequests: 120, windowSize: const Duration(minutes: 1)),
     );
 
     var pipeline = const shelf.Pipeline()

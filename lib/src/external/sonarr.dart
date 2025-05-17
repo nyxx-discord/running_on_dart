@@ -21,8 +21,13 @@ class Series {
   final int runtime;
   final Iterable<Image> images;
 
-  Series(
-      {required this.title, required this.status, required this.overview, required this.runtime, required this.images});
+  Series({
+    required this.title,
+    required this.status,
+    required this.overview,
+    required this.runtime,
+    required this.images,
+  });
 
   factory Series.parseJson(Map<String, dynamic> data) {
     return Series(
@@ -44,14 +49,15 @@ class CalendarItem {
   final String? overview;
   final Series series;
 
-  CalendarItem(
-      {required this.seriesId,
-      required this.seasonNumber,
-      required this.episodeNumber,
-      required this.title,
-      required this.airDateUtc,
-      required this.overview,
-      required this.series});
+  CalendarItem({
+    required this.seriesId,
+    required this.seasonNumber,
+    required this.episodeNumber,
+    required this.title,
+    required this.airDateUtc,
+    required this.overview,
+    required this.series,
+  });
 
   factory CalendarItem.parseJson(Map<String, dynamic> data) {
     return CalendarItem(
@@ -76,11 +82,14 @@ class SonarrClient {
   }
 
   Future<List<CalendarItem>> fetchCalendar({DateTime? start, DateTime? end, bool? includeSeries = true}) async {
-    final response = await _get("/api/v3/calendar", parameters: {
-      if (start != null) 'start': start.toIso8601String(),
-      if (end != null) 'end': end.toIso8601String(),
-      if (includeSeries != null) 'includeSeries': boolToString(includeSeries),
-    });
+    final response = await _get(
+      "/api/v3/calendar",
+      parameters: {
+        if (start != null) 'start': start.toIso8601String(),
+        if (end != null) 'end': end.toIso8601String(),
+        if (includeSeries != null) 'includeSeries': boolToString(includeSeries),
+      },
+    );
 
     final body = jsonDecode(response.body) as List<dynamic>;
     return body.map((element) => CalendarItem.parseJson(element as Map<String, dynamic>)).toList();

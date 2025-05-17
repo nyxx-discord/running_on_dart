@@ -11,24 +11,24 @@ import 'package:running_on_dart/src/util/util.dart';
 final featureSettings = ChatGroup(
   'settings',
   'Manage enabled features in this guild',
-  checks: [
-    PermissionsCheck(Permissions.manageGuild),
-    GuildCheck.all(),
-  ],
+  checks: [PermissionsCheck(Permissions.manageGuild), GuildCheck.all()],
   children: [
     ChatCommand(
       'enable',
       'Enable or update a setting for this guild',
-      id('settings-enable',
-          (InteractionChatContext context, @Description('The setting to enable') Setting setting) async {
+      id('settings-enable', (
+        InteractionChatContext context,
+        @Description('The setting to enable') Setting setting,
+      ) async {
         SettingData? data;
         if (setting is! Setting<NoData>) {
           final modal = await context.getModal(title: "Configuration", components: setting.getConfigurationFields());
 
           data = setting.parseData(modal.asMap());
           if (data == null) {
-            return context
-                .respond(MessageBuilder(content: "Cannot properly parse settings data. Please contact administrator"));
+            return context.respond(
+              MessageBuilder(content: "Cannot properly parse settings data. Please contact administrator"),
+            );
           }
         }
 
@@ -47,12 +47,11 @@ final featureSettings = ChatGroup(
     ChatCommand(
       'disable',
       'Disable a setting for this guild',
-      id('settings-disable', (
-        ChatContext context,
-        @Description('The setting to enable') Setting setting,
-      ) async {
-        final featureSetting =
-            await Injector.appInstance.get<FeatureSettingsRepository>().fetchSetting(setting, context.guild!.id);
+      id('settings-disable', (ChatContext context, @Description('The setting to enable') Setting setting) async {
+        final featureSetting = await Injector.appInstance.get<FeatureSettingsRepository>().fetchSetting(
+          setting,
+          context.guild!.id,
+        );
 
         if (featureSetting != null) {
           Injector.appInstance.get<FeatureSettingsModule>().disable(featureSetting);
@@ -62,41 +61,55 @@ final featureSettings = ChatGroup(
       }),
     ),
     ChatCommand(
-        "show-configuration",
-        "Show current configuration for settings",
-        id('settings-show-configuration', (ChatContext context) async {
-          final settings =
-              await Injector.appInstance.get<FeatureSettingsRepository>().fetchSettingsForGuild(context.guild!.id);
+      "show-configuration",
+      "Show current configuration for settings",
+      id('settings-show-configuration', (ChatContext context) async {
+        final settings = await Injector.appInstance.get<FeatureSettingsRepository>().fetchSettingsForGuild(
+          context.guild!.id,
+        );
 
-          final messageBuilders = settings.map((setting) {
-            final embed = EmbedBuilder(title: setting.setting.name, description: setting.setting.description, fields: [
+        final messageBuilders = settings.map((setting) {
+          final embed = EmbedBuilder(
+            title: setting.setting.name,
+            description: setting.setting.description,
+            fields: [
               EmbedFieldBuilder(
-                  name: 'Added at', value: setting.addedAt.format(TimestampStyle.shortDate), isInline: true),
+                name: 'Added at',
+                value: setting.addedAt.format(TimestampStyle.shortDate),
+                isInline: true,
+              ),
               EmbedFieldBuilder(name: 'Added by', value: userMention(setting.whoEnabled), isInline: true),
               if (settings is! Setting<NoData>)
                 EmbedFieldBuilder(name: 'Additional data', value: setting.rawData ?? '[EMPTY]', isInline: false),
-            ]);
+            ],
+          );
 
-            return MessageBuilder(embeds: [embed]);
-          });
+          return MessageBuilder(embeds: [embed]);
+        });
 
-          final paginator = await pagination.builders(messageBuilders.toList());
+        final paginator = await pagination.builders(messageBuilders.toList());
 
-          return context.respond(paginator);
-        }),
-        options: CommandOptions(defaultResponseLevel: ResponseLevel.private)),
+        return context.respond(paginator);
+      }),
+      options: CommandOptions(defaultResponseLevel: ResponseLevel.private),
+    ),
     ChatCommand(
       'list',
       'List available settings',
       id('settings-list', (ChatContext context) async {
         final embeds = Setting.values.map((s) {
-          return EmbedBuilder(title: s.name, description: s.description, fields: [
-            if (s is! Setting<NoData>)
-              EmbedFieldBuilder(
+          return EmbedBuilder(
+            title: s.name,
+            description: s.description,
+            fields: [
+              if (s is! Setting<NoData>)
+                EmbedFieldBuilder(
                   name: 'Data fields',
                   value: s.getConfigurationFields().map((e) => e.customId).join(", "),
-                  isInline: false)
-          ]);
+                  isInline: false,
+                ),
+            ],
+          );
         });
 
         final builders = embeds.slices(4).map((embeds) => MessageBuilder(embeds: embeds)).toList();

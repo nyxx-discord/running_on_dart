@@ -3,11 +3,7 @@ import 'dart:convert';
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/util/util.dart';
 
-enum DataType {
-  channelMention,
-  json,
-  string,
-}
+enum DataType { channelMention, json, string }
 
 abstract class SettingData {
   Map<String, dynamic> toJson();
@@ -29,9 +25,7 @@ class GenericSnowflakeData implements SettingData {
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      'value': value.toString(),
-    };
+    return {'value': value.toString()};
   }
 }
 
@@ -47,9 +41,7 @@ class GenericInstanceData implements SettingData {
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      'create_instance_role': createInstanceRole.toString(),
-    };
+    return {'create_instance_role': createInstanceRole.toString()};
   }
 }
 
@@ -80,17 +72,16 @@ class EmojiReactData implements SettingData {
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      "use_builtin": useBuiltin,
-      "mode": mode.name,
-      "process_other_bots": processOtherBots,
-    };
+    return {"use_builtin": useBuiltin, "mode": mode.name, "process_other_bots": processOtherBots};
   }
 }
 
 enum Setting<T extends SettingData> {
   poopName<NoData>(
-      'poop_name', 'Replace nickname of a member with poop emoji if the member tries to hoist itself', false),
+    'poop_name',
+    'Replace nickname of a member with poop emoji if the member tries to hoist itself',
+    false,
+  ),
   joinLogs<GenericSnowflakeData>('join_logs', 'Logs member join events into specified channel', true),
   modLogs<GenericSnowflakeData>('mod_logs', 'Logs administration event into specified channel', true),
   jellyfin<GenericInstanceData>('jellyfin', 'Allows usage of jellyfin commands', true),
@@ -115,33 +106,35 @@ enum Setting<T extends SettingData> {
     }
 
     return switch (T) {
-      const (GenericSnowflakeData) => GenericSnowflakeData.fromJson(raw),
-      const (GenericInstanceData) => GenericInstanceData.fromJson(raw),
-      const (EmojiReactData) => EmojiReactData.fromJson(raw),
-      _ => null,
-    } as T?;
+          const (GenericSnowflakeData) => GenericSnowflakeData.fromJson(raw),
+          const (GenericInstanceData) => GenericInstanceData.fromJson(raw),
+          const (EmojiReactData) => EmojiReactData.fromJson(raw),
+          _ => null,
+        }
+        as T?;
   }
 
   List<TextInputBuilder> getConfigurationFields() {
     return switch (T) {
       const (GenericSnowflakeData) => [
-          TextInputBuilder(customId: 'value', style: TextInputStyle.short, label: "Target Snowflake"),
-        ],
+        TextInputBuilder(customId: 'value', style: TextInputStyle.short, label: "Target Snowflake"),
+      ],
       const (GenericInstanceData) => [
-          TextInputBuilder(
-              customId: 'create_instance_role', style: TextInputStyle.short, label: "Target Role Snowflake"),
-        ],
+        TextInputBuilder(customId: 'create_instance_role', style: TextInputStyle.short, label: "Target Role Snowflake"),
+      ],
       const (EmojiReactData) => [
-          TextInputBuilder(customId: 'use_builtin', style: TextInputStyle.short, label: "Use built in emotes (yes/no)"),
-          TextInputBuilder(
-              customId: 'mode',
-              style: TextInputStyle.short,
-              label: "Mode name (${EmojiReactType.values.map((e) => e.name).join(', ')})"),
-          TextInputBuilder(
-              customId: 'process_other_bots',
-              style: TextInputStyle.short,
-              label: "Process messages of other bots (yes/no)"),
-        ],
+        TextInputBuilder(customId: 'use_builtin', style: TextInputStyle.short, label: "Use built in emotes (yes/no)"),
+        TextInputBuilder(
+          customId: 'mode',
+          style: TextInputStyle.short,
+          label: "Mode name (${EmojiReactType.values.map((e) => e.name).join(', ')})",
+        ),
+        TextInputBuilder(
+          customId: 'process_other_bots',
+          style: TextInputStyle.short,
+          label: "Process messages of other bots (yes/no)",
+        ),
+      ],
       _ => throw Error(),
     };
   }
@@ -172,14 +165,19 @@ class FeatureSetting {
     required this.rawData,
   });
 
-  factory FeatureSetting.create(
-      {required Setting setting, required Snowflake guildId, required Snowflake whoEnabled, SettingData? data}) {
+  factory FeatureSetting.create({
+    required Setting setting,
+    required Snowflake guildId,
+    required Snowflake whoEnabled,
+    SettingData? data,
+  }) {
     return FeatureSetting(
-        setting: setting,
-        guildId: guildId,
-        whoEnabled: whoEnabled,
-        addedAt: DateTime.now(),
-        rawData: data != null ? jsonEncode(data.toJson()) : null);
+      setting: setting,
+      guildId: guildId,
+      whoEnabled: whoEnabled,
+      addedAt: DateTime.now(),
+      rawData: data != null ? jsonEncode(data.toJson()) : null,
+    );
   }
 
   T? parseData<T extends SettingData>() {

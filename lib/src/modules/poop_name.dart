@@ -6,7 +6,19 @@ import 'package:running_on_dart/src/settings.dart';
 import 'package:running_on_dart/src/init.dart';
 
 const poopEmoji = "💩";
-const poopCharacters = ['!', '#', '@', '^', '%', '&', '-', '*', '.' '+', "'"];
+const poopCharacters = [
+  '!',
+  '#',
+  '@',
+  '^',
+  '%',
+  '&',
+  '-',
+  '*',
+  '.'
+      '+',
+  "'",
+];
 final poopRegexp = RegExp("[${poopCharacters.join()}]");
 
 class PoopNameModule implements RequiresInitialization {

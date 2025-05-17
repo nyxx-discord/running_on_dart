@@ -27,15 +27,17 @@ List<MessageBuilder> _getPaginationBuilders(Iterable<DocEntry> searchResults, St
 
   return foldedResults.asMap().entries.map((entry) {
     final embed = EmbedBuilder(
-        color: getRandomColor(),
-        title: 'Search results - $query',
-        fields: [
-          EmbedFieldBuilder(
-              name: 'Results in ${package != null ? 'package ${package.packageName}' : 'all packages'}',
-              value: entry.value.join('\n'),
-              isInline: false),
-        ],
-        footer: EmbedFooterBuilder(text: 'Page ${entry.key + 1} of $pageCount'));
+      color: getRandomColor(),
+      title: 'Search results - $query',
+      fields: [
+        EmbedFieldBuilder(
+          name: 'Results in ${package != null ? 'package ${package.packageName}' : 'all packages'}',
+          value: entry.value.join('\n'),
+          isInline: false,
+        ),
+      ],
+      footer: EmbedFooterBuilder(text: 'Page ${entry.key + 1} of $pageCount'),
+    );
 
     return MessageBuilder(embeds: [embed]);
   }).toList();
@@ -58,13 +60,14 @@ final docs = ChatGroup(
         @Description('The element to get documentation for') DocEntry element,
       ) async {
         final embed = EmbedBuilder(
-            color: getRandomColor(),
-            title: '${element.displayName} ${element.type}',
-            description: '''
+          color: getRandomColor(),
+          title: '${element.displayName} ${element.type}',
+          description: '''
 Documentation: [${element.name}](${element.urlToDocs})
 Package: [${element.packageName}](https://pub.dev/packages/${element.packageName})
 ''',
-            footer: EmbedFooterBuilder(text: element.qualifiedName));
+          footer: EmbedFooterBuilder(text: element.qualifiedName),
+        );
 
         await context.respond(MessageBuilder(embeds: [embed]));
       }),
@@ -80,13 +83,16 @@ Package: [${element.packageName}](https://pub.dev/packages/${element.packageName
         final searchResults = Injector.appInstance.get<DocsModule>().search(query, package);
 
         if (searchResults.isEmpty) {
-          await context.respond(MessageBuilder(
-              embeds: [EmbedBuilder(title: 'No results', color: DiscordColor.parseHexString("#FF0000"))]));
+          await context.respond(
+            MessageBuilder(embeds: [EmbedBuilder(title: 'No results', color: DiscordColor.parseHexString("#FF0000"))]),
+          );
           return;
         }
 
-        final paginator =
-            await pagination.builders(_getPaginationBuilders(searchResults, query, package), userId: context.user.id);
+        final paginator = await pagination.builders(
+          _getPaginationBuilders(searchResults, query, package),
+          userId: context.user.id,
+        );
 
         await context.respond(paginator);
       }),

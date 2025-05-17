@@ -11,9 +11,10 @@ typedef UpdateCallback = Future<(bool, String?)> Function();
 typedef RunCallback = Future<void> Function();
 
 EmbedBuilder getInitialEmbed(int taskAmount, String pipelineName) => EmbedBuilder(
-    title: getEmbedTitle(1, taskAmount),
-    description: 'Starting...',
-    author: EmbedAuthorBuilder(name: "Pipeline $pipelineName"));
+  title: getEmbedTitle(1, taskAmount),
+  description: 'Starting...',
+  author: EmbedAuthorBuilder(name: "Pipeline $pipelineName"),
+);
 
 String getEmbedTitle(int index, int length) => 'Task $index of $length';
 
@@ -62,10 +63,11 @@ class Pipeline {
     final embed = getInitialEmbed(tasks.length, name);
 
     return InternalPipeline(
-        messageSupplier: () => messageSupplier(MessageBuilder(embeds: [embed], components: [], content: null)),
-        tasks: tasks,
-        updateInterval: updateInterval,
-        embed: embed);
+      messageSupplier: () => messageSupplier(MessageBuilder(embeds: [embed], components: [], content: null)),
+      tasks: tasks,
+      updateInterval: updateInterval,
+      embed: embed,
+    );
   }
 
   InternalPipeline forUpdateContext({required TargetUpdateMessageSupplier messageSupplier}) {
@@ -87,16 +89,23 @@ class InternalPipeline {
 
   late EmbedBuilder embed;
 
-  InternalPipeline(
-      {required this.messageSupplier, required this.tasks, required this.updateInterval, required this.embed});
+  InternalPipeline({
+    required this.messageSupplier,
+    required this.tasks,
+    required this.updateInterval,
+    required this.embed,
+  });
 
   Future<void> execute() async {
     final message = await messageSupplier();
 
     final timer = Stopwatch()..start();
     for (final (index, task) in tasks.indexed) {
-      final internalTask =
-          InternalTask(targetMessage: message, updateCallback: task.updateCallback, updateInterval: updateInterval);
+      final internalTask = InternalTask(
+        targetMessage: message,
+        updateCallback: task.updateCallback,
+        updateInterval: updateInterval,
+      );
 
       embed.title = getEmbedTitle(index + 1, tasks.length);
       task.runCallback();

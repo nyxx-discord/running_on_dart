@@ -15,8 +15,12 @@ JsonApiResponse mapGuildTag(Tag tag) {
   };
 }
 
-Future<JsonApiResponse> mapGuildTagsToData(Snowflake guildId, int tagsLimit,
-    {Map<String, String> filters = const {}, int page = 1}) async {
+Future<JsonApiResponse> mapGuildTagsToData(
+  Snowflake guildId,
+  int tagsLimit, {
+  Map<String, String> filters = const {},
+  int page = 1,
+}) async {
   final tagsModule = Injector.appInstance.get<TagModule>();
 
   var tags = tagsModule.getGuildTags(guildId);

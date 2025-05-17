@@ -76,16 +76,8 @@ class TagModule implements RequiresInitialization, Reloadable {
       allTags.toList(),
       options: FuzzyOptions(
         keys: [
-          WeightedKey(
-            name: 'name',
-            getter: (tag) => tag.name,
-            weight: 5,
-          ),
-          WeightedKey(
-            name: 'content',
-            getter: (tag) => tag.content,
-            weight: 1,
-          ),
+          WeightedKey(name: 'name', getter: (tag) => tag.name, weight: 5),
+          WeightedKey(name: 'content', getter: (tag) => tag.content, weight: 1),
         ],
       ),
     ).search(query);

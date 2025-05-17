@@ -45,8 +45,10 @@ final List<Snowflake> adminIds = getEnv('ROD_ADMIN_IDS').split(RegExp(r'\s+')).m
 final Duration docsUpdateInterval = Duration(seconds: int.parse(getEnv('ROD_DOCS_UPDATE_INTERVAL', '86400')));
 
 /// The packages to cache documentation for.
-final List<String> docsPackages =
-    getEnv('ROD_DOCS_PACKAGES', 'nyxx nyxx_commands nyxx_lavalink nyxx_extensions').split(RegExp(r'\s+'));
+final List<String> docsPackages = getEnv(
+  'ROD_DOCS_PACKAGES',
+  'nyxx nyxx_commands nyxx_lavalink nyxx_extensions',
+).split(RegExp(r'\s+'));
 
 /// The default response for the docs command.
 final String defaultDocsResponse = getEnv('ROD_DEFAULT_DOCS_RESPONSE', '''
@@ -106,7 +108,8 @@ final Flags<GatewayIntents> _baseIntents =
     GatewayIntents.directMessages | GatewayIntents.guilds | GatewayIntents.guildVoiceStates;
 
 /// Privileged intents that can be enabled to add additional features to Running on Dart.
-final Flags<GatewayIntents> _privilegedIntents = _baseIntents |
+final Flags<GatewayIntents> _privilegedIntents =
+    _baseIntents |
     GatewayIntents.guildMessages |
     GatewayIntents.guildMembers |
     GatewayIntents.messageContent |

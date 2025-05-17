@@ -32,23 +32,24 @@ class CreateInvitationRequest {
   final bool unlimited;
   final int sessions;
 
-  CreateInvitationRequest(
-      {required this.code,
-      required this.expires,
-      required this.duration,
-      required this.specificLibraries,
-      required this.unlimited,
-      required this.sessions});
+  CreateInvitationRequest({
+    required this.code,
+    required this.expires,
+    required this.duration,
+    required this.specificLibraries,
+    required this.unlimited,
+    required this.sessions,
+  });
 
   Map<String, String> toBody() => {
-        'code': code,
-        if (duration != null) 'duration': duration!.inMinutes.toString(),
-        if (expires != null) 'expires': expires!.inMinutes.toString(),
-        'live_tv': 'false',
-        'sessions': sessions.toString(),
-        'unlimited': unlimited ? 'true' : 'false',
-        'specific_libraries': jsonEncode(specificLibraries),
-      };
+    'code': code,
+    if (duration != null) 'duration': duration!.inMinutes.toString(),
+    if (expires != null) 'expires': expires!.inMinutes.toString(),
+    'live_tv': 'false',
+    'sessions': sessions.toString(),
+    'unlimited': unlimited ? 'true' : 'false',
+    'specific_libraries': jsonEncode(specificLibraries),
+  };
 }
 
 class WizarrClient {
@@ -59,7 +60,11 @@ class WizarrClient {
   WizarrClient({required this.baseUrl, required this.token, required this.configName});
 
   Future<InvitationValidationResult> validateInvitation(
-      String code, String username, String password, String email) async {
+    String code,
+    String username,
+    String password,
+    String email,
+  ) async {
     var t = Random.secure().nextInt(100000);
 
     final tempSid = await _fetchSid(t);
@@ -89,25 +94,25 @@ class WizarrClient {
   }
 
   Future<InvitationValidationResult> _validateInvitation(
-      String code, String username, String password, String email, String sid) async {
-    final result = await http.post(_getUri("/api/jellyfin"), body: {
-      "username": username,
-      "email": email,
-      "password": password,
-      "code": code,
-      "socket_id": sid,
-    });
+    String code,
+    String username,
+    String password,
+    String email,
+    String sid,
+  ) async {
+    final result = await http.post(
+      _getUri("/api/jellyfin"),
+      body: {"username": username, "email": email, "password": password, "code": code, "socket_id": sid},
+    );
 
     final body = jsonDecode(result.body) as Map<String, dynamic>;
     return InvitationValidationResult.parseJson(body);
   }
 
   Future<String> _fetchSid(int t) async {
-    final result = await http.get(_getUri("/socket.io/", parameters: {
-      "EIO": "4",
-      "transport": "polling",
-      "t": t.toString(),
-    }));
+    final result = await http.get(
+      _getUri("/socket.io/", parameters: {"EIO": "4", "transport": "polling", "t": t.toString()}),
+    );
 
     final bodyString = result.body.substring(1);
     final bodyJson = jsonDecode(bodyString);
@@ -117,13 +122,9 @@ class WizarrClient {
 
   Future<void> _validateSid(int t, String sid) async {
     final result = await http.post(
-        _getUri("/socket.io/", parameters: {
-          "EIO": "4",
-          "transport": "polling",
-          "t": t.toString(),
-          'sid': sid,
-        }),
-        body: '40/jellyfin,');
+      _getUri("/socket.io/", parameters: {"EIO": "4", "transport": "polling", "t": t.toString(), 'sid': sid}),
+      body: '40/jellyfin,',
+    );
 
     if (result.body != 'OK') {
       throw Exception("Cannot validate sid");
@@ -131,12 +132,9 @@ class WizarrClient {
   }
 
   Future<String> _fetchFinalSid(int t, String sid) async {
-    final result = await http.get(_getUri("/socket.io/", parameters: {
-      "EIO": "4",
-      "transport": "polling",
-      "t": t.toString(),
-      'sid': sid,
-    }));
+    final result = await http.get(
+      _getUri("/socket.io/", parameters: {"EIO": "4", "transport": "polling", "t": t.toString(), 'sid': sid}),
+    );
 
     final bodyString = result.body.replaceFirst('40/jellyfin,', '');
     final bodyJson = jsonDecode(bodyString);
@@ -150,9 +148,10 @@ class WizarrClient {
       return http.post(uri, headers: _getHeaders(includeAuth: true), body: jsonEncode(body));
     }
 
-    final request = http.MultipartRequest('POST', uri)
-      ..headers.addAll(_getHeaders(includeAuth: true, includeContentType: false))
-      ..fields.addAll(body.cast());
+    final request =
+        http.MultipartRequest('POST', uri)
+          ..headers.addAll(_getHeaders(includeAuth: true, includeContentType: false))
+          ..fields.addAll(body.cast());
 
     return request.send();
   }

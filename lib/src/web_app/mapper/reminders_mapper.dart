@@ -17,8 +17,13 @@ JsonApiResponse _mapReminder(Reminder reminder) {
   };
 }
 
-Future<JsonApiResponse> mapRemindersToData(Snowflake guildId, int limit,
-    {Map<String, String> filters = const {}, int page = 1, String? createdBy}) async {
+Future<JsonApiResponse> mapRemindersToData(
+  Snowflake guildId,
+  int limit, {
+  Map<String, String> filters = const {},
+  int page = 1,
+  String? createdBy,
+}) async {
   final reminderModule = Injector.appInstance.get<ReminderModule>();
 
   var reminders = reminderModule.getRemindersForGuild(guildId);

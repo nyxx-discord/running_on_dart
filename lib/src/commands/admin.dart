@@ -13,18 +13,26 @@ Future<MessageBuilder> createMessageBuilder(List<String> nicknames, String messa
     return MessageBuilder(content: "-/-");
   }
 
-  return pagination.split(nicknames.join(','), buildChunk: (String chunk) => MessageBuilder(content: """
+  return pagination.split(
+    nicknames.join(','),
+    buildChunk:
+        (String chunk) => MessageBuilder(
+          content: """
 $messageHeader:
 ```
 $chunk
 ```
-"""));
+""",
+        ),
+  );
 }
 
 Stream<Member> searchMembers(String disallowedChar, int batchSize, Guild guild) {
-  return (guild.manager.client as NyxxGateway)
-      .gateway
-      .listGuildMembers(guild.id, query: disallowedChar, limit: batchSize);
+  return (guild.manager.client as NyxxGateway).gateway.listGuildMembers(
+    guild.id,
+    query: disallowedChar,
+    limit: batchSize,
+  );
 }
 
 final admin = ChatGroup(
@@ -39,11 +47,12 @@ final admin = ChatGroup(
         @UseConverter(IntConverter(min: 1)) @Description('The number of messages to delete') int count, [
         @Description('The user from whom to delete messages') User? user,
       ]) async {
-        final messagesToDelete = await context.channel.messages
-            .stream()
-            .where((m) => user == null || user.id == m.author.id)
-            .take(count)
-            .toList();
+        final messagesToDelete =
+            await context.channel.messages
+                .stream()
+                .where((m) => user == null || user.id == m.author.id)
+                .take(count)
+                .toList();
 
         await Future.wait(
           messagesToDelete
@@ -53,65 +62,67 @@ final admin = ChatGroup(
               .map((m) => context.channel.messages.bulkDelete(m)),
         );
 
-        await Future.wait(
-          messagesToDelete.where((m) => !m.id.isBefore(Snowflake.firstBulk())).map((m) => m.delete()),
-        );
+        await Future.wait(messagesToDelete.where((m) => !m.id.isBefore(Snowflake.firstBulk())).map((m) => m.delete()));
 
         await context.respond(MessageBuilder(content: 'Successfully deleted messages!'));
       }),
       checks: [PermissionsCheck(Permissions.manageMessages)],
-      options: CommandsOptions(
-        defaultResponseLevel: ResponseLevel.private,
-      ),
+      options: CommandsOptions(defaultResponseLevel: ResponseLevel.private),
     ),
     ChatCommand(
-        "perform-nickname-pooping",
-        "Perform pooping of usernames in current guild",
-        id('perform-nickname-pooping', (ChatContext context, [bool dryRun = true, int batchSize = 100]) async {
-          final poopModule = Injector.appInstance.get<PoopNameModule>();
+      "perform-nickname-pooping",
+      "Perform pooping of usernames in current guild",
+      id('perform-nickname-pooping', (ChatContext context, [bool dryRun = true, int batchSize = 100]) async {
+        final poopModule = Injector.appInstance.get<PoopNameModule>();
 
-          var nickNamesToRemove = <String>[];
-          for (final disallowedChar in poopCharacters) {
-            await for (final member in searchMembers(disallowedChar, batchSize, context.guild!)) {
-              final (performed, nick) = await poopModule.poopMember(member, dryRun: dryRun);
-              if (performed && (nick ?? '').isNotEmpty) {
-                nickNamesToRemove.add(nick!);
-              }
+        var nickNamesToRemove = <String>[];
+        for (final disallowedChar in poopCharacters) {
+          await for (final member in searchMembers(disallowedChar, batchSize, context.guild!)) {
+            final (performed, nick) = await poopModule.poopMember(member, dryRun: dryRun);
+            if (performed && (nick ?? '').isNotEmpty) {
+              nickNamesToRemove.add(nick!);
             }
           }
+        }
 
-          final outPutMessageHeader = "Pooping nicknames ${dryRun ? "[DRY RUN]" : ""}";
-          final messageBuilder = await createMessageBuilder(nickNamesToRemove, outPutMessageHeader);
+        final outPutMessageHeader = "Pooping nicknames ${dryRun ? "[DRY RUN]" : ""}";
+        final messageBuilder = await createMessageBuilder(nickNamesToRemove, outPutMessageHeader);
 
-          await context.respond(messageBuilder);
-        }),
-        checks: [
-          GuildCheck.all(),
-          PermissionsCheck(Permissions.manageNicknames),
-        ]),
-    ChatGroup("system", "System administration commands", checks: [
-      administratorCheck,
-      administratorGuildCheck,
-    ], children: [
-      ChatCommand(
-        'reload-modules',
-        'Reload modules',
-        id('admin-reload-modules', (InteractionChatContext context) async {
-          final modulesToReload = await context.getMultiSelection(
-            reloadableModules.keys.toList(),
-            MessageBuilder(content: 'Select modules to reload'),
-            toSelectMenuOption: (value) => SelectMenuOptionBuilder(label: value, value: value),
-          );
+        await context.respond(messageBuilder);
+      }),
+      checks: [GuildCheck.all(), PermissionsCheck(Permissions.manageNicknames)],
+    ),
+    ChatGroup(
+      "system",
+      "System administration commands",
+      checks: [administratorCheck, administratorGuildCheck],
+      children: [
+        ChatCommand(
+          'reload-modules',
+          'Reload modules',
+          id('admin-reload-modules', (InteractionChatContext context) async {
+            final modulesToReload = await context.getMultiSelection(
+              reloadableModules.keys.toList(),
+              MessageBuilder(content: 'Select modules to reload'),
+              toSelectMenuOption: (value) => SelectMenuOptionBuilder(label: value, value: value),
+            );
 
-          final stopwatch = Stopwatch()..start();
-          final reloadFunctions =
-              modulesToReload.map((m) => reloadableModules[m]).nonNulls.map((m) => m()).map((r) => r.reload());
-          await Future.wait(reloadFunctions);
+            final stopwatch = Stopwatch()..start();
+            final reloadFunctions = modulesToReload
+                .map((m) => reloadableModules[m])
+                .nonNulls
+                .map((m) => m())
+                .map((r) => r.reload());
+            await Future.wait(reloadFunctions);
 
-          return context.respond(MessageBuilder(
-              content: 'Reloaded ${reloadFunctions.length} modules. Took ${stopwatch.elapsed.formatShort()}'));
-        }),
-      )
-    ]),
+            return context.respond(
+              MessageBuilder(
+                content: 'Reloaded ${reloadFunctions.length} modules. Took ${stopwatch.elapsed.formatShort()}',
+              ),
+            );
+          }),
+        ),
+      ],
+    ),
   ],
 );
