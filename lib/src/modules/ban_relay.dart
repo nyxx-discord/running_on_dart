@@ -26,7 +26,7 @@ class BanRelayModule implements RequiresInitialization {
     for (final setting in settings) {
       final data = setting.parseData<BanRelayData>();
       if (data == null) {
-        throw StateError("ban_relay setting cannot have null data");
+        throw StateError("ban_relay setting data cannot be null");
       }
 
       for (final targetGuild in data.relayedGuilds) {
