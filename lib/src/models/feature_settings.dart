@@ -101,9 +101,7 @@ class BanRelayData implements SettingData {
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      'relayed_guilds': relayedGuilds.map((e) => e.toString()).toList(),
-    };
+    return {'relayed_guilds': relayedGuilds.map((e) => e.toString()).toList()};
   }
 }
 
@@ -138,12 +136,13 @@ enum Setting<T extends SettingData> {
     }
 
     return switch (T) {
-      const (GenericSnowflakeData) => GenericSnowflakeData.fromJson(raw),
-      const (GenericInstanceData) => GenericInstanceData.fromJson(raw),
-      const (EmojiReactData) => EmojiReactData.fromJson(raw),
-      const (BanRelayData) => BanRelayData.fromJson(raw),
-      _ => null,
-    } as T?;
+          const (GenericSnowflakeData) => GenericSnowflakeData.fromJson(raw),
+          const (GenericInstanceData) => GenericInstanceData.fromJson(raw),
+          const (EmojiReactData) => EmojiReactData.fromJson(raw),
+          const (BanRelayData) => BanRelayData.fromJson(raw),
+          _ => null,
+        }
+        as T?;
   }
 
   T? parseFromConfiguration(Map<String, dynamic>? raw) {
@@ -152,40 +151,51 @@ enum Setting<T extends SettingData> {
     }
 
     return switch (T) {
-      const (GenericSnowflakeData) || const (GenericInstanceData) || const (EmojiReactData) => parseData(raw),
-      const (BanRelayData) => BanRelayData.fromConfiguration(raw),
-      _ => null,
-    } as T?;
+          const (GenericSnowflakeData) || const (GenericInstanceData) || const (EmojiReactData) => parseData(raw),
+          const (BanRelayData) => BanRelayData.fromConfiguration(raw),
+          _ => null,
+        }
+        as T?;
   }
 
   List<TextInputBuilder> getConfigurationFields() {
     return switch (T) {
       const (GenericSnowflakeData) => [
-          TextInputBuilder(customId: 'value', style: TextInputStyle.short, label: "Target Snowflake"),
-        ],
+        TextInputBuilder(customId: 'value', style: TextInputStyle.short, label: "Target Snowflake"),
+      ],
       const (GenericInstanceData) => [
-          TextInputBuilder(
-              customId: 'create_instance_role', style: TextInputStyle.short, label: "Target Role Snowflake"),
-        ],
+        TextInputBuilder(customId: 'create_instance_role', style: TextInputStyle.short, label: "Target Role Snowflake"),
+      ],
       const (EmojiReactData) => [
-          TextInputBuilder(customId: 'use_builtin', style: TextInputStyle.short, label: "Use built in emotes (yes/no)"),
-          TextInputBuilder(
-              customId: 'mode',
-              style: TextInputStyle.short,
-              label: "Mode name (${EmojiReactType.values.map((e) => e.name).join(', ')})"),
-          TextInputBuilder(
-              customId: 'process_other_bots',
-              style: TextInputStyle.short,
-              label: "Process messages of other bots (yes/no)"),
-        ],
+        TextInputBuilder(customId: 'use_builtin', style: TextInputStyle.short, label: "Use built in emotes (yes/no)"),
+        TextInputBuilder(
+          customId: 'mode',
+          style: TextInputStyle.short,
+          label: "Mode name (${EmojiReactType.values.map((e) => e.name).join(', ')})",
+        ),
+        TextInputBuilder(
+          customId: 'process_other_bots',
+          style: TextInputStyle.short,
+          label: "Process messages of other bots (yes/no)",
+        ),
+      ],
       const (BanRelayData) => [
-          TextInputBuilder(
-              customId: 'relayed_guilds',
-              style: TextInputStyle.paragraph,
-              label: "List of guilds ids (comma separated)"),
-          TextInputBuilder(customId: 'unban', style: TextInputStyle.short, label: "Also unban when unbanned from target guild (yes/no)"),
-          TextInputBuilder(customId: 'ensure_ban', style: TextInputStyle.short, label: "When = yes, then it would go beyond cache to ban user (yes/no)"),
-        ],
+        TextInputBuilder(
+          customId: 'relayed_guilds',
+          style: TextInputStyle.paragraph,
+          label: "List of guilds ids (comma separated)",
+        ),
+        TextInputBuilder(
+          customId: 'unban',
+          style: TextInputStyle.short,
+          label: "Also unban when unbanned from target guild (yes/no)",
+        ),
+        TextInputBuilder(
+          customId: 'ensure_ban',
+          style: TextInputStyle.short,
+          label: "When = yes, then it would go beyond cache to ban user (yes/no)",
+        ),
+      ],
       _ => throw Error(),
     };
   }
