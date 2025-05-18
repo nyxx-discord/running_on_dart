@@ -14,9 +14,10 @@ final info = ChatCommand(
 
     final startDateStr =
         "${botInfo.uptime.format(TimestampStyle.longDateTime)} (${botInfo.uptime.format(TimestampStyle.relativeTime)})";
-    final docsUpdateStr = botInfo.docsUpdate != null
-        ? "${botInfo.docsUpdate!.format(TimestampStyle.longDateTime)} (${botInfo.docsUpdate!.format(TimestampStyle.relativeTime)})"
-        : "Never";
+    final docsUpdateStr =
+        botInfo.docsUpdate != null
+            ? "${botInfo.docsUpdate!.format(TimestampStyle.longDateTime)} (${botInfo.docsUpdate!.format(TimestampStyle.relativeTime)})"
+            : "Never";
 
     final embed = EmbedBuilder(
       color: getRandomColor(),
@@ -26,10 +27,12 @@ final info = ChatCommand(
         url: Uri.parse(ApiOptions.nyxxRepositoryUrl),
       ),
       footer: EmbedFooterBuilder(
-          text: 'nyxx ${botInfo.nyxxVersion}'
-              ' | Bot ${botInfo.version}'
-              ' | Frontend ${botInfo.frontendVersion}'
-              ' | Dart SDK ${botInfo.dartPlatform}'),
+        text:
+            'nyxx ${botInfo.nyxxVersion}'
+            ' | Bot ${botInfo.version}'
+            ' | Frontend ${botInfo.frontendVersion}'
+            ' | Dart SDK ${botInfo.dartPlatform}',
+      ),
       fields: [
         EmbedFieldBuilder(name: 'Cached guilds', value: botInfo.cachedGuilds.toString(), isInline: true),
         EmbedFieldBuilder(name: 'Cached users', value: botInfo.cachedUsers.toString(), isInline: true),
@@ -49,13 +52,18 @@ final info = ChatCommand(
       MessageBuilder(
         embeds: [embed],
         components: [
-          ActionRowBuilder(components: [
-            ButtonBuilder.link(
+          ActionRowBuilder(
+            components: [
+              ButtonBuilder.link(
                 url: context.client.application.getInviteUri(scopes: ['bot', 'applications.commands']),
-                label: 'Add ROD to your guild'),
-            ButtonBuilder.link(
-                url: Uri.parse('https://www.youtube.com/watch?v=dQw4w9WgXcQ'), label: 'Special link for special people')
-          ]),
+                label: 'Add ROD to your guild',
+              ),
+              ButtonBuilder.link(
+                url: Uri.parse('https://www.youtube.com/watch?v=dQw4w9WgXcQ'),
+                label: 'Special link for special people',
+              ),
+            ],
+          ),
         ],
       ),
     );

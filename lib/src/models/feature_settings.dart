@@ -1,14 +1,9 @@
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/util/util.dart';
 
-enum DataType {
-  channelMention,
-  json,
-  string,
-}
+enum DataType { channelMention, json, string }
 
 abstract class SettingData {
   Map<String, dynamic> toJson();
@@ -30,9 +25,7 @@ class GenericSnowflakeData implements SettingData {
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      'value': value.toString(),
-    };
+    return {'value': value.toString()};
   }
 }
 
@@ -48,9 +41,7 @@ class GenericInstanceData implements SettingData {
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      'create_instance_role': createInstanceRole.toString(),
-    };
+    return {'create_instance_role': createInstanceRole.toString()};
   }
 }
 
@@ -81,11 +72,7 @@ class EmojiReactData implements SettingData {
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      "use_builtin": useBuiltin,
-      "mode": mode.name,
-      "process_other_bots": processOtherBots,
-    };
+    return {"use_builtin": useBuiltin, "mode": mode.name, "process_other_bots": processOtherBots};
   }
 }
 
@@ -122,7 +109,10 @@ class BanRelayData implements SettingData {
 
 enum Setting<T extends SettingData> {
   poopName<NoData>(
-      'poop_name', 'Replace nickname of a member with poop emoji if the member tries to hoist itself', false),
+    'poop_name',
+    'Replace nickname of a member with poop emoji if the member tries to hoist itself',
+    false,
+  ),
   joinLogs<GenericSnowflakeData>('join_logs', 'Logs member join events into specified channel', true),
   modLogs<GenericSnowflakeData>('mod_logs', 'Logs administration event into specified channel', true),
   jellyfin<GenericInstanceData>('jellyfin', 'Allows usage of jellyfin commands', true),
@@ -226,14 +216,19 @@ class FeatureSetting {
     required this.rawData,
   });
 
-  factory FeatureSetting.create(
-      {required Setting setting, required Snowflake guildId, required Snowflake whoEnabled, SettingData? data}) {
+  factory FeatureSetting.create({
+    required Setting setting,
+    required Snowflake guildId,
+    required Snowflake whoEnabled,
+    SettingData? data,
+  }) {
     return FeatureSetting(
-        setting: setting,
-        guildId: guildId,
-        whoEnabled: whoEnabled,
-        addedAt: DateTime.now(),
-        rawData: data != null ? jsonEncode(data.toJson()) : null);
+      setting: setting,
+      guildId: guildId,
+      whoEnabled: whoEnabled,
+      addedAt: DateTime.now(),
+      rawData: data != null ? jsonEncode(data.toJson()) : null,
+    );
   }
 
   T? parseData<T extends SettingData>() {

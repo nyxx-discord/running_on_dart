@@ -8,8 +8,12 @@ class JellyfinConfigUserData {
   final bool instanceIsDefault;
   final String? userId;
 
-  JellyfinConfigUserData(
-      {required this.instanceName, required this.instanceBaseBath, required this.instanceIsDefault, this.userId});
+  JellyfinConfigUserData({
+    required this.instanceName,
+    required this.instanceBaseBath,
+    required this.instanceIsDefault,
+    this.userId,
+  });
 
   factory JellyfinConfigUserData.fromDatabaseRow(Map<String, dynamic> row) {
     return JellyfinConfigUserData(

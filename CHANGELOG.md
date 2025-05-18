@@ -1,3 +1,34 @@
+## 4.13.0
+- Improve reconnection logic
+- Replace messages per second with messages per minute metric
+- Add events per minute metric
+
+## 4.12.0
+- Add metric reconnection logic
+- Add cached messages metric
+- Upgrade deps
+
+## 4.11.6
+- Fix latency metrics 
+
+## 4.11.5
+- Add latency metrics
+
+## 4.11.4
+- Fix joins per minute metric
+
+## 4.11.3
+- Add joins per minute metric
+
+## 4.11.2
+- Improve metric publish handling
+
+## 4.11.1
+- Improve metric publish handling
+
+## 4.11.0
+- Implement home assistant metrics support
+
 ## 4.10.2
 - Upgrade nyxx
 - List frontend version

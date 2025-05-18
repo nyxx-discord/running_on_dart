@@ -11,8 +11,13 @@ class KavitaUserConfig {
   KavitaConfig? config;
   int? id;
 
-  KavitaUserConfig(
-      {required this.userId, required this.authToken, required this.apiKey, required this.kavitaConfigId, this.id});
+  KavitaUserConfig({
+    required this.userId,
+    required this.authToken,
+    required this.apiKey,
+    required this.kavitaConfigId,
+    this.id,
+  });
 
   factory KavitaUserConfig.fromDatabaseRow(Map<String, dynamic> row) {
     return KavitaUserConfig(
@@ -40,13 +45,7 @@ class KavitaConfig {
   /// The ID of this config, or `null` if this config has not yet been added to the database.
   int? id;
 
-  KavitaConfig({
-    required this.name,
-    required this.basePath,
-    required this.isDefault,
-    required this.parentId,
-    this.id,
-  });
+  KavitaConfig({required this.name, required this.basePath, required this.isDefault, required this.parentId, this.id});
 
   factory KavitaConfig.fromDatabaseRow(Map<String, dynamic> row) {
     return KavitaConfig(

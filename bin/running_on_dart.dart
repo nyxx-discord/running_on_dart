@@ -39,16 +39,11 @@ void main(List<String> args) async {
 
   commands.onCommandError.listen(handleException);
 
-  final client = await Nyxx.connectGateway(token, intents,
-      options: GatewayClientOptions(
-        plugins: [
-          Logging(),
-          CliIntegration(),
-          IgnoreExceptions(),
-          commands,
-          pagination,
-        ],
-      ));
+  final client = await Nyxx.connectGateway(
+    token,
+    intents,
+    options: GatewayClientOptions(plugins: [Logging(), CliIntegration(), IgnoreExceptions(), commands, pagination]),
+  );
 
   await setupContainer(client);
 

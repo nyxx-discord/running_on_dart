@@ -12,28 +12,29 @@ Stream<MessageBuilder> getSearchEmbedPages(Iterable<SeriesItem> items, Authentic
     final attachments = <AttachmentBuilder>[];
 
     final embeds = Stream.fromIterable(itemSlice).asyncMap((item) async {
-      final attachment =
-          AttachmentBuilder(data: await client.getSeriesCover(item.seriesId), fileName: 'series-cover.jpg');
+      final attachment = AttachmentBuilder(
+        data: await client.getSeriesCover(item.seriesId),
+        fileName: 'series-cover.jpg',
+      );
       attachments.add(attachment);
 
       return EmbedBuilder(
         title: '${item.name} (${item.seriesId})',
-        fields: [
-          EmbedFieldBuilder(name: 'Library', value: item.libraryName, isInline: true),
-        ],
+        fields: [EmbedFieldBuilder(name: 'Library', value: item.libraryName, isInline: true)],
         thumbnail: EmbedThumbnailBuilder(url: Uri.parse('attachment://series-cover.jpg')),
       );
     });
 
-    yield MessageBuilder(
-      embeds: await embeds.toList(),
-      attachments: attachments,
-    );
+    yield MessageBuilder(embeds: await embeds.toList(), attachments: attachments);
   }
 }
 
 Stream<FutureOr<MessageBuilder> Function()> generateReadingPaginationFactories(
-    ContinuePoint continuePoint, AuthenticatedKavitaClient client, int seriesId, bool saveReadProgress) async* {
+  ContinuePoint continuePoint,
+  AuthenticatedKavitaClient client,
+  int seriesId,
+  bool saveReadProgress,
+) async* {
   for (var i = 0; i < continuePoint.pages; i += 1) {
     yield () {
       if (saveReadProgress) {
@@ -49,5 +50,6 @@ Future<MessageBuilder> generateReadingPage(int page, int chapterId, Authenticate
   final pageData = await client.getChapterImage(chapterId, page);
 
   return MessageBuilder(
-      attachments: [AttachmentBuilder(data: pageData, fileName: '${pageNumberFormat.format(page)}.jpg')]);
+    attachments: [AttachmentBuilder(data: pageData, fileName: '${pageNumberFormat.format(page)}.jpg')],
+  );
 }

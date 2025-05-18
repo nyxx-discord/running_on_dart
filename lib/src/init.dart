@@ -8,6 +8,7 @@ import 'package:running_on_dart/src/modules/jellyfin.dart';
 import 'package:running_on_dart/src/modules/join_logs.dart';
 import 'package:running_on_dart/src/modules/kavita.dart';
 import 'package:running_on_dart/src/modules/mentions.dart';
+import 'package:running_on_dart/src/modules/metrics.dart';
 import 'package:running_on_dart/src/modules/mod_log.dart';
 import 'package:running_on_dart/src/modules/poop_name.dart';
 import 'package:running_on_dart/src/modules/reminder.dart';
@@ -57,7 +58,8 @@ Future<void> setupContainer(NyxxGateway client) async {
     ..registerSingleton(() => KavitaModule())
     ..registerSingleton(() => EmojiReactModule())
     ..registerSingleton(() => BanRelayModule())
-    ..registerSingleton(() => BotInfoService());
+    ..registerSingleton(() => BotInfoService())
+    ..registerSingleton(() => MetricsModule());
 
   await Injector.appInstance.get<DatabaseService>().init();
   await Injector.appInstance.get<FeatureSettingsModule>().init();
@@ -72,4 +74,5 @@ Future<void> setupContainer(NyxxGateway client) async {
   await Injector.appInstance.get<MentionsMonitoringModule>().init();
   await Injector.appInstance.get<EmojiReactModule>().init();
   await Injector.appInstance.get<BanRelayModule>().init();
+  await Injector.appInstance.get<MetricsModule>().init();
 }

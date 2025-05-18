@@ -27,13 +27,14 @@ class SeriesItem {
   final String libraryName;
   final int libraryId;
 
-  SeriesItem(
-      {required this.seriesId,
-      required this.name,
-      required this.originalName,
-      required this.format,
-      required this.libraryName,
-      required this.libraryId});
+  SeriesItem({
+    required this.seriesId,
+    required this.name,
+    required this.originalName,
+    required this.format,
+    required this.libraryName,
+    required this.libraryId,
+  });
 
   factory SeriesItem.fromJson(Map<String, dynamic> raw) {
     return SeriesItem(
@@ -56,8 +57,13 @@ class ContinuePoint {
 
   int get chapterId => id;
 
-  ContinuePoint(
-      {required this.id, required this.pagesRead, required this.pages, required this.volumeId, this.isBook = false});
+  ContinuePoint({
+    required this.id,
+    required this.pagesRead,
+    required this.pages,
+    required this.volumeId,
+    this.isBook = false,
+  });
 
   factory ContinuePoint.fromJson(Map<String, dynamic> raw) {
     return ContinuePoint(
@@ -82,19 +88,21 @@ class AuthenticatedKavitaClient {
   }
 
   Future<Uint8List> getChapterImage(int chapterId, int page) async {
-    final result = await _get("/api/Reader/image",
-        parameters: {"chapterId": chapterId.toString(), "page": page.toString()}, authApiKey: true);
+    final result = await _get(
+      "/api/Reader/image",
+      parameters: {"chapterId": chapterId.toString(), "page": page.toString()},
+      authApiKey: true,
+    );
 
     return result.bodyBytes;
   }
 
   Future<Iterable<SeriesItem>> searchSeries(String query) async {
-    final result = await _get("/api/Search/search",
-        parameters: {
-          'queryString': query,
-          'includeChapterAndFiles': false.toString(),
-        },
-        authToken: true);
+    final result = await _get(
+      "/api/Search/search",
+      parameters: {'queryString': query, 'includeChapterAndFiles': false.toString()},
+      authToken: true,
+    );
 
     final body = jsonDecode(result.body) as Map<String, dynamic>;
 
@@ -102,90 +110,106 @@ class AuthenticatedKavitaClient {
   }
 
   Future<bool> saveContinuePoint(int seriesId, int volumeId, int chapterId, int page) async {
-    final result = await _post('/api/Reader/progress',
-        body: {
-          'seriesId': seriesId,
-          'volumeId': volumeId,
-          'chapterId': chapterId,
-          'pageNum': page,
-        },
-        authToken: true);
+    final result = await _post(
+      '/api/Reader/progress',
+      body: {'seriesId': seriesId, 'volumeId': volumeId, 'chapterId': chapterId, 'pageNum': page},
+      authToken: true,
+    );
 
     return result.body == 'true';
   }
 
   Future<ContinuePoint> getContinuePoint(int seriesId) async {
-    final result = await _get("/api/reader/continue-point",
-        parameters: {
-          'seriesId': seriesId.toString(),
-        },
-        authToken: true);
+    final result = await _get(
+      "/api/reader/continue-point",
+      parameters: {'seriesId': seriesId.toString()},
+      authToken: true,
+    );
 
     final body = jsonDecode(result.body) as Map<String, dynamic>;
     return ContinuePoint.fromJson(body);
   }
 
   Future<String> getBookPage(int chapterId, int page) async {
-    final result =
-        await _get("/api/Book/$chapterId/book-page", parameters: {"page": page.toString()}, authApiKey: true);
+    final result = await _get(
+      "/api/Book/$chapterId/book-page",
+      parameters: {"page": page.toString()},
+      authApiKey: true,
+    );
 
     return result.body;
   }
 
   Future<int> getNextChapter(int seriesId, int volumeId, int currentChapterId) async {
-    final result = await _get("/api/Reader/next-chapter",
-        parameters: {
-          'seriesId': seriesId.toString(),
-          'volumeId': volumeId.toString(),
-          'currentChapterId': currentChapterId.toString(),
-        },
-        authToken: true);
+    final result = await _get(
+      "/api/Reader/next-chapter",
+      parameters: {
+        'seriesId': seriesId.toString(),
+        'volumeId': volumeId.toString(),
+        'currentChapterId': currentChapterId.toString(),
+      },
+      authToken: true,
+    );
 
     return int.parse(result.body);
   }
 
   Future<Uint8List> getChapterCover(int chapterId) async {
-    final result =
-        await _get("/api/Image/chapter-cover", parameters: {"chapterId": chapterId.toString()}, authApiKey: true);
+    final result = await _get(
+      "/api/Image/chapter-cover",
+      parameters: {"chapterId": chapterId.toString()},
+      authApiKey: true,
+    );
 
     return result.bodyBytes;
   }
 
   Future<Uint8List> getSeriesCover(int seriesId) async {
-    final result =
-        await _get("/api/Image/series-cover", parameters: {"seriesId": seriesId.toString()}, authApiKey: true);
+    final result = await _get(
+      "/api/Image/series-cover",
+      parameters: {"seriesId": seriesId.toString()},
+      authApiKey: true,
+    );
 
     return result.bodyBytes;
   }
 
-  Future<http.Response> _get(String path,
-      {Map<String, String> parameters = const {}, bool authToken = false, bool authApiKey = false}) async {
-    final uri =
-        Uri.parse('$baseUrl$path').replace(queryParameters: _makeQueryParameters(parameters, authApiKey: authApiKey));
+  Future<http.Response> _get(
+    String path, {
+    Map<String, String> parameters = const {},
+    bool authToken = false,
+    bool authApiKey = false,
+  }) async {
+    final uri = Uri.parse(
+      '$baseUrl$path',
+    ).replace(queryParameters: _makeQueryParameters(parameters, authApiKey: authApiKey));
 
     return await http.get(uri, headers: _makeHeaders(authToken: authToken));
   }
 
-  Future<http.Response> _post(String path,
-      {Object? body,
-      Map<String, String> parameters = const {},
-      bool authToken = false,
-      bool authApiKey = false}) async {
+  Future<http.Response> _post(
+    String path, {
+    Object? body,
+    Map<String, String> parameters = const {},
+    bool authToken = false,
+    bool authApiKey = false,
+  }) async {
     return await http.post(
-        Uri.parse('$baseUrl$path').replace(queryParameters: _makeQueryParameters(parameters, authApiKey: authApiKey)),
-        headers: _makeHeaders(authToken: authToken),
-        body: jsonEncode(body));
+      Uri.parse('$baseUrl$path').replace(queryParameters: _makeQueryParameters(parameters, authApiKey: authApiKey)),
+      headers: _makeHeaders(authToken: authToken),
+      body: jsonEncode(body),
+    );
   }
 
   Map<String, String> _makeQueryParameters(Map<String, String> parameters, {bool authApiKey = false}) => {
-        ...parameters,
-        if (authApiKey) 'apiKey': apiKey,
-      };
+    ...parameters,
+    if (authApiKey) 'apiKey': apiKey,
+  };
 
   Map<String, String> _makeHeaders({bool authToken = false}) => {
-        ..._headers,
-        if (authToken) 'Authorization': 'Bearer $token',
-      };
+    ..._headers,
+    if (authToken) 'Authorization': 'Bearer $token',
+  };
 }
 
 class UnauthenticatedKavitaClient {
@@ -198,10 +222,7 @@ class UnauthenticatedKavitaClient {
   }
 
   Future<LoginResult> login(String username, String password) async {
-    final result = await _post("/api/Account/login", body: {
-      "username": username,
-      "password": password,
-    });
+    final result = await _post("/api/Account/login", body: {"username": username, "password": password});
 
     final body = jsonDecode(result.body);
 
@@ -231,11 +252,15 @@ class KavitaModule {
     return userConfig;
   }
 
-  Future<KavitaUserConfig?> fetchGetUserConfigWithFallback(
-      {required Snowflake userId, required Snowflake parentId, String? instanceName}) async {
-    final config = instanceName != null
-        ? await getJellyfinConfig(instanceName, parentId)
-        : await getJellyfinDefaultConfig(parentId);
+  Future<KavitaUserConfig?> fetchGetUserConfigWithFallback({
+    required Snowflake userId,
+    required Snowflake parentId,
+    String? instanceName,
+  }) async {
+    final config =
+        instanceName != null
+            ? await getJellyfinConfig(instanceName, parentId)
+            : await getJellyfinDefaultConfig(parentId);
     if (config == null) {
       return null;
     }
@@ -262,8 +287,11 @@ class KavitaModule {
 
   Future<KavitaUserConfig> login(KavitaConfig config, LoginResult loginResult, Snowflake userId) {
     final userConfig = KavitaUserConfig(
-        userId: userId, authToken: loginResult.token, apiKey: loginResult.apiKey, kavitaConfigId: config.id!)
-      ..config = config;
+      userId: userId,
+      authToken: loginResult.token,
+      apiKey: loginResult.apiKey,
+      kavitaConfigId: config.id!,
+    )..config = config;
 
     return _kavitaRepository.saveUserConfig(userConfig);
   }

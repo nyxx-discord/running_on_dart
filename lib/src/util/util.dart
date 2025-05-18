@@ -49,8 +49,9 @@ String? valueOrNull(String? value) {
 }
 
 String generateRandomString(int length) =>
-    String.fromCharCodes(Iterable.generate(length, (_) => _chars.codeUnitAt(random.nextInt(_chars.length))))
-        .toUpperCase();
+    String.fromCharCodes(
+      Iterable.generate(length, (_) => _chars.codeUnitAt(random.nextInt(_chars.length))),
+    ).toUpperCase();
 
 Iterable<MessageBuilder> spliceEmbedsForMessageBuilders(Iterable<EmbedBuilder> embeds, [int sliceSize = 2]) sync* {
   for (final splicedEmbeds in embeds.slices(sliceSize)) {
@@ -67,12 +68,14 @@ Duration? getDurationFromStringOrDefault(String? durationString, [Duration? defa
 }
 
 Map<String, String?> getModalDataIndexed(List<MessageComponent> components) {
-  return Map.fromEntries(components
-      .cast<ActionRowComponent>()
-      .map((row) => row.components)
-      .flattened
-      .cast<TextInputComponent>()
-      .map((textInputComponent) => MapEntry<String, String?>(textInputComponent.customId, textInputComponent.value)));
+  return Map.fromEntries(
+    components
+        .cast<ActionRowComponent>()
+        .map((row) => row.components)
+        .flattened
+        .cast<TextInputComponent>()
+        .map((textInputComponent) => MapEntry<String, String?>(textInputComponent.customId, textInputComponent.value)),
+  );
 }
 
 Snowflake getParentIdFromContext(ContextData context) => context.guild?.id ?? context.user.id;

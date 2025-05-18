@@ -19,20 +19,33 @@ String _getMediaInfoAuthHeader(String parentId) =>
     'MediaBrowser Client="$botName", Device="DiscordBot ($botName, $parentId)", DeviceId="${botName}_$parentId", Version="$version"';
 
 MessageBuilder getWizarrRedeemInvitationMessageBuilder(
-    WizarrClient client, String code, Snowflake userId, Snowflake parentId, String configName) {
+  WizarrClient client,
+  String code,
+  Snowflake userId,
+  Snowflake parentId,
+  String configName,
+) {
   return MessageBuilder(
-      content:
-          "Redeem Wizarr invitation to jellyfin instance. Your code: `$code`. \nYou can also redeem later using slash command: `/jellyfin wizarr redeem-invitation`",
-      components: [
-        ActionRowBuilder(components: [
+    content:
+        "Redeem Wizarr invitation to jellyfin instance. Your code: `$code`. \nYou can also redeem later using slash command: `/jellyfin wizarr redeem-invitation`",
+    components: [
+      ActionRowBuilder(
+        components: [
           ButtonBuilder.link(url: Uri.parse("${client.baseUrl}/j/$code"), label: "Redeem code in browser"),
           ButtonBuilder.primary(
-              customId: RedeemWizarrInvitationId.button(
-                      userId: userId, code: code, parentId: parentId, configName: configName)
-                  .toString(),
-              label: "Redeem here"),
-        ])
-      ]);
+            customId:
+                RedeemWizarrInvitationId.button(
+                  userId: userId,
+                  code: code,
+                  parentId: parentId,
+                  configName: configName,
+                ).toString(),
+            label: "Redeem here",
+          ),
+        ],
+      ),
+    ],
+  );
 }
 
 class JellyfinLoginSelectId {
@@ -69,25 +82,37 @@ class JellyfinLoginCustomId {
   bool get isUsernameAuth => identifier == usernameIdentifier;
   bool get isQuickConnectAuth => identifier == quickConnectIdentifier;
 
-  JellyfinLoginCustomId(
-      {required this.identifier,
-      required this.userId,
-      required this.configName,
-      required this.parentId,
-      required this.isModal});
+  JellyfinLoginCustomId({
+    required this.identifier,
+    required this.userId,
+    required this.configName,
+    required this.parentId,
+    required this.isModal,
+  });
 
-  factory JellyfinLoginCustomId.username(
-          {required Snowflake userId, required String configName, required Snowflake parentId, bool isModal = false}) =>
-      JellyfinLoginCustomId(
-          identifier: usernameIdentifier, userId: userId, configName: configName, parentId: parentId, isModal: isModal);
-  factory JellyfinLoginCustomId.quickConnect(
-          {required Snowflake userId, required String configName, required Snowflake parentId}) =>
-      JellyfinLoginCustomId(
-          identifier: quickConnectIdentifier,
-          userId: userId,
-          configName: configName,
-          parentId: parentId,
-          isModal: false);
+  factory JellyfinLoginCustomId.username({
+    required Snowflake userId,
+    required String configName,
+    required Snowflake parentId,
+    bool isModal = false,
+  }) => JellyfinLoginCustomId(
+    identifier: usernameIdentifier,
+    userId: userId,
+    configName: configName,
+    parentId: parentId,
+    isModal: isModal,
+  );
+  factory JellyfinLoginCustomId.quickConnect({
+    required Snowflake userId,
+    required String configName,
+    required Snowflake parentId,
+  }) => JellyfinLoginCustomId(
+    identifier: quickConnectIdentifier,
+    userId: userId,
+    configName: configName,
+    parentId: parentId,
+    isModal: false,
+  );
 
   static JellyfinLoginCustomId? parse(String idString) {
     final idParts = idString.split("/");
@@ -97,11 +122,12 @@ class JellyfinLoginCustomId {
     }
 
     return JellyfinLoginCustomId(
-        identifier: idParts[0],
-        userId: Snowflake.parse(idParts[1]),
-        parentId: Snowflake.parse(idParts[2]),
-        configName: idParts[3],
-        isModal: idParts[4] == '1');
+      identifier: idParts[0],
+      userId: Snowflake.parse(idParts[1]),
+      parentId: Snowflake.parse(idParts[2]),
+      configName: idParts[3],
+      isModal: idParts[4] == '1',
+    );
   }
 
   @override
@@ -121,20 +147,37 @@ class RedeemWizarrInvitationId {
   bool get isButton => identifier == buttonIdentifier;
   bool get isModal => identifier == modalIdentifier;
 
-  RedeemWizarrInvitationId(
-      {required this.identifier,
-      required this.userId,
-      required this.code,
-      required this.parentId,
-      required this.configName});
-  factory RedeemWizarrInvitationId.button(
-          {required Snowflake userId, required String code, required Snowflake parentId, required String configName}) =>
-      RedeemWizarrInvitationId(
-          identifier: buttonIdentifier, userId: userId, code: code, parentId: parentId, configName: configName);
-  factory RedeemWizarrInvitationId.modal(
-          {required Snowflake userId, required String code, required Snowflake parentId, required String configName}) =>
-      RedeemWizarrInvitationId(
-          identifier: modalIdentifier, userId: userId, code: code, parentId: parentId, configName: configName);
+  RedeemWizarrInvitationId({
+    required this.identifier,
+    required this.userId,
+    required this.code,
+    required this.parentId,
+    required this.configName,
+  });
+  factory RedeemWizarrInvitationId.button({
+    required Snowflake userId,
+    required String code,
+    required Snowflake parentId,
+    required String configName,
+  }) => RedeemWizarrInvitationId(
+    identifier: buttonIdentifier,
+    userId: userId,
+    code: code,
+    parentId: parentId,
+    configName: configName,
+  );
+  factory RedeemWizarrInvitationId.modal({
+    required Snowflake userId,
+    required String code,
+    required Snowflake parentId,
+    required String configName,
+  }) => RedeemWizarrInvitationId(
+    identifier: modalIdentifier,
+    userId: userId,
+    code: code,
+    parentId: parentId,
+    configName: configName,
+  );
 
   static RedeemWizarrInvitationId? parse(String idString) {
     final idParts = idString.split("/");
@@ -169,12 +212,14 @@ class AuthenticatedJellyfinClient {
     return response.data ?? [];
   }
 
-  Future<List<BaseItemDto>> searchItems(String query,
-      {int limit = 15,
-      bool includeEpisodes = false,
-      bool includeMovies = true,
-      bool includeSeries = true,
-      bool isMissing = false}) async {
+  Future<List<BaseItemDto>> searchItems(
+    String query, {
+    int limit = 15,
+    bool includeEpisodes = false,
+    bool includeMovies = true,
+    bool includeSeries = true,
+    bool isMissing = false,
+  }) async {
     final includeItemTypes = [
       if (includeEpisodes) BaseItemKind.episode,
       if (includeMovies) BaseItemKind.movie,
@@ -182,22 +227,26 @@ class AuthenticatedJellyfinClient {
     ];
 
     final response = await jellyfinClient.getItemsApi().getItems(
-          searchTerm: query,
-          limit: limit,
-          recursive: true,
-          includeItemTypes: BuiltList.from(includeItemTypes),
-          fields: BuiltList.from([ItemFields.overview]),
-          isMissing: isMissing,
-        );
+      searchTerm: query,
+      limit: limit,
+      recursive: true,
+      includeItemTypes: BuiltList.from(includeItemTypes),
+      fields: BuiltList.from([ItemFields.overview]),
+      isMissing: isMissing,
+    );
 
     return response.data?.items?.toList() ?? [];
   }
 
   Future<UserDto?> createUser(String username, String password, {List<String> allowedLibraries = const []}) async {
     final response = await jellyfinClient.getUserApi().createUserByName(
-        createUserByName: CreateUserByName((b) => b
-          ..name = username
-          ..password = password));
+      createUserByName: CreateUserByName(
+        (b) =>
+            b
+              ..name = username
+              ..password = password,
+      ),
+    );
     if (response.data == null) {
       return null;
     }
@@ -206,18 +255,23 @@ class AuthenticatedJellyfinClient {
       final allowedLibrariesLoweredCase = allowedLibraries.map((str) => str.toLowerCase());
 
       final mediaFoldersResponse = await jellyfinClient.getLibraryApi().getMediaFolders(isHidden: false);
-      final mediaFoldersIds = (mediaFoldersResponse.data?.items?.toList() ?? [])
-          .where((item) => allowedLibrariesLoweredCase.contains(item.name?.toLowerCase()))
-          .map((item) => item.id)
-          .nonNulls;
+      final mediaFoldersIds =
+          (mediaFoldersResponse.data?.items?.toList() ?? [])
+              .where((item) => allowedLibrariesLoweredCase.contains(item.name?.toLowerCase()))
+              .map((item) => item.id)
+              .nonNulls;
 
       await jellyfinClient.getUserApi().updateUserPolicy(
-          userId: response.data!.id!,
-          userPolicy: UserPolicy((up) => up
-            ..enabledFolders = ListBuilder(mediaFoldersIds)
-            ..authenticationProviderId = 'Jellyfin.Server.Implementations.Users.DefaultAuthenticationProvider'
-            ..passwordResetProviderId = 'Jellyfin.Server.Implementations.Users.DefaultPasswordResetProvider'
-            ..enableAllFolders = false));
+        userId: response.data!.id!,
+        userPolicy: UserPolicy(
+          (up) =>
+              up
+                ..enabledFolders = ListBuilder(mediaFoldersIds)
+                ..authenticationProviderId = 'Jellyfin.Server.Implementations.Users.DefaultAuthenticationProvider'
+                ..passwordResetProviderId = 'Jellyfin.Server.Implementations.Users.DefaultPasswordResetProvider'
+                ..enableAllFolders = false,
+        ),
+      );
     }
 
     return response.data;
@@ -237,11 +291,12 @@ class AuthenticatedJellyfinClient {
 
   Future<List<BaseItemDto>> getNextUpEpisodes({int limit = 10}) async {
     final result = await jellyfinClient.getTvShowsApi().getNextUp(
-        limit: limit,
-        enableTotalRecordCount: false,
-        disableFirstEpisode: true,
-        enableRewatching: false,
-        fields: BuiltList([ItemFields.overview]));
+      limit: limit,
+      enableTotalRecordCount: false,
+      disableFirstEpisode: true,
+      enableRewatching: false,
+      fields: BuiltList([ItemFields.overview]),
+    );
 
     return result.data?.items?.toList() ?? [];
   }
@@ -263,9 +318,13 @@ class AnonymousJellyfinClient {
 
   Future<AuthenticationResult> loginByPassword(String username, String password) async {
     final response = await jellyfinClient.getUserApi().authenticateUserByName(
-        authenticateUserByName: AuthenticateUserByName((builder) => builder
-          ..username = username
-          ..pw = password));
+      authenticateUserByName: AuthenticateUserByName(
+        (builder) =>
+            builder
+              ..username = username
+              ..pw = password,
+      ),
+    );
 
     return response.data!;
   }
@@ -286,8 +345,8 @@ class AnonymousJellyfinClient {
 
   Future<AuthenticationResult?> finishLoginByQuickConnect(QuickConnectResult quickConnectResult) async {
     final response = await jellyfinClient.getUserApi().authenticateWithQuickConnect(
-        quickConnectDto:
-            QuickConnectDto((quickConnectBuilder) => quickConnectBuilder.secret = quickConnectResult.secret));
+      quickConnectDto: QuickConnectDto((quickConnectBuilder) => quickConnectBuilder.secret = quickConnectResult.secret),
+    );
 
     if (response.statusCode != 200) {
       return null;
@@ -359,8 +418,9 @@ class JellyfinModuleV2 implements RequiresInitialization {
 
   @override
   Future<void> init() async {
-    final buttonInteractions = _client.onMessageComponentInteraction
-        .where((event) => event.interaction.data.type == MessageComponentType.button);
+    final buttonInteractions = _client.onMessageComponentInteraction.where(
+      (event) => event.interaction.data.type == MessageComponentType.button,
+    );
 
     buttonInteractions.listen(_handleButtonInteractionForWizarrRedeemInvitation);
     buttonInteractions.listen(_handleButtonInteractionForJellyfinLogin);
@@ -389,7 +449,8 @@ class JellyfinModuleV2 implements RequiresInitialization {
   }
 
   Future<void> _handleModalInteractionForWizarrRedeemInvitation(
-      InteractionCreateEvent<ModalSubmitInteraction> event) async {
+    InteractionCreateEvent<ModalSubmitInteraction> event,
+  ) async {
     final customId = RedeemWizarrInvitationId.parse(event.interaction.data.customId);
     if (customId == null || !customId.isModal) {
       return;
@@ -399,11 +460,12 @@ class JellyfinModuleV2 implements RequiresInitialization {
       return event.interaction.respond(MessageBuilder(content: "Invalid interaction"));
     }
 
-    final modalComponents = event.interaction.data.components
-        .cast<ActionRowComponent>()
-        .map((row) => row.components)
-        .flattened
-        .cast<TextInputComponent>();
+    final modalComponents =
+        event.interaction.data.components
+            .cast<ActionRowComponent>()
+            .map((row) => row.components)
+            .flattened
+            .cast<TextInputComponent>();
 
     final usernameComponent = modalComponents.firstWhere((component) => component.customId == 'username');
     final passwordComponent = modalComponents.firstWhere((component) => component.customId == 'password');
@@ -413,19 +475,30 @@ class JellyfinModuleV2 implements RequiresInitialization {
     final client = await fetchGetWizarrClientWithFallback(originalConfig: config, parentId: customId.parentId);
 
     final redeemResult = await client.validateInvitation(
-        customId.code, usernameComponent.value!, passwordComponent.value!, emailComponent.value!);
+      customId.code,
+      usernameComponent.value!,
+      passwordComponent.value!,
+      emailComponent.value!,
+    );
 
-    event.interaction
-        .respond(MessageBuilder(content: "Invitation redeemed (username: ${redeemResult.username})", components: [
-      ActionRowBuilder(components: [
-        ButtonBuilder.link(url: Uri.parse(config!.basePath), label: "Go to Jellyfin"),
-        ButtonBuilder.link(url: Uri.parse('https://jellyfin.org/downloads'), label: "Download Jellyfin client"),
-      ])
-    ]));
+    event.interaction.respond(
+      MessageBuilder(
+        content: "Invitation redeemed (username: ${redeemResult.username})",
+        components: [
+          ActionRowBuilder(
+            components: [
+              ButtonBuilder.link(url: Uri.parse(config!.basePath), label: "Go to Jellyfin"),
+              ButtonBuilder.link(url: Uri.parse('https://jellyfin.org/downloads'), label: "Download Jellyfin client"),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _handleButtonInteractionForJellyfinLogin(
-      InteractionCreateEvent<MessageComponentInteraction> event) async {
+    InteractionCreateEvent<MessageComponentInteraction> event,
+  ) async {
     final customId = JellyfinLoginCustomId.parse(event.interaction.data.customId);
     if (customId == null) {
       return;
@@ -446,24 +519,46 @@ class JellyfinModuleV2 implements RequiresInitialization {
     }
 
     if (customId.isUsernameAuth) {
-      return event.interaction.respondModal(ModalBuilder(
-          customId: JellyfinLoginCustomId.username(
-                  userId: customId.userId, configName: customId.configName, parentId: customId.parentId, isModal: true)
-              .toString(),
+      return event.interaction.respondModal(
+        ModalBuilder(
+          customId:
+              JellyfinLoginCustomId.username(
+                userId: customId.userId,
+                configName: customId.configName,
+                parentId: customId.parentId,
+                isModal: true,
+              ).toString(),
           title: "Login to jellyfin instance (${config.name})",
           components: [
-            ActionRowBuilder(components: [
-              TextInputBuilder(customId: 'username', style: TextInputStyle.short, label: 'Username', isRequired: true)
-            ]),
-            ActionRowBuilder(components: [
-              TextInputBuilder(customId: 'password', style: TextInputStyle.short, label: 'Password', isRequired: true)
-            ])
-          ]));
+            ActionRowBuilder(
+              components: [
+                TextInputBuilder(
+                  customId: 'username',
+                  style: TextInputStyle.short,
+                  label: 'Username',
+                  isRequired: true,
+                ),
+              ],
+            ),
+            ActionRowBuilder(
+              components: [
+                TextInputBuilder(
+                  customId: 'password',
+                  style: TextInputStyle.short,
+                  label: 'Password',
+                  isRequired: true,
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
     }
   }
 
   Future<void> _handleButtonInteractionForWizarrRedeemInvitation(
-      InteractionCreateEvent<MessageComponentInteraction> event) async {
+    InteractionCreateEvent<MessageComponentInteraction> event,
+  ) async {
     final customId = RedeemWizarrInvitationId.parse(event.interaction.data.customId);
     if (customId == null || !customId.isButton) {
       return;
@@ -473,25 +568,35 @@ class JellyfinModuleV2 implements RequiresInitialization {
       return event.interaction.respond(MessageBuilder(content: "Invalid interaction"));
     }
 
-    event.interaction.respondModal(ModalBuilder(
-        customId: RedeemWizarrInvitationId.modal(
-                userId: customId.userId,
-                code: customId.code,
-                parentId: customId.parentId,
-                configName: customId.configName)
-            .toString(),
+    event.interaction.respondModal(
+      ModalBuilder(
+        customId:
+            RedeemWizarrInvitationId.modal(
+              userId: customId.userId,
+              code: customId.code,
+              parentId: customId.parentId,
+              configName: customId.configName,
+            ).toString(),
         title: "Redeem wizarr code",
         components: [
-          ActionRowBuilder(components: [
-            TextInputBuilder(customId: "username", style: TextInputStyle.short, label: "Username", isRequired: true),
-          ]),
-          ActionRowBuilder(components: [
-            TextInputBuilder(customId: "password", style: TextInputStyle.short, label: "Password", isRequired: true),
-          ]),
-          ActionRowBuilder(components: [
-            TextInputBuilder(customId: "email", style: TextInputStyle.short, label: "Email", isRequired: true),
-          ]),
-        ]));
+          ActionRowBuilder(
+            components: [
+              TextInputBuilder(customId: "username", style: TextInputStyle.short, label: "Username", isRequired: true),
+            ],
+          ),
+          ActionRowBuilder(
+            components: [
+              TextInputBuilder(customId: "password", style: TextInputStyle.short, label: "Password", isRequired: true),
+            ],
+          ),
+          ActionRowBuilder(
+            components: [
+              TextInputBuilder(customId: "email", style: TextInputStyle.short, label: "Email", isRequired: true),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _handleLoginUsername(ModalSubmitInteraction interaction, JellyfinConfig config, Snowflake userId) async {
@@ -509,18 +614,23 @@ class JellyfinModuleV2 implements RequiresInitialization {
   }
 
   Future<void> _handleLoginQuickConnect(
-      MessageComponentInteraction interaction, JellyfinConfig config, Snowflake userId) async {
+    MessageComponentInteraction interaction,
+    JellyfinConfig config,
+    Snowflake userId,
+  ) async {
     final client = Injector.appInstance.get<JellyfinModuleV2>().createJellyfinClientAnonymous(config);
 
     final initiationResult = await client.initiateLoginByQuickConnect();
 
     await interaction.respond(
-        MessageBuilder(content: "Quick Connect code: `${initiationResult.code}`. Waiting for confirmation..."),
-        isEphemeral: true);
+      MessageBuilder(content: "Quick Connect code: `${initiationResult.code}`. Waiting for confirmation..."),
+      isEphemeral: true,
+    );
     Timer.periodic(Duration(seconds: 2), (Timer timer) async {
       if (timer.tick > 30) {
-        interaction
-            .updateOriginalResponse(MessageUpdateBuilder(content: "Cannot login. Took too long to confirm code"));
+        interaction.updateOriginalResponse(
+          MessageUpdateBuilder(content: "Cannot login. Took too long to confirm code"),
+        );
         timer.cancel();
       }
 
@@ -551,7 +661,10 @@ class JellyfinModuleV2 implements RequiresInitialization {
       _jellyfinConfigRepository.getAggregateJellyfinUserConfigData(parentId.toString(), userId.toString());
 
   Future<List<JellyfinConfigUser>> getJellyfinConfigBasedOnPreviousLogin(
-      Snowflake userId, Snowflake guildId, String host) {
+    Snowflake userId,
+    Snowflake guildId,
+    String host,
+  ) {
     return _jellyfinConfigRepository.getJellyfinConfigBasedOnPreviousLogin(userId.toString(), guildId.toString(), host);
   }
 
@@ -567,8 +680,10 @@ class JellyfinModuleV2 implements RequiresInitialization {
     return _jellyfinConfigRepository.getDefaultForParent(parentId.toString());
   }
 
-  Future<WizarrClient> fetchGetWizarrClientWithFallback(
-      {required JellyfinConfig? originalConfig, required Snowflake parentId}) async {
+  Future<WizarrClient> fetchGetWizarrClientWithFallback({
+    required JellyfinConfig? originalConfig,
+    required Snowflake parentId,
+  }) async {
     final config = originalConfig ?? await getJellyfinDefaultConfig(parentId);
     if (config == null) {
       throw JellyfinConfigNotFoundException("Missing jellyfin config");
@@ -581,8 +696,10 @@ class JellyfinModuleV2 implements RequiresInitialization {
     return WizarrClient(baseUrl: config.wizarrBasePath!, token: config.wizarrToken!, configName: config.name);
   }
 
-  Future<SonarrClient> fetchGetSonarrClientWithFallback(
-      {required JellyfinConfig? originalConfig, required Snowflake parentId}) async {
+  Future<SonarrClient> fetchGetSonarrClientWithFallback({
+    required JellyfinConfig? originalConfig,
+    required Snowflake parentId,
+  }) async {
     final config = originalConfig ?? await getJellyfinDefaultConfig(parentId);
     if (config == null) {
       throw JellyfinConfigNotFoundException("Missing jellyfin config");
@@ -595,11 +712,15 @@ class JellyfinModuleV2 implements RequiresInitialization {
     return SonarrClient(baseUrl: config.sonarrBasePath!, token: config.sonarrToken!);
   }
 
-  Future<JellyfinConfigUser?> fetchGetUserConfigWithFallback(
-      {required Snowflake userId, required Snowflake parentId, String? instanceName}) async {
-    final config = instanceName != null
-        ? await getJellyfinConfig(instanceName, parentId)
-        : await getJellyfinDefaultConfig(parentId);
+  Future<JellyfinConfigUser?> fetchGetUserConfigWithFallback({
+    required Snowflake userId,
+    required Snowflake parentId,
+    String? instanceName,
+  }) async {
+    final config =
+        instanceName != null
+            ? await getJellyfinConfig(instanceName, parentId)
+            : await getJellyfinDefaultConfig(parentId);
     if (config == null) {
       return null;
     }
@@ -621,18 +742,22 @@ class JellyfinModuleV2 implements RequiresInitialization {
 
   AnonymousJellyfinClient createJellyfinClientAnonymous(JellyfinConfig config) {
     return AnonymousJellyfinClient(
-        jellyfinClient:
-            Tentacle(basePathOverride: config.basePath, interceptors: [AnonAuthInterceptor(config.parentId)]),
-        config: config);
+      jellyfinClient: Tentacle(basePathOverride: config.basePath, interceptors: [AnonAuthInterceptor(config.parentId)]),
+      config: config,
+    );
   }
 
   AuthenticatedJellyfinClient createJellyfinClientAuthenticated(JellyfinConfigUser configUser) {
     return AuthenticatedJellyfinClient(
-        Tentacle(basePathOverride: configUser.config!.basePath, interceptors: [
+      Tentacle(
+        basePathOverride: configUser.config!.basePath,
+        interceptors: [
           TokenAuthInterceptor(configUser.token, configUser.config?.parentId ?? configUser.userId),
-          AuthResponseErrorInterceptor()
-        ]),
-        configUser);
+          AuthResponseErrorInterceptor(),
+        ],
+      ),
+      configUser,
+    );
   }
 
   Future<bool> login(JellyfinConfig config, AuthenticationResult authResult, Snowflake userId) async {

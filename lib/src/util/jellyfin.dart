@@ -101,8 +101,10 @@ Iterable<EmbedFieldBuilder> getMediaPlaybackInfoFields(SessionInfoDto sessionInf
 
     return getMediaInfoEmbedFields([
       ...mediaStreams.where((mediaStream) => mediaStream.type == MediaStreamType.video),
-      ...mediaStreams.where((mediaStream) =>
-          mediaStream.type == MediaStreamType.audio && mediaStream.index == sessionInfo.playState!.audioStreamIndex),
+      ...mediaStreams.where(
+        (mediaStream) =>
+            mediaStream.type == MediaStreamType.audio && mediaStream.index == sessionInfo.playState!.audioStreamIndex,
+      ),
     ]);
   }
 
@@ -110,9 +112,10 @@ Iterable<EmbedFieldBuilder> getMediaPlaybackInfoFields(SessionInfoDto sessionInf
 
   final finalBitrate = ((transcodingInfo.bitrate ?? 0) / 1024 / 1024).toStringAsFixed(2);
 
-  final completionInfo = transcodingInfo.completionPercentage != null && transcodingInfo.framerate != null
-      ? ' - ${transcodingInfo.completionPercentage!.toStringAsFixed(2)}% (${transcodingInfo.framerate} fps)'
-      : '';
+  final completionInfo =
+      transcodingInfo.completionPercentage != null && transcodingInfo.framerate != null
+          ? ' - ${transcodingInfo.completionPercentage!.toStringAsFixed(2)}% (${transcodingInfo.framerate} fps)'
+          : '';
 
   final transcodingReason = getTranscodingReason(transcodingInfo);
   final reasonInfo = transcodingReason != null ? " ($transcodingReason)" : '';
@@ -136,7 +139,7 @@ String? getTranscodingReason(TranscodingInfo transcodingInfo) {
         'Bitrate exceeds Limit',
       TranscodingInfoTranscodeReasonsEnum(:final name) when name.contains('video') => 'Video not supported',
       TranscodingInfoTranscodeReasonsEnum(:final name) when name.contains('audio') => 'Audio not supported',
-      _ => 'Other'
+      _ => 'Other',
     };
   });
 
@@ -237,9 +240,15 @@ EmbedBuilder? buildMediaEmbedBuilder(BaseItemDto item, AuthenticatedJellyfinClie
     EmbedFieldBuilder(name: "Rating (Community/Critic)", value: rating, isInline: true),
     if ([BaseItemKind.episode, BaseItemKind.movie].contains(item.type))
       EmbedFieldBuilder(
-          name: "Length", value: parseDurationFromTicks(item.runTimeTicks!).formatShort(), isInline: true),
+        name: "Length",
+        value: parseDurationFromTicks(item.runTimeTicks!).formatShort(),
+        isInline: true,
+      ),
     EmbedFieldBuilder(
-        name: "Url", value: "[Open in Jellyfin](${client.getJellyfinItemUrl(item.id!)})", isInline: false),
+      name: "Url",
+      value: "[Open in Jellyfin](${client.getJellyfinItemUrl(item.id!)})",
+      isInline: false,
+    ),
   ];
 
   if (item.type == BaseItemKind.episode) {
@@ -266,7 +275,10 @@ EmbedBuilder? buildMediaEmbedBuilder(BaseItemDto item, AuthenticatedJellyfinClie
         EmbedFieldBuilder(name: "Status", value: item.status.toString(), isInline: true),
         ...fields,
         EmbedFieldBuilder(
-            name: 'Avg Length', value: parseDurationFromTicks(item.runTimeTicks!).formatShort(), isInline: true)
+          name: 'Avg Length',
+          value: parseDurationFromTicks(item.runTimeTicks!).formatShort(),
+          isInline: true,
+        ),
       ],
     );
   }
@@ -292,30 +304,46 @@ EmbedBuilder getUserInfoEmbed(UserDto currentUser, AuthenticatedJellyfinClient c
     title: currentUser.name,
     fields: [
       EmbedFieldBuilder(
-          name: "Last login", value: formatShortDateTimeWithRelative(currentUser.lastLoginDate!), isInline: true),
+        name: "Last login",
+        value: formatShortDateTimeWithRelative(currentUser.lastLoginDate!),
+        isInline: true,
+      ),
       EmbedFieldBuilder(
-          name: "Last activity", value: formatShortDateTimeWithRelative(currentUser.lastActivityDate!), isInline: true),
+        name: "Last activity",
+        value: formatShortDateTimeWithRelative(currentUser.lastActivityDate!),
+        isInline: true,
+      ),
       EmbedFieldBuilder(
-          name: "Is admin?", value: currentUser.policy?.isAdministrator == true ? 'true' : 'false', isInline: true),
-      EmbedFieldBuilder(name: "Links", value: '[Profile](${client.getUserProfile(currentUser.id!)})', isInline: false)
+        name: "Is admin?",
+        value: currentUser.policy?.isAdministrator == true ? 'true' : 'false',
+        isInline: true,
+      ),
+      EmbedFieldBuilder(name: "Links", value: '[Profile](${client.getUserProfile(currentUser.id!)})', isInline: false),
     ],
   );
 }
 
-MessageBuilder getJellyfinLoginMessage(
-        {required Snowflake userId, required String configName, required Snowflake parentId, bool isReAuth = false}) =>
-    MessageBuilder(
-        content:
-            '${isReAuth ? 'Session expired. ' : ''}Login using username and password or using Quick Connect feature',
-        components: [
-          ActionRowBuilder(components: [
-            ButtonBuilder.primary(
-                customId: JellyfinLoginCustomId.username(userId: userId, configName: configName, parentId: parentId)
-                    .toString(),
-                label: "Username login"),
-            ButtonBuilder.primary(
-                customId: JellyfinLoginCustomId.quickConnect(userId: userId, configName: configName, parentId: parentId)
-                    .toString(),
-                label: "Quick Connect login"),
-          ])
-        ]);
+MessageBuilder getJellyfinLoginMessage({
+  required Snowflake userId,
+  required String configName,
+  required Snowflake parentId,
+  bool isReAuth = false,
+}) => MessageBuilder(
+  content: '${isReAuth ? 'Session expired. ' : ''}Login using username and password or using Quick Connect feature',
+  components: [
+    ActionRowBuilder(
+      components: [
+        ButtonBuilder.primary(
+          customId:
+              JellyfinLoginCustomId.username(userId: userId, configName: configName, parentId: parentId).toString(),
+          label: "Username login",
+        ),
+        ButtonBuilder.primary(
+          customId:
+              JellyfinLoginCustomId.quickConnect(userId: userId, configName: configName, parentId: parentId).toString(),
+          label: "Quick Connect login",
+        ),
+      ],
+    ),
+  ],
+);

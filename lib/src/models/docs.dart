@@ -23,9 +23,7 @@ class PackageDocs {
   String get urlToDocs => 'https://pub.dev/documentation/$packageName/latest/index.json';
 
   /// Create a new [PackageDocs] for a given package.
-  PackageDocs({
-    required this.packageName,
-  });
+  PackageDocs({required this.packageName});
 
   /// Update this package's local data from [urlToDocs].
   Future<void> update() async {

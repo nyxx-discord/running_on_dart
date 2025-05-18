@@ -14,9 +14,7 @@ class ModLogsModule implements RequiresInitialization {
   final Logger _logger = Logger('ROD.ModLogs');
 
   Map<AuditLogEvent, List<String>> handledEventTypes = {
-    AuditLogEvent.memberUpdate: [
-      'communication_disabled_until',
-    ],
+    AuditLogEvent.memberUpdate: ['communication_disabled_until'],
     AuditLogEvent.memberBanAdd: [],
     AuditLogEvent.memberKick: [],
   };
@@ -81,10 +79,7 @@ class ModLogsModule implements RequiresInitialization {
 
     messageBuffer.writeln('Moderator: ${modUser.username} (${modUser.mention})');
 
-    return MessageBuilder(
-      content: messageBuffer.toString(),
-      allowedMentions: AllowedMentions.users([targetUser.id]),
-    );
+    return MessageBuilder(content: messageBuffer.toString(), allowedMentions: AllowedMentions.users([targetUser.id]));
   }
 
   String? getAdditionalMessageData(AuditLogEntry auditLogEntry) {

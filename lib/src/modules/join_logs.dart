@@ -37,14 +37,18 @@ class JoinLogsModule implements RequiresInitialization {
     }
 
     final embed = EmbedBuilder(
-        description: descriptionBuffer.toString(),
-        author: EmbedAuthorBuilder(name: event.member.user!.username, iconUrl: event.member.user!.avatar.url),
-        fields: [
-          EmbedFieldBuilder(name: idFieldName, value: userMention(event.member.id), isInline: true),
-          EmbedFieldBuilder(name: 'Joined At', value: _formatDateTimeString(event.member.joinedAt), isInline: true),
-          EmbedFieldBuilder(
-              name: 'Account created at', value: _formatDateTimeString(event.member.id.timestamp), isInline: true)
-        ]);
+      description: descriptionBuffer.toString(),
+      author: EmbedAuthorBuilder(name: event.member.user!.username, iconUrl: event.member.user!.avatar.url),
+      fields: [
+        EmbedFieldBuilder(name: idFieldName, value: userMention(event.member.id), isInline: true),
+        EmbedFieldBuilder(name: 'Joined At', value: _formatDateTimeString(event.member.joinedAt), isInline: true),
+        EmbedFieldBuilder(
+          name: 'Account created at',
+          value: _formatDateTimeString(event.member.id.timestamp),
+          isInline: true,
+        ),
+      ],
+    );
 
     channel.sendMessage(MessageBuilder(embeds: [embed]));
   }
@@ -64,12 +68,14 @@ class JoinLogsModule implements RequiresInitialization {
     final messages = channel.messages
         .stream(pageSize: 20, order: StreamOrder.mostRecentFirst)
         .where((message) => message.embeds.isNotEmpty)
-        .where((message) =>
-            message.embeds.first.fields
-                ?.firstWhereOrNull((f) => f.name == idFieldName)
-                ?.value
-                .contains(event.user.id.toString()) !=
-            null);
+        .where(
+          (message) =>
+              message.embeds.first.fields
+                  ?.firstWhereOrNull((f) => f.name == idFieldName)
+                  ?.value
+                  .contains(event.user.id.toString()) !=
+              null,
+        );
 
     final message = (await messages.toList()).firstOrNull;
     if (message == null) {

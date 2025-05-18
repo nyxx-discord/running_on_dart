@@ -26,10 +26,7 @@ String buildSets(Map<String, String> sets) {
 }
 
 (String, String) buildInsert(Map<String, String> inserts) {
-  return (
-    inserts.entries.map((entry) => entry.key).join(","),
-    inserts.entries.map((entry) => entry.value).join(","),
-  );
+  return (inserts.entries.map((entry) => entry.key).join(","), inserts.entries.map((entry) => entry.value).join(","));
 }
 
 String buildReturnings(List<String> returnings) => returnings.join(",");

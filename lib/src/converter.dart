@@ -28,30 +28,30 @@ final packageDocsConverter = Converter<PackageDocs>(
 final reminderConverter = Converter<Reminder>(
   (view, context) =>
       Injector.appInstance.get<ReminderModule>().search(context.user.id, view.getQuotedWord()).firstOrNull,
-  autocompleteCallback: (context) => Injector.appInstance
-      .get<ReminderModule>()
-      .search(context.user.id, context.currentValue)
-      .take(25)
-      .map((e) =>
-          '${reminderDateFormat.format(e.triggerAt)}: ${e.message.length > 50 ? '${e.message.substring(0, 50)}...' : e.message}')
-      .map((e) => CommandOptionChoiceBuilder(name: e, value: e)),
+  autocompleteCallback:
+      (context) => Injector.appInstance
+          .get<ReminderModule>()
+          .search(context.user.id, context.currentValue)
+          .take(25)
+          .map(
+            (e) =>
+                '${reminderDateFormat.format(e.triggerAt)}: ${e.message.length > 50 ? '${e.message.substring(0, 50)}...' : e.message}',
+          )
+          .map((e) => CommandOptionChoiceBuilder(name: e, value: e)),
 );
 
-final durationConverter = Converter<Duration>(
-  (view, context) {
-    final duration = parseStringToDuration(view.getQuotedWord());
-    if (duration == null) {
-      return null;
-    }
+final durationConverter = Converter<Duration>((view, context) {
+  final duration = parseStringToDuration(view.getQuotedWord());
+  if (duration == null) {
+    return null;
+  }
 
-    if (duration.inSeconds <= 0) {
-      return null;
-    }
+  if (duration.inSeconds <= 0) {
+    return null;
+  }
 
-    return duration;
-  },
-  autocompleteCallback: autocompleteDuration,
-);
+  return duration;
+}, autocompleteCallback: autocompleteDuration);
 
 String stringifySetting(Setting setting) => setting.name;
 const settingsConverter = SimpleConverter.fixed(elements: Setting.values, stringify: stringifySetting);
@@ -60,38 +60,44 @@ Iterable<Tag> getManageableTags(ContextData context) =>
     Injector.appInstance.get<TagModule>().findAll(context.guild?.id ?? Snowflake.zero, context.user.id);
 String stringifyTag(Tag tag) => tag.name;
 
-const manageableTagConverter = SimpleConverter<Tag>(
-  provider: getManageableTags,
-  stringify: stringifyTag,
-);
+const manageableTagConverter = SimpleConverter<Tag>(provider: getManageableTags, stringify: stringifyTag);
 
 final jellyfinConfigUserConverter = Converter<JellyfinConfigUser>(
   (view, context) async {
     return Injector.appInstance.get<JellyfinModuleV2>().fetchGetUserConfigWithFallback(
-        userId: context.user.id, parentId: context.guild?.id ?? context.user.id, instanceName: view.getQuotedWord());
+      userId: context.user.id,
+      parentId: context.guild?.id ?? context.user.id,
+      instanceName: view.getQuotedWord(),
+    );
   },
-  autocompleteCallback: (context) async => (await Injector.appInstance
-          .get<JellyfinConfigRepository>()
-          .getConfigsForParent((context.guild?.id ?? context.user.id).toString()))
-      .map((config) => CommandOptionChoiceBuilder(name: config.name, value: config.name)),
+  autocompleteCallback:
+      (context) async => (await Injector.appInstance.get<JellyfinConfigRepository>().getConfigsForParent(
+        (context.guild?.id ?? context.user.id).toString(),
+      )).map((config) => CommandOptionChoiceBuilder(name: config.name, value: config.name)),
 );
 
 final kavitaUserConfigsConverter = Converter<KavitaUserConfig>(
   (view, context) async {
     return Injector.appInstance.get<KavitaModule>().fetchGetUserConfigWithFallback(
-        userId: context.user.id, parentId: context.guild?.id ?? context.user.id, instanceName: view.getQuotedWord());
+      userId: context.user.id,
+      parentId: context.guild?.id ?? context.user.id,
+      instanceName: view.getQuotedWord(),
+    );
   },
-  autocompleteCallback: (context) async =>
-      (await Injector.appInstance.get<KavitaRepository>().findAllForParent(getParentIdFromContext(context).toString()))
-          .map((config) => CommandOptionChoiceBuilder(name: config.name, value: config.name)),
+  autocompleteCallback:
+      (context) async => (await Injector.appInstance.get<KavitaRepository>().findAllForParent(
+        getParentIdFromContext(context).toString(),
+      )).map((config) => CommandOptionChoiceBuilder(name: config.name, value: config.name)),
 );
 
 String stringifyKavitaConfig(KavitaConfig config) => config.name;
 Future<Iterable<KavitaConfig>> getKavitaConfigs(ContextData context) =>
     Injector.appInstance.get<KavitaRepository>().findAllForParent(getParentIdFromContext(context).toString());
 
-const kavitaConfigConverter =
-    SimpleConverter<KavitaConfig>(provider: getKavitaConfigs, stringify: stringifyKavitaConfig);
+const kavitaConfigConverter = SimpleConverter<KavitaConfig>(
+  provider: getKavitaConfigs,
+  stringify: stringifyKavitaConfig,
+);
 
 Future<Iterable<JellyfinConfig>> getJellyfinConfigs(ContextData context) => Injector.appInstance
     .get<JellyfinConfigRepository>()
@@ -99,8 +105,10 @@ Future<Iterable<JellyfinConfig>> getJellyfinConfigs(ContextData context) => Inje
 
 String stringifyJellyfinConfig(JellyfinConfig config) => config.name;
 
-const jellyfinConfigConverter =
-    SimpleConverter<JellyfinConfig>(provider: getJellyfinConfigs, stringify: stringifyJellyfinConfig);
+const jellyfinConfigConverter = SimpleConverter<JellyfinConfig>(
+  provider: getJellyfinConfigs,
+  stringify: stringifyJellyfinConfig,
+);
 
 /// Search autocomplete, but only include elements from a given package (if there is one selected).
 Iterable<CommandOptionChoiceBuilder<dynamic>> autocompleteQueryWithPackage(AutocompleteContext context) {
@@ -157,15 +165,17 @@ Iterable<CommandOptionChoiceBuilder<dynamic>> autocompleteDuration(AutocompleteC
     }
 
     return corrected
-        // Expand each corrected part with all possible corrections to the following parts
-        .expand((correctedStart) => correct(nextParts.first, nextParts.skip(1)).map(
-              (correctedEnd) => '$correctedStart $correctedEnd'.trim(),
-            ));
+    // Expand each corrected part with all possible corrections to the following parts
+    .expand(
+      (correctedStart) =>
+          correct(nextParts.first, nextParts.skip(1)).map((correctedEnd) => '$correctedStart $correctedEnd'.trim()),
+    );
   }
 
-  final result = correct(clustersSoFar.first, clustersSoFar.skip(1))
-      .take(25)
-      .map((e) => CommandOptionChoiceBuilder(name: e, value: e));
+  final result = correct(
+    clustersSoFar.first,
+    clustersSoFar.skip(1),
+  ).take(25).map((e) => CommandOptionChoiceBuilder(name: e, value: e));
 
   if (result.isNotEmpty) {
     return result;

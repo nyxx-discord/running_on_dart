@@ -9,9 +9,10 @@ class ReminderRepository {
   final _database = Injector.appInstance.get<DatabaseService>();
 
   Future<Reminder?> fetchReminder(int id) async {
-    final result = await _database
-        .getConnection()
-        .execute(Sql.named('SELECT * FROM reminders WHERE id = @id'), parameters: {'id': id});
+    final result = await _database.getConnection().execute(
+      Sql.named('SELECT * FROM reminders WHERE id = @id'),
+      parameters: {'id': id},
+    );
     if (result.isEmpty || result.length > 1) {
       throw Exception("Empty or multiple reminder with same id");
     }
@@ -34,9 +35,7 @@ class ReminderRepository {
       return;
     }
 
-    await _database.getConnection().execute(Sql.named('DELETE FROM reminders WHERE id = @id'), parameters: {
-      'id': id,
-    });
+    await _database.getConnection().execute(Sql.named('DELETE FROM reminders WHERE id = @id'), parameters: {'id': id});
   }
 
   /// Add a reminder to the database.
@@ -46,7 +45,8 @@ class ReminderRepository {
       return reminder;
     }
 
-    final result = await _database.getConnection().execute(Sql.named('''
+    final result = await _database.getConnection().execute(
+      Sql.named('''
     INSERT INTO reminders (
       user_id,
       channel_id,
@@ -62,14 +62,16 @@ class ReminderRepository {
       @add_date,
       @message
     ) RETURNING id;
-  '''), parameters: {
-      'user_id': reminder.userId.toString(),
-      'channel_id': reminder.channelId.toString(),
-      'message_id': reminder.messageId?.toString(),
-      'trigger_date': reminder.triggerAt.toUtc(),
-      'add_date': reminder.addedAt.toUtc(),
-      'message': reminder.message,
-    });
+  '''),
+      parameters: {
+        'user_id': reminder.userId.toString(),
+        'channel_id': reminder.channelId.toString(),
+        'message_id': reminder.messageId?.toString(),
+        'trigger_date': reminder.triggerAt.toUtc(),
+        'add_date': reminder.addedAt.toUtc(),
+        'message': reminder.message,
+      },
+    );
 
     reminder.id = result.first.first as int;
     return reminder;

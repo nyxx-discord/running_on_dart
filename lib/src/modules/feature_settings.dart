@@ -24,10 +24,7 @@ class FeatureSettingsModule implements RequiresInitialization {
   Future<(bool, FeatureSetting?)> fetchSetting(Setting setting, Snowflake guildId) async {
     final result = await _featureSettingsRepository.fetchSetting(setting, guildId);
 
-    return (
-      result != null,
-      result,
-    );
+    return (result != null, result);
   }
 
   /// Returns whether a setting is enabled in a particular guild.

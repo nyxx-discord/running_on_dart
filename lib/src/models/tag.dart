@@ -48,21 +48,10 @@ class TagUsedEvent {
   final DateTime usedAt;
   final bool hidden;
 
-  TagUsedEvent({
-    required this.tagId,
-    required this.usedAt,
-    required this.hidden,
-  });
+  TagUsedEvent({required this.tagId, required this.usedAt, required this.hidden});
 
-  factory TagUsedEvent.fromTag({
-    required Tag tag,
-    required bool hidden,
-  }) =>
-      TagUsedEvent(
-        tagId: tag.id!,
-        usedAt: DateTime.now(),
-        hidden: hidden,
-      );
+  factory TagUsedEvent.fromTag({required Tag tag, required bool hidden}) =>
+      TagUsedEvent(tagId: tag.id!, usedAt: DateTime.now(), hidden: hidden);
 
   factory TagUsedEvent.fromRow(Map<String, dynamic> row) {
     return TagUsedEvent(

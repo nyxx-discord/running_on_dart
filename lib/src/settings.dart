@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:nyxx/nyxx.dart';
 
-String get version => '4.11.0';
+String get version => '4.13.0';
 String get frontendVersion => '1.0.0';
 
 /// Get a [String] from an environment variable, throwing an exception if it is not set.
@@ -45,8 +45,10 @@ final List<Snowflake> adminIds = getEnv('ROD_ADMIN_IDS').split(RegExp(r'\s+')).m
 final Duration docsUpdateInterval = Duration(seconds: int.parse(getEnv('ROD_DOCS_UPDATE_INTERVAL', '86400')));
 
 /// The packages to cache documentation for.
-final List<String> docsPackages =
-    getEnv('ROD_DOCS_PACKAGES', 'nyxx nyxx_commands nyxx_lavalink nyxx_extensions').split(RegExp(r'\s+'));
+final List<String> docsPackages = getEnv(
+  'ROD_DOCS_PACKAGES',
+  'nyxx nyxx_commands nyxx_lavalink nyxx_extensions',
+).split(RegExp(r'\s+'));
 
 /// The default response for the docs command.
 final String defaultDocsResponse = getEnv('ROD_DEFAULT_DOCS_RESPONSE', '''
@@ -73,21 +75,17 @@ __Package repositories__:
 ${docsPackages.map((packageName) => '- $packageName: <https://github.com/nyxx-discord/$packageName>').join('\n')}
 ''');
 
-/// The custom content for web server alert box
-final String webServerAlertContent =
-    getEnv('WEB_SERVER_ALERT_CONTENT', '<span class="bold">Experimental version</span>');
-
 /// Whether web server should be enabled
 final bool webServerEnabled = getEnvBool('WEB_SERVER_ENABLE', false);
+
+/// Whether home assistant MQTT integration should be enabled
+final bool homeAssistantMetricsMqttEnabled = getEnvBool('HOME_ASSISTANT_METRICS_MQTT_ENABLED', false);
 
 /// The host of web server
 final String webServerHost = getEnv("WEB_SERVER_HOST", 'localhost');
 
 /// The port of web server
 final int webServerPort = getEnvInt('WEB_SERVER_PORT', 8088);
-
-/// Path to templates directory
-final String webServerTemplatesDirectory = getEnv('WEB_SERVER_TEMPLATES_DIRECTORY', "./templates");
 
 /// Allowed origins for cors headers
 final String webServerAllowedOrigins = getEnv('WEB_SERVER_ALLOWED_ORIGIN', 'rod.l7ssha.xyz');
@@ -110,7 +108,8 @@ final Flags<GatewayIntents> _baseIntents =
     GatewayIntents.directMessages | GatewayIntents.guilds | GatewayIntents.guildVoiceStates;
 
 /// Privileged intents that can be enabled to add additional features to Running on Dart.
-final Flags<GatewayIntents> _privilegedIntents = _baseIntents |
+final Flags<GatewayIntents> _privilegedIntents =
+    _baseIntents |
     GatewayIntents.guildMessages |
     GatewayIntents.guildMembers |
     GatewayIntents.messageContent |
@@ -118,3 +117,12 @@ final Flags<GatewayIntents> _privilegedIntents = _baseIntents |
 
 /// The intents to use for this instance.
 final Flags<GatewayIntents> intents = intentFeaturesEnabled ? _privilegedIntents : _baseIntents;
+
+/// Home assistant MQTT server path
+final metricsMqttPath = getEnv('METRICS_MQTT_PATH');
+
+/// Home assistant MQTT server username
+final metricsMqttUsername = getEnv('METRICS_MQTT_USERNAME');
+
+/// Home assistant MQTT server password
+final metricsMqttPassword = getEnv('METRICS_MQTT_PASSWORD');

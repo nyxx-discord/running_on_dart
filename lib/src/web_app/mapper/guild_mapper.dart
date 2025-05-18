@@ -6,10 +6,7 @@ import 'package:running_on_dart/src/web_app/mapper/features_mapper.dart';
 import 'package:running_on_dart/src/web_app/utils.dart';
 
 JsonApiResponse mapChannelToData(Channel channel) {
-  final data = <String, dynamic>{
-    'id': channel.id.toString(),
-    'type': channel.type.value,
-  };
+  final data = <String, dynamic>{'id': channel.id.toString(), 'type': channel.type.value};
 
   if (channel is GuildChannel) {
     data.addAll({
@@ -45,17 +42,12 @@ JsonApiResponse mapChannelToData(Channel channel) {
       'createdAt': channel.createdAt.toIso8601String(),
       'totalMessagesSent': channel.totalMessagesSent,
       'appliedTags': channel.appliedTags?.map((s) => s.toString()),
-      'owner': {
-        "id": channel.owner.id,
-      },
+      'owner': {"id": channel.owner.id},
     });
   }
 
   if (channel is ThreadsOnlyChannel) {
-    data.addAll({
-      'topic': channel.topic,
-      'lastThreadId': channel.lastThreadId?.toString(),
-    });
+    data.addAll({'topic': channel.topic, 'lastThreadId': channel.lastThreadId?.toString()});
   }
 
   return data;
@@ -69,11 +61,14 @@ Stream<JsonApiResponse> mapGuildsToGuildReducedData(Iterable<Guild> guilds) asyn
   for (final guild in guilds) {
     final guildChannels = client.channels.cache.values.whereType<GuildChannel>().where((c) => c.guildId == guild.id);
 
-    final guildCachedMessages =
-        guildChannels.whereType<TextChannel>().fold(0, (previous, channel) => previous + channel.messages.cache.length);
+    final guildCachedMessages = guildChannels.whereType<TextChannel>().fold(
+      0,
+      (previous, channel) => previous + channel.messages.cache.length,
+    );
 
-    final enabledFeatures =
-        (await featureSettingsRepository.fetchSettingsForGuild(guild.id)).map((s) => s.setting.name);
+    final enabledFeatures = (await featureSettingsRepository.fetchSettingsForGuild(
+      guild.id,
+    )).map((s) => s.setting.name);
 
     final tagsCount = tagModule.getGuildTags(guild.id).length;
 
@@ -95,30 +90,34 @@ Stream<JsonApiResponse> mapGuildsToGuildReducedData(Iterable<Guild> guilds) asyn
 Future<JsonApiResponse> mapGuildToDetailsData(Guild guild, int channelsLimit, int rolesLimit, int tagsLimit) async {
   final client = Injector.appInstance.get<NyxxGateway>();
 
-  final roles = rolesLimit > 0
-      ? guild.roles.cache.values
-          .take(rolesLimit)
-          .map((r) => {
-                "id": r.id.toString(),
-                "name": r.name.toString(),
-                "position": r.position,
-                "isHoisted": r.isHoisted,
-                "color": r.color.toHexString(),
-                "icon": r.iconHash,
-                "flags": r.flags.value,
-                "permission": r.permissions.value
-              })
-          .toList()
-      : [];
+  final roles =
+      rolesLimit > 0
+          ? guild.roles.cache.values
+              .take(rolesLimit)
+              .map(
+                (r) => {
+                  "id": r.id.toString(),
+                  "name": r.name.toString(),
+                  "position": r.position,
+                  "isHoisted": r.isHoisted,
+                  "color": r.color.toHexString(),
+                  "icon": r.iconHash,
+                  "flags": r.flags.value,
+                  "permission": r.permissions.value,
+                },
+              )
+              .toList()
+          : [];
 
-  final channels = channelsLimit > 0
-      ? client.channels.cache.values
-          .whereType<GuildChannel>()
-          .where((c) => c.guildId == guild.id)
-          .take(channelsLimit)
-          .map((c) => mapChannelToData(c))
-          .toList()
-      : [];
+  final channels =
+      channelsLimit > 0
+          ? client.channels.cache.values
+              .whereType<GuildChannel>()
+              .where((c) => c.guildId == guild.id)
+              .take(channelsLimit)
+              .map((c) => mapChannelToData(c))
+              .toList()
+          : [];
 
   return {
     'id': guild.id.toString(),
@@ -136,9 +135,6 @@ JsonApiResponse mapMemberToData(Guild guild, Member member) {
     'id': member.id.toString(),
     'nick': member.nick,
     'avatar': member.avatarHash,
-    'user': {
-      'avatar': member.user?.avatarHash,
-      'username': member.user?.globalName ?? member.user?.username,
-    }
+    'user': {'avatar': member.user?.avatarHash, 'username': member.user?.globalName ?? member.user?.username},
   };
 }

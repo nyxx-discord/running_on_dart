@@ -20,12 +20,17 @@ final tag = ChatGroup(
         @Description('Whether to enable the tag by default') bool enabled = true,
       ]) async {
         if (Injector.appInstance.get<TagModule>().getByName(context.guild?.id ?? context.user.id, name) != null) {
-          await context.respond(MessageBuilder(embeds: [
-            EmbedBuilder(
-                color: DiscordColor.parseHexString("#FF0000"),
-                title: 'Couldn\'t create tag',
-                description: 'A tag with that name already exists in this server')
-          ]));
+          await context.respond(
+            MessageBuilder(
+              embeds: [
+                EmbedBuilder(
+                  color: DiscordColor.parseHexString("#FF0000"),
+                  title: 'Couldn\'t create tag',
+                  description: 'A tag with that name already exists in this server',
+                ),
+              ],
+            ),
+          );
 
           return;
         }
@@ -46,33 +51,22 @@ final tag = ChatGroup(
     ChatCommand(
       'show',
       'Show a tag',
-      id('tag-show', (
-        ChatContext context,
-        @Description('The tag to show') Tag tag,
-      ) async {
+      id('tag-show', (ChatContext context, @Description('The tag to show') Tag tag) async {
         await context.respond(MessageBuilder(content: tag.content));
 
-        await Injector.appInstance.get<TagModule>().registerTagUsedEvent(TagUsedEvent.fromTag(
-              tag: tag,
-              hidden: false,
-            ));
+        await Injector.appInstance.get<TagModule>().registerTagUsedEvent(TagUsedEvent.fromTag(tag: tag, hidden: false));
       }),
     ),
     ChatCommand(
-        'preview',
-        'View a tag, without making it publicly visible',
-        id('tag-preview', (
-          ChatContext context,
-          @Description('The tag to preview') Tag tag,
-        ) async {
-          context.respond(MessageBuilder(content: tag.content));
+      'preview',
+      'View a tag, without making it publicly visible',
+      id('tag-preview', (ChatContext context, @Description('The tag to preview') Tag tag) async {
+        context.respond(MessageBuilder(content: tag.content));
 
-          await Injector.appInstance.get<TagModule>().registerTagUsedEvent(TagUsedEvent.fromTag(
-                tag: tag,
-                hidden: true,
-              ));
-        }),
-        options: CommandOptions(defaultResponseLevel: ResponseLevel.private)),
+        await Injector.appInstance.get<TagModule>().registerTagUsedEvent(TagUsedEvent.fromTag(tag: tag, hidden: true));
+      }),
+      options: CommandOptions(defaultResponseLevel: ResponseLevel.private),
+    ),
     ChatCommand(
       'enable',
       'Enable a tag',
@@ -124,10 +118,7 @@ final tag = ChatGroup(
     ChatCommand(
       'stats',
       'Show tag statistics',
-      id('tag-stats', (
-        ChatContext context, [
-        @Description('The tag to show stats for') Tag? tag,
-      ]) async {
+      id('tag-stats', (ChatContext context, [@Description('The tag to show stats for') Tag? tag]) async {
         final events =
             Injector.appInstance.get<TagModule>().getTagUsage(context.guild?.id ?? context.user.id, tag).toList();
 
@@ -141,15 +132,19 @@ final tag = ChatGroup(
 
         final fields = [
           EmbedFieldBuilder(
-              name: 'Total usage',
-              value: '- Tag${tag == null ? 's' : ''} shown ${totalUses - totalHiddenUses} times\n'
-                  '- Tag${tag == null ? 's' : ''} previewed $totalHiddenUses times',
-              isInline: false),
+            name: 'Total usage',
+            value:
+                '- Tag${tag == null ? 's' : ''} shown ${totalUses - totalHiddenUses} times\n'
+                '- Tag${tag == null ? 's' : ''} previewed $totalHiddenUses times',
+            isInline: false,
+          ),
           EmbedFieldBuilder(
-              name: 'Usage in the last 3 days',
-              value: '- Tag${tag == null ? 's' : ''} shown ${usesLastThreeDays - hiddenUsesLastThreeDays} times\n'
-                  '- Tag${tag == null ? 's' : ''} previewed $hiddenUsesLastThreeDays times',
-              isInline: false)
+            name: 'Usage in the last 3 days',
+            value:
+                '- Tag${tag == null ? 's' : ''} shown ${usesLastThreeDays - hiddenUsesLastThreeDays} times\n'
+                '- Tag${tag == null ? 's' : ''} previewed $hiddenUsesLastThreeDays times',
+            isInline: false,
+          ),
         ];
 
         if (tag == null) {
@@ -170,10 +165,13 @@ final tag = ChatGroup(
                 .map((entry) => entry.key)
                 .take(5);
 
-            fields.add(EmbedFieldBuilder(
+            fields.add(
+              EmbedFieldBuilder(
                 name: 'Top tags',
                 value: top5.map((tag) => '- **${tag.name}** (${useCount[tag]})').join('\n'),
-                isInline: false));
+                isInline: false,
+              ),
+            );
           }
         }
 

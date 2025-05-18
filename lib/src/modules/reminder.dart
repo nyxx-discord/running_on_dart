@@ -25,9 +25,10 @@ class ReminderModuleComponentId {
     }
 
     return ReminderModuleComponentId(
-        reminderId: int.parse(idParts[1]),
-        userId: Snowflake.parse(idParts[2]),
-        duration: Duration(minutes: int.parse(idParts[3])));
+      reminderId: int.parse(idParts[1]),
+      userId: Snowflake.parse(idParts[2]),
+      duration: Duration(minutes: int.parse(idParts[3])),
+    );
   }
 
   @override
@@ -78,8 +79,10 @@ class ReminderModule implements RequiresInitialization {
 
     _logger.fine('Processing reminders for $now');
 
-    final executionResults =
-        reminders.where((reminder) => reminder.triggerAt.isBefore(now)).toList().map((reminder) => _execute(reminder));
+    final executionResults = reminders
+        .where((reminder) => reminder.triggerAt.isBefore(now))
+        .toList()
+        .map((reminder) => _execute(reminder));
 
     await Future.wait(executionResults);
   }
@@ -97,31 +100,45 @@ class ReminderModule implements RequiresInitialization {
   }
 
   Future<void> _sendReminderMessage(Reminder reminder, TextChannel channel) async {
-    final content = StringBuffer('<@!${reminder.userId}> Reminder ')
-      ..write(reminder.addedAt.format(TimestampStyle.relativeTime))
-      ..write(" (${reminder.addedAt.format(TimestampStyle.shortDateTime)})")
-      ..write(": ")
-      ..write(reminder.message);
+    final content =
+        StringBuffer('<@!${reminder.userId}> Reminder ')
+          ..write(reminder.addedAt.format(TimestampStyle.relativeTime))
+          ..write(" (${reminder.addedAt.format(TimestampStyle.shortDateTime)})")
+          ..write(": ")
+          ..write(reminder.message);
 
-    final buttons = [5, 15, 30, 60]
-        .map((minutes) => Duration(minutes: minutes))
-        .map((duration) => ButtonBuilder.primary(
-            customId: ReminderModuleComponentId(reminderId: reminder.id!, userId: reminder.userId, duration: duration)
-                .toString(),
-            label: "Add ${duration.inMinutes} mins"))
-        .toList();
+    final buttons =
+        [5, 15, 30, 60]
+            .map((minutes) => Duration(minutes: minutes))
+            .map(
+              (duration) => ButtonBuilder.primary(
+                customId:
+                    ReminderModuleComponentId(
+                      reminderId: reminder.id!,
+                      userId: reminder.userId,
+                      duration: duration,
+                    ).toString(),
+                label: "Add ${duration.inMinutes} mins",
+              ),
+            )
+            .toList();
 
     final messageBuilder = MessageBuilder(
-        content: content.toString(),
-        referencedMessage:
-            reminder.messageId != null ? MessageReferenceBuilder.reply(messageId: reminder.messageId!) : null,
-        components: [
-          ActionRowBuilder(components: [
+      content: content.toString(),
+      referencedMessage:
+          reminder.messageId != null ? MessageReferenceBuilder.reply(messageId: reminder.messageId!) : null,
+      components: [
+        ActionRowBuilder(
+          components: [
             ...buttons,
             ButtonBuilder.secondary(
-                customId: ReminderModuleClearComponentsId(userId: reminder.userId).toString(), label: 'Confirm'),
-          ])
-        ]);
+              customId: ReminderModuleClearComponentsId(userId: reminder.userId).toString(),
+              label: 'Confirm',
+            ),
+          ],
+        ),
+      ],
+    );
 
     await channel.sendMessage(messageBuilder);
   }
@@ -141,12 +158,16 @@ class ReminderModule implements RequiresInitialization {
   }
 
   Future<void> _handleReminderModuleClearComponentButtonAction(
-      InteractionCreateEvent<MessageComponentInteraction> event, ReminderModuleClearComponentsId customId) async {
+    InteractionCreateEvent<MessageComponentInteraction> event,
+    ReminderModuleClearComponentsId customId,
+  ) async {
     final targetUserId = event.interaction.member?.id ?? event.interaction.user?.id;
 
     if (targetUserId == null) {
-      return event.interaction
-          .respond(MessageBuilder(content: "Invalid interaction. Missing user id!"), isEphemeral: true);
+      return event.interaction.respond(
+        MessageBuilder(content: "Invalid interaction. Missing user id!"),
+        isEphemeral: true,
+      );
     }
 
     if (targetUserId != customId.userId) {
@@ -157,12 +178,16 @@ class ReminderModule implements RequiresInitialization {
   }
 
   Future<void> _handleReminderModuleComponentButtonAction(
-      InteractionCreateEvent<MessageComponentInteraction> event, ReminderModuleComponentId customId) async {
+    InteractionCreateEvent<MessageComponentInteraction> event,
+    ReminderModuleComponentId customId,
+  ) async {
     final targetUserId = event.interaction.member?.id ?? event.interaction.user?.id;
 
     if (targetUserId == null) {
-      return event.interaction
-          .respond(MessageBuilder(content: "Invalid interaction. Missing user id!"), isEphemeral: true);
+      return event.interaction.respond(
+        MessageBuilder(content: "Invalid interaction. Missing user id!"),
+        isEphemeral: true,
+      );
     }
 
     if (targetUserId != customId.userId) {
@@ -171,17 +196,21 @@ class ReminderModule implements RequiresInitialization {
 
     final reminder = await _reminderRepository.fetchReminder(customId.reminderId);
     if (reminder == null) {
-      return event.interaction
-          .respond(MessageBuilder(content: "Given reminder is missing. Cannot extend reminder!"), isEphemeral: true);
+      return event.interaction.respond(
+        MessageBuilder(content: "Given reminder is missing. Cannot extend reminder!"),
+        isEphemeral: true,
+      );
     }
 
     final newReminder = await addReminder(Reminder.fromOther(reminder, DateTime.now().add(customId.duration)));
 
     return event.interaction.respond(
-        MessageBuilder(
-            content:
-                "Reminder extended ${customId.duration.inMinutes} minutes. Will trigger at: ${newReminder.triggerAt.format(TimestampStyle.longDateTime)}."),
-        isEphemeral: true);
+      MessageBuilder(
+        content:
+            "Reminder extended ${customId.duration.inMinutes} minutes. Will trigger at: ${newReminder.triggerAt.format(TimestampStyle.longDateTime)}.",
+      ),
+      isEphemeral: true,
+    );
   }
 
   /// Add a new reminder to the database and schedule its execution.
@@ -225,8 +254,9 @@ class ReminderModule implements RequiresInitialization {
         keys: [
           WeightedKey(
             name: 'message',
-            getter: (reminder) =>
-                reminder.message.length < 50 ? reminder.message : '${reminder.message.substring(0, 50)}...',
+            getter:
+                (reminder) =>
+                    reminder.message.length < 50 ? reminder.message : '${reminder.message.substring(0, 50)}...',
             weight: 1,
           ),
           WeightedKey(
@@ -236,8 +266,9 @@ class ReminderModule implements RequiresInitialization {
           ),
           WeightedKey(
             name: 'Perfect match',
-            getter: (reminder) =>
-                '${reminderDateFormat.format(reminder.triggerAt)}  ${reminder.message.length < 50 ? reminder.message : '${reminder.message.substring(0, 50)}...'}',
+            getter:
+                (reminder) =>
+                    '${reminderDateFormat.format(reminder.triggerAt)}  ${reminder.message.length < 50 ? reminder.message : '${reminder.message.substring(0, 50)}...'}',
             weight: 2,
           ),
         ],

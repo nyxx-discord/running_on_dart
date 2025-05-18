@@ -17,11 +17,14 @@ final ping = ChatCommand(
     final gatewayLatency = context.client.gateway.latency.inMilliseconds;
     final restLatency = context.client.httpHandler.latency.inMilliseconds;
 
-    final embed = EmbedBuilder(color: getRandomColor(), fields: [
-      EmbedFieldBuilder(name: 'Gateway latency', value: '${gatewayLatency}ms', isInline: true),
-      EmbedFieldBuilder(name: 'REST latency', value: '${restLatency}ms', isInline: true),
-      EmbedFieldBuilder(name: 'Message round-trip', value: 'Pending...', isInline: true),
-    ]);
+    final embed = EmbedBuilder(
+      color: getRandomColor(),
+      fields: [
+        EmbedFieldBuilder(name: 'Gateway latency', value: '${gatewayLatency}ms', isInline: true),
+        EmbedFieldBuilder(name: 'REST latency', value: '${restLatency}ms', isInline: true),
+        EmbedFieldBuilder(name: 'Message round-trip', value: 'Pending...', isInline: true),
+      ],
+    );
 
     // Get round-trip time
     final roundTripTimer = Stopwatch()..start();
