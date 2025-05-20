@@ -8,11 +8,10 @@ import 'package:running_on_dart/src/modules/reminder.dart';
 import 'package:running_on_dart/src/util/util.dart';
 
 String _getReminderReadyMessageText(String userMention, DateTime triggerAt, String? message) {
-  final buffer =
-      StringBuffer('Alright ')
-        ..write(userMention)
-        ..write(', ')
-        ..write(triggerAt.format(TimestampStyle.relativeTime));
+  final buffer = StringBuffer('Alright ')
+    ..write(userMention)
+    ..write(', ')
+    ..write(triggerAt.format(TimestampStyle.relativeTime));
 
   if (message != null) {
     buffer
@@ -29,16 +28,17 @@ Future<void> _createReminder({
   required Snowflake messageId,
   required DateTime triggerAt,
   required String message,
-}) => Injector.appInstance.get<ReminderModule>().addReminder(
-  Reminder(
-    userId: userId,
-    channelId: channelId,
-    messageId: messageId,
-    triggerAt: triggerAt,
-    addedAt: DateTime.now(),
-    message: message,
-  ),
-);
+}) =>
+    Injector.appInstance.get<ReminderModule>().addReminder(
+          Reminder(
+            userId: userId,
+            channelId: channelId,
+            messageId: messageId,
+            triggerAt: triggerAt,
+            addedAt: DateTime.now(),
+            message: message,
+          ),
+        );
 
 final reminderMessageCommand = MessageCommand("create-reminder", (MessageContext context) async {
   final modal = await context.getModal(
@@ -93,13 +93,12 @@ final reminder = ChatGroup(
       ) async {
         final triggerAt = DateTime.now().add(offset);
 
-        final messageBuffer =
-            StringBuffer('Alright ')
-              ..write(context.user.mention)
-              ..write(' Creating reminder: ')
-              ..write(triggerAt.format(TimestampStyle.relativeTime))
-              ..write(': ')
-              ..write(message);
+        final messageBuffer = StringBuffer('Alright ')
+          ..write(context.user.mention)
+          ..write(' Creating reminder: ')
+          ..write(triggerAt.format(TimestampStyle.relativeTime))
+          ..write(': ')
+          ..write(message);
 
         final replyMessage = await context.respond(MessageBuilder(content: messageBuffer.toString()));
 
@@ -137,36 +136,33 @@ final reminder = ChatGroup(
       'list',
       'List all your active reminders',
       id('reminder-list', (ChatContext context) async {
-        final reminders =
-            Injector.appInstance.get<ReminderModule>().getUserReminders(context.user.id).toList()
-              ..sort((a, b) => a.triggerAt.compareTo(b.triggerAt));
+        final reminders = Injector.appInstance.get<ReminderModule>().getUserReminders(context.user.id).toList()
+          ..sort((a, b) => a.triggerAt.compareTo(b.triggerAt));
 
-        final entries =
-            reminders.asMap().entries.map((entry) {
-              final index = entry.key;
-              final reminder = entry.value;
+        final entries = reminders.asMap().entries.map((entry) {
+          final index = entry.key;
+          final reminder = entry.value;
 
-              final embed = EmbedBuilder(
-                color: getRandomColor(),
-                title: 'Reminder ${index + 1} of ${reminders.length}',
-                fields: [
-                  EmbedFieldBuilder(
-                    name: 'Triggers at',
-                    value:
-                        '${reminder.triggerAt.format(TimestampStyle.longDateTime)} (${reminder.triggerAt.format(TimestampStyle.relativeTime)})',
-                    isInline: false,
-                  ),
-                  EmbedFieldBuilder(
-                    name: 'Content',
-                    value:
-                        reminder.message.length > 2048 ? '${reminder.message.substring(0, 2045)}...' : reminder.message,
-                    isInline: false,
-                  ),
-                ],
-              );
+          final embed = EmbedBuilder(
+            color: getRandomColor(),
+            title: 'Reminder ${index + 1} of ${reminders.length}',
+            fields: [
+              EmbedFieldBuilder(
+                name: 'Triggers at',
+                value:
+                    '${reminder.triggerAt.format(TimestampStyle.longDateTime)} (${reminder.triggerAt.format(TimestampStyle.relativeTime)})',
+                isInline: false,
+              ),
+              EmbedFieldBuilder(
+                name: 'Content',
+                value: reminder.message.length > 2048 ? '${reminder.message.substring(0, 2045)}...' : reminder.message,
+                isInline: false,
+              ),
+            ],
+          );
 
-              return MessageBuilder(embeds: [embed]);
-            }).toList();
+          return MessageBuilder(embeds: [embed]);
+        }).toList();
 
         if (entries.isEmpty) {
           await context.respond(MessageBuilder(content: "No reminders!"));

@@ -28,9 +28,9 @@ String? valueOrNullIfNotDefault(String? value, [String ifNotDefault = 'Unlimited
 
 Future<AuthenticatedJellyfinClient> getJellyfinClient(JellyfinConfigUser? config, ChatContext context) async {
   config ??= await Injector.appInstance.get<JellyfinModuleV2>().fetchGetUserConfigWithFallback(
-    userId: context.user.id,
-    parentId: getParentIdFromContext(context),
-  );
+        userId: context.user.id,
+        parentId: getParentIdFromContext(context),
+      );
 
   if (config == null) {
     throw JellyfinConfigNotFoundException("Invalid jellyfin config or user not logged in.");
@@ -65,9 +65,9 @@ final jellyfin = ChatGroup(
             @Description("Instance to use. Default selected if not provided") JellyfinConfig? config,
           ]) async {
             final client = await Injector.appInstance.get<JellyfinModuleV2>().fetchGetWizarrClientWithFallback(
-              originalConfig: config,
-              parentId: context.guild?.id ?? context.user.id,
-            );
+                  originalConfig: config,
+                  parentId: context.guild?.id ?? context.user.id,
+                );
 
             return await context.respond(
               getWizarrRedeemInvitationMessageBuilder(
@@ -94,9 +94,9 @@ final jellyfin = ChatGroup(
             await ensureAdminJellyfinUser(jellyfinClient);
 
             final wizarrClient = await Injector.appInstance.get<JellyfinModuleV2>().fetchGetWizarrClientWithFallback(
-              originalConfig: jellyfinClient.configUser.config!,
-              parentId: context.guild?.id ?? context.user.id,
-            );
+                  originalConfig: jellyfinClient.configUser.config!,
+                  parentId: context.guild?.id ?? context.user.id,
+                );
 
             final librariesMap = Map.fromEntries(
               (await wizarrClient.getAvailableLibraries()).map((library) => MapEntry(library.name, library.id)),
@@ -239,9 +239,9 @@ final jellyfin = ChatGroup(
             @Description("Instance to use. Default selected if not provided") JellyfinConfigUser? config,
           ]) async {
             final client = await Injector.appInstance.get<JellyfinModuleV2>().fetchGetSonarrClientWithFallback(
-              originalConfig: config?.config,
-              parentId: context.guild?.id ?? context.user.id,
-            );
+                  originalConfig: config?.config,
+                  parentId: context.guild?.id ?? context.user.id,
+                );
 
             final calendarItems = await client.fetchCalendar(end: DateTime.now().add(Duration(days: 7)));
             final embeds = getSonarrCalendarEmbeds(calendarItems);
@@ -435,9 +435,9 @@ final jellyfin = ChatGroup(
       'Displays info about jellyfin instances',
       id('jellyfin-info', (ChatContext context) async {
         final configs = await Injector.appInstance.get<JellyfinModuleV2>().getAggregateJellyfinUserConfigData(
-          getParentIdFromContext(context),
-          context.user.id,
-        );
+              getParentIdFromContext(context),
+              context.user.id,
+            );
 
         final embeds = configs.map(
           (config) => EmbedBuilder(
@@ -635,17 +635,17 @@ final jellyfin = ChatGroup(
             }
 
             final newConfig = await Injector.appInstance.get<JellyfinConfigRepository>().createJellyfinConfig(
-              JellyfinConfig(
-                name: configName ?? config.name,
-                basePath: config.basePath,
-                isDefault: copyDefaultFlag && config.isDefault,
-                parentId: targetParentId,
-                sonarrBasePath: config.sonarrBasePath,
-                sonarrToken: config.sonarrToken,
-                wizarrBasePath: config.wizarrBasePath,
-                wizarrToken: config.wizarrToken,
-              ),
-            );
+                  JellyfinConfig(
+                    name: configName ?? config.name,
+                    basePath: config.basePath,
+                    isDefault: copyDefaultFlag && config.isDefault,
+                    parentId: targetParentId,
+                    sonarrBasePath: config.sonarrBasePath,
+                    sonarrToken: config.sonarrToken,
+                    wizarrBasePath: config.wizarrBasePath,
+                    wizarrToken: config.wizarrToken,
+                  ),
+                );
 
             context.respond(
               MessageBuilder(content: 'Copied config: "${newConfig.name}" to parent: "${newConfig.parentId}"'),
@@ -675,8 +675,8 @@ final jellyfin = ChatGroup(
             @Description('Instance to use. Default selected if not provided') JellyfinConfig? config,
           ]) async {
             config ??= await Injector.appInstance.get<JellyfinModuleV2>().getJellyfinDefaultConfig(
-              context.guild?.id ?? context.user.id,
-            );
+                  context.guild?.id ?? context.user.id,
+                );
             if (config == null) {
               return context.respond(MessageBuilder(content: 'Invalid jellyfin config'));
             }
@@ -768,15 +768,13 @@ final jellyfin = ChatGroup(
               await client.getScheduledTasks(),
               MessageBuilder(content: 'Choose task to run!'),
               toSelectMenuOption: (taskInfo) {
-                final label =
-                    taskInfo.state != TaskState.idle
-                        ? "${taskInfo.name} [${taskInfo.state}]"
-                        : taskInfo.name.toString();
+                final label = taskInfo.state != TaskState.idle
+                    ? "${taskInfo.name} [${taskInfo.state}]"
+                    : taskInfo.name.toString();
 
-                final description =
-                    (taskInfo.description?.length ?? 0) >= 100
-                        ? "${taskInfo.description?.substring(0, 97)}..."
-                        : taskInfo.description;
+                final description = (taskInfo.description?.length ?? 0) >= 100
+                    ? "${taskInfo.description?.substring(0, 97)}..."
+                    : taskInfo.description;
 
                 return SelectMenuOptionBuilder(label: label, value: taskInfo.id!, description: description);
               },
@@ -784,28 +782,28 @@ final jellyfin = ChatGroup(
             );
 
             Pipeline(
-                  name: selectMenuResult.name!,
-                  description: "",
-                  tasks: [
-                    Task(
-                      runCallback: () => client.startTask(selectMenuResult.id!),
-                      updateCallback: () async {
-                        final scheduledTask = (await client.getScheduledTasks()).firstWhereOrNull(
-                          (taskInfo) => taskInfo.id == selectMenuResult.id,
-                        );
-                        if (scheduledTask == null || scheduledTask.state == TaskState.idle) {
-                          return (true, null);
-                        }
+              name: selectMenuResult.name!,
+              description: "",
+              tasks: [
+                Task(
+                  runCallback: () => client.startTask(selectMenuResult.id!),
+                  updateCallback: () async {
+                    final scheduledTask = (await client.getScheduledTasks()).firstWhereOrNull(
+                      (taskInfo) => taskInfo.id == selectMenuResult.id,
+                    );
+                    if (scheduledTask == null || scheduledTask.state == TaskState.idle) {
+                      return (true, null);
+                    }
 
-                        return (
-                          false,
-                          "Running `${scheduledTask.name!}` - ${taskProgressFormat.format(scheduledTask.currentProgressPercentage!)}%",
-                        );
-                      },
-                    ),
-                  ],
-                  updateInterval: Duration(seconds: 2),
-                )
+                    return (
+                      false,
+                      "Running `${scheduledTask.name!}` - ${taskProgressFormat.format(scheduledTask.currentProgressPercentage!)}%",
+                    );
+                  },
+                ),
+              ],
+              updateInterval: Duration(seconds: 2),
+            )
                 .forUpdateContext(
                   messageSupplier: (messageBuilder) => context.interaction.updateOriginalResponse(messageBuilder),
                 )

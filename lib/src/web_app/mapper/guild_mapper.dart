@@ -62,13 +62,14 @@ Stream<JsonApiResponse> mapGuildsToGuildReducedData(Iterable<Guild> guilds) asyn
     final guildChannels = client.channels.cache.values.whereType<GuildChannel>().where((c) => c.guildId == guild.id);
 
     final guildCachedMessages = guildChannels.whereType<TextChannel>().fold(
-      0,
-      (previous, channel) => previous + channel.messages.cache.length,
-    );
+          0,
+          (previous, channel) => previous + channel.messages.cache.length,
+        );
 
     final enabledFeatures = (await featureSettingsRepository.fetchSettingsForGuild(
       guild.id,
-    )).map((s) => s.setting.name);
+    ))
+        .map((s) => s.setting.name);
 
     final tagsCount = tagModule.getGuildTags(guild.id).length;
 
@@ -90,34 +91,32 @@ Stream<JsonApiResponse> mapGuildsToGuildReducedData(Iterable<Guild> guilds) asyn
 Future<JsonApiResponse> mapGuildToDetailsData(Guild guild, int channelsLimit, int rolesLimit, int tagsLimit) async {
   final client = Injector.appInstance.get<NyxxGateway>();
 
-  final roles =
-      rolesLimit > 0
-          ? guild.roles.cache.values
-              .take(rolesLimit)
-              .map(
-                (r) => {
-                  "id": r.id.toString(),
-                  "name": r.name.toString(),
-                  "position": r.position,
-                  "isHoisted": r.isHoisted,
-                  "color": r.color.toHexString(),
-                  "icon": r.iconHash,
-                  "flags": r.flags.value,
-                  "permission": r.permissions.value,
-                },
-              )
-              .toList()
-          : [];
+  final roles = rolesLimit > 0
+      ? guild.roles.cache.values
+          .take(rolesLimit)
+          .map(
+            (r) => {
+              "id": r.id.toString(),
+              "name": r.name.toString(),
+              "position": r.position,
+              "isHoisted": r.isHoisted,
+              "color": r.color.toHexString(),
+              "icon": r.iconHash,
+              "flags": r.flags.value,
+              "permission": r.permissions.value,
+            },
+          )
+          .toList()
+      : [];
 
-  final channels =
-      channelsLimit > 0
-          ? client.channels.cache.values
-              .whereType<GuildChannel>()
-              .where((c) => c.guildId == guild.id)
-              .take(channelsLimit)
-              .map((c) => mapChannelToData(c))
-              .toList()
-          : [];
+  final channels = channelsLimit > 0
+      ? client.channels.cache.values
+          .whereType<GuildChannel>()
+          .where((c) => c.guildId == guild.id)
+          .take(channelsLimit)
+          .map((c) => mapChannelToData(c))
+          .toList()
+      : [];
 
   return {
     'id': guild.id.toString(),

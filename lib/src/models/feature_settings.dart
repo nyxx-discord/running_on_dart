@@ -106,35 +106,35 @@ enum Setting<T extends SettingData> {
     }
 
     return switch (T) {
-          const (GenericSnowflakeData) => GenericSnowflakeData.fromJson(raw),
-          const (GenericInstanceData) => GenericInstanceData.fromJson(raw),
-          const (EmojiReactData) => EmojiReactData.fromJson(raw),
-          _ => null,
-        }
-        as T?;
+      const (GenericSnowflakeData) => GenericSnowflakeData.fromJson(raw),
+      const (GenericInstanceData) => GenericInstanceData.fromJson(raw),
+      const (EmojiReactData) => EmojiReactData.fromJson(raw),
+      _ => null,
+    } as T?;
   }
 
   List<TextInputBuilder> getConfigurationFields() {
     return switch (T) {
       const (GenericSnowflakeData) => [
-        TextInputBuilder(customId: 'value', style: TextInputStyle.short, label: "Target Snowflake"),
-      ],
+          TextInputBuilder(customId: 'value', style: TextInputStyle.short, label: "Target Snowflake"),
+        ],
       const (GenericInstanceData) => [
-        TextInputBuilder(customId: 'create_instance_role', style: TextInputStyle.short, label: "Target Role Snowflake"),
-      ],
+          TextInputBuilder(
+              customId: 'create_instance_role', style: TextInputStyle.short, label: "Target Role Snowflake"),
+        ],
       const (EmojiReactData) => [
-        TextInputBuilder(customId: 'use_builtin', style: TextInputStyle.short, label: "Use built in emotes (yes/no)"),
-        TextInputBuilder(
-          customId: 'mode',
-          style: TextInputStyle.short,
-          label: "Mode name (${EmojiReactType.values.map((e) => e.name).join(', ')})",
-        ),
-        TextInputBuilder(
-          customId: 'process_other_bots',
-          style: TextInputStyle.short,
-          label: "Process messages of other bots (yes/no)",
-        ),
-      ],
+          TextInputBuilder(customId: 'use_builtin', style: TextInputStyle.short, label: "Use built in emotes (yes/no)"),
+          TextInputBuilder(
+            customId: 'mode',
+            style: TextInputStyle.short,
+            label: "Mode name (${EmojiReactType.values.map((e) => e.name).join(', ')})",
+          ),
+          TextInputBuilder(
+            customId: 'process_other_bots',
+            style: TextInputStyle.short,
+            label: "Process messages of other bots (yes/no)",
+          ),
+        ],
       _ => throw Error(),
     };
   }

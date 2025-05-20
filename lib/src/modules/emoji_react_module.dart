@@ -32,7 +32,9 @@ class EmojiReactModule implements RequiresInitialization, Reloadable {
     _emojiFeatureSettingsCache.addAll(
       (await _featureSettingsRepository.fetchSettingsForType(
         Setting.emojiReact,
-      )).map((setting) => MapEntry(setting.guildId, setting.parseData<EmojiReactData>()!)).toMap(),
+      ))
+          .map((setting) => MapEntry(setting.guildId, setting.parseData<EmojiReactData>()!))
+          .toMap(),
     );
 
     await reload();

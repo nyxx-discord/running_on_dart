@@ -79,8 +79,7 @@ class MentionsMonitoringModule implements RequiresInitialization {
       return;
     }
 
-    final shouldBeSkippedByPermissions =
-        (member.permissions?.isAdministrator ?? false) ||
+    final shouldBeSkippedByPermissions = (member.permissions?.isAdministrator ?? false) ||
         (member.permissions?.canManageMessages ?? false) ||
         (member.permissions?.canManageChannels ?? false);
     if (shouldBeSkippedByPermissions) {

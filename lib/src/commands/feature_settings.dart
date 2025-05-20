@@ -49,9 +49,9 @@ final featureSettings = ChatGroup(
       'Disable a setting for this guild',
       id('settings-disable', (ChatContext context, @Description('The setting to enable') Setting setting) async {
         final featureSetting = await Injector.appInstance.get<FeatureSettingsRepository>().fetchSetting(
-          setting,
-          context.guild!.id,
-        );
+              setting,
+              context.guild!.id,
+            );
 
         if (featureSetting != null) {
           Injector.appInstance.get<FeatureSettingsModule>().disable(featureSetting);
@@ -65,8 +65,8 @@ final featureSettings = ChatGroup(
       "Show current configuration for settings",
       id('settings-show-configuration', (ChatContext context) async {
         final settings = await Injector.appInstance.get<FeatureSettingsRepository>().fetchSettingsForGuild(
-          context.guild!.id,
-        );
+              context.guild!.id,
+            );
 
         final messageBuilders = settings.map((setting) {
           final embed = EmbedBuilder(

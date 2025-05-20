@@ -112,10 +112,9 @@ Iterable<EmbedFieldBuilder> getMediaPlaybackInfoFields(SessionInfoDto sessionInf
 
   final finalBitrate = ((transcodingInfo.bitrate ?? 0) / 1024 / 1024).toStringAsFixed(2);
 
-  final completionInfo =
-      transcodingInfo.completionPercentage != null && transcodingInfo.framerate != null
-          ? ' - ${transcodingInfo.completionPercentage!.toStringAsFixed(2)}% (${transcodingInfo.framerate} fps)'
-          : '';
+  final completionInfo = transcodingInfo.completionPercentage != null && transcodingInfo.framerate != null
+      ? ' - ${transcodingInfo.completionPercentage!.toStringAsFixed(2)}% (${transcodingInfo.framerate} fps)'
+      : '';
 
   final transcodingReason = getTranscodingReason(transcodingInfo);
   final reasonInfo = transcodingReason != null ? " ($transcodingReason)" : '';
@@ -328,22 +327,23 @@ MessageBuilder getJellyfinLoginMessage({
   required String configName,
   required Snowflake parentId,
   bool isReAuth = false,
-}) => MessageBuilder(
-  content: '${isReAuth ? 'Session expired. ' : ''}Login using username and password or using Quick Connect feature',
-  components: [
-    ActionRowBuilder(
+}) =>
+    MessageBuilder(
+      content: '${isReAuth ? 'Session expired. ' : ''}Login using username and password or using Quick Connect feature',
       components: [
-        ButtonBuilder.primary(
-          customId:
-              JellyfinLoginCustomId.username(userId: userId, configName: configName, parentId: parentId).toString(),
-          label: "Username login",
-        ),
-        ButtonBuilder.primary(
-          customId:
-              JellyfinLoginCustomId.quickConnect(userId: userId, configName: configName, parentId: parentId).toString(),
-          label: "Quick Connect login",
+        ActionRowBuilder(
+          components: [
+            ButtonBuilder.primary(
+              customId:
+                  JellyfinLoginCustomId.username(userId: userId, configName: configName, parentId: parentId).toString(),
+              label: "Username login",
+            ),
+            ButtonBuilder.primary(
+              customId: JellyfinLoginCustomId.quickConnect(userId: userId, configName: configName, parentId: parentId)
+                  .toString(),
+              label: "Quick Connect login",
+            ),
+          ],
         ),
       ],
-    ),
-  ],
-);
+    );

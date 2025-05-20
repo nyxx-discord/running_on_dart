@@ -19,10 +19,9 @@ class TagRepository {
   }
 
   Future<Iterable<Tag>> fetchActiveTagsByName(String nameQuery) async {
-    final query =
-        SelectQuery.selectAll("tags")
-          ..andWhere("enabled = TRUE")
-          ..andWhere("name LIKE @nameQuery");
+    final query = SelectQuery.selectAll("tags")
+      ..andWhere("enabled = TRUE")
+      ..andWhere("name LIKE @nameQuery");
 
     final result = await _database.executeQuery(query, parameters: {'nameQuery': '%$nameQuery%'});
 
@@ -37,10 +36,9 @@ class TagRepository {
       return;
     }
 
-    final query =
-        UpdateQuery("tags")
-          ..addSet("enabled", "FALSE")
-          ..andWhere("id = @id");
+    final query = UpdateQuery("tags")
+      ..addSet("enabled", "FALSE")
+      ..andWhere("id = @id");
 
     await _database.executeQuery(query, parameters: {'id': id});
   }
@@ -52,14 +50,13 @@ class TagRepository {
       return;
     }
 
-    final query =
-        InsertQuery("tags")
-          ..addNamedInsert("name")
-          ..addNamedInsert("content")
-          ..addNamedInsert("enabled")
-          ..addNamedInsert("guild_id")
-          ..addNamedInsert("author_id")
-          ..addReturning("id");
+    final query = InsertQuery("tags")
+      ..addNamedInsert("name")
+      ..addNamedInsert("content")
+      ..addNamedInsert("enabled")
+      ..addNamedInsert("guild_id")
+      ..addNamedInsert("author_id")
+      ..addReturning("id");
 
     final result = await _database.executeQuery(
       query,
@@ -81,14 +78,13 @@ class TagRepository {
       return addTag(tag);
     }
 
-    final query =
-        UpdateQuery("tags")
-          ..addNamedSet('name')
-          ..addNamedSet('content')
-          ..addNamedSet('enabled')
-          ..addNamedSet('guild_id')
-          ..addNamedSet('author_id')
-          ..andWhere("id = @id");
+    final query = UpdateQuery("tags")
+      ..addNamedSet('name')
+      ..addNamedSet('content')
+      ..addNamedSet('enabled')
+      ..addNamedSet('guild_id')
+      ..addNamedSet('author_id')
+      ..andWhere("id = @id");
 
     await _database.executeQuery(
       query,
@@ -113,11 +109,10 @@ class TagRepository {
   }
 
   Future<void> registerTagUsedEvent(TagUsedEvent event) async {
-    final query =
-        InsertQuery("tag_usage")
-          ..addNamedInsert("command_id")
-          ..addNamedInsert("use_date")
-          ..addNamedInsert("hidden");
+    final query = InsertQuery("tag_usage")
+      ..addNamedInsert("command_id")
+      ..addNamedInsert("use_date")
+      ..addNamedInsert("hidden");
 
     await _database.executeQuery(
       query,

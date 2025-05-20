@@ -15,24 +15,23 @@ Future<MessageBuilder> createMessageBuilder(List<String> nicknames, String messa
 
   return pagination.split(
     nicknames.join(','),
-    buildChunk:
-        (String chunk) => MessageBuilder(
-          content: """
+    buildChunk: (String chunk) => MessageBuilder(
+      content: """
 $messageHeader:
 ```
 $chunk
 ```
 """,
-        ),
+    ),
   );
 }
 
 Stream<Member> searchMembers(String disallowedChar, int batchSize, Guild guild) {
   return (guild.manager.client as NyxxGateway).gateway.listGuildMembers(
-    guild.id,
-    query: disallowedChar,
-    limit: batchSize,
-  );
+        guild.id,
+        query: disallowedChar,
+        limit: batchSize,
+      );
 }
 
 final admin = ChatGroup(
@@ -47,12 +46,11 @@ final admin = ChatGroup(
         @UseConverter(IntConverter(min: 1)) @Description('The number of messages to delete') int count, [
         @Description('The user from whom to delete messages') User? user,
       ]) async {
-        final messagesToDelete =
-            await context.channel.messages
-                .stream()
-                .where((m) => user == null || user.id == m.author.id)
-                .take(count)
-                .toList();
+        final messagesToDelete = await context.channel.messages
+            .stream()
+            .where((m) => user == null || user.id == m.author.id)
+            .take(count)
+            .toList();
 
         await Future.wait(
           messagesToDelete
@@ -108,11 +106,8 @@ final admin = ChatGroup(
             );
 
             final stopwatch = Stopwatch()..start();
-            final reloadFunctions = modulesToReload
-                .map((m) => reloadableModules[m])
-                .nonNulls
-                .map((m) => m())
-                .map((r) => r.reload());
+            final reloadFunctions =
+                modulesToReload.map((m) => reloadableModules[m]).nonNulls.map((m) => m()).map((r) => r.reload());
             await Future.wait(reloadFunctions);
 
             return context.respond(

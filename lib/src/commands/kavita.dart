@@ -11,9 +11,9 @@ import 'package:running_on_dart/src/util/util.dart';
 
 Future<AuthenticatedKavitaClient> getKavitaClient(KavitaUserConfig? config, ChatContext context) async {
   config ??= await Injector.appInstance.get<KavitaModule>().fetchGetUserConfigWithFallback(
-    userId: context.user.id,
-    parentId: getParentIdFromContext(context),
-  );
+        userId: context.user.id,
+        parentId: getParentIdFromContext(context),
+      );
 
   if (config == null) {
     throw Exception("Invalid kavita config or user not logged in."); // Todo: handle properly
@@ -55,13 +55,13 @@ final kavita = ChatGroup(
             );
 
             final newlyCreatedConfig = await Injector.appInstance.get<KavitaRepository>().saveConfig(
-              KavitaConfig(
-                name: modalResponse['name']!,
-                basePath: modalResponse['base_url']!,
-                isDefault: modalResponse['is_default']?.toLowerCase() == 'true',
-                parentId: getParentIdFromContext(context),
-              ),
-            );
+                  KavitaConfig(
+                    name: modalResponse['name']!,
+                    basePath: modalResponse['base_url']!,
+                    isDefault: modalResponse['is_default']?.toLowerCase() == 'true',
+                    parentId: getParentIdFromContext(context),
+                  ),
+                );
 
             modalResponse.respond(
               MessageBuilder(content: "Added new jellyfin instance with name: ${newlyCreatedConfig.name}"),

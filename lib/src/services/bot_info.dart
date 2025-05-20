@@ -40,21 +40,21 @@ class BotInfo {
   });
 
   Map<String, dynamic> toJson() => {
-    'nyxxVersion': nyxxVersion,
-    'version': version,
-    'platform': dartPlatform,
-    'memoryUsageString': memoryUserString,
-    'cachedChannels': cachedChannels,
-    'cachedMessages': cachedMessages,
-    'cachedGuilds': cachedGuilds,
-    'cachedUsers': cachedUsers,
-    'cachedVoiceStates': cachedVoiceStates,
-    'shardCount': shardCount,
-    'totalTagsCount': totalTagsCount,
-    'totalReminderCount': totalRemainderCount,
-    'uptime': uptime.toIso8601String(),
-    'docsUpdate': docsUpdate?.toIso8601String(),
-  };
+        'nyxxVersion': nyxxVersion,
+        'version': version,
+        'platform': dartPlatform,
+        'memoryUsageString': memoryUserString,
+        'cachedChannels': cachedChannels,
+        'cachedMessages': cachedMessages,
+        'cachedGuilds': cachedGuilds,
+        'cachedUsers': cachedUsers,
+        'cachedVoiceStates': cachedVoiceStates,
+        'shardCount': shardCount,
+        'totalTagsCount': totalTagsCount,
+        'totalReminderCount': totalRemainderCount,
+        'uptime': uptime.toIso8601String(),
+        'docsUpdate': docsUpdate?.toIso8601String(),
+      };
 }
 
 class BotInfoService {
@@ -68,18 +68,16 @@ class BotInfoService {
     final cachedGuilds = client.guilds.cache.length;
     final cachedUsers = client.users.cache.length;
     final cachedChannels = client.channels.cache.length;
-    final cachedVoiceStates =
-        client.guilds.cache.values
-            .map((g) => g.voiceStates.length)
-            .fold<num>(0, (value, element) => value + element)
-            .ceil();
+    final cachedVoiceStates = client.guilds.cache.values
+        .map((g) => g.voiceStates.length)
+        .fold<num>(0, (value, element) => value + element)
+        .ceil();
     final shardCount = client.gateway.shards.length;
-    final cachedMessages =
-        client.channels.cache.values
-            .whereType<TextChannel>()
-            .map((c) => c.messages.cache.length)
-            .fold<num>(0, (value, element) => value + element)
-            .ceil();
+    final cachedMessages = client.channels.cache.values
+        .whereType<TextChannel>()
+        .map((c) => c.messages.cache.length)
+        .fold<num>(0, (value, element) => value + element)
+        .ceil();
     final totalTags = tagModule.countTags();
     final totalReminders = reminderModule.reminders.length;
     final botStartDateTime = startDurationModule.startDate;
