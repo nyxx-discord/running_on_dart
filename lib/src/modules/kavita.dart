@@ -202,14 +202,14 @@ class AuthenticatedKavitaClient {
   }
 
   Map<String, String> _makeQueryParameters(Map<String, String> parameters, {bool authApiKey = false}) => {
-        ...parameters,
-        if (authApiKey) 'apiKey': apiKey,
-      };
+    ...parameters,
+    if (authApiKey) 'apiKey': apiKey,
+  };
 
   Map<String, String> _makeHeaders({bool authToken = false}) => {
-        ..._headers,
-        if (authToken) 'Authorization': 'Bearer $token',
-      };
+    ..._headers,
+    if (authToken) 'Authorization': 'Bearer $token',
+  };
 }
 
 class UnauthenticatedKavitaClient {
@@ -257,9 +257,10 @@ class KavitaModule {
     required Snowflake parentId,
     String? instanceName,
   }) async {
-    final config = instanceName != null
-        ? await getJellyfinConfig(instanceName, parentId)
-        : await getJellyfinDefaultConfig(parentId);
+    final config =
+        instanceName != null
+            ? await getJellyfinConfig(instanceName, parentId)
+            : await getJellyfinDefaultConfig(parentId);
     if (config == null) {
       return null;
     }

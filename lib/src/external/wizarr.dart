@@ -42,14 +42,14 @@ class CreateInvitationRequest {
   });
 
   Map<String, String> toBody() => {
-        'code': code,
-        if (duration != null) 'duration': duration!.inMinutes.toString(),
-        if (expires != null) 'expires': expires!.inMinutes.toString(),
-        'live_tv': 'false',
-        'sessions': sessions.toString(),
-        'unlimited': unlimited ? 'true' : 'false',
-        'specific_libraries': jsonEncode(specificLibraries),
-      };
+    'code': code,
+    if (duration != null) 'duration': duration!.inMinutes.toString(),
+    if (expires != null) 'expires': expires!.inMinutes.toString(),
+    'live_tv': 'false',
+    'sessions': sessions.toString(),
+    'unlimited': unlimited ? 'true' : 'false',
+    'specific_libraries': jsonEncode(specificLibraries),
+  };
 }
 
 class WizarrClient {
@@ -148,9 +148,10 @@ class WizarrClient {
       return http.post(uri, headers: _getHeaders(includeAuth: true), body: jsonEncode(body));
     }
 
-    final request = http.MultipartRequest('POST', uri)
-      ..headers.addAll(_getHeaders(includeAuth: true, includeContentType: false))
-      ..fields.addAll(body.cast());
+    final request =
+        http.MultipartRequest('POST', uri)
+          ..headers.addAll(_getHeaders(includeAuth: true, includeContentType: false))
+          ..fields.addAll(body.cast());
 
     return request.send();
   }

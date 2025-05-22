@@ -45,12 +45,13 @@ class DatabaseService implements RequiresInitialization {
 
     _logger.info('Running database migrations');
 
-    final migrator = MigentMigrationRunner(
-      connection: _connection,
-      databaseName: databaseName,
-      migrationAccess: MemoryMigrationAccess(),
-    )
-      ..enqueueMigration('1', '''
+    final migrator =
+        MigentMigrationRunner(
+            connection: _connection,
+            databaseName: databaseName,
+            migrationAccess: MemoryMigrationAccess(),
+          )
+          ..enqueueMigration('1', '''
       CREATE TABLE tags (
         id SERIAL PRIMARY KEY,
         name VARCHAR NOT NULL,
@@ -63,7 +64,7 @@ class DatabaseService implements RequiresInitialization {
       CREATE INDEX guild_index ON tags USING btree(guild_id);
       ALTER TABLE tags ADD CONSTRAINT name_guild_id_unique UNIQUE (name, guild_id);
     ''')
-      ..enqueueMigration('1.1', '''
+          ..enqueueMigration('1.1', '''
       CREATE TABLE tag_usage (
         id SERIAL PRIMARY KEY,
         command_id SERIAL,
@@ -73,7 +74,7 @@ class DatabaseService implements RequiresInitialization {
       );
       CREATE INDEX command_id_index ON tag_usage USING btree(command_id);
     ''')
-      ..enqueueMigration('1.2', '''
+          ..enqueueMigration('1.2', '''
       CREATE TABLE feature_settings (
         id SERIAL PRIMARY KEY,
         name varchar(20) NOT NULL,
@@ -90,16 +91,16 @@ class DatabaseService implements RequiresInitialization {
         FOREIGN KEY(feature_setting_id) REFERENCES feature_settings(id)
       );
     ''')
-      ..enqueueMigration('1.3', '''
+          ..enqueueMigration('1.3', '''
       CREATE EXTENSION pg_trgm;
     ''')
-      ..enqueueMigration('1.4', '''
+          ..enqueueMigration('1.4', '''
       DROP TABLE feature_settings_additional_data;
     ''')
-      ..enqueueMigration('1.5', '''
+          ..enqueueMigration('1.5', '''
       ALTER TABLE feature_settings ADD COLUMN additional_data VARCHAR NULL;
     ''')
-      ..enqueueMigration('1.6', '''
+          ..enqueueMigration('1.6', '''
       CREATE TABLE reminders (
         id SERIAL PRIMARY KEY,
         user_id VARCHAR NOT NULL,
@@ -111,26 +112,26 @@ class DatabaseService implements RequiresInitialization {
       );
       CREATE INDEX reminder_trigger_date_idx ON reminders USING btree(trigger_date);
     ''')
-      ..enqueueMigration('1.7', '''
+          ..enqueueMigration('1.7', '''
       ALTER TABLE reminders ALTER COLUMN message TYPE VARCHAR(200)
     ''')
-      ..enqueueMigration('1.8', '''
+          ..enqueueMigration('1.8', '''
       ALTER TABLE reminders ADD COLUMN active BOOLEAN NOT NULL;
     ''')
-      ..enqueueMigration('1.9', '''
+          ..enqueueMigration('1.9', '''
       CREATE INDEX name_trgm_idx ON tags USING gin (name gin_trgm_ops);
     ''')
-      ..enqueueMigration('2.0', '''
+          ..enqueueMigration('2.0', '''
       ALTER TABLE reminders DROP COLUMN active;
       ALTER TABLE reminders ALTER COLUMN message TYPE TEXT;
     ''')
-      ..enqueueMigration('2.1', '''
+          ..enqueueMigration('2.1', '''
       ALTER TABLE feature_settings ADD CONSTRAINT settings_name_guild_id_unique UNIQUE (name, guild_id);
     ''')
-      ..enqueueMigration('2.2', '''
+          ..enqueueMigration('2.2', '''
       TRUNCATE TABLE reminders;
       ''')
-      ..enqueueMigration("2.3", '''
+          ..enqueueMigration("2.3", '''
       CREATE TABLE jellyfin_configs (
         id SERIAL PRIMARY KEY,
         name VARCHAR NOT NULL,
@@ -142,20 +143,20 @@ class DatabaseService implements RequiresInitialization {
       CREATE UNIQUE INDEX idx_jellyfin_configs_unique_name ON jellyfin_configs(name, guild_id);
       CREATE UNIQUE INDEX idx_jellyfin_configs_unique_default ON jellyfin_configs(guild_id, is_default) WHERE is_default = TRUE;
       ''')
-      ..enqueueMigration("2.5", '''
+          ..enqueueMigration("2.5", '''
       ALTER TABLE jellyfin_configs ADD COLUMN sonarr_base_path VARCHAR DEFAULT NULL;
       ''')
-      ..enqueueMigration("2.6", '''
+          ..enqueueMigration("2.6", '''
       ALTER TABLE jellyfin_configs ADD COLUMN sonarr_token VARCHAR DEFAULT NULL;
       ''')
-      ..enqueueMigration("2.7", '''
+          ..enqueueMigration("2.7", '''
       ALTER TABLE jellyfin_configs ADD COLUMN wizarr_base_path VARCHAR DEFAULT NULL;
       ''')
-      ..enqueueMigration("2.8", '''
+          ..enqueueMigration("2.8", '''
       ALTER TABLE jellyfin_configs ADD COLUMN wizarr_token VARCHAR DEFAULT NULL;
       ''')
-      ..enqueueMigration("2.9", 'ALTER TABLE jellyfin_configs DROP COLUMN token')
-      ..enqueueMigration("2.10", '''
+          ..enqueueMigration("2.9", 'ALTER TABLE jellyfin_configs DROP COLUMN token')
+          ..enqueueMigration("2.10", '''
         CREATE TABLE jellyfin_user_configs (
           id SERIAL PRIMARY KEY,
           user_id VARCHAR NOT NULL,
@@ -166,15 +167,15 @@ class DatabaseService implements RequiresInitialization {
             REFERENCES jellyfin_configs(id)
         );
       ''')
-      ..enqueueMigration(
-        "2.11",
-        'CREATE UNIQUE INDEX idx_jellyfin_configs_user_id ON jellyfin_user_configs(user_id, jellyfin_config_id);',
-      )
-      ..enqueueMigration(
-        "2.12",
-        'ALTER TABLE jellyfin_user_configs ADD CONSTRAINT jellyfin_configs_user_id_unique UNIQUE (user_id, jellyfin_config_id);',
-      )
-      ..enqueueMigration("2.13", '''
+          ..enqueueMigration(
+            "2.11",
+            'CREATE UNIQUE INDEX idx_jellyfin_configs_user_id ON jellyfin_user_configs(user_id, jellyfin_config_id);',
+          )
+          ..enqueueMigration(
+            "2.12",
+            'ALTER TABLE jellyfin_user_configs ADD CONSTRAINT jellyfin_configs_user_id_unique UNIQUE (user_id, jellyfin_config_id);',
+          )
+          ..enqueueMigration("2.13", '''
         CREATE TABLE kavita_configs (
           id SERIAL PRIMARY KEY,
           name VARCHAR NOT NULL,
@@ -183,15 +184,15 @@ class DatabaseService implements RequiresInitialization {
           parent_id VARCHAR NOT NULL
         );
       ''')
-      ..enqueueMigration(
-        "2.14",
-        'CREATE UNIQUE INDEX idx_kavita_configs_unique_name ON kavita_configs(name, parent_id);',
-      )
-      ..enqueueMigration(
-        "2.15",
-        'CREATE UNIQUE INDEX idx_kavita_configs_unique_default ON kavita_configs(parent_id, is_default) WHERE is_default = TRUE;',
-      )
-      ..enqueueMigration("2.16", '''
+          ..enqueueMigration(
+            "2.14",
+            'CREATE UNIQUE INDEX idx_kavita_configs_unique_name ON kavita_configs(name, parent_id);',
+          )
+          ..enqueueMigration(
+            "2.15",
+            'CREATE UNIQUE INDEX idx_kavita_configs_unique_default ON kavita_configs(parent_id, is_default) WHERE is_default = TRUE;',
+          )
+          ..enqueueMigration("2.16", '''
         CREATE TABLE kavita_user_configs (
           id SERIAL PRIMARY KEY,
           user_id VARCHAR NOT NULL,
@@ -203,15 +204,15 @@ class DatabaseService implements RequiresInitialization {
             REFERENCES kavita_configs(id)
         );
       ''')
-      ..enqueueMigration(
-        "2.17",
-        'CREATE UNIQUE INDEX idx_kavita_user_configs_id ON kavita_user_configs(user_id, kavita_config_id);',
-      )
-      ..enqueueMigration(
-        "2.18",
-        'ALTER TABLE kavita_user_configs ADD CONSTRAINT kavita_user_configs_user_id_unique UNIQUE (user_id, kavita_config_id);',
-      )
-      ..enqueueMigration("2.19", """
+          ..enqueueMigration(
+            "2.17",
+            'CREATE UNIQUE INDEX idx_kavita_user_configs_id ON kavita_user_configs(user_id, kavita_config_id);',
+          )
+          ..enqueueMigration(
+            "2.18",
+            'ALTER TABLE kavita_user_configs ADD CONSTRAINT kavita_user_configs_user_id_unique UNIQUE (user_id, kavita_config_id);',
+          )
+          ..enqueueMigration("2.19", """
         UPDATE feature_settings SET additional_data = CONCAT('{"value":"', additional_data, '"}') WHERE name = 'join_logs' OR name = 'mod_logs';
       """);
 

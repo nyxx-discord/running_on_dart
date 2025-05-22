@@ -133,13 +133,15 @@ final tag = ChatGroup(
         final fields = [
           EmbedFieldBuilder(
             name: 'Total usage',
-            value: '- Tag${tag == null ? 's' : ''} shown ${totalUses - totalHiddenUses} times\n'
+            value:
+                '- Tag${tag == null ? 's' : ''} shown ${totalUses - totalHiddenUses} times\n'
                 '- Tag${tag == null ? 's' : ''} previewed $totalHiddenUses times',
             isInline: false,
           ),
           EmbedFieldBuilder(
             name: 'Usage in the last 3 days',
-            value: '- Tag${tag == null ? 's' : ''} shown ${usesLastThreeDays - hiddenUsesLastThreeDays} times\n'
+            value:
+                '- Tag${tag == null ? 's' : ''} shown ${usesLastThreeDays - hiddenUsesLastThreeDays} times\n'
                 '- Tag${tag == null ? 's' : ''} previewed $hiddenUsesLastThreeDays times',
             isInline: false,
           ),

@@ -51,16 +51,16 @@ Future<void> _handleUncaughtException(UncaughtException error, CommandContext co
       break;
     case DioException(:final error) when error is JellyfinUnauthorizedException:
       final jellyfinConfigs = await Injector.appInstance.get<JellyfinModuleV2>().getJellyfinConfigBasedOnPreviousLogin(
-            context.user.id,
-            getParentIdFromContext(context),
-            error.host,
-          );
+        context.user.id,
+        getParentIdFromContext(context),
+        error.host,
+      );
 
       if (jellyfinConfigs.length == 1) {
         final userConfig = jellyfinConfigs.first;
         final config = await Injector.appInstance.get<JellyfinModuleV2>().getJellyfinConfigById(
-              userConfig.jellyfinConfigId,
-            );
+          userConfig.jellyfinConfigId,
+        );
 
         context.respond(
           getJellyfinLoginMessage(

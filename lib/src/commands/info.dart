@@ -14,9 +14,10 @@ final info = ChatCommand(
 
     final startDateStr =
         "${botInfo.uptime.format(TimestampStyle.longDateTime)} (${botInfo.uptime.format(TimestampStyle.relativeTime)})";
-    final docsUpdateStr = botInfo.docsUpdate != null
-        ? "${botInfo.docsUpdate!.format(TimestampStyle.longDateTime)} (${botInfo.docsUpdate!.format(TimestampStyle.relativeTime)})"
-        : "Never";
+    final docsUpdateStr =
+        botInfo.docsUpdate != null
+            ? "${botInfo.docsUpdate!.format(TimestampStyle.longDateTime)} (${botInfo.docsUpdate!.format(TimestampStyle.relativeTime)})"
+            : "Never";
 
     final embed = EmbedBuilder(
       color: getRandomColor(),
@@ -26,7 +27,8 @@ final info = ChatCommand(
         url: Uri.parse(ApiOptions.nyxxRepositoryUrl),
       ),
       footer: EmbedFooterBuilder(
-        text: 'nyxx ${botInfo.nyxxVersion}'
+        text:
+            'nyxx ${botInfo.nyxxVersion}'
             ' | Bot ${botInfo.version}'
             ' | Frontend ${botInfo.frontendVersion}'
             ' | Dart SDK ${botInfo.dartPlatform}',

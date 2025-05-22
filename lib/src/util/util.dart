@@ -48,7 +48,8 @@ String? valueOrNull(String? value) {
   return value;
 }
 
-String generateRandomString(int length) => String.fromCharCodes(
+String generateRandomString(int length) =>
+    String.fromCharCodes(
       Iterable.generate(length, (_) => _chars.codeUnitAt(random.nextInt(_chars.length))),
     ).toUpperCase();
 

@@ -36,9 +36,9 @@ Future<(bool?, FeatureSetting?)> fetchAndCheckSetting(CommandContext context, Se
   }
 
   final setting = await Injector.appInstance.get<FeatureSettingsRepository>().fetchSetting(
-        settingToCheck,
-        context.guild!.id,
-      );
+    settingToCheck,
+    context.guild!.id,
+  );
   if (setting == null) {
     return (false, null);
   }

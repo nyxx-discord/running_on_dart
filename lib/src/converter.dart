@@ -28,15 +28,16 @@ final packageDocsConverter = Converter<PackageDocs>(
 final reminderConverter = Converter<Reminder>(
   (view, context) =>
       Injector.appInstance.get<ReminderModule>().search(context.user.id, view.getQuotedWord()).firstOrNull,
-  autocompleteCallback: (context) => Injector.appInstance
-      .get<ReminderModule>()
-      .search(context.user.id, context.currentValue)
-      .take(25)
-      .map(
-        (e) =>
-            '${reminderDateFormat.format(e.triggerAt)}: ${e.message.length > 50 ? '${e.message.substring(0, 50)}...' : e.message}',
-      )
-      .map((e) => CommandOptionChoiceBuilder(name: e, value: e)),
+  autocompleteCallback:
+      (context) => Injector.appInstance
+          .get<ReminderModule>()
+          .search(context.user.id, context.currentValue)
+          .take(25)
+          .map(
+            (e) =>
+                '${reminderDateFormat.format(e.triggerAt)}: ${e.message.length > 50 ? '${e.message.substring(0, 50)}...' : e.message}',
+          )
+          .map((e) => CommandOptionChoiceBuilder(name: e, value: e)),
 );
 
 final durationConverter = Converter<Duration>((view, context) {
@@ -64,30 +65,29 @@ const manageableTagConverter = SimpleConverter<Tag>(provider: getManageableTags,
 final jellyfinConfigUserConverter = Converter<JellyfinConfigUser>(
   (view, context) async {
     return Injector.appInstance.get<JellyfinModuleV2>().fetchGetUserConfigWithFallback(
-          userId: context.user.id,
-          parentId: context.guild?.id ?? context.user.id,
-          instanceName: view.getQuotedWord(),
-        );
+      userId: context.user.id,
+      parentId: context.guild?.id ?? context.user.id,
+      instanceName: view.getQuotedWord(),
+    );
   },
-  autocompleteCallback: (context) async =>
-      (await Injector.appInstance.get<JellyfinConfigRepository>().getConfigsForParent(
-                (context.guild?.id ?? context.user.id).toString(),
-              ))
-          .map((config) => CommandOptionChoiceBuilder(name: config.name, value: config.name)),
+  autocompleteCallback:
+      (context) async => (await Injector.appInstance.get<JellyfinConfigRepository>().getConfigsForParent(
+        (context.guild?.id ?? context.user.id).toString(),
+      )).map((config) => CommandOptionChoiceBuilder(name: config.name, value: config.name)),
 );
 
 final kavitaUserConfigsConverter = Converter<KavitaUserConfig>(
   (view, context) async {
     return Injector.appInstance.get<KavitaModule>().fetchGetUserConfigWithFallback(
-          userId: context.user.id,
-          parentId: context.guild?.id ?? context.user.id,
-          instanceName: view.getQuotedWord(),
-        );
+      userId: context.user.id,
+      parentId: context.guild?.id ?? context.user.id,
+      instanceName: view.getQuotedWord(),
+    );
   },
-  autocompleteCallback: (context) async => (await Injector.appInstance.get<KavitaRepository>().findAllForParent(
-            getParentIdFromContext(context).toString(),
-          ))
-      .map((config) => CommandOptionChoiceBuilder(name: config.name, value: config.name)),
+  autocompleteCallback:
+      (context) async => (await Injector.appInstance.get<KavitaRepository>().findAllForParent(
+        getParentIdFromContext(context).toString(),
+      )).map((config) => CommandOptionChoiceBuilder(name: config.name, value: config.name)),
 );
 
 String stringifyKavitaConfig(KavitaConfig config) => config.name;
@@ -165,8 +165,8 @@ Iterable<CommandOptionChoiceBuilder<dynamic>> autocompleteDuration(AutocompleteC
     }
 
     return corrected
-        // Expand each corrected part with all possible corrections to the following parts
-        .expand(
+    // Expand each corrected part with all possible corrections to the following parts
+    .expand(
       (correctedStart) =>
           correct(nextParts.first, nextParts.skip(1)).map((correctedEnd) => '$correctedStart $correctedEnd'.trim()),
     );

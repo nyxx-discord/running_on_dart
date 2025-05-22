@@ -61,14 +61,14 @@ class StaticMetric extends Metric {
   final StaticValueCallback extractValue;
 
   StaticMetric(super.objectId, super.name, this.extractValue, {super.unit, super.icon, super.deviceClass})
-      : super(stateClass: 'measurement');
+    : super(stateClass: 'measurement');
 }
 
 class DynamicMetric extends Metric {
   final ContextValueCallback extractValue;
 
   DynamicMetric(super.objectId, super.name, this.extractValue, {super.unit, super.icon, super.isDiagnostic = false})
-      : super(stateClass: 'measurement', deviceClass: 'data_size');
+    : super(stateClass: 'measurement', deviceClass: 'data_size');
 }
 
 class DiagnosticMetric extends Metric {
@@ -89,7 +89,7 @@ class BotInfoMetric extends Metric {
   final ExtractValueCallback extractValue;
 
   BotInfoMetric(super.objectId, super.name, this.extractValue, {super.unit, super.icon, super.isDiagnostic = false})
-      : super(stateClass: 'measurement', deviceClass: 'data_size');
+    : super(stateClass: 'measurement', deviceClass: 'data_size');
 }
 
 final List<DiagnosticMetric> oneTimeMetrics = [
@@ -214,9 +214,9 @@ class MetricsModule implements RequiresInitialization {
     Injector.appInstance.get<NyxxGateway>().onGuildMemberAdd.listen((e) => dynamicMetricContext.joins++);
     Injector.appInstance.get<NyxxGateway>().onGuildMemberRemove.listen((e) => dynamicMetricContext.removals++);
     Injector.appInstance.get<NyxxGateway>().onEvent.listen((e) => dynamicMetricContext.events++);
-    final _cmdPlugin = Injector.appInstance.get<NyxxGateway>().options.plugins.whereType<CommandsPlugin>().first;
-    _cmdPlugin.onPostCall.listen((_) => dynamicMetricContext.commands++);
-    _cmdPlugin.onCommandError.listen((_) => dynamicMetricContext.errors++);
+    final cmdPlugin = Injector.appInstance.get<NyxxGateway>().options.plugins.whereType<CommandsPlugin>().first;
+    cmdPlugin.onPostCall.listen((_) => dynamicMetricContext.commands++);
+    cmdPlugin.onCommandError.listen((_) => dynamicMetricContext.errors++);
   }
 
   Future<void> _connect() async {

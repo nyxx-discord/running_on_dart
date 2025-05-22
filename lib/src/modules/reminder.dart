@@ -79,8 +79,10 @@ class ReminderModule implements RequiresInitialization {
 
     _logger.fine('Processing reminders for $now');
 
-    final executionResults =
-        reminders.where((reminder) => reminder.triggerAt.isBefore(now)).toList().map((reminder) => _execute(reminder));
+    final executionResults = reminders
+        .where((reminder) => reminder.triggerAt.isBefore(now))
+        .toList()
+        .map((reminder) => _execute(reminder));
 
     await Future.wait(executionResults);
   }
@@ -98,25 +100,28 @@ class ReminderModule implements RequiresInitialization {
   }
 
   Future<void> _sendReminderMessage(Reminder reminder, TextChannel channel) async {
-    final content = StringBuffer('<@!${reminder.userId}> Reminder ')
-      ..write(reminder.addedAt.format(TimestampStyle.relativeTime))
-      ..write(" (${reminder.addedAt.format(TimestampStyle.shortDateTime)})")
-      ..write(": ")
-      ..write(reminder.message);
+    final content =
+        StringBuffer('<@!${reminder.userId}> Reminder ')
+          ..write(reminder.addedAt.format(TimestampStyle.relativeTime))
+          ..write(" (${reminder.addedAt.format(TimestampStyle.shortDateTime)})")
+          ..write(": ")
+          ..write(reminder.message);
 
-    final buttons = [5, 15, 30, 60]
-        .map((minutes) => Duration(minutes: minutes))
-        .map(
-          (duration) => ButtonBuilder.primary(
-            customId: ReminderModuleComponentId(
-              reminderId: reminder.id!,
-              userId: reminder.userId,
-              duration: duration,
-            ).toString(),
-            label: "Add ${duration.inMinutes} mins",
-          ),
-        )
-        .toList();
+    final buttons =
+        [5, 15, 30, 60]
+            .map((minutes) => Duration(minutes: minutes))
+            .map(
+              (duration) => ButtonBuilder.primary(
+                customId:
+                    ReminderModuleComponentId(
+                      reminderId: reminder.id!,
+                      userId: reminder.userId,
+                      duration: duration,
+                    ).toString(),
+                label: "Add ${duration.inMinutes} mins",
+              ),
+            )
+            .toList();
 
     final messageBuilder = MessageBuilder(
       content: content.toString(),
@@ -249,8 +254,9 @@ class ReminderModule implements RequiresInitialization {
         keys: [
           WeightedKey(
             name: 'message',
-            getter: (reminder) =>
-                reminder.message.length < 50 ? reminder.message : '${reminder.message.substring(0, 50)}...',
+            getter:
+                (reminder) =>
+                    reminder.message.length < 50 ? reminder.message : '${reminder.message.substring(0, 50)}...',
             weight: 1,
           ),
           WeightedKey(
@@ -260,8 +266,9 @@ class ReminderModule implements RequiresInitialization {
           ),
           WeightedKey(
             name: 'Perfect match',
-            getter: (reminder) =>
-                '${reminderDateFormat.format(reminder.triggerAt)}  ${reminder.message.length < 50 ? reminder.message : '${reminder.message.substring(0, 50)}...'}',
+            getter:
+                (reminder) =>
+                    '${reminderDateFormat.format(reminder.triggerAt)}  ${reminder.message.length < 50 ? reminder.message : '${reminder.message.substring(0, 50)}...'}',
             weight: 2,
           ),
         ],
