@@ -119,16 +119,19 @@ final tag = ChatGroup(
       'stats',
       'Show tag statistics',
       id('tag-stats', (ChatContext context, [@Description('The tag to show stats for') Tag? tag]) async {
-        final events =
-            Injector.appInstance.get<TagModule>().getTagUsage(context.guild?.id ?? context.user.id, tag).toList();
+        final events = Injector.appInstance
+            .get<TagModule>()
+            .getTagUsage(context.guild?.id ?? context.user.id, tag)
+            .toList();
 
         final totalUses = events.length;
         final totalHiddenUses = events.where((event) => event.hidden).length;
 
         final threeDaysAgo = DateTime.now().add(Duration(days: -3));
         final usesLastThreeDays = events.where((event) => event.usedAt.isAfter(threeDaysAgo)).length;
-        final hiddenUsesLastThreeDays =
-            events.where((event) => event.usedAt.isAfter(threeDaysAgo) && event.hidden).length;
+        final hiddenUsesLastThreeDays = events
+            .where((event) => event.usedAt.isAfter(threeDaysAgo) && event.hidden)
+            .length;
 
         final fields = [
           EmbedFieldBuilder(

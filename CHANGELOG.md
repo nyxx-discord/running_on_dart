@@ -1,3 +1,7 @@
+## 4.14.0
+- Upgrade dart and dependencies
+- Add additional metrics
+
 ## 4.13.0
 - Improve reconnection logic
 - Replace messages per second with messages per minute metric
