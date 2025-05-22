@@ -6,7 +6,6 @@ import 'package:injector/injector.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:nyxx/nyxx.dart';
-import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:running_on_dart/src/services/bot_info.dart';
 import 'package:running_on_dart/src/settings.dart';
 import 'package:running_on_dart/src/init.dart';
@@ -50,10 +49,9 @@ class DynamicMetricContext {
   var messages = 0;
   var joins = 0;
 
-  /// Count of members removed (voluntary leaves, kicks, bans)
   var removals = 0;
   var events = 0;
-  var commands = 0;
+  var interactions = 0;
   var errors = 0;
 }
 
@@ -142,12 +140,12 @@ final List<Metric> periodicMetrics = [
 
     return value;
   }, unit: 'events/min'),
-  DynamicMetric('commands_per_minute', 'Commands', (context) {
-    final value = context.commands.toString();
-    context.commands = 0;
+  DynamicMetric('interactions_per_minute', 'Interactions', (context) {
+    final value = context.interactions.toString();
+    context.interactions = 0;
 
     return value;
-  }, unit: 'commands/min'),
+  }, unit: 'interactions/min'),
   DynamicMetric('errors_per_minute', 'Errors', (context) {
     final value = context.errors.toString();
     context.errors = 0;
@@ -213,10 +211,8 @@ class MetricsModule implements RequiresInitialization {
     Injector.appInstance.get<NyxxGateway>().onMessageCreate.listen((e) => dynamicMetricContext.messages++);
     Injector.appInstance.get<NyxxGateway>().onGuildMemberAdd.listen((e) => dynamicMetricContext.joins++);
     Injector.appInstance.get<NyxxGateway>().onGuildMemberRemove.listen((e) => dynamicMetricContext.removals++);
+    Injector.appInstance.get<NyxxGateway>().onInteractionCreate.listen((e) => dynamicMetricContext.interactions++);
     Injector.appInstance.get<NyxxGateway>().onEvent.listen((e) => dynamicMetricContext.events++);
-    final cmdPlugin = Injector.appInstance.get<NyxxGateway>().options.plugins.whereType<CommandsPlugin>().first;
-    cmdPlugin.onPostCall.listen((_) => dynamicMetricContext.commands++);
-    cmdPlugin.onCommandError.listen((_) => dynamicMetricContext.errors++);
   }
 
   Future<void> _connect() async {
