@@ -768,15 +768,13 @@ final jellyfin = ChatGroup(
               await client.getScheduledTasks(),
               MessageBuilder(content: 'Choose task to run!'),
               toSelectMenuOption: (taskInfo) {
-                final label =
-                    taskInfo.state != TaskState.idle
-                        ? "${taskInfo.name} [${taskInfo.state}]"
-                        : taskInfo.name.toString();
+                final label = taskInfo.state != TaskState.idle
+                    ? "${taskInfo.name} [${taskInfo.state}]"
+                    : taskInfo.name.toString();
 
-                final description =
-                    (taskInfo.description?.length ?? 0) >= 100
-                        ? "${taskInfo.description?.substring(0, 97)}..."
-                        : taskInfo.description;
+                final description = (taskInfo.description?.length ?? 0) >= 100
+                    ? "${taskInfo.description?.substring(0, 97)}..."
+                    : taskInfo.description;
 
                 return SelectMenuOptionBuilder(label: label, value: taskInfo.id!, description: description);
               },
