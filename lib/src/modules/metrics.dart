@@ -52,7 +52,6 @@ class DynamicMetricContext {
   var removals = 0;
   var events = 0;
   var interactions = 0;
-  var errors = 0;
 }
 
 class StaticMetric extends Metric {
@@ -146,12 +145,6 @@ final List<Metric> periodicMetrics = [
 
     return value;
   }, unit: 'interactions/min'),
-  DynamicMetric('errors_per_minute', 'Errors', (context) {
-    final value = context.errors.toString();
-    context.errors = 0;
-
-    return value;
-  }, unit: 'errors/min'),
   StaticMetric(
     'uptime',
     'Uptime',

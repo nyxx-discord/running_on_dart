@@ -1,3 +1,6 @@
+## 4.14.1
+- Removed unused 'errors' metric
+
 ## 4.14.0
 - Upgrade dart and dependencies
 - Add additional metrics
