@@ -9,6 +9,7 @@ import 'package:running_on_dart/src/modules/kavita.dart';
 import 'package:running_on_dart/src/modules/mentions.dart';
 import 'package:running_on_dart/src/modules/metrics.dart';
 import 'package:running_on_dart/src/modules/mod_log.dart';
+import 'package:running_on_dart/src/modules/ban_relay.dart';
 import 'package:running_on_dart/src/modules/poop_name.dart';
 import 'package:running_on_dart/src/modules/reminder.dart';
 import 'package:running_on_dart/src/modules/tag.dart';
@@ -50,6 +51,7 @@ Future<void> setupContainer(NyxxGateway client) async {
     ..registerSingleton(() => JoinLogsModule())
     ..registerSingleton(() => ReminderModule())
     ..registerSingleton(() => ModLogsModule())
+    ..registerSingleton(() => BanRelayModule())
     ..registerSingleton(() => TagModule())
     ..registerSingleton(() => DocsModule())
     ..registerSingleton(() => JellyfinModuleV2())
@@ -65,6 +67,7 @@ Future<void> setupContainer(NyxxGateway client) async {
   await Injector.appInstance.get<DocsModule>().init();
   await Injector.appInstance.get<TagModule>().init();
   await Injector.appInstance.get<ModLogsModule>().init();
+  await Injector.appInstance.get<BanRelayModule>().init();
   await Injector.appInstance.get<ReminderModule>().init();
   await Injector.appInstance.get<JoinLogsModule>().init();
   await Injector.appInstance.get<PoopNameModule>().init();

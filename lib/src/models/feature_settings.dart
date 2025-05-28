@@ -36,12 +36,44 @@ class GenericInstanceData implements SettingData {
   GenericInstanceData({required this.createInstanceRole});
 
   factory GenericInstanceData.fromJson(Map<String, dynamic> raw) {
-    return GenericInstanceData(createInstanceRole: Snowflake.parse(raw['create_instance_role']));
+    return GenericInstanceData(
+        createInstanceRole: Snowflake.parse(raw['create_instance_role']));
   }
 
   @override
   Map<String, dynamic> toJson() {
     return {'create_instance_role': createInstanceRole.toString()};
+  }
+}
+
+/// Data for ban relay feature: list of guild IDs to relay bans to.
+class BanRelayData implements SettingData {
+  /// The list of guild IDs to which bans should be relayed.
+  final List<Snowflake> guildIds;
+
+  BanRelayData({required this.guildIds});
+
+  factory BanRelayData.fromJson(Map<String, dynamic> raw) {
+    final value = raw['guild_ids'];
+    if (value is List) {
+      return BanRelayData(
+        guildIds: (value as List<dynamic>)
+            .map((e) => Snowflake.parse(e as String))
+            .toList(),
+      );
+    }
+    if (value is String) {
+      final parts = value.split(RegExp(r'\s+')).where((e) => e.isNotEmpty);
+      return BanRelayData(
+        guildIds: parts.map((e) => Snowflake.parse(e)).toList(),
+      );
+    }
+    throw Exception('Invalid data for BanRelayData: $value');
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {'guild_ids': guildIds.map((id) => id.toString()).toList()};
   }
 }
 
@@ -60,7 +92,10 @@ class EmojiReactData implements SettingData {
   final EmojiReactType mode;
   final bool processOtherBots;
 
-  EmojiReactData({required this.useBuiltin, required this.mode, required this.processOtherBots});
+  EmojiReactData(
+      {required this.useBuiltin,
+      required this.mode,
+      required this.processOtherBots});
 
   factory EmojiReactData.fromJson(Map<String, dynamic> raw) {
     return EmojiReactData(
@@ -72,7 +107,11 @@ class EmojiReactData implements SettingData {
 
   @override
   Map<String, dynamic> toJson() {
-    return {"use_builtin": useBuiltin, "mode": mode.name, "process_other_bots": processOtherBots};
+    return {
+      "use_builtin": useBuiltin,
+      "mode": mode.name,
+      "process_other_bots": processOtherBots
+    };
   }
 }
 
@@ -82,12 +121,18 @@ enum Setting<T extends SettingData> {
     'Replace nickname of a member with poop emoji if the member tries to hoist itself',
     false,
   ),
-  joinLogs<GenericSnowflakeData>('join_logs', 'Logs member join events into specified channel', true),
-  modLogs<GenericSnowflakeData>('mod_logs', 'Logs administration event into specified channel', true),
-  jellyfin<GenericInstanceData>('jellyfin', 'Allows usage of jellyfin commands', true),
+  joinLogs<GenericSnowflakeData>(
+      'join_logs', 'Logs member join events into specified channel', true),
+  modLogs<GenericSnowflakeData>(
+      'mod_logs', 'Logs administration event into specified channel', true),
+  banRelay<BanRelayData>('ban_relay', 'Relay bans to specified guilds', true),
+  jellyfin<GenericInstanceData>(
+      'jellyfin', 'Allows usage of jellyfin commands', true),
   mentions<NoData>('mentions', 'Monitors messages for mention abuse', false),
-  kavita<GenericInstanceData>('kavita', 'Allows usage of jellyfin command', true),
-  emojiReact<EmojiReactData>('emoji_react', 'React to predefined words with emojis', true);
+  kavita<GenericInstanceData>(
+      'kavita', 'Allows usage of jellyfin command', true),
+  emojiReact<EmojiReactData>(
+      'emoji_react', 'React to predefined words with emojis', true);
 
   /// name of setting
   final String name;
@@ -106,35 +151,52 @@ enum Setting<T extends SettingData> {
     }
 
     return switch (T) {
-          const (GenericSnowflakeData) => GenericSnowflakeData.fromJson(raw),
-          const (GenericInstanceData) => GenericInstanceData.fromJson(raw),
-          const (EmojiReactData) => EmojiReactData.fromJson(raw),
-          _ => null,
-        }
-        as T?;
+      const (GenericSnowflakeData) => GenericSnowflakeData.fromJson(raw),
+      const (GenericInstanceData) => GenericInstanceData.fromJson(raw),
+      const (BanRelayData) => BanRelayData.fromJson(raw),
+      const (EmojiReactData) => EmojiReactData.fromJson(raw),
+      _ => null,
+    } as T?;
   }
 
   List<TextInputBuilder> getConfigurationFields() {
     return switch (T) {
       const (GenericSnowflakeData) => [
-        TextInputBuilder(customId: 'value', style: TextInputStyle.short, label: "Target Snowflake"),
-      ],
+          TextInputBuilder(
+              customId: 'value',
+              style: TextInputStyle.short,
+              label: "Target Snowflake"),
+        ],
       const (GenericInstanceData) => [
-        TextInputBuilder(customId: 'create_instance_role', style: TextInputStyle.short, label: "Target Role Snowflake"),
-      ],
+          TextInputBuilder(
+              customId: 'create_instance_role',
+              style: TextInputStyle.short,
+              label: "Target Role Snowflake"),
+        ],
+      const (BanRelayData) => [
+          TextInputBuilder(
+            customId: 'guild_ids',
+            style: TextInputStyle.paragraph,
+            label: "Guild IDs to relay bans to (space-separated)",
+          ),
+        ],
       const (EmojiReactData) => [
-        TextInputBuilder(customId: 'use_builtin', style: TextInputStyle.short, label: "Use built in emotes (yes/no)"),
-        TextInputBuilder(
-          customId: 'mode',
-          style: TextInputStyle.short,
-          label: "Mode name (${EmojiReactType.values.map((e) => e.name).join(', ')})",
-        ),
-        TextInputBuilder(
-          customId: 'process_other_bots',
-          style: TextInputStyle.short,
-          label: "Process messages of other bots (yes/no)",
-        ),
-      ],
+          TextInputBuilder(
+              customId: 'use_builtin',
+              style: TextInputStyle.short,
+              label: "Use built in emotes (yes/no)"),
+          TextInputBuilder(
+            customId: 'mode',
+            style: TextInputStyle.short,
+            label:
+                "Mode name (${EmojiReactType.values.map((e) => e.name).join(', ')})",
+          ),
+          TextInputBuilder(
+            customId: 'process_other_bots',
+            style: TextInputStyle.short,
+            label: "Process messages of other bots (yes/no)",
+          ),
+        ],
       _ => throw Error(),
     };
   }
@@ -191,7 +253,8 @@ class FeatureSetting {
   /// Create an instance of [GuildSetting] from a database row.
   factory FeatureSetting.fromRow(Map<String, dynamic> row) {
     return FeatureSetting(
-      setting: Setting.values.singleWhere((setting) => setting.name == row['name']),
+      setting:
+          Setting.values.singleWhere((setting) => setting.name == row['name']),
       guildId: Snowflake.parse(row['guild_id']),
       whoEnabled: Snowflake.parse(row['who_enabled']),
       addedAt: row['add_date'] as DateTime,
