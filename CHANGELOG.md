@@ -1,3 +1,7 @@
+## 4.14.2
+- Improved poop nickname logic
+- Fix dynamic metrics
+
 ## 4.14.1
 - Removed unused 'errors' metric
 
