@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Setup Dart Action
         uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -20,13 +22,16 @@ jobs:
       - name: Cache
         uses: actions/cache@v4
         with:
-          path: ~/.pub-cache
-          key: ${{ runner.os }}-pubspec-${{ hashFiles('**/pubspec.lock') }}
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: ${{ runner.os }}-dart-stable-pub-${{ hashFiles('pubspec.lock') }}
           restore-keys: |
-            ${{ runner.os }}-pubspec-
+            ${{ runner.os }}-dart-stable-pub-
+            ${{ runner.os }}-dart-
 
       - name: Install dependencies
-        run: dart pub get
+        run: dart pub get --offline || dart pub get
 
       - name: Analyze project source
         run: dart analyze
@@ -37,6 +42,8 @@ jobs:
     steps:
       - name: Setup Dart Action
         uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -44,13 +51,16 @@ jobs:
       - name: Cache
         uses: actions/cache@v4
         with:
-          path: ~/.pub-cache
-          key: ${{ runner.os }}-pubspec-${{ hashFiles('**/pubspec.lock') }}
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: ${{ runner.os }}-dart-stable-pub-${{ hashFiles('pubspec.lock') }}
           restore-keys: |
-            ${{ runner.os }}-pubspec-
+            ${{ runner.os }}-dart-stable-pub-
+            ${{ runner.os }}-dart-
 
       - name: Install dependencies
-        run: dart pub get
+        run: dart pub get --offline || dart pub get
 
       - name: Analyze project source
         run: dart fix --dry-run
@@ -61,6 +71,8 @@ jobs:
     steps:
       - name: Setup Dart Action
         uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -68,13 +80,16 @@ jobs:
       - name: Cache
         uses: actions/cache@v4
         with:
-          path: ~/.pub-cache
-          key: ${{ runner.os }}-pubspec-${{ hashFiles('**/pubspec.lock') }}
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: ${{ runner.os }}-dart-stable-pub-${{ hashFiles('pubspec.lock') }}
           restore-keys: |
-            ${{ runner.os }}-pubspec-
+            ${{ runner.os }}-dart-stable-pub-
+            ${{ runner.os }}-dart-
 
       - name: Install dependencies
-        run: dart pub get
+        run: dart pub get --offline || dart pub get
 
       - name: Format
         run: dart format --set-exit-if-changed -l120 ./lib
@@ -86,6 +101,8 @@ jobs:
     steps:
       - name: Setup Dart Action
         uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -93,13 +110,16 @@ jobs:
       - name: Cache
         uses: actions/cache@v4
         with:
-          path: ~/.pub-cache
-          key: ${{ runner.os }}-pubspec-${{ hashFiles('**/pubspec.lock') }}
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: ${{ runner.os }}-dart-stable-pub-${{ hashFiles('pubspec.lock') }}
           restore-keys: |
-            ${{ runner.os }}-pubspec-
+            ${{ runner.os }}-dart-stable-pub-
+            ${{ runner.os }}-dart-
 
       - name: Install dependencies
-        run: dart pub get
+        run: dart pub get --offline || dart pub get
 
       - name: Unit tests
         run: dart run test
