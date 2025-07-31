@@ -65,7 +65,7 @@ class DynamicMetric extends Metric {
   final ContextValueCallback extractValue;
 
   DynamicMetric(super.objectId, super.name, this.extractValue, {super.unit, super.icon, super.isDiagnostic = false})
-    : super(stateClass: 'measurement', deviceClass: 'data_size');
+    : super(stateClass: 'measurement');
 }
 
 class DiagnosticMetric extends Metric {
@@ -86,7 +86,7 @@ class BotInfoMetric extends Metric {
   final ExtractValueCallback extractValue;
 
   BotInfoMetric(super.objectId, super.name, this.extractValue, {super.unit, super.icon, super.isDiagnostic = false})
-    : super(stateClass: 'measurement', deviceClass: 'data_size');
+    : super(stateClass: 'measurement');
 }
 
 final List<DiagnosticMetric> oneTimeMetrics = [
@@ -194,18 +194,18 @@ class MetricsModule implements RequiresInitialization {
       return;
     }
 
+    Injector.appInstance.get<NyxxGateway>().onMessageCreate.listen((e) => dynamicMetricContext.messages++);
+    Injector.appInstance.get<NyxxGateway>().onGuildMemberAdd.listen((e) => dynamicMetricContext.joins++);
+    Injector.appInstance.get<NyxxGateway>().onGuildMemberRemove.listen((e) => dynamicMetricContext.removals++);
+    Injector.appInstance.get<NyxxGateway>().onInteractionCreate.listen((e) => dynamicMetricContext.interactions++);
+    Injector.appInstance.get<NyxxGateway>().onEvent.listen((e) => dynamicMetricContext.events++);
+
     client = MqttServerClient(metricsMqttPath, deviceName, maxConnectionAttempts: 30);
     client.onConnected = _onConnected;
     client.onAutoReconnected = _onAutoReconnected;
     client.onDisconnected = _onDisconnected;
 
     _connect();
-
-    Injector.appInstance.get<NyxxGateway>().onMessageCreate.listen((e) => dynamicMetricContext.messages++);
-    Injector.appInstance.get<NyxxGateway>().onGuildMemberAdd.listen((e) => dynamicMetricContext.joins++);
-    Injector.appInstance.get<NyxxGateway>().onGuildMemberRemove.listen((e) => dynamicMetricContext.removals++);
-    Injector.appInstance.get<NyxxGateway>().onInteractionCreate.listen((e) => dynamicMetricContext.interactions++);
-    Injector.appInstance.get<NyxxGateway>().onEvent.listen((e) => dynamicMetricContext.events++);
   }
 
   Future<void> _connect() async {
