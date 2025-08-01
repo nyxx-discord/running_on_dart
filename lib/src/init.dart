@@ -32,7 +32,6 @@ abstract class Reloadable {
 final reloadableModules = <String, Reloadable Function()>{
   'EmojiReactModule': () => Injector.appInstance.get<EmojiReactModule>(),
   'DocsModule': () => Injector.appInstance.get<DocsModule>(),
-  'TagModule': () => Injector.appInstance.get<TagModule>(),
 };
 
 Future<void> setupContainer(NyxxGateway client) async {
@@ -63,7 +62,6 @@ Future<void> setupContainer(NyxxGateway client) async {
   await Injector.appInstance.get<FeatureSettingsModule>().init();
   await Injector.appInstance.get<JellyfinModuleV2>().init();
   await Injector.appInstance.get<DocsModule>().init();
-  await Injector.appInstance.get<TagModule>().init();
   await Injector.appInstance.get<ModLogsModule>().init();
   await Injector.appInstance.get<ReminderModule>().init();
   await Injector.appInstance.get<JoinLogsModule>().init();

@@ -55,7 +55,7 @@ final durationConverter = Converter<Duration>((view, context) {
 String stringifySetting(Setting setting) => setting.name;
 const settingsConverter = SimpleConverter.fixed(elements: Setting.values, stringify: stringifySetting);
 
-Iterable<Tag> getManageableTags(ContextData context) =>
+Future<Iterable<Tag>> getManageableTags(ContextData context) =>
     Injector.appInstance.get<TagModule>().findAll(context.guild?.id ?? Snowflake.zero, context.user.id);
 String stringifyTag(Tag tag) => tag.name;
 

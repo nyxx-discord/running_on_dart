@@ -23,7 +23,7 @@ Future<JsonApiResponse> mapGuildTagsToData(
 }) async {
   final tagsModule = Injector.appInstance.get<TagModule>();
 
-  var tags = tagsModule.getGuildTags(guildId);
+  var tags = await tagsModule.getGuildTags(guildId);
 
   for (final entry in filters.entries) {
     switch (entry.key) {
