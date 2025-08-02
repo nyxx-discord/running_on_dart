@@ -76,7 +76,7 @@ mixin _WhereQuery implements Query {
       if (_andWheres.isEmpty) {
         buffer.write("WHERE ");
       } else {
-        buffer.write("OR ");
+        buffer.write(" OR ");
       }
       buffer.write(buildWheres(_orWheres, "OR"));
     }

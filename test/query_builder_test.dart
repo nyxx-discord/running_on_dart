@@ -10,6 +10,50 @@ extension PostgresSqlStringExtension on Sql {
 
 void main() {
   group("Query builder tests", () {
+    group("Helper builder functions", () {
+      test("buildSelects throws on empty list", () {
+        expect(() => buildSelects([]), throwsA(isA<QueryBuilderException>()));
+      });
+
+      test("buildSelects joins with commas", () {
+        expect(buildSelects(['a', 'b', 'c']), 'a,b,c');
+      });
+
+      test("buildWheres joins with AND/OR correctly", () {
+        expect(buildWheres(['a=1', 'b=2'], 'AND'), 'a=1 AND b=2');
+        expect(buildWheres(['a=1', 'b=2'], 'OR'), 'a=1 OR b=2');
+      });
+
+      test("buildSets formats key = value and preserves order", () {
+        final sets = {'a': '@a', 'b': 'now()'};
+        expect(buildSets(sets), 'a = @a,b = now()');
+      });
+
+      test("buildInsert returns fields and values preserving order", () {
+        final inserts = {'a': '1', 'b': '2'};
+        final res = buildInsert(inserts);
+        expect(res.$1, 'a,b');
+        expect(res.$2, '1,2');
+      });
+
+      test("buildReturnings comma joins", () {
+        expect(buildReturnings(['id', 'name']), 'id,name');
+      });
+
+      test("toStringClean collapses spaces and fixes space before semicolon", () {
+        final buf = StringBuffer('SELECT  *  FROM  t  ;');
+
+        expect(buf.toStringClean(), 'SELECT * FROM t;');
+      });
+    });
+
+    group("RawQuery", () {
+      test("returns Sql.named with exact string", () {
+        final raw = RawQuery('SELECT 1;');
+        expect(raw.build().asString(), 'SELECT 1;');
+      });
+    });
+
     group("Select tests", () {
       test("Simple select", () {
         final query = SelectQuery("test")
@@ -49,6 +93,17 @@ void main() {
         expect(query.build().asString(), "SELECT * FROM test WHERE name = 'test' OR model = 'xg';");
       });
 
+      test("Select both AND and OR statements", () {
+        final query = SelectQuery("test")
+          ..select("*")
+          ..andWhere("a = 1")
+          ..andWhere("b = 2")
+          ..orWhere("c = 3")
+          ..orWhere("d = 4");
+
+        expect(query.build().asString(), "SELECT * FROM test WHERE a = 1 AND b = 2 OR c = 3 OR d = 4;");
+      });
+
       test("Join another table", () {
         final query = SelectQuery("test", alias: "t")
           ..select("t.*")
@@ -79,6 +134,11 @@ void main() {
 
         expect(query.build().asString(), "SELECT t.* FROM test t WHERE t.name = 'test';");
       });
+
+      test("Select build throws when no selects provided", () {
+        final query = SelectQuery("test");
+        expect(() => query.build().asString(), throwsA(isA<QueryBuilderException>()));
+      });
     });
 
     group("Update tests", () {
@@ -97,6 +157,20 @@ void main() {
           ..andWhere("id = 1");
 
         expect(query.build().asString(), "UPDATE test SET name = @name,model = @model WHERE id = 1;");
+      });
+
+      test("Update requires where - throws", () {
+        final query = UpdateQuery("test")..addSet("name", "'x'");
+        expect(() => query.build().asString(), throwsA(isA<QueryBuilderException>()));
+      });
+
+      test("Update with AND and OR wheres", () {
+        final query = UpdateQuery("test")
+          ..addNamedSet("name")
+          ..andWhere("a = 1")
+          ..orWhere("b = 2");
+
+        expect(query.build().asString(), "UPDATE test SET name = @name WHERE a = 1 OR b = 2;");
       });
     });
 
@@ -118,6 +192,16 @@ void main() {
         expect(query.build().asString(), "INSERT INTO test (name,model) VALUES (moron,@model) RETURNING id;");
       });
 
+      test("Insert with multiple returnings preserves order", () {
+        final query = InsertQuery("test")
+          ..addNamedInsert("a")
+          ..addNamedInsert("b")
+          ..addReturning("id")
+          ..addReturning("name");
+
+        expect(query.build().asString(), "INSERT INTO test (a,b) VALUES (@a,@b) RETURNING id,name;");
+      });
+
       test("on conflict", () {
         final query = InsertQuery("test")
           ..addInsert("name", "moron")
@@ -130,6 +214,24 @@ void main() {
           "INSERT INTO test (name,model) VALUES (moron,@model) ON CONFLICT ON CONSTRAINT test_constraint DO UPDATE SET model = @model WHERE id = @id RETURNING id;",
         );
       });
+
+      test("on conflict throws when sets empty", () {
+        final query = InsertQuery("t")..addNamedInsert("a");
+        // Build the onConflict object directly by calling onConflict with empty sets to assert throw at build time
+        query.onConflict("c", {}, ['x = 1']);
+        expect(() => query.build().asString(), throwsA(isA<QueryBuilderException>()));
+      });
+
+      test("on conflict throws when wheres empty", () {
+        final query = InsertQuery("t")..addNamedInsert("a");
+        query.onConflict("c", {'a': '@a'}, []);
+        expect(() => query.build().asString(), throwsA(isA<QueryBuilderException>()));
+      });
+
+      test("Empty inserts produce empty columns and values (document current behavior)", () {
+        final query = InsertQuery("t");
+        expect(query.build().asString(), "INSERT INTO t () VALUES ();");
+      });
     });
 
     group("Delete tests", () {
@@ -137,6 +239,26 @@ void main() {
         final query = DeleteQuery("test")..andWhere("name = 'test'");
 
         expect(query.build().asString(), "DELETE FROM test WHERE name = 'test';");
+      });
+
+      test("Delete requires where - throws", () {
+        final query = DeleteQuery("test");
+        expect(() => query.build().asString(), throwsA(isA<QueryBuilderException>()));
+      });
+
+      test("Delete OR wheres", () {
+        final query = DeleteQuery("test")
+          ..orWhere("a = 1")
+          ..orWhere("b = 2");
+        expect(query.build().asString(), "DELETE FROM test WHERE a = 1 OR b = 2;");
+      });
+
+      test("Delete AND and OR wheres mixed", () {
+        final query = DeleteQuery("test")
+          ..andWhere("a = 1")
+          ..andWhere("b = 2")
+          ..orWhere("c = 3");
+        expect(query.build().asString(), "DELETE FROM test WHERE a = 1 AND b = 2 OR c = 3;");
       });
     });
   });
