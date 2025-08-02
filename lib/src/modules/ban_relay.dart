@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 
@@ -13,15 +15,28 @@ class BanAssociation {
   BanAssociation(this.guildId, this.unban, this.ensureBan);
 }
 
-class BanRelayModule implements RequiresInitialization {
+class BanRelayModule implements RequiresInitialization, Reloadable {
   final NyxxGateway _client = Injector.appInstance.get();
 
-  late final Map<Snowflake, List<BanAssociation>> banRelayAssociations = {};
+  final Map<Snowflake, List<BanAssociation>> banRelayAssociations = {};
 
   @override
   Future<void> init() async {
-    final settingRepository = Injector.appInstance.get<FeatureSettingsRepository>();
+    await _loadAssociations();
 
+    _client.onGuildBanAdd.listen((event) => _handleBanAction(event.guildId, event.user.id));
+    _client.onGuildBanRemove.listen((event) => _handleBanAction(event.guildId, event.user.id));
+  }
+
+  @override
+  Future<void> reload() async {
+    await _loadAssociations();
+  }
+
+  Future<void> _loadAssociations() async {
+    banRelayAssociations.clear();
+
+    final settingRepository = Injector.appInstance.get<FeatureSettingsRepository>();
     final settings = await settingRepository.fetchSettingsForType(Setting.banRelay);
     for (final setting in settings) {
       final data = setting.parseData<BanRelayData>();
@@ -34,40 +49,28 @@ class BanRelayModule implements RequiresInitialization {
 
         if (!banRelayAssociations.containsKey(targetGuild)) {
           banRelayAssociations[targetGuild] = [banAssociation];
-
           continue;
         }
 
         banRelayAssociations[targetGuild]!.add(banAssociation);
       }
     }
-
-    _client.onGuildBanAdd.listen((event) => _handleGuildBan(event));
   }
 
-  Future<void> _handleGuildBan(GuildBanAddEvent event) async {
-    final banRelayDetails = banRelayAssociations[event.guildId];
+  Future<void> _handleBanAction(Snowflake guildId, Snowflake userId) async {
+    final banRelayDetails = banRelayAssociations[guildId];
     if (banRelayDetails == null) {
       return;
     }
 
     for (final banAssociation in banRelayDetails) {
-      _banUser(event.user.id, banAssociation, event.guildId);
+      final guild = await _client.guilds.get(banAssociation.guildId);
+
+      if (banAssociation.unban) {
+        return guild.deleteBan(userId, auditLogReason: "Unban relayed from: $guildId");
+      }
+
+      return guild.createBan(userId, auditLogReason: "Ban relayed from: $guildId");
     }
-  }
-
-  Future<void> _banUser(Snowflake userId, BanAssociation banAssociation, Snowflake originalBanGuild) async {
-    final guild = await _client.guilds.get(banAssociation.guildId);
-
-    var memberToBan = guild.members.cache[userId];
-    if (memberToBan == null && banAssociation.ensureBan) {
-      memberToBan = await guild.members.fetch(userId);
-    }
-
-    if (memberToBan == null) {
-      return;
-    }
-
-    return memberToBan.ban(auditLogReason: "Ban relayed from: $originalBanGuild");
   }
 }

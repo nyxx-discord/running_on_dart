@@ -33,6 +33,7 @@ abstract class Reloadable {
 final reloadableModules = <String, Reloadable Function()>{
   'EmojiReactModule': () => Injector.appInstance.get<EmojiReactModule>(),
   'DocsModule': () => Injector.appInstance.get<DocsModule>(),
+  'BanRelayModule': () => Injector.appInstance.get<BanRelayModule>(),
 };
 
 Future<void> setupContainer(NyxxGateway client) async {
