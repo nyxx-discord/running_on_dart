@@ -125,12 +125,12 @@ final tag = ChatGroup(
         );
 
         final totalUses = events.length;
-        final totalHiddenUses = events.where((event) => event.hidden).length;
+        final totalHiddenUses = events.where((event) => event.$1.hidden).length;
 
         final threeDaysAgo = DateTime.now().add(Duration(days: -3));
-        final usesLastThreeDays = events.where((event) => event.usedAt.isAfter(threeDaysAgo)).length;
+        final usesLastThreeDays = events.where((event) => event.$1.usedAt.isAfter(threeDaysAgo)).length;
         final hiddenUsesLastThreeDays = events
-            .where((event) => event.usedAt.isAfter(threeDaysAgo) && event.hidden)
+            .where((event) => event.$1.usedAt.isAfter(threeDaysAgo) && event.$1.hidden)
             .length;
 
         final fields = [
@@ -154,11 +154,7 @@ final tag = ChatGroup(
           final useCount = <Tag, int>{};
 
           for (final event in events) {
-            final tag = await Injector.appInstance.get<TagModule>().getById(event.tagId);
-
-            if (tag == null) {
-              continue;
-            }
+            final tag = event.$2;
 
             useCount[tag] = (useCount[tag] ?? 0) + 1;
           }

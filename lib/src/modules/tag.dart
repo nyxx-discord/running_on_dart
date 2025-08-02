@@ -57,11 +57,7 @@ class TagModule {
     return results.firstOrNull;
   }
 
-  Future<Tag?> getById(int id) async {
-    return _tagRepository.fetchById(id);
-  }
-
-  Future<Iterable<TagUsedEvent>> getTagUsage(Snowflake guildId, [Tag? tag]) {
+  Future<Iterable<(TagUsedEvent, Tag)>> getTagUsage(Snowflake guildId, [Tag? tag]) {
     return _tagRepository.fetchTagUsage(guildId: guildId.toString(), tagId: tag?.id);
   }
 

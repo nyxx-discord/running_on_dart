@@ -9,14 +9,6 @@ class TagRepository {
 
   final Logger _logger = Logger('ROD.TagRepository');
 
-  Future<Tag?> fetchById(int id) async {
-    final query = SelectQuery('tags')..andWhere('id = @id');
-
-    final result = await _database.executeQuery(query, parameters: {'id': id});
-
-    return Tag.fromRow(result.first.toColumnMap());
-  }
-
   /// Fetch all existing tags from the database.
   Future<Iterable<Tag>> fetchAllActiveTags({String? guildId, String? userId, String? name}) async {
     final query = SelectQuery.selectAll('tags')..andWhere('enabled = TRUE');
@@ -174,8 +166,9 @@ LIMIT @limit OFFSET @offset
     );
   }
 
-  Future<Iterable<TagUsedEvent>> fetchTagUsage({String? guildId, int? tagId}) async {
+  Future<Iterable<(TagUsedEvent, Tag)>> fetchTagUsage({String? guildId, int? tagId}) async {
     final query = SelectQuery.selectAll("tag_usage", alias: "tu")
+      ..select('t.*')
       ..addJoin('tags', 't', ['t.id = tu.command_id', 't.enabled = TRUE']);
 
     final parameters = <String, dynamic>{};
@@ -190,9 +183,9 @@ LIMIT @limit OFFSET @offset
       parameters.addAll({'tagId': tagId});
     }
 
-    final result = await _database.executeQuery(query);
+    final result = await _database.executeQuery(query, parameters: parameters);
 
-    return result.map((row) => row.toColumnMap()).map(TagUsedEvent.fromRow);
+    return result.map((row) => row.toColumnMap()).map((row) => (TagUsedEvent.fromRow(row), Tag.fromRow(row)));
   }
 
   Future<void> registerTagUsedEvent(TagUsedEvent event) async {
