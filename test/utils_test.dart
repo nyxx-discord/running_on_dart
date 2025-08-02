@@ -56,8 +56,6 @@ void main() {
   });
 
   group("Utility Functions (New Tests)", () {
-    // Group for the new tests
-
     test('getCurrentMemoryString returns a string with memory usage', () {
       final memoryString = getCurrentMemoryString();
       expect(memoryString, matches(RegExp(r'^\d+\.\d+/\d+\.\d+ MB$')));
@@ -74,41 +72,98 @@ void main() {
       expect(map, {'a': 1, 'b': 2});
     });
 
-    test('generateRandomString generates a random string of given length', () {
+    test('generateRandomString generates a random string of given length and uppercases', () {
       final randomString = generateRandomString(10);
       expect(randomString.length, 10);
-      expect(randomString, matches(RegExp(r'^[A-Za-z0-9]+$')));
+      expect(randomString, matches(RegExp(r'^[A-Z0-9]+$')));
     });
 
-    test('spliceEmbedsForMessageBuilders splits embeds into chunks', () {
-      final embeds = [EmbedBuilder(), EmbedBuilder(), EmbedBuilder(), EmbedBuilder()];
-      final messageBuilders = spliceEmbedsForMessageBuilders(embeds, 2).toList();
+    test('spliceEmbedsForMessageBuilders splits embeds into chunks (default size 2)', () {
+      final embeds = [EmbedBuilder(), EmbedBuilder(), EmbedBuilder()];
+      final messageBuilders = spliceEmbedsForMessageBuilders(embeds).toList();
       expect(messageBuilders.length, 2);
       expect(messageBuilders[0].embeds?.length, 2);
+      expect(messageBuilders[1].embeds?.length, 1);
+    });
+
+    test('spliceEmbedsForMessageBuilders splits embeds with custom slice size', () {
+      final embeds = [EmbedBuilder(), EmbedBuilder(), EmbedBuilder(), EmbedBuilder(), EmbedBuilder()];
+      final messageBuilders = spliceEmbedsForMessageBuilders(embeds, 3).toList();
+      expect(messageBuilders.length, 2);
+      expect(messageBuilders[0].embeds?.length, 3);
       expect(messageBuilders[1].embeds?.length, 2);
     });
 
     test('stripNonAscii removes non-ASCII characters (extended)', () {
       expect(stripNonAscii('test\u00A0test'), 'testtest');
+      expect(stripNonAscii('żźćńółęąś🐍'), '');
+      expect(stripNonAscii('ASCII_only_123'), 'ASCII_only_123');
+      expect(stripNonAscii('Hello\u200BWorld'), 'HelloWorld');
     });
 
     test('boolValue converts values to boolean', () {
       expect(boolValue(true), isTrue);
       expect(boolValue(1), isTrue);
+      expect(boolValue(2), isTrue);
       expect(boolValue('1'), isTrue);
       expect(boolValue('yes'), isTrue);
       expect(boolValue('true'), isTrue);
       expect(boolValue(false), isFalse);
       expect(boolValue(0), isFalse);
+      expect(boolValue(-1), isFalse);
       expect(boolValue('0'), isFalse);
       expect(boolValue('no'), isFalse);
       expect(boolValue('false'), isFalse);
-      expect(boolValue('test'), isFalse);
+      expect(boolValue(' test '), isFalse);
+      expect(boolValue(null), isFalse);
     });
 
     test('boolToString converts boolean to string', () {
       expect(boolToString(true), 'true');
       expect(boolToString(false), 'false');
+    });
+
+    test('getModalDataIndexed flattens action rows and maps customId to value', () {
+      final inputsRow1 = ActionRowComponent(
+        components: [
+          TextInputComponent(
+            customId: 'a',
+            style: TextInputStyle.short,
+            label: 'A',
+            minLength: 0,
+            maxLength: 100,
+            isRequired: false,
+            placeholder: null,
+            value: '1',
+          ),
+          TextInputComponent(
+            customId: 'b',
+            style: TextInputStyle.paragraph,
+            label: 'B',
+            minLength: 0,
+            maxLength: 1000,
+            isRequired: true,
+            placeholder: 'ph',
+            value: '2',
+          ),
+        ],
+      );
+      final inputsRow2 = ActionRowComponent(
+        components: [
+          TextInputComponent(
+            customId: 'c',
+            style: TextInputStyle.short,
+            label: 'C',
+            minLength: 0,
+            maxLength: 50,
+            isRequired: false,
+            placeholder: null,
+            value: null,
+          ),
+        ],
+      );
+      final result = getModalDataIndexed([inputsRow1, inputsRow2]);
+      expect(result, {'a': '1', 'b': '2', 'c': null});
     });
   });
 }
