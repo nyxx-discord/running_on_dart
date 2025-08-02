@@ -79,15 +79,13 @@ class EmojiReactData implements SettingData {
 class BanRelayData implements SettingData {
   final Iterable<Snowflake> relayedGuilds;
   final bool unban;
-  final bool ensureBan;
 
-  BanRelayData({required this.relayedGuilds, required this.unban, required this.ensureBan});
+  BanRelayData({required this.relayedGuilds, required this.unban});
 
   factory BanRelayData.fromConfiguration(Map<String, dynamic> raw) {
     return BanRelayData(
       relayedGuilds: (raw['relayed_guilds'] as String).split(',').map((s) => s.trim()).map((s) => Snowflake.parse(s)),
       unban: boolValue(raw['unban']),
-      ensureBan: boolValue(raw['ensure_ban']),
     );
   }
 
@@ -95,7 +93,6 @@ class BanRelayData implements SettingData {
     return BanRelayData(
       relayedGuilds: (raw['relayed_guilds'] as Iterable).map((e) => Snowflake.parse(e)),
       unban: boolValue(raw['unban']),
-      ensureBan: boolValue(raw['ensure_ban']),
     );
   }
 
@@ -189,11 +186,6 @@ enum Setting<T extends SettingData> {
           customId: 'unban',
           style: TextInputStyle.short,
           label: "Also unban when unbanned from target guild (yes/no)",
-        ),
-        TextInputBuilder(
-          customId: 'ensure_ban',
-          style: TextInputStyle.short,
-          label: "When = yes, then it would go beyond cache to ban user (yes/no)",
         ),
       ],
       _ => throw Error(),

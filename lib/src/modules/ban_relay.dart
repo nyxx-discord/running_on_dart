@@ -10,9 +10,8 @@ import 'package:running_on_dart/src/repository/feature_settings.dart';
 class BanAssociation {
   final Snowflake guildId;
   final bool unban;
-  final bool ensureBan;
 
-  BanAssociation(this.guildId, this.unban, this.ensureBan);
+  BanAssociation(this.guildId, this.unban);
 }
 
 class BanRelayModule implements RequiresInitialization, Reloadable {
@@ -45,7 +44,7 @@ class BanRelayModule implements RequiresInitialization, Reloadable {
       }
 
       for (final targetGuild in data.relayedGuilds) {
-        final banAssociation = BanAssociation(setting.guildId, data.unban, data.ensureBan);
+        final banAssociation = BanAssociation(setting.guildId, data.unban);
 
         if (!banRelayAssociations.containsKey(targetGuild)) {
           banRelayAssociations[targetGuild] = [banAssociation];
