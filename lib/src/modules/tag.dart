@@ -22,7 +22,7 @@ class TagModule {
     await _tagRepository.deleteTag(tag);
   }
 
-  Future<int> countTags({Snowflake? guildId}) => _tagRepository.countAllActiveTags(guildId: guildId.toString());
+  Future<int> countTags({Snowflake? guildId}) => _tagRepository.countAllActiveTags(guildId: guildId?.toString());
 
   /// Get all the enabled tags in a guild.
   Future<Iterable<Tag>> getGuildTags(Snowflake guildId) =>

@@ -53,7 +53,7 @@ class TagRepository {
       parameters.addAll({'guildId': guildId});
     }
 
-    final result = await _database.executeQuery(query);
+    final result = await _database.executeQuery(query, parameters: parameters);
 
     return result.first.toColumnMap()['count_tags'] ?? 0;
   }
