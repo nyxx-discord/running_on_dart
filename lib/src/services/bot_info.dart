@@ -78,7 +78,7 @@ class BotInfoService {
         .map((c) => c.messages.cache.length)
         .fold<num>(0, (value, element) => value + element)
         .ceil();
-    final totalTags = tagModule.countTags();
+    final totalTags = await tagModule.countTags();
     final totalReminders = reminderModule.reminders.length;
     final botStartDateTime = startDurationModule.startDate;
     final docsUpdateDateTime = docsModule.lastUpdate;

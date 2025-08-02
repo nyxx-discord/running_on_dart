@@ -70,7 +70,7 @@ Stream<JsonApiResponse> mapGuildsToGuildReducedData(Iterable<Guild> guilds) asyn
       guild.id,
     )).map((s) => s.setting.name);
 
-    final tagsCount = tagModule.getGuildTags(guild.id).length;
+    final tagsCount = tagModule.countTags(guildId: guild.id);
 
     yield {
       'id': guild.id.toString(),

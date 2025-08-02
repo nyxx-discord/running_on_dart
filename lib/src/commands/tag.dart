@@ -19,7 +19,12 @@ final tag = ChatGroup(
         @Description('The content of the tag') String content, [
         @Description('Whether to enable the tag by default') bool enabled = true,
       ]) async {
-        if (Injector.appInstance.get<TagModule>().getByName(context.guild?.id ?? context.user.id, name) != null) {
+        var fetchedTagByName = await Injector.appInstance.get<TagModule>().getByName(
+          context.guild?.id ?? context.user.id,
+          name,
+        );
+
+        if (fetchedTagByName != null) {
           await context.respond(
             MessageBuilder(
               embeds: [
@@ -79,8 +84,7 @@ final tag = ChatGroup(
           return;
         }
 
-        tag.enabled = true;
-        await Injector.appInstance.get<TagModule>().updateTag(tag);
+        await Injector.appInstance.get<TagModule>().updateTagEnabled(tag, true);
 
         await context.respond(MessageBuilder(content: 'Successfully enabled tag!'));
       }),
@@ -97,8 +101,7 @@ final tag = ChatGroup(
           return;
         }
 
-        tag.enabled = false;
-        await Injector.appInstance.get<TagModule>().updateTag(tag);
+        await Injector.appInstance.get<TagModule>().updateTagEnabled(tag, false);
 
         await context.respond(MessageBuilder(content: 'Successfully disabled tag!'));
       }),
@@ -119,18 +122,18 @@ final tag = ChatGroup(
       'stats',
       'Show tag statistics',
       id('tag-stats', (ChatContext context, [@Description('The tag to show stats for') Tag? tag]) async {
-        final events = Injector.appInstance
-            .get<TagModule>()
-            .getTagUsage(context.guild?.id ?? context.user.id, tag)
-            .toList();
+        final events = await Injector.appInstance.get<TagModule>().getTagUsage(
+          context.guild?.id ?? context.user.id,
+          tag,
+        );
 
         final totalUses = events.length;
-        final totalHiddenUses = events.where((event) => event.hidden).length;
+        final totalHiddenUses = events.where((event) => event.$1.hidden).length;
 
         final threeDaysAgo = DateTime.now().add(Duration(days: -3));
-        final usesLastThreeDays = events.where((event) => event.usedAt.isAfter(threeDaysAgo)).length;
+        final usesLastThreeDays = events.where((event) => event.$1.usedAt.isAfter(threeDaysAgo)).length;
         final hiddenUsesLastThreeDays = events
-            .where((event) => event.usedAt.isAfter(threeDaysAgo) && event.hidden)
+            .where((event) => event.$1.usedAt.isAfter(threeDaysAgo) && event.$1.hidden)
             .length;
 
         final fields = [
@@ -154,11 +157,7 @@ final tag = ChatGroup(
           final useCount = <Tag, int>{};
 
           for (final event in events) {
-            final tag = Injector.appInstance.get<TagModule>().getById(event.tagId);
-
-            if (tag == null) {
-              continue;
-            }
+            final tag = event.$2;
 
             useCount[tag] = (useCount[tag] ?? 0) + 1;
           }
