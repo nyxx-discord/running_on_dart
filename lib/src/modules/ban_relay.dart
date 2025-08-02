@@ -23,8 +23,8 @@ class BanRelayModule implements RequiresInitialization, Reloadable {
   Future<void> init() async {
     await _loadAssociations();
 
-    _client.onGuildBanAdd.listen((event) => _handleBanAction(event.guildId, event.user.id));
-    _client.onGuildBanRemove.listen((event) => _handleBanAction(event.guildId, event.user.id));
+    _client.onGuildBanAdd.listen((event) => _handleBan(event.guildId, event.user.id));
+    _client.onGuildBanRemove.listen((event) => _handleUnban(event.guildId, event.user.id));
   }
 
   @override
@@ -56,7 +56,7 @@ class BanRelayModule implements RequiresInitialization, Reloadable {
     }
   }
 
-  Future<void> _handleBanAction(Snowflake guildId, Snowflake userId) async {
+  Future<void> _handleBan(Snowflake guildId, Snowflake userId) async {
     final banRelayDetails = banRelayAssociations[guildId];
     if (banRelayDetails == null) {
       return;
@@ -65,11 +65,24 @@ class BanRelayModule implements RequiresInitialization, Reloadable {
     for (final banAssociation in banRelayDetails) {
       final guild = await _client.guilds.get(banAssociation.guildId);
 
-      if (banAssociation.unban) {
-        return guild.deleteBan(userId, auditLogReason: "Unban relayed from: $guildId");
+      await guild.createBan(userId, auditLogReason: "Ban relayed from: $guildId");
+    }
+  }
+
+  Future<void> _handleUnban(Snowflake guildId, Snowflake userId) async {
+    final banRelayDetails = banRelayAssociations[guildId];
+    if (banRelayDetails == null) {
+      return;
+    }
+
+    for (final banAssociation in banRelayDetails) {
+      if (!banAssociation.unban) {
+        continue;
       }
 
-      return guild.createBan(userId, auditLogReason: "Ban relayed from: $guildId");
+      final guild = await _client.guilds.get(banAssociation.guildId);
+
+      return guild.deleteBan(userId, auditLogReason: "Unban relayed from: $guildId");
     }
   }
 }
