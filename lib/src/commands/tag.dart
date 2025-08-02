@@ -19,7 +19,12 @@ final tag = ChatGroup(
         @Description('The content of the tag') String content, [
         @Description('Whether to enable the tag by default') bool enabled = true,
       ]) async {
-        if (await Injector.appInstance.get<TagModule>().getByName(context.guild?.id ?? context.user.id, name) != null) {
+        var fetchedTagByName = await Injector.appInstance.get<TagModule>().getByName(
+          context.guild?.id ?? context.user.id,
+          name,
+        );
+
+        if (fetchedTagByName != null) {
           await context.respond(
             MessageBuilder(
               embeds: [
@@ -79,8 +84,7 @@ final tag = ChatGroup(
           return;
         }
 
-        tag.enabled = true;
-        await Injector.appInstance.get<TagModule>().updateTag(tag);
+        await Injector.appInstance.get<TagModule>().updateTagEnabled(tag, true);
 
         await context.respond(MessageBuilder(content: 'Successfully enabled tag!'));
       }),
@@ -97,8 +101,7 @@ final tag = ChatGroup(
           return;
         }
 
-        tag.enabled = false;
-        await Injector.appInstance.get<TagModule>().updateTag(tag);
+        await Injector.appInstance.get<TagModule>().updateTagEnabled(tag, false);
 
         await context.respond(MessageBuilder(content: 'Successfully disabled tag!'));
       }),

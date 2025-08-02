@@ -17,6 +17,11 @@ class TagModule {
     await _tagRepository.updateTag(tag);
   }
 
+  Future<void> updateTagEnabled(Tag tag, bool enabled) async {
+    tag.enabled = enabled;
+    await _tagRepository.updateTag(tag);
+  }
+
   /// Delete a tag.
   Future<void> deleteTag(Tag tag) async {
     await _tagRepository.deleteTag(tag);
