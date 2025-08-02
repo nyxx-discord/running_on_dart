@@ -48,10 +48,9 @@ String? valueOrNull(String? value) {
   return value;
 }
 
-String generateRandomString(int length) =>
-    String.fromCharCodes(
-      Iterable.generate(length, (_) => _chars.codeUnitAt(random.nextInt(_chars.length))),
-    ).toUpperCase();
+String generateRandomString(int length) => String.fromCharCodes(
+  Iterable.generate(length, (_) => _chars.codeUnitAt(random.nextInt(_chars.length))),
+).toUpperCase();
 
 Iterable<MessageBuilder> spliceEmbedsForMessageBuilders(Iterable<EmbedBuilder> embeds, [int sliceSize = 2]) sync* {
   for (final splicedEmbeds in embeds.slices(sliceSize)) {

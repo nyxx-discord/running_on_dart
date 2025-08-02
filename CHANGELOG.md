@@ -1,3 +1,14 @@
+## 4.14.2
+- Improved poop nickname logic
+- Fix dynamic metrics
+
+## 4.14.1
+- Removed unused 'errors' metric
+
+## 4.14.0
+- Upgrade dart and dependencies
+- Add additional metrics
+
 ## 4.13.0
 - Improve reconnection logic
 - Replace messages per second with messages per minute metric

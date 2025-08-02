@@ -68,19 +68,17 @@ class BotInfoService {
     final cachedGuilds = client.guilds.cache.length;
     final cachedUsers = client.users.cache.length;
     final cachedChannels = client.channels.cache.length;
-    final cachedVoiceStates =
-        client.guilds.cache.values
-            .map((g) => g.voiceStates.length)
-            .fold<num>(0, (value, element) => value + element)
-            .ceil();
+    final cachedVoiceStates = client.guilds.cache.values
+        .map((g) => g.voiceStates.length)
+        .fold<num>(0, (value, element) => value + element)
+        .ceil();
     final shardCount = client.gateway.shards.length;
-    final cachedMessages =
-        client.channels.cache.values
-            .whereType<TextChannel>()
-            .map((c) => c.messages.cache.length)
-            .fold<num>(0, (value, element) => value + element)
-            .ceil();
-    final totalTags = tagModule.countTags();
+    final cachedMessages = client.channels.cache.values
+        .whereType<TextChannel>()
+        .map((c) => c.messages.cache.length)
+        .fold<num>(0, (value, element) => value + element)
+        .ceil();
+    final totalTags = await tagModule.countTags();
     final totalReminders = reminderModule.reminders.length;
     final botStartDateTime = startDurationModule.startDate;
     final docsUpdateDateTime = docsModule.lastUpdate;

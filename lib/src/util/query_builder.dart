@@ -48,6 +48,17 @@ abstract class Query {
   Sql build();
 }
 
+class RawQuery extends Query {
+  final String queryString;
+
+  RawQuery(this.queryString) : super('');
+
+  @override
+  Sql build() {
+    return Sql.named(queryString);
+  }
+}
+
 mixin _WhereQuery implements Query {
   final List<String> _andWheres = [];
   final List<String> _orWheres = [];
@@ -65,7 +76,7 @@ mixin _WhereQuery implements Query {
       if (_andWheres.isEmpty) {
         buffer.write("WHERE ");
       } else {
-        buffer.write("OR ");
+        buffer.write(" OR ");
       }
       buffer.write(buildWheres(_orWheres, "OR"));
     }

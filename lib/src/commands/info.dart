@@ -14,10 +14,9 @@ final info = ChatCommand(
 
     final startDateStr =
         "${botInfo.uptime.format(TimestampStyle.longDateTime)} (${botInfo.uptime.format(TimestampStyle.relativeTime)})";
-    final docsUpdateStr =
-        botInfo.docsUpdate != null
-            ? "${botInfo.docsUpdate!.format(TimestampStyle.longDateTime)} (${botInfo.docsUpdate!.format(TimestampStyle.relativeTime)})"
-            : "Never";
+    final docsUpdateStr = botInfo.docsUpdate != null
+        ? "${botInfo.docsUpdate!.format(TimestampStyle.longDateTime)} (${botInfo.docsUpdate!.format(TimestampStyle.relativeTime)})"
+        : "Never";
 
     final embed = EmbedBuilder(
       color: getRandomColor(),

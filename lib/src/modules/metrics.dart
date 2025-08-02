@@ -9,6 +9,7 @@ import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/services/bot_info.dart';
 import 'package:running_on_dart/src/settings.dart';
 import 'package:running_on_dart/src/init.dart';
+import 'package:running_on_dart/src/modules/bot_start_duration.dart';
 import 'package:running_on_dart/src/util/util.dart';
 import 'package:typed_data/typed_buffers.dart';
 
@@ -47,7 +48,10 @@ class Metric {
 class DynamicMetricContext {
   var messages = 0;
   var joins = 0;
+
+  var removals = 0;
   var events = 0;
+  var interactions = 0;
 }
 
 class StaticMetric extends Metric {
@@ -61,7 +65,7 @@ class DynamicMetric extends Metric {
   final ContextValueCallback extractValue;
 
   DynamicMetric(super.objectId, super.name, this.extractValue, {super.unit, super.icon, super.isDiagnostic = false})
-    : super(stateClass: 'measurement', deviceClass: 'data_size');
+    : super(stateClass: 'measurement');
 }
 
 class DiagnosticMetric extends Metric {
@@ -82,7 +86,7 @@ class BotInfoMetric extends Metric {
   final ExtractValueCallback extractValue;
 
   BotInfoMetric(super.objectId, super.name, this.extractValue, {super.unit, super.icon, super.isDiagnostic = false})
-    : super(stateClass: 'measurement', deviceClass: 'data_size');
+    : super(stateClass: 'measurement');
 }
 
 final List<DiagnosticMetric> oneTimeMetrics = [
@@ -123,12 +127,34 @@ final List<Metric> periodicMetrics = [
 
     return value;
   }, unit: 'joins/min'),
+  DynamicMetric('removals_per_minute', 'Guild removals', (context) {
+    final value = context.removals.toString();
+    context.removals = 0;
+
+    return value;
+  }, unit: 'removals/min'),
   DynamicMetric('events_per_minute', 'Events', (context) {
     final value = context.events.toString();
     context.events = 0;
 
     return value;
   }, unit: 'events/min'),
+  DynamicMetric('interactions_per_minute', 'Interactions', (context) {
+    final value = context.interactions.toString();
+    context.interactions = 0;
+
+    return value;
+  }, unit: 'interactions/min'),
+  StaticMetric(
+    'uptime',
+    'Uptime',
+    () {
+      final start = Injector.appInstance.get<BotStartDuration>().startDate;
+      return DateTime.now().difference(start).inSeconds.toString();
+    },
+    deviceClass: 'duration',
+    unit: 's',
+  ),
   StaticMetric(
     'gateway_latency',
     'Gateway Latency',
@@ -168,16 +194,18 @@ class MetricsModule implements RequiresInitialization {
       return;
     }
 
+    Injector.appInstance.get<NyxxGateway>().onMessageCreate.listen((e) => dynamicMetricContext.messages++);
+    Injector.appInstance.get<NyxxGateway>().onGuildMemberAdd.listen((e) => dynamicMetricContext.joins++);
+    Injector.appInstance.get<NyxxGateway>().onGuildMemberRemove.listen((e) => dynamicMetricContext.removals++);
+    Injector.appInstance.get<NyxxGateway>().onInteractionCreate.listen((e) => dynamicMetricContext.interactions++);
+    Injector.appInstance.get<NyxxGateway>().onEvent.listen((e) => dynamicMetricContext.events++);
+
     client = MqttServerClient(metricsMqttPath, deviceName, maxConnectionAttempts: 30);
     client.onConnected = _onConnected;
     client.onAutoReconnected = _onAutoReconnected;
     client.onDisconnected = _onDisconnected;
 
     _connect();
-
-    Injector.appInstance.get<NyxxGateway>().onMessageCreate.listen((e) => dynamicMetricContext.messages++);
-    Injector.appInstance.get<NyxxGateway>().onGuildMemberAdd.listen((e) => dynamicMetricContext.joins++);
-    Injector.appInstance.get<NyxxGateway>().onEvent.listen((e) => dynamicMetricContext.events++);
   }
 
   Future<void> _connect() async {

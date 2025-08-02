@@ -325,10 +325,10 @@ packages:
     dependency: "direct dev"
     description:
       name: lints
-      sha256: c35bb79562d980e9a453fc715854e1ed39e24e7d0297a880ef54e17f9874a9d7
+      sha256: a5e2b223cb7c9c8efdc663ef484fdd95bb243bff242ef5b13e26883547fce9a0
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.1"
+    version: "6.0.0"
   logging:
     dependency: "direct main"
     description:
@@ -349,10 +349,10 @@ packages:
     dependency: transitive
     description:
       name: meta
-      sha256: e3641ec5d63ebf0d9b41bd43201a66e3fc79a65db5f61fc181f04cd27aab950c
+      sha256: "23f08335362185a5ea2ad3a4e597f1375e78bce8a040df5c600c8d3552ef2394"
       url: "https://pub.dev"
     source: hosted
-    version: "1.16.0"
+    version: "1.17.0"
   migent:
     dependency: "direct main"
     description:
@@ -374,10 +374,10 @@ packages:
     dependency: "direct main"
     description:
       name: mqtt_client
-      sha256: "85fa7e9aad03fbd6a54fcaf46127579f3e049b4834557a06e49aea7869b04c94"
+      sha256: "7f2cb7faf1bfd132abb4075d64418894f7811e376a4c4db947b4a19d7f569821"
       url: "https://pub.dev"
     source: hosted
-    version: "10.8.0"
+    version: "10.8.1"
   nanoid2:
     dependency: transitive
     description:
@@ -414,10 +414,10 @@ packages:
     dependency: "direct main"
     description:
       name: nyxx_extensions
-      sha256: e4ede22d39ea809d9b5bcd6daeda2d916f67f25edfadbba09a2da34611f29bd9
+      sha256: "9a6a2ac635dffdd9cf7b1f78e375e9b4833e8d25dfe53cced58acca2ca7d7434"
       url: "https://pub.dev"
     source: hosted
-    version: "4.3.2"
+    version: "4.4.0"
   oauth2:
     dependency: transitive
     description:
@@ -748,4 +748,4 @@ packages:
     source: hosted
     version: "3.1.3"
 sdks:
-  dart: ">=3.7.0 <4.0.0"
+  dart: ">=3.8.0 <4.0.0"

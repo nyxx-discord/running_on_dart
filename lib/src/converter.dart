@@ -28,16 +28,15 @@ final packageDocsConverter = Converter<PackageDocs>(
 final reminderConverter = Converter<Reminder>(
   (view, context) =>
       Injector.appInstance.get<ReminderModule>().search(context.user.id, view.getQuotedWord()).firstOrNull,
-  autocompleteCallback:
-      (context) => Injector.appInstance
-          .get<ReminderModule>()
-          .search(context.user.id, context.currentValue)
-          .take(25)
-          .map(
-            (e) =>
-                '${reminderDateFormat.format(e.triggerAt)}: ${e.message.length > 50 ? '${e.message.substring(0, 50)}...' : e.message}',
-          )
-          .map((e) => CommandOptionChoiceBuilder(name: e, value: e)),
+  autocompleteCallback: (context) => Injector.appInstance
+      .get<ReminderModule>()
+      .search(context.user.id, context.currentValue)
+      .take(25)
+      .map(
+        (e) =>
+            '${reminderDateFormat.format(e.triggerAt)}: ${e.message.length > 50 ? '${e.message.substring(0, 50)}...' : e.message}',
+      )
+      .map((e) => CommandOptionChoiceBuilder(name: e, value: e)),
 );
 
 final durationConverter = Converter<Duration>((view, context) {
@@ -56,7 +55,7 @@ final durationConverter = Converter<Duration>((view, context) {
 String stringifySetting(Setting setting) => setting.name;
 const settingsConverter = SimpleConverter.fixed(elements: Setting.values, stringify: stringifySetting);
 
-Iterable<Tag> getManageableTags(ContextData context) =>
+Future<Iterable<Tag>> getManageableTags(ContextData context) =>
     Injector.appInstance.get<TagModule>().findAll(context.guild?.id ?? Snowflake.zero, context.user.id);
 String stringifyTag(Tag tag) => tag.name;
 
@@ -70,8 +69,8 @@ final jellyfinConfigUserConverter = Converter<JellyfinConfigUser>(
       instanceName: view.getQuotedWord(),
     );
   },
-  autocompleteCallback:
-      (context) async => (await Injector.appInstance.get<JellyfinConfigRepository>().getConfigsForParent(
+  autocompleteCallback: (context) async =>
+      (await Injector.appInstance.get<JellyfinConfigRepository>().getConfigsForParent(
         (context.guild?.id ?? context.user.id).toString(),
       )).map((config) => CommandOptionChoiceBuilder(name: config.name, value: config.name)),
 );
@@ -84,10 +83,9 @@ final kavitaUserConfigsConverter = Converter<KavitaUserConfig>(
       instanceName: view.getQuotedWord(),
     );
   },
-  autocompleteCallback:
-      (context) async => (await Injector.appInstance.get<KavitaRepository>().findAllForParent(
-        getParentIdFromContext(context).toString(),
-      )).map((config) => CommandOptionChoiceBuilder(name: config.name, value: config.name)),
+  autocompleteCallback: (context) async => (await Injector.appInstance.get<KavitaRepository>().findAllForParent(
+    getParentIdFromContext(context).toString(),
+  )).map((config) => CommandOptionChoiceBuilder(name: config.name, value: config.name)),
 );
 
 String stringifyKavitaConfig(KavitaConfig config) => config.name;

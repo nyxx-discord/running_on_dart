@@ -112,10 +112,9 @@ Iterable<EmbedFieldBuilder> getMediaPlaybackInfoFields(SessionInfoDto sessionInf
 
   final finalBitrate = ((transcodingInfo.bitrate ?? 0) / 1024 / 1024).toStringAsFixed(2);
 
-  final completionInfo =
-      transcodingInfo.completionPercentage != null && transcodingInfo.framerate != null
-          ? ' - ${transcodingInfo.completionPercentage!.toStringAsFixed(2)}% (${transcodingInfo.framerate} fps)'
-          : '';
+  final completionInfo = transcodingInfo.completionPercentage != null && transcodingInfo.framerate != null
+      ? ' - ${transcodingInfo.completionPercentage!.toStringAsFixed(2)}% (${transcodingInfo.framerate} fps)'
+      : '';
 
   final transcodingReason = getTranscodingReason(transcodingInfo);
   final reasonInfo = transcodingReason != null ? " ($transcodingReason)" : '';
@@ -206,7 +205,10 @@ EmbedBuilder? buildSessionEmbed(SessionInfoDto sessionInfo, AuthenticatedJellyfi
       author: author,
       thumbnail: EmbedThumbnailBuilder(url: client.getItemPrimaryImage(nowPlayingItem.albumId!)),
       title: '${artist.name!} - ${nowPlayingItem.name} (Track ${nowPlayingItem.indexNumber})',
-      fields: [EmbedFieldBuilder(name: 'Album', value: '${nowPlayingItem.album}', isInline: false), ...fields],
+      fields: [
+        EmbedFieldBuilder(name: 'Album', value: '${nowPlayingItem.album}', isInline: false),
+        ...fields,
+      ],
       footer: footer,
     );
   }
@@ -296,8 +298,9 @@ EmbedBuilder? buildMediaEmbedBuilder(BaseItemDto item, AuthenticatedJellyfinClie
 }
 
 EmbedBuilder getUserInfoEmbed(UserDto currentUser, AuthenticatedJellyfinClient client) {
-  final thumbnail =
-      currentUser.primaryImageTag != null ? EmbedThumbnailBuilder(url: client.getUserImage(currentUser.id!)) : null;
+  final thumbnail = currentUser.primaryImageTag != null
+      ? EmbedThumbnailBuilder(url: client.getUserImage(currentUser.id!))
+      : null;
 
   return EmbedBuilder(
     thumbnail: thumbnail,
@@ -334,13 +337,19 @@ MessageBuilder getJellyfinLoginMessage({
     ActionRowBuilder(
       components: [
         ButtonBuilder.primary(
-          customId:
-              JellyfinLoginCustomId.username(userId: userId, configName: configName, parentId: parentId).toString(),
+          customId: JellyfinLoginCustomId.username(
+            userId: userId,
+            configName: configName,
+            parentId: parentId,
+          ).toString(),
           label: "Username login",
         ),
         ButtonBuilder.primary(
-          customId:
-              JellyfinLoginCustomId.quickConnect(userId: userId, configName: configName, parentId: parentId).toString(),
+          customId: JellyfinLoginCustomId.quickConnect(
+            userId: userId,
+            configName: configName,
+            parentId: parentId,
+          ).toString(),
           label: "Quick Connect login",
         ),
       ],

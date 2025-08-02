@@ -62,7 +62,8 @@ final docs = ChatGroup(
         final embed = EmbedBuilder(
           color: getRandomColor(),
           title: '${element.displayName} ${element.type}',
-          description: '''
+          description:
+              '''
 Documentation: [${element.name}](${element.urlToDocs})
 Package: [${element.packageName}](https://pub.dev/packages/${element.packageName})
 ''',
@@ -84,7 +85,9 @@ Package: [${element.packageName}](https://pub.dev/packages/${element.packageName
 
         if (searchResults.isEmpty) {
           await context.respond(
-            MessageBuilder(embeds: [EmbedBuilder(title: 'No results', color: DiscordColor.parseHexString("#FF0000"))]),
+            MessageBuilder(
+              embeds: [EmbedBuilder(title: 'No results', color: DiscordColor.parseHexString("#FF0000"))],
+            ),
           );
           return;
         }

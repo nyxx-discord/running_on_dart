@@ -7,19 +7,38 @@ import 'package:running_on_dart/src/init.dart';
 
 const poopEmoji = "💩";
 const poopCharacters = [
-  '!',
-  '#',
-  '@',
-  '^',
-  '%',
-  '&',
+  '(',
+  ')',
   '-',
-  '*',
-  '.'
-      '+',
+  '+',
+  '=',
+  '_',
+  ']',
+  '[',
+  '\\',
+  '|',
+  ';',
   "'",
+  ',',
+  '.',
+  '<',
+  '>',
+  '/',
+  '?',
+  '!',
+  '@',
+  '#',
+  r'$',
+  '%',
+  '^',
+  '&',
+  '*',
 ];
-final poopRegexp = RegExp("[${poopCharacters.join()}]");
+
+final poopRegexp = RegExp("[${poopCharacters.map((c) => RegExp.escape(c)).join()}]");
+final weirdCharsRegexp = RegExp(
+  r'[\u200B\u200C\u200D\u2060\uFEFF\u180E\u202A-\u202E\u2066-\u2069\u00AD\u061C\uFFF9-\uFFFB\uFFFD]|[\x00-\x1F\x7F-\x9F]',
+);
 
 class PoopNameModule implements RequiresInitialization {
   final NyxxGateway _client = Injector.appInstance.get();
@@ -52,7 +71,7 @@ class PoopNameModule implements RequiresInitialization {
     return (true, memberName);
   }
 
-  bool _shouldPoopName(String name) => name.startsWith(poopRegexp);
+  bool _shouldPoopName(String name) => name.startsWith(poopRegexp) || weirdCharsRegexp.hasMatch(name);
 
   Future<void> _updateMemberWithPoopEmoji(Member member) =>
       member.update(MemberUpdateBuilder(nick: poopEmoji), auditLogReason: 'ROD PoopNameModule moderation');

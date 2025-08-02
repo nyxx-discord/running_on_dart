@@ -148,10 +148,9 @@ class WizarrClient {
       return http.post(uri, headers: _getHeaders(includeAuth: true), body: jsonEncode(body));
     }
 
-    final request =
-        http.MultipartRequest('POST', uri)
-          ..headers.addAll(_getHeaders(includeAuth: true, includeContentType: false))
-          ..fields.addAll(body.cast());
+    final request = http.MultipartRequest('POST', uri)
+      ..headers.addAll(_getHeaders(includeAuth: true, includeContentType: false))
+      ..fields.addAll(body.cast());
 
     return request.send();
   }
