@@ -1,5 +1,6 @@
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
+import 'package:running_on_dart/src/modules/ban_relay.dart';
 import 'package:running_on_dart/src/modules/bot_start_duration.dart';
 import 'package:running_on_dart/src/modules/docs.dart';
 import 'package:running_on_dart/src/modules/emoji_react_module.dart';
@@ -32,6 +33,7 @@ abstract class Reloadable {
 final reloadableModules = <String, Reloadable Function()>{
   'EmojiReactModule': () => Injector.appInstance.get<EmojiReactModule>(),
   'DocsModule': () => Injector.appInstance.get<DocsModule>(),
+  'BanRelayModule': () => Injector.appInstance.get<BanRelayModule>(),
 };
 
 Future<void> setupContainer(NyxxGateway client) async {
@@ -55,6 +57,7 @@ Future<void> setupContainer(NyxxGateway client) async {
     ..registerSingleton(() => MentionsMonitoringModule())
     ..registerSingleton(() => KavitaModule())
     ..registerSingleton(() => EmojiReactModule())
+    ..registerSingleton(() => BanRelayModule())
     ..registerSingleton(() => BotInfoService())
     ..registerSingleton(() => MetricsModule());
 
@@ -69,5 +72,6 @@ Future<void> setupContainer(NyxxGateway client) async {
   await Injector.appInstance.get<BotStartDuration>().init();
   await Injector.appInstance.get<MentionsMonitoringModule>().init();
   await Injector.appInstance.get<EmojiReactModule>().init();
+  await Injector.appInstance.get<BanRelayModule>().init();
   await Injector.appInstance.get<MetricsModule>().init();
 }

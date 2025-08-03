@@ -11,6 +11,7 @@ doc/api/
 
 # dotenv environment variables file
 .env*
+!.env.example
 
 # IDE configuration folders
 .vscode/

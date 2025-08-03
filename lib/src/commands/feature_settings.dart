@@ -24,7 +24,7 @@ final featureSettings = ChatGroup(
         if (setting is! Setting<NoData>) {
           final modal = await context.getModal(title: "Configuration", components: setting.getConfigurationFields());
 
-          data = setting.parseData(modal.asMap());
+          data = setting.parseFromConfiguration(modal.asMap());
           if (data == null) {
             return context.respond(
               MessageBuilder(content: "Cannot properly parse settings data. Please contact administrator"),
