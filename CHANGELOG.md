@@ -1,3 +1,10 @@
+## 4.15.0
+- Ban relay module
+- Improve tags handling
+- Add example .env
+- Readme fixups
+- Code formatting and small internal logic fixes
+
 ## 4.14.2
 - Improved poop nickname logic
 - Fix dynamic metrics
@@ -20,7 +27,7 @@
 - Upgrade deps
 
 ## 4.11.6
-- Fix latency metrics 
+- Fix latency metrics
 
 ## 4.11.5
 - Add latency metrics
@@ -127,7 +134,7 @@
 - ## 4.3.0
 - Rework catching JellyfinConfigNotFoundException
 - Handle 401 from jellyfin
-- Rework util methods. 
+- Rework util methods.
 - Extract login logic from command body
 
 ## 4.2.3
@@ -187,7 +194,7 @@
 
 ## 3.3.0
 
-- Implement new `/admin perform-nickname-pooping` and `/system clear-cache` command 
+- Implement new `/admin perform-nickname-pooping` and `/system clear-cache` command
 
 ## 3.2.3
 
@@ -208,7 +215,7 @@
 ## 3.1.0
 
 - Fixup tag deleting (invalid column in db)
-- Add bot version to /info command 
+- Add bot version to /info command
 
 ## 3.0.2
 
