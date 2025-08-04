@@ -58,20 +58,22 @@ class PoopNameModule implements RequiresInitialization {
     poopMember(member, dryRun: false);
   }
 
-  Future<(bool, String?)> poopMember(Member member, {bool dryRun = true}) async {
-    final memberName = member.nick ?? member.user?.globalName;
+  Future<bool> poopMember(Member member, {bool dryRun = true}) async {
+    final memberName = getMemberNameForPooping(member);
     if (memberName == null || !_shouldPoopName(memberName)) {
-      return (false, null);
+      return false;
     }
 
     if (!dryRun) {
       _updateMemberWithPoopEmoji(member);
     }
 
-    return (true, memberName);
+    return true;
   }
 
   bool _shouldPoopName(String name) => name.startsWith(poopRegexp) || weirdCharsRegexp.hasMatch(name);
+
+  String? getMemberNameForPooping(Member member) => member.nick ?? member.user?.globalName ?? member.user?.username;
 
   Future<void> _updateMemberWithPoopEmoji(Member member) =>
       member.update(MemberUpdateBuilder(nick: poopEmoji), auditLogReason: 'ROD PoopNameModule moderation');
