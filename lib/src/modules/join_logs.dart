@@ -9,6 +9,7 @@ import 'package:running_on_dart/src/settings.dart';
 import 'package:running_on_dart/src/init.dart';
 
 const idFieldName = 'ID';
+final RegExp suspiciousNameRegex = RegExp(r'^[A-Za-z]+[\._][A-Za-z]+_\d+_\d+$');
 
 class JoinLogsModule implements RequiresInitialization {
   final NyxxGateway _client = Injector.appInstance.get();
@@ -34,6 +35,10 @@ class JoinLogsModule implements RequiresInitialization {
     final descriptionBuffer = StringBuffer('**Member joined**');
     if (DateTime.now().difference(event.member.id.timestamp).inDays < 30) {
       descriptionBuffer.write(" (New user)");
+    }
+
+    if (event.member.user != null && _isSuspiciousName(event.member.user!)) {
+      descriptionBuffer.write(" (Suspicious)");
     }
 
     final embed = EmbedBuilder(
@@ -115,6 +120,14 @@ class JoinLogsModule implements RequiresInitialization {
 
   String _formatDateTimeString(DateTime dateTime) =>
       '${dateTime.format(TimestampStyle.shortDate)} (${dateTime.format(TimestampStyle.relativeTime)})';
+
+  bool _isSuspiciousName(User user) {
+    if (user.globalName != null && suspiciousNameRegex.hasMatch(user.globalName!)) {
+      return true;
+    }
+
+    return suspiciousNameRegex.hasMatch(user.username);
+  }
 
   Future<bool> _isEnabledForGuild(Snowflake guildId) async {
     if (!intentFeaturesEnabled) {
