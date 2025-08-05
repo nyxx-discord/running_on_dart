@@ -87,11 +87,8 @@ final admin = ChatGroup(
         final multiSelectResult = await context.getMultiSelection(
           membersToPoop,
           MessageBuilder(content: 'Performing members pooping...'),
-          toSelectMenuOption: (value) => SelectMenuOptionBuilder(
-            label: poopModule.getMemberNameForPooping(value)!,
-            value: value.id.toString(),
-            // isDefault: true,
-          ),
+          toSelectMenuOption: (value) =>
+              SelectMenuOptionBuilder(label: poopModule.getMemberNameForPooping(value)!, value: value.id.toString()),
         );
 
         for (final member in multiSelectResult) {
