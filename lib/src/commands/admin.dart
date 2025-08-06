@@ -8,25 +8,6 @@ import 'package:running_on_dart/src/modules/poop_name.dart';
 import 'package:running_on_dart/src/init.dart';
 import 'package:running_on_dart/src/util/util.dart';
 
-Future<MessageBuilder> createMessageBuilder(List<String> nicknames, String messageHeader) async {
-  if (nicknames.isEmpty) {
-    return MessageBuilder(content: "-/-");
-  }
-
-  return pagination.split(
-    nicknames.join(','),
-    buildChunk: (String chunk) => MessageBuilder(
-      content:
-          """
-$messageHeader:
-```
-$chunk
-```
-""",
-    ),
-  );
-}
-
 Stream<Member> searchMembers(String disallowedChar, int batchSize, Guild guild) {
   return (guild.manager.client as NyxxGateway).gateway.listGuildMembers(
     guild.id,
@@ -71,17 +52,21 @@ final admin = ChatGroup(
     ChatCommand(
       "perform-nickname-pooping",
       "Perform pooping of usernames in current guild",
-      id('perform-nickname-pooping', (ChatContext context, [int batchSize = 100]) async {
+      id('perform-nickname-pooping', (ChatContext context, [int batchSize = 10]) async {
         final poopModule = Injector.appInstance.get<PoopNameModule>();
 
         final membersToPoop = <Member>[];
-        for (final disallowedChar in poopCharacters) {
+        for (final disallowedChar in minimalPoopCharacters) {
           await for (final member in searchMembers(disallowedChar, batchSize, context.guild!)) {
             final shouldBePooped = await poopModule.poopMember(member, dryRun: true);
             if (shouldBePooped) {
               membersToPoop.add(member);
             }
           }
+        }
+
+        if (membersToPoop.isEmpty) {
+          return context.respond(MessageBuilder(content: 'No members to poop...'));
         }
 
         final multiSelectResult = await context.getMultiSelection(
@@ -97,7 +82,8 @@ final admin = ChatGroup(
 
         await context.respond(
           MessageBuilder(
-            content: 'Pooped members: `${multiSelectResult.map((value) => poopModule.getMemberNameForPooping(value))}`',
+            content:
+                'Pooped members: ${multiSelectResult.map((value) => poopModule.getMemberNameForPooping(value)).map((v) => '`$v`').join(', ')}',
           ),
         );
       }),

@@ -35,6 +35,8 @@ const poopCharacters = [
   '*',
 ];
 
+const minimalPoopCharacters = ['.', "'", '<', '[', '!', '@', r'$', '^', '*'];
+
 final poopRegexp = RegExp("[${poopCharacters.map((c) => RegExp.escape(c)).join()}]");
 final weirdCharsRegexp = RegExp(
   r'[\u200B\u200C\u200D\u2060\uFEFF\u180E\u202A-\u202E\u2066-\u2069\u00AD\u061C\uFFF9-\uFFFB\uFFFD]|[\x00-\x1F\x7F-\x9F]',
