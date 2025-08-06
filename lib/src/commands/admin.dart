@@ -71,23 +71,35 @@ final admin = ChatGroup(
     ChatCommand(
       "perform-nickname-pooping",
       "Perform pooping of usernames in current guild",
-      id('perform-nickname-pooping', (ChatContext context, [bool dryRun = true, int batchSize = 100]) async {
+      id('perform-nickname-pooping', (ChatContext context, [int batchSize = 100]) async {
         final poopModule = Injector.appInstance.get<PoopNameModule>();
 
-        var nickNamesToRemove = <String>[];
+        final membersToPoop = <Member>[];
         for (final disallowedChar in poopCharacters) {
           await for (final member in searchMembers(disallowedChar, batchSize, context.guild!)) {
-            final (performed, nick) = await poopModule.poopMember(member, dryRun: dryRun);
-            if (performed && (nick ?? '').isNotEmpty) {
-              nickNamesToRemove.add(nick!);
+            final shouldBePooped = await poopModule.poopMember(member, dryRun: true);
+            if (shouldBePooped) {
+              membersToPoop.add(member);
             }
           }
         }
 
-        final outPutMessageHeader = "Pooping nicknames ${dryRun ? "[DRY RUN]" : ""}";
-        final messageBuilder = await createMessageBuilder(nickNamesToRemove, outPutMessageHeader);
+        final multiSelectResult = await context.getMultiSelection(
+          membersToPoop,
+          MessageBuilder(content: 'Performing members pooping...'),
+          toSelectMenuOption: (value) =>
+              SelectMenuOptionBuilder(label: poopModule.getMemberNameForPooping(value)!, value: value.id.toString()),
+        );
 
-        await context.respond(messageBuilder);
+        for (final member in multiSelectResult) {
+          poopModule.poopMember(member, dryRun: false);
+        }
+
+        await context.respond(
+          MessageBuilder(
+            content: 'Pooped members: `${multiSelectResult.map((value) => poopModule.getMemberNameForPooping(value))}`',
+          ),
+        );
       }),
       checks: [GuildCheck.all(), PermissionsCheck(Permissions.manageNicknames)],
     ),
