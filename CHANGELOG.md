@@ -1,3 +1,7 @@
+## 4.16.0
+- feature: Alternative pooping interface (#50)
+- Check for suspicious usernames
+
 ## 4.15.0
 - Ban relay module
 - Improve tags handling
