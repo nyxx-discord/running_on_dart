@@ -1,3 +1,6 @@
+## 4.16.1
+- Improve pooping command
+
 ## 4.16.0
 - feature: Alternative pooping interface (#50)
 - Check for suspicious usernames
