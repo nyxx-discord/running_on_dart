@@ -45,6 +45,15 @@ void main() {
 
         expect(buf.toStringClean(), 'SELECT * FROM t;');
       });
+      test("toStringClean collapses multiple spaces across query (no tabs/newlines)", () {
+        final buf = StringBuffer('SELECT   a   FROM    t   WHERE   x =  1   ;');
+        expect(buf.toStringClean(), 'SELECT a FROM t WHERE x = 1;');
+      });
+
+      test("toStringClean keeps single spaces between tokens and removes space before semicolon", () {
+        final buf = StringBuffer('INSERT  INTO  t  (a,b)  VALUES  (1,2)  ;');
+        expect(buf.toStringClean(), 'INSERT INTO t (a,b) VALUES (1,2);');
+      });
     });
 
     group("RawQuery", () {

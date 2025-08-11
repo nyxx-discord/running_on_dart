@@ -166,4 +166,26 @@ void main() {
       expect(result, {'a': '1', 'b': '2', 'c': null});
     });
   });
+
+  group("Additional utils edge cases", () {
+    test('spliceEmbedsForMessageBuilders with empty list yields no messages', () {
+      final result = spliceEmbedsForMessageBuilders(const <EmbedBuilder>[]).toList();
+      expect(result, isEmpty);
+    });
+
+    test('getDurationFromStringOrDefault invalid string returns default', () {
+      expect(
+        getDurationFromStringOrDefault('not a duration', const Duration(seconds: 5)),
+        const Duration(seconds: 5),
+      );
+    });
+
+    test('valueOrNull returns original non-empty string (not trimmed)', () {
+      expect(valueOrNull(' value '), ' value ');
+    });
+
+    test('generateRandomString supports zero length', () {
+      expect(generateRandomString(0), '');
+    });
+  });
 }
