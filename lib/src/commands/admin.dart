@@ -16,6 +16,22 @@ Stream<Member> searchMembers(String disallowedChar, int batchSize, Guild guild) 
   );
 }
 
+final poopUserCommand = UserCommand("poop-username", (UserContext context) async {
+  final member = context.targetMember;
+  if (member == null) {
+    return context.respond(
+      MessageBuilder(content: "This command can only be used on guild members."),
+      level: ResponseLevel.private,
+    );
+  }
+
+  final poopModule = Injector.appInstance.get<PoopNameModule>();
+
+  await poopModule.poopMember(member, dryRun: false);
+
+  await context.respond(MessageBuilder(content: "Done..."), level: ResponseLevel.private);
+}, checks: [GuildCheck.all(), PermissionsCheck(Permissions.manageNicknames)]);
+
 final admin = ChatGroup(
   'admin',
   'Administrative commands',

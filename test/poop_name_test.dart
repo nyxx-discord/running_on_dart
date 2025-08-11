@@ -4,13 +4,7 @@ import 'package:running_on_dart/src/modules/poop_name.dart';
 void main() {
   group('weirdCharsRegexp', () {
     test('should catch Mathematical Alphanumeric Symbols (original examples)', () {
-      final testCases = [
-        '𝕯𝖗𝖚𝖌𝖘',
-        '𝕾𝖚𝖌𝖆𝖗𝕾𝖊𝖆𝖓',
-        '𝸸𝖚𝖗𝖉𝖚𝖍 ♛',
-        '𝑇𝑟𝑎𝑣𝑖𝑠',
-        '𝔃𝓲𝓰𝓪',
-      ];
+      final testCases = ['𝕯𝖗𝖚𝖌𝖘', '𝕾𝖚𝖌𝖆𝖗𝕾𝖊𝖆𝖓', '𝸸𝖚𝖗𝖉𝖚𝖍 ♛', '𝑇𝑟𝑎𝑣𝑖𝑠', '𝔃𝓲𝓰𝓪'];
 
       for (final testCase in testCases) {
         expect(
@@ -39,12 +33,7 @@ void main() {
     });
 
     test('should catch excessive currency symbol abuse (3+ symbols)', () {
-      final testCases = [
-        '₮₴₹test',
-        '₮₴₹₽₪test',
-        'test₮₴₹name',
-        '₮₴₹₽₪₫₡₢₣₤₥₦₧₨₩₮₯₰₱₲₳₴₵₶₷₸₹₺₻₼₽₾₿',
-      ];
+      final testCases = ['₮₴₹test', '₮₴₹₽₪test', 'test₮₴₹name', '₮₴₹₽₪₫₡₢₣₤₥₦₧₨₩₮₯₰₱₲₳₴₵₶₷₸₹₺₻₼₽₾₿'];
 
       for (final testCase in testCases) {
         expect(
@@ -56,12 +45,7 @@ void main() {
     });
 
     test('should NOT catch moderate currency symbol use (1-2 symbols)', () {
-      final testCases = [
-        '₮testname',
-        'test₴name',
-        '₮test₴',
-        'user₹name₽',
-      ];
+      final testCases = ['₮testname', 'test₴name', '₮test₴', 'user₹name₽'];
 
       for (final testCase in testCases) {
         expect(
@@ -87,13 +71,7 @@ void main() {
     });
 
     test('should preserve existing invisible character detection', () {
-      final testCases = [
-        'test\u200Bname',
-        'name\u202Etext',
-        'test\u2060name',
-        'name\uFEFFtext',
-        'test\u00ADname',
-      ];
+      final testCases = ['test\u200Bname', 'name\u202Etext', 'test\u2060name', 'name\uFEFFtext', 'test\u00ADname'];
 
       for (final testCase in testCases) {
         expect(
@@ -116,7 +94,7 @@ void main() {
         'kebab-case-user',
         'User123',
         'SimpleTest',
-        'café', 
+        'café',
         'naïve',
         'résumé',
       ];
@@ -127,12 +105,7 @@ void main() {
     });
 
     test('should catch ASCII control characters', () {
-      final testCases = [
-        'test\x00name',
-        'test\x1Fname',
-        'test\x7Fname',
-        'test\x9Fname',
-      ];
+      final testCases = ['test\x00name', 'test\x1Fname', 'test\x7Fname', 'test\x9Fname'];
 
       for (final testCase in testCases) {
         expect(

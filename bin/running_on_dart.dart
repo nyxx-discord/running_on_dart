@@ -26,6 +26,7 @@ void main(List<String> args) async {
     ..addCommand(admin)
     ..addCommand(jellyfin)
     ..addCommand(reminderMessageCommand)
+    ..addCommand(poopUserCommand)
     ..addCommand(kavita)
     ..addConverter(settingsConverter)
     ..addConverter(manageableTagConverter)

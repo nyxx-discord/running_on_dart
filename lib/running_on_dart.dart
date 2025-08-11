@@ -4,11 +4,10 @@ export 'src/commands/info.dart' show info;
 export 'src/commands/github.dart' show github;
 export 'src/commands/avatar.dart' show avatar;
 export 'src/commands/docs.dart' show docs;
-export 'src/commands/reminder.dart' show reminder;
-export 'src/commands/admin.dart' show admin;
+export 'src/commands/reminder.dart' show reminder, reminderMessageCommand;
+export 'src/commands/admin.dart' show admin, poopUserCommand;
 export 'src/commands/jellyfin.dart' show jellyfin;
 export 'src/commands/tag.dart' show tag;
-export 'src/commands/reminder.dart' show reminderMessageCommand;
 export 'src/commands/kavita.dart' show kavita;
 
 export 'src/settings.dart';
