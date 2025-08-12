@@ -11,9 +11,6 @@ Core bot settings
 - `ROD_PREFIX` (optional, default `n>>`): The prefix to use for text commands.
 - `ROD_INTENT_FEATURES_ENABLE`: A bool (`true` or `false`) indicating whether to enable features requiring privileged intents, namely `GUILD_MESSAGES` and `GUILD_MEMBERS`.
 - `ROD_ADMIN_IDS`: The space-separated IDs (snowflakes) of the users that can use administrator commands.
-- `ROD_ADMIN_ID` (optional): Single administrator user ID (snowflake). Use `ROD_ADMIN_IDS` to provide multiple admins.
-- `SYNC_COMMANDS` (optional, default `true`): Whether to sync application commands on startup.
-- `ROD_DEBUG` (optional, default `0`): Enable extra debug logging (`1`/`0` or `true`/`false`).
 - `ROD_DEV` (optional, default `false`): A bool indicating whether to run in development mode.
 - `BOT_NAME` (optional, default `Nataly`): Displayed bot name in some contexts.
 
@@ -36,6 +33,7 @@ Web server
 - `WEB_SERVER_ENABLE` (optional, default `0`): Enable the built-in web server (`1`/`0`).
 - `WEB_SERVER_HOST` (optional, default `0.0.0.0`): Host/interface to bind the web server to.
 - `WEB_SERVER_PORT` (optional, default `8088`): Port for the web server.
+- `WEB_SERVER_ALLOWED_ORIGIN` (optional, default `https://localhost:8088`): Allowed origins for CORS headers.
 - `DISCORD_CLIENT_ID` (optional): Discord OAuth2 application client ID.
 - `DISCORD_CLIENT_SECRET` (optional): Discord OAuth2 application client secret.
 - `DISCORD_REDIRECT_URI` (optional, default `https://localhost:8088/redirect`): OAuth2 redirect URI.
