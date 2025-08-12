@@ -66,15 +66,15 @@ FROM (
     (similarity(name, @q) * 5.0 + similarity(content, @q) * 1.0) AS score
   FROM tags
   WHERE enabled = TRUE
-    AND (@authorId::text IS NULL OR author_id::text = @authorId)
-    AND (@guildId::text IS NULL OR guild_id::text = @guildId)
+    AND (author_id = @authorId OR @authorId IS NULL)
+    AND (guild_id = @guildId OR @guildId IS NULL)
     AND (
       name ILIKE '%' || @q || '%'
       OR content ILIKE '%' || @q || '%'
       OR name % @q
       OR content % @q
     )
-) s
+) AS scored_tags
 WHERE score >= @simThresh
 ORDER BY score DESC, name ASC
 LIMIT @limit OFFSET @offset
