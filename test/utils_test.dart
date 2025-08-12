@@ -174,10 +174,7 @@ void main() {
     });
 
     test('getDurationFromStringOrDefault invalid string returns default', () {
-      expect(
-        getDurationFromStringOrDefault('not a duration', const Duration(seconds: 5)),
-        const Duration(seconds: 5),
-      );
+      expect(getDurationFromStringOrDefault('not a duration', const Duration(seconds: 5)), const Duration(seconds: 5));
     });
 
     test('valueOrNull returns original non-empty string (not trimmed)', () {
