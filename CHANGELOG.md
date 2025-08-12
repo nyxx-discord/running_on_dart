@@ -1,3 +1,9 @@
+## 4.17.0
+- New `poop user` command
+- Improved SQL query for searching active tags
+- Extended list of bad characters for "poop" feature
+- Various test improvements
+
 ## 4.16.1
 - Improve pooping command
 

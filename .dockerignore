@@ -21,3 +21,5 @@ build/
 lib_old/
 
 **/node_modules/**
+
+.roo/**

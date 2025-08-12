@@ -27,9 +27,9 @@ final poopUserCommand = UserCommand("poop-username", (UserContext context) async
 
   final poopModule = Injector.appInstance.get<PoopNameModule>();
 
-  await poopModule.poopMember(member, dryRun: false);
+  final result = await poopModule.poopMember(member, dryRun: false);
 
-  await context.respond(MessageBuilder(content: "Done..."), level: ResponseLevel.private);
+  await context.respond(MessageBuilder(content: result ? 'Done...' : 'Not needed...'), level: ResponseLevel.private);
 }, checks: [GuildCheck.all(), PermissionsCheck(Permissions.manageNicknames)]);
 
 final admin = ChatGroup(
