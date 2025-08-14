@@ -76,7 +76,7 @@ final tag = ChatGroup(
         }
         module.registerTagUsedEvent(TagUsedEvent.fromTag(tag: randomTag, hidden: false));
 
-        return context.respond(MessageBuilder(content: randomTag.content));
+        return context.respond(MessageBuilder(content: '`${randomTag.name}`: ${randomTag.content}'));
       }),
     ),
     ChatCommand(
