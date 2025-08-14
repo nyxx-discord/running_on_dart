@@ -26,3 +26,5 @@ sessions/
 
 public/
 !public/.gitkeep
+
+.roo/**
