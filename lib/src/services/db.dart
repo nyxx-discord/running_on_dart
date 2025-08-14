@@ -13,8 +13,8 @@ import 'package:running_on_dart/src/init.dart';
 String user = getEnv('POSTGRES_USER');
 
 /// The password to use when connecting to the database.
-// Don't use [getEnv] so we can have password be optional
-String? password = Platform.environment['POSTGRES_PASSWORD'];
+// Optional password
+String? password = getEnv('POSTGRES_PASSWORD');
 
 /// The name of the database to connect to.
 String databaseName = getEnv('POSTGRES_DB');
@@ -23,7 +23,7 @@ String databaseName = getEnv('POSTGRES_DB');
 String host = getEnv('DB_HOST', 'db');
 
 /// The port to connect to the database on.
-int port = int.parse(getEnv('DB_PORT', '5432'));
+int port = getEnvInt('DB_PORT', 5432);
 
 class DatabaseService implements RequiresInitialization {
   late Connection _connection;
