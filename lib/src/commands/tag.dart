@@ -63,6 +63,23 @@ final tag = ChatGroup(
       }),
     ),
     ChatCommand(
+      'random',
+      'Show a random tag',
+      id('tag-random', (ChatContext context) async {
+        final module = Injector.appInstance.get<TagModule>();
+        final guildOrUser = context.guild?.id ?? context.user.id;
+
+        final randomTag = await module.getRandomTag(guildOrUser);
+
+        if (randomTag == null) {
+          return await context.respond(MessageBuilder(content: 'Cannot fetch random tag...'));
+        }
+        module.registerTagUsedEvent(TagUsedEvent.fromTag(tag: randomTag, hidden: false));
+
+        return context.respond(MessageBuilder(content: randomTag.content));
+      }),
+    ),
+    ChatCommand(
       'preview',
       'View a tag, without making it publicly visible',
       id('tag-preview', (ChatContext context, @Description('The tag to preview') Tag tag) async {

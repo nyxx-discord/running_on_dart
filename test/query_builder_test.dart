@@ -148,6 +148,83 @@ void main() {
         final query = SelectQuery("test");
         expect(() => query.build().asString(), throwsA(isA<QueryBuilderException>()));
       });
+      test("Select with ORDER BY random() and LIMIT/OFFSET", () {
+        final query = SelectQuery("test")
+          ..select("*")
+          ..andWhere("a = 1")
+          ..orderBy("random()")
+          ..limit(5)
+          ..offset(10);
+
+        expect(query.build().asString(), "SELECT * FROM test WHERE a = 1 ORDER BY random() LIMIT 5 OFFSET 10;");
+      });
+
+      test("Select with multiple ORDER BY clauses", () {
+        final query = SelectQuery("t")
+          ..select("*")
+          ..orderBy("a ASC")
+          ..orderBy("b DESC");
+
+        expect(query.build().asString(), "SELECT * FROM t ORDER BY a ASC,b DESC;");
+      });
+
+      test("Select with LIMIT only", () {
+        final query = SelectQuery("t")
+          ..select("*")
+          ..limit(3);
+
+        expect(query.build().asString(), "SELECT * FROM t LIMIT 3;");
+      });
+
+      test("Select with OFFSET only", () {
+        final query = SelectQuery("t")
+          ..select("*")
+          ..offset(7);
+
+        expect(query.build().asString(), "SELECT * FROM t OFFSET 7;");
+      });
+
+      test("Select with JOIN + WHERE + ORDER BY + LIMIT", () {
+        final query = SelectQuery("tag_usage", alias: "tu")
+          ..select("tu.*")
+          ..addJoin("tags", "t", ["t.id = tu.command_id"])
+          ..andWhere("t.enabled = TRUE")
+          ..orderBy("t.id DESC")
+          ..limit(1);
+
+        expect(
+          query.build().asString(),
+          "SELECT tu.* FROM tag_usage tu JOIN tags t ON t.id = tu.command_id WHERE t.enabled = TRUE ORDER BY t.id DESC LIMIT 1;",
+        );
+      });
+      test("Select alias selectAll with ORDER BY + LIMIT + OFFSET", () {
+        final query = SelectQuery.selectAll("test", alias: "t")
+          ..orderBy("t.a DESC")
+          ..limit(2)
+          ..offset(1);
+
+        expect(query.build().asString(), "SELECT t.* FROM test t ORDER BY t.a DESC LIMIT 2 OFFSET 1;");
+      });
+
+      test("Select LIMIT/OFFSET render order is LIMIT then OFFSET regardless of call order", () {
+        final query = SelectQuery("t")
+          ..select("*")
+          ..offset(100)
+          ..limit(10);
+
+        expect(query.build().asString(), "SELECT * FROM t LIMIT 10 OFFSET 100;");
+      });
+
+      test("Select with mixed AND/OR WHEREs and ORDER BY", () {
+        final query = SelectQuery("t")
+          ..select("*")
+          ..andWhere("a = 1")
+          ..andWhere("b = 2")
+          ..orWhere("c = 3")
+          ..orderBy("id");
+
+        expect(query.build().asString(), "SELECT * FROM t WHERE a = 1 AND b = 2 OR c = 3 ORDER BY id;");
+      });
     });
 
     group("Update tests", () {

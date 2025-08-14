@@ -215,12 +215,18 @@ class DeleteQuery extends Query with _WhereQuery {
 
 class SelectQuery extends Query with _WhereQuery, _JoinQuery {
   final List<String> _selects = [];
+  final List<String> _orderBys = [];
+  int? _limit;
+  int? _offset;
 
   SelectQuery(super.from, {super.alias});
   factory SelectQuery.selectAll(String from, {String? alias}) =>
       SelectQuery(from, alias: alias)..select("${alias != null ? '$alias.' : ''}*");
 
   void select(String expression) => _selects.add(expression);
+  void orderBy(String expression) => _orderBys.add(expression);
+  void limit(int n) => _limit = n;
+  void offset(int n) => _offset = n;
 
   @override
   Sql build() {
@@ -232,8 +238,17 @@ class SelectQuery extends Query with _WhereQuery, _JoinQuery {
     buffer.write(" ");
     _buildWheres(buffer);
 
-    buffer.write(";");
+    if (_orderBys.isNotEmpty) {
+      buffer.write(" ORDER BY ${_orderBys.join(",")}");
+    }
+    if (_limit != null) {
+      buffer.write(" LIMIT $_limit");
+    }
+    if (_offset != null) {
+      buffer.write(" OFFSET $_offset");
+    }
 
+    buffer.write(";");
     return Sql.named(buffer.toStringClean());
   }
 }

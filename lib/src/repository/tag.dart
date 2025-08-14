@@ -50,6 +50,23 @@ class TagRepository {
     return result.first.toColumnMap()['count_tags'] ?? 0;
   }
 
+  Future<Tag?> fetchRandomActiveTag({required String guildId}) async {
+    final query = SelectQuery.selectAll('tags')
+      ..andWhere('enabled = TRUE')
+      ..andWhere('guild_id = @guildId')
+      ..orderBy('random()')
+      ..limit(1);
+
+    final params = <String, dynamic>{"guildId": guildId};
+
+    final result = await _database.executeQuery(query, parameters: params);
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return Tag.fromRow(result.first.toColumnMap());
+  }
+
   Future<Iterable<Tag>> searchActiveTags({
     required String query,
     int limit = 25,
