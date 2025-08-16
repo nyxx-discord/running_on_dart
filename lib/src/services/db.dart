@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:logging/logging.dart';
 import 'package:migent/migent.dart';
@@ -9,20 +8,10 @@ import 'package:running_on_dart/src/settings.dart';
 import 'package:running_on_dart/src/util/query_builder.dart';
 import 'package:running_on_dart/src/init.dart';
 
-/// The user to use when connecting to the database.
 String user = getEnv('POSTGRES_USER');
-
-/// The password to use when connecting to the database.
-// Optional password
 String? password = getEnv('POSTGRES_PASSWORD');
-
-/// The name of the database to connect to.
 String databaseName = getEnv('POSTGRES_DB');
-
-/// The host name of the database to connect to.
 String host = getEnv('DB_HOST', 'db');
-
-/// The port to connect to the database on.
 int port = getEnvInt('DB_PORT', 5432);
 
 class DatabaseService implements RequiresInitialization {

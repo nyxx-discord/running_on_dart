@@ -7,6 +7,8 @@ import 'package:running_on_dart/src/checks.dart';
 import 'package:running_on_dart/src/modules/poop_name.dart';
 import 'package:running_on_dart/src/init.dart';
 import 'package:running_on_dart/src/util/util.dart';
+import 'package:running_on_dart/src/services/db.dart';
+import 'package:running_on_dart/src/util/sql_result_formatter.dart';
 
 Stream<Member> searchMembers(String disallowedChar, int batchSize, Guild guild) {
   return (guild.manager.client as NyxxGateway).gateway.listGuildMembers(
@@ -133,6 +135,29 @@ final admin = ChatGroup(
                 content: 'Reloaded ${reloadFunctions.length} modules. Took ${stopwatch.elapsed.formatShort()}',
               ),
             );
+          }),
+        ),
+        ChatCommand(
+          'sql',
+          'Execute a SQL query',
+          id('admin-sql', (
+            ChatContext context,
+            @Description('SQL query to execute') String query, [
+            @Description('Set to false to show response publicly') bool private = true,
+          ]) async {
+            final db = Injector.appInstance.get<DatabaseService>();
+            final responseLevel = private ? ResponseLevel.private : ResponseLevel.public;
+
+            try {
+              final result = await db.getConnection().execute(query);
+
+              final table = formatSqlResult(result);
+              final truncated = table.length > 3900 ? '${table.substring(0, 3900)}... (truncated)' : table;
+
+              await context.respond(MessageBuilder(content: '```\n$truncated\n```'), level: responseLevel);
+            } catch (e) {
+              await context.respond(MessageBuilder(content: 'Error executing query: $e'), level: responseLevel);
+            }
           }),
         ),
       ],
