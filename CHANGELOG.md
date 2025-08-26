@@ -1,3 +1,9 @@
+## 4.18.0
+- Add system sql command
+- Use standard env methods for fetching db pass
+- Display tag name on /tag random command
+- Add /tag random command
+
 ## 4.17.0
 - New `poop user` command
 - Improved SQL query for searching active tags
