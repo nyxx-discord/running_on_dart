@@ -1,3 +1,6 @@
+## 4.18.1
+- Fix frontend guilds endpoint bug
+
 ## 4.18.0
 - Add system sql command
 - Use standard env methods for fetching db pass
