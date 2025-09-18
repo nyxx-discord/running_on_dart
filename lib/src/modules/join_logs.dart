@@ -80,6 +80,28 @@ class JoinLogsModule implements RequiresInitialization {
       return;
     }
 
+    // Check via API if the user is still in the guild to avoid false "Left" marks due to cache/race conditions
+    try {
+      final guild = await _client.guilds.get(event.guildId);
+      Member? stillMember;
+      try {
+        stillMember = await guild.members.get(event.user.id);
+      } catch (_) {
+        stillMember = null;
+      }
+
+      if (stillMember != null) {
+        _logger.fine(
+          'Skip marking as Left; member still present per API. guild=${event.guildId} user=${event.user.id}',
+        );
+        return;
+      }
+    } catch (e, _) {
+      _logger.warning(
+        'Failed to verify member presence via API; proceeding. guild=${event.guildId} user=${event.user.id} error=$e',
+      );
+    }
+
     _logger.fine('Searching recent messages for user ${event.user.id} in channel ${channel.id}');
 
     final messagesStream = channel.messages
