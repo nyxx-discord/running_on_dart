@@ -22,6 +22,7 @@ class JoinLogsModule implements RequiresInitialization {
   Future<void> init() async {
     _client.onGuildMemberAdd.listen(_handleMemberAdd);
     _client.onGuildMemberRemove.listen(_handleMemberRemove);
+    _logger.info('JoinLogsModule initialized: listeners registered for GuildMemberAdd and GuildMemberRemove');
   }
 
   Future<void> _handleMemberAdd(GuildMemberAddEvent event) async {
@@ -59,42 +60,77 @@ class JoinLogsModule implements RequiresInitialization {
   }
 
   Future<void> _handleMemberRemove(GuildMemberRemoveEvent event) async {
+    _logger.fine(
+      'GuildMemberRemove received: guild=${event.guildId} user=${event.user.id} removedMemberPresent=${event.removedMember != null}',
+    );
+
     final channel = await _getChannelIfFeatureEnabled(event.guildId);
     if (channel == null) {
+      _logger.fine('JoinLogs disabled or channel not configured for guild ${event.guildId}');
       return;
     }
 
-    if (event.removedMember != null && DateTime.now().difference(event.removedMember!.joinedAt).inDays > 7) {
+    final joinedAt = event.removedMember?.joinedAt;
+    final daysSinceJoin = joinedAt != null ? DateTime.now().difference(joinedAt).inDays : null;
+
+    if (event.removedMember != null && daysSinceJoin != null && daysSinceJoin > 7) {
+      _logger.fine(
+        'Skipping leave mark; member joined >7 days ago. guild=${event.guildId} user=${event.user.id} joinedAt=$joinedAt daysSinceJoin=$daysSinceJoin',
+      );
       return;
     }
 
-    _logger.fine('Trying to update join log message for user ${event.user.id} in channel ${channel.id}');
+    _logger.fine('Searching recent messages for user ${event.user.id} in channel ${channel.id}');
 
-    final messages = channel.messages
-        .stream(pageSize: 20, order: StreamOrder.mostRecentFirst)
-        .where((message) => message.embeds.isNotEmpty)
-        .where(
-          (message) =>
-              message.embeds.first.fields
-                  ?.firstWhereOrNull((f) => f.name == idFieldName)
-                  ?.value
-                  .contains(event.user.id.toString()) !=
-              null,
-        );
+    final messagesStream = channel.messages
+        .stream(pageSize: 50, order: StreamOrder.mostRecentFirst)
+        .where((m) => m.embeds.isNotEmpty)
+        .where((m) => _messageMatchesUser(m, event.user.id));
 
-    final message = (await messages.toList()).firstOrNull;
+    final messagesList = await messagesStream.toList();
+    _logger.fine('Searched ${messagesList.length} messages for user=${event.user.id} in channel=${channel.id}');
+
+    final message = messagesList.firstOrNull;
     if (message == null) {
+      _logger.info('No join message found to update for user ${event.user.id} in channel ${channel.id}');
       return;
     }
 
     final embed = message.embeds.first.toEmbedBuilder();
-    if (embed.description?.contains("(Left") ?? true) {
+    final before = embed.description ?? '';
+    final hasLeft = before.contains('(Left');
+
+    if (hasLeft) {
+      _logger.severe(
+        'Already marked as Left, possible duplicate _handleMemberRemove call. '
+        'guild=${event.guildId} channel=${channel.id} messageId=${message.id} user=${event.user.id} '
+        'removedMemberPresent=${event.removedMember != null} joinedAt=${event.removedMember?.joinedAt} '
+        'desc="$before"',
+      );
       return;
     }
 
-    embed.description = "${embed.description} (Left)";
+    embed.description = '$before (Left)';
 
     message.update(MessageUpdateBuilder(embeds: [embed]));
+    _logger.severe(
+      'Marked user as Left (first time). '
+      'guild=${event.guildId} channel=${channel.id} messageId=${message.id} user=${event.user.id} '
+      'removedMemberPresent=${event.removedMember != null} joinedAt=${event.removedMember?.joinedAt} '
+      'descBefore="$before" descAfter="${embed.description}"',
+    );
+  }
+
+  bool _messageMatchesUser(Message message, Snowflake userId) {
+    try {
+      if (message.embeds.isEmpty) return false;
+      final fields = message.embeds.first.fields ?? const [];
+      final idField = fields.firstWhereOrNull((f) => f.name == idFieldName);
+      final value = idField?.value;
+      return value != null && value.contains(userId.toString());
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<TextChannel?> _getChannelIfFeatureEnabled(Snowflake guildId) async {
