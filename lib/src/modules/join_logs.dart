@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
@@ -93,7 +95,7 @@ class JoinLogsModule implements RequiresInitialization {
       _logger.fine("Cannot obtain or update message");
     }
 
-    Future.microtask(() => _joinLogsRepository.removeOldLogs());
+    scheduleMicrotask(() => _joinLogsRepository.removeOldLogs());
   }
 
   Future<TextChannel?> _getChannelIfFeatureEnabled(Snowflake guildId) async {
