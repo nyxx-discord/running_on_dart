@@ -1,4 +1,7 @@
 ## 4.19.0
+- Fix join logs handling
+
+## 4.19.0
 - Improve join logs handling
 
 ## 4.18.1
