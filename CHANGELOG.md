@@ -1,3 +1,6 @@
+## 4.19.0
+- Improve join logs handling
+
 ## 4.18.1
 - Fix frontend guilds endpoint bug
 
