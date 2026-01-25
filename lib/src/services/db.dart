@@ -203,6 +203,17 @@ class DatabaseService implements RequiresInitialization {
           )
           ..enqueueMigration("2.19", """
         UPDATE feature_settings SET additional_data = CONCAT('{"value":"', additional_data, '"}') WHERE name = 'join_logs' OR name = 'mod_logs';
+      """)
+          ..enqueueMigration("2.20", """
+        CREATE TABLE join_logs (
+          id SERIAL PRIMARY KEY,
+          user_id VARCHAR NOT NULL,
+          message_id VARCHAR NOT NULL,
+          guild_id VARCHAR NOT NULL,
+          created_at TIMESTAMP NOT NULL
+        );
+        CREATE UNIQUE INDEX idx_join_logs_unique_user ON join_logs(user_id, guild_id);
+        CREATE UNIQUE INDEX idx_join_logs_unique_message ON join_logs(message_id);
       """);
 
     await migrator.runMigrations();

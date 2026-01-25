@@ -1,10 +1,12 @@
+import 'dart:async';
+
 import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
-import 'package:collection/collection.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
 import 'package:running_on_dart/src/repository/feature_settings.dart';
 import 'package:running_on_dart/src/modules/feature_settings.dart';
+import 'package:running_on_dart/src/repository/join_logs.dart';
 import 'package:running_on_dart/src/settings.dart';
 import 'package:running_on_dart/src/init.dart';
 
@@ -15,6 +17,7 @@ class JoinLogsModule implements RequiresInitialization {
   final NyxxGateway _client = Injector.appInstance.get();
   final FeatureSettingsRepository _featureSettingsRepository = Injector.appInstance.get();
   final FeatureSettingsModule _featureSettingsService = Injector.appInstance.get();
+  final JoinLogsRepository _joinLogsRepository = Injector.appInstance.get();
 
   final Logger _logger = Logger('ROD.JoinLogs');
 
@@ -70,31 +73,29 @@ class JoinLogsModule implements RequiresInitialization {
 
     _logger.fine('Trying to update join log message for user ${event.user.id} in channel ${channel.id}');
 
-    final messages = channel.messages
-        .stream(pageSize: 20, order: StreamOrder.mostRecentFirst)
-        .where((message) => message.embeds.isNotEmpty)
-        .where(
-          (message) =>
-              message.embeds.first.fields
-                  ?.firstWhereOrNull((f) => f.name == idFieldName)
-                  ?.value
-                  .contains(event.user.id.toString()) !=
-              null,
-        );
-
-    final message = (await messages.toList()).firstOrNull;
-    if (message == null) {
+    final joinLogEntry = await _joinLogsRepository.findJoinLog(event.user.id, event.guildId);
+    if (joinLogEntry == null) {
       return;
     }
 
-    final embed = message.embeds.first.toEmbedBuilder();
-    if (embed.description?.contains("(Left") ?? true) {
-      return;
+    try {
+      final message = await channel.messages.get(joinLogEntry.messageId);
+
+      _logger.fine('Found message to update: ${message.id} in channel ${channel.id}');
+
+      final embed = message.embeds.first.toEmbedBuilder();
+      if (embed.description?.contains("(Left") ?? true) {
+        return;
+      }
+
+      embed.description = "${embed.description} (Left)";
+
+      message.update(MessageUpdateBuilder(embeds: [embed]));
+    } on Error {
+      _logger.fine("Cannot obtain or update message");
     }
 
-    embed.description = "${embed.description} (Left)";
-
-    message.update(MessageUpdateBuilder(embeds: [embed]));
+    scheduleMicrotask(() => _joinLogsRepository.removeOldLogs());
   }
 
   Future<TextChannel?> _getChannelIfFeatureEnabled(Snowflake guildId) async {
