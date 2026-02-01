@@ -4,6 +4,7 @@ import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
+import 'package:running_on_dart/src/models/join_logs.dart';
 import 'package:running_on_dart/src/repository/feature_settings.dart';
 import 'package:running_on_dart/src/modules/feature_settings.dart';
 import 'package:running_on_dart/src/repository/join_logs.dart';
@@ -58,7 +59,16 @@ class JoinLogsModule implements RequiresInitialization {
       ],
     );
 
-    channel.sendMessage(MessageBuilder(embeds: [embed]));
+    final message = await channel.sendMessage(MessageBuilder(embeds: [embed]));
+
+    _joinLogsRepository.save(
+      JoinLogEntry(
+        userId: event.member.id,
+        guildId: event.guildId,
+        messageId: message.id,
+        createdAt: message.timestamp,
+      ),
+    );
   }
 
   Future<void> _handleMemberRemove(GuildMemberRemoveEvent event) async {
