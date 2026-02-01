@@ -1,3 +1,7 @@
+## 4.20.0
+- Add /minecraft command
+- Fix list enabled settings command
+
 ## 4.19.2
 - Fix join logs handling
 

@@ -9,6 +9,7 @@ export 'src/commands/admin.dart' show admin, poopUserCommand;
 export 'src/commands/jellyfin.dart' show jellyfin;
 export 'src/commands/tag.dart' show tag;
 export 'src/commands/kavita.dart' show kavita;
+export 'src/commands/minecraft.dart' show minecraft;
 
 export 'src/settings.dart';
 export 'src/converter.dart';

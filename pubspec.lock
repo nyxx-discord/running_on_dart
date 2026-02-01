@@ -145,6 +145,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.6"
+  dart_minecraft:
+    dependency: "direct main"
+    description:
+      name: dart_minecraft
+      sha256: "5ca77023fc901ad4e885ef25071579e47d85668c6fb8d5321ef2eeb4dedf30f2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.0"
   dart_style:
     dependency: transitive
     description:
@@ -691,6 +699,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.0"
+  uuid:
+    dependency: transitive
+    description:
+      name: uuid
+      sha256: a11b666489b1954e01d992f3d601b1804a33937b5a8fe677bd26b8a9f96f96e8
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.5.2"
   vm_service:
     dependency: transitive
     description:

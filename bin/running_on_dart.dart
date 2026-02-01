@@ -28,6 +28,7 @@ void main(List<String> args) async {
     ..addCommand(reminderMessageCommand)
     ..addCommand(poopUserCommand)
     ..addCommand(kavita)
+    ..addCommand(minecraft)
     ..addConverter(settingsConverter)
     ..addConverter(manageableTagConverter)
     ..addConverter(durationConverter)

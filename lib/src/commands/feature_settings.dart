@@ -87,6 +87,10 @@ final featureSettings = ChatGroup(
           return MessageBuilder(embeds: [embed]);
         });
 
+        if (messageBuilders.isEmpty) {
+          return context.respond(MessageBuilder(content: "Not settings enabled."));
+        }
+
         final paginator = await pagination.builders(messageBuilders.toList());
 
         return context.respond(paginator);
