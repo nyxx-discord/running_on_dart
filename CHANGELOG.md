@@ -1,3 +1,6 @@
+## 4.20.1
+- Remove generated at timestamp from minecraft ping command
+
 ## 4.20.0
 - Add /minecraft command
 - Fix list enabled settings command

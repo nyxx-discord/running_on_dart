@@ -1,6 +1,5 @@
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
-import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/src/modules/minecraft.dart';
 
 final minecraft = ChatGroup(
@@ -35,7 +34,6 @@ final minecraft = ChatGroup(
               isInline: true,
             ),
           ],
-          footer: EmbedFooterBuilder(text: 'Generated at: ${formatDate(DateTime.now())}'),
         );
 
         return context.respond(
