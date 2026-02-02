@@ -35,7 +35,6 @@ final minecraft = ChatGroup(
               isInline: true,
             ),
           ],
-          footer: EmbedFooterBuilder(text: 'Generated at: ${formatDate(DateTime.now())}'),
         );
 
         return context.respond(
