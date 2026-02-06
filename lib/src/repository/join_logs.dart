@@ -18,10 +18,10 @@ class JoinLogsRepository {
     await _database.executeQuery(
       query,
       parameters: {
-        'user_id': joinLogEntry.userId,
-        'guild_id': joinLogEntry.guildId,
-        'message_id': joinLogEntry.messageId,
-        'created_at': joinLogEntry.createdAt,
+        'user_id': joinLogEntry.userId.toString(),
+        'guild_id': joinLogEntry.guildId.toString(),
+        'message_id': joinLogEntry.messageId.toString(),
+        'created_at': joinLogEntry.createdAt.toUtc(),
       },
     );
   }

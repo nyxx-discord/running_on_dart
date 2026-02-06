@@ -1,3 +1,7 @@
+## 4.20.2
+- Fix join logs database adapter
+- Improve /tags commands stability
+
 ## 4.20.1
 - Remove generated at timestamp from minecraft ping command
 

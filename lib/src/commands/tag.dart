@@ -56,9 +56,12 @@ final tag = ChatGroup(
     ChatCommand(
       'show',
       'Show a tag',
-      id('tag-show', (ChatContext context, @Description('The tag to show') Tag tag) async {
-        await context.respond(MessageBuilder(content: tag.content));
+      id('tag-show', (ChatContext context, @Description('The tag to show') Tag? tag) async {
+        if (tag == null) {
+          return context.respond(MessageBuilder(content: 'Cannot find that tag...'));
+        }
 
+        await context.respond(MessageBuilder(content: tag.content));
         await Injector.appInstance.get<TagModule>().registerTagUsedEvent(TagUsedEvent.fromTag(tag: tag, hidden: false));
       }),
     ),
@@ -74,6 +77,7 @@ final tag = ChatGroup(
         if (randomTag == null) {
           return await context.respond(MessageBuilder(content: 'Cannot fetch random tag...'));
         }
+
         module.registerTagUsedEvent(TagUsedEvent.fromTag(tag: randomTag, hidden: false));
 
         return context.respond(MessageBuilder(content: '`${randomTag.name}`: ${randomTag.content}'));
@@ -94,15 +98,17 @@ final tag = ChatGroup(
       'Enable a tag',
       id('tag-enable', (
         ChatContext context,
-        @UseConverter(manageableTagConverter) @Description('The tag to enable') Tag tag,
+        @UseConverter(manageableTagConverter) @Description('The tag to enable') Tag? tag,
       ) async {
+        if (tag == null) {
+          return context.respond(MessageBuilder(content: 'Cannot find that tag...'));
+        }
+
         if (tag.enabled) {
-          await context.respond(MessageBuilder(content: 'That tag is already enabled!'));
-          return;
+          return context.respond(MessageBuilder(content: 'That tag is already enabled!'));
         }
 
         await Injector.appInstance.get<TagModule>().updateTagEnabled(tag, true);
-
         await context.respond(MessageBuilder(content: 'Successfully enabled tag!'));
       }),
     ),
@@ -111,11 +117,14 @@ final tag = ChatGroup(
       'Disable a tag',
       id('tag-disable', (
         ChatContext context,
-        @UseConverter(manageableTagConverter) @Description('The tag to disable') Tag tag,
+        @UseConverter(manageableTagConverter) @Description('The tag to disable') Tag? tag,
       ) async {
+        if (tag == null) {
+          return context.respond(MessageBuilder(content: 'Cannot find that tag...'));
+        }
+
         if (!tag.enabled) {
-          await context.respond(MessageBuilder(content: 'That tag is already disabled!'));
-          return;
+          return context.respond(MessageBuilder(content: 'That tag is already disabled!'));
         }
 
         await Injector.appInstance.get<TagModule>().updateTagEnabled(tag, false);
@@ -128,10 +137,13 @@ final tag = ChatGroup(
       'Delete an existing tag',
       id('tag-delete', (
         ChatContext context,
-        @UseConverter(manageableTagConverter) @Description('The tag to delete') Tag tag,
+        @UseConverter(manageableTagConverter) @Description('The tag to delete') Tag? tag,
       ) async {
-        await Injector.appInstance.get<TagModule>().deleteTag(tag);
+        if (tag == null) {
+          return context.respond(MessageBuilder(content: 'Cannot find that tag...'));
+        }
 
+        await Injector.appInstance.get<TagModule>().deleteTag(tag);
         await context.respond(MessageBuilder(content: 'Successfully deleted tag!'));
       }),
     ),
