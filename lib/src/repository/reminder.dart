@@ -38,6 +38,13 @@ class ReminderRepository {
     await _database.getConnection().execute(Sql.named('DELETE FROM reminders WHERE id = @id'), parameters: {'id': id});
   }
 
+  Future<void> deleteAllRemindersForUser(String userId) async {
+    await _database.getConnection().execute(
+      Sql.named('DELETE FROM reminders WHERE user_id = @user_id'),
+      parameters: {'user_id': userId},
+    );
+  }
+
   /// Add a reminder to the database.
   Future<Reminder> addReminder(Reminder reminder) async {
     if (reminder.id != null) {

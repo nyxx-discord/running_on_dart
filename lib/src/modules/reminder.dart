@@ -79,15 +79,18 @@ class ReminderModule implements RequiresInitialization {
 
     _logger.fine('Processing reminders for $now');
 
-    final executionResults = reminders
-        .where((reminder) => reminder.triggerAt.isBefore(now))
-        .toList()
-        .map((reminder) => _execute(reminder));
+    final dueReminders = reminders.where((reminder) => reminder.triggerAt.isBefore(now)).toList();
+    if (dueReminders.isEmpty) {
+      return;
+    }
 
-    await Future.wait(executionResults);
+    reminders.removeWhere((r) => dueReminders.contains(r));
+
+    Future.wait(dueReminders.map(_reminderRepository.deleteReminder));
+    Future.wait(dueReminders.map(_executeClaimed));
   }
 
-  Future<void> _execute(Reminder reminder) async {
+  Future<void> _executeClaimed(Reminder reminder) async {
     _logger.fine('Executing reminder ${reminder.id}');
 
     final channel = await _client.channels[reminder.channelId].getOrNull();
@@ -95,8 +98,6 @@ class ReminderModule implements RequiresInitialization {
     if (channel != null && channel is TextChannel) {
       await _sendReminderMessage(reminder, channel);
     }
-
-    await removeReminder(reminder);
   }
 
   Future<void> _sendReminderMessage(Reminder reminder, TextChannel channel) async {
@@ -224,10 +225,14 @@ class ReminderModule implements RequiresInitialization {
 
   /// Delete a reminder from the database and cancel its execution.
   Future<void> removeReminder(Reminder reminder) async {
+    await _reminderRepository.deleteReminder(reminder);
     reminders.remove(reminder);
   }
 
-  void removeAllRemindersForUser(Snowflake userId) => reminders.removeWhere((reminder) => reminder.userId == userId);
+  Future<void> removeAllRemindersForUser(Snowflake userId) async {
+    await _reminderRepository.deleteAllRemindersForUser(userId.toString());
+    reminders.removeWhere((reminder) => reminder.userId == userId);
+  }
 
   /// Get all the reminders for a specific user.
   Iterable<Reminder> getUserReminders(Snowflake userId) => reminders.where((reminder) => reminder.userId == userId);
