@@ -1,3 +1,6 @@
+## 4.20.3
+- Fix reminder execution
+
 ## 4.20.2
 - Fix join logs database adapter
 - Improve /tags commands stability
