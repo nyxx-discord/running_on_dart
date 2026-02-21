@@ -66,7 +66,7 @@ class ModLogsModule implements RequiresInitialization {
     };
 
     final messageBuffer = StringBuffer('$eventTypeName | ${DateTime.now().format(TimestampStyle.longDateTime)}')
-      ..writeln('User: ${targetUser.username} (${targetUser.mention})');
+      ..writeln('\nUser: ${targetUser.username} (${targetUser.mention})');
 
     final additionalMessageData = getAdditionalMessageData(auditLogEntry);
     if (additionalMessageData != null) {
