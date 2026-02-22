@@ -146,7 +146,7 @@ class WebServer {
 
     final authorId = tryParseSnowflake(bodyJson['authorId']);
     if (authorId == null) {
-      return createValidationErrorResponse({if (authorId == null) 'authorId': 'Not a valid snowflake'});
+      return createValidationErrorResponse({'authorId': 'Not a valid snowflake'});
     }
 
     final tag = Tag(
