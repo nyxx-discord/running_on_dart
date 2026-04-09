@@ -71,7 +71,10 @@ final admin = ChatGroup(
     ChatCommand(
       'reason',
       'Update latest mod log entry with reason',
-      id('admin-reason', (ChatContext context, @Description('Reason to set in latest mod log entry') String reason) async {
+      id('admin-reason', (
+        ChatContext context,
+        @Description('Reason to set in latest mod log entry') String reason,
+      ) async {
         final modLogsModule = Injector.appInstance.get<ModLogsModule>();
         final updated = await modLogsModule.updateLatestLogReason(context.guild!.id, reason, context.user.id);
 

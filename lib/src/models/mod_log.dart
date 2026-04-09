@@ -4,7 +4,7 @@ class ModLogEntry {
   final int id;
   final Snowflake guildId;
   final Snowflake messageId;
-  final String actionType;
+  final int actionType;
   final Snowflake targetUserId;
   final Snowflake moderatorUserId;
   final String? reason;
@@ -32,7 +32,7 @@ class ModLogEntry {
       id: row['id'] as int,
       guildId: Snowflake.parse(row['guild_id']),
       messageId: Snowflake.parse(row['message_id']),
-      actionType: row['action_type'] as String,
+      actionType: row['action_type'] as int,
       targetUserId: Snowflake.parse(row['target_user_id']),
       moderatorUserId: Snowflake.parse(row['moderator_user_id']),
       reason: row['reason'] as String?,

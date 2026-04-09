@@ -9,6 +9,16 @@ import 'package:running_on_dart/src/modules/feature_settings.dart';
 import 'package:running_on_dart/src/init.dart';
 import 'package:running_on_dart/src/settings.dart';
 
+String getEventTypeName(AuditLogEvent actionType) {
+  return switch (actionType) {
+    AuditLogEvent.memberKick => 'Kick',
+    AuditLogEvent.memberBanAdd => 'Ban',
+    AuditLogEvent.memberUpdate => 'Timeout Added',
+    AuditLogEvent.memberPrune => 'Members Pruned',
+    _ => throw UnimplementedError(),
+  };
+}
+
 class ModLogsModule implements RequiresInitialization {
   final NyxxGateway _client = Injector.appInstance.get();
   final FeatureSettingsRepository _featureSettingsRepository = Injector.appInstance.get();
@@ -65,7 +75,7 @@ class ModLogsModule implements RequiresInitialization {
         id: 0,
         guildId: event.guildId,
         messageId: message.id,
-        actionType: entry.actionType.name,
+        actionType: entry.actionType.value,
         targetUserId: targetUser.id,
         moderatorUserId: modUser.id,
         reason: entry.reason,
@@ -121,18 +131,12 @@ class ModLogsModule implements RequiresInitialization {
   }
 
   MessageBuilder _prepareMessage(AuditLogEntry auditLogEntry, User targetUser, User modUser) {
-    final eventTypeName = switch (auditLogEntry.actionType) {
-      AuditLogEvent.memberKick => 'Kick',
-      AuditLogEvent.memberBanAdd => 'Ban',
-      AuditLogEvent.memberUpdate => 'Timeout Added',
-      AuditLogEvent.memberPrune => 'Members Pruned',
-      _ => throw UnimplementedError(),
-    };
+    final eventTypeName = getEventTypeName(auditLogEntry.actionType);
 
     final messageBuffer = StringBuffer('$eventTypeName | ${DateTime.now().format(TimestampStyle.longDateTime)}')
       ..writeln('\nUser: ${targetUser.username} (${targetUser.mention})');
 
-    final additionalMessageData = getAdditionalMessageData(auditLogEntry);
+    final additionalMessageData = getAdditionalMessageData(auditLogEntry, eventTypeName);
     if (additionalMessageData != null) {
       messageBuffer.writeln(additionalMessageData);
     }
@@ -146,25 +150,26 @@ class ModLogsModule implements RequiresInitialization {
     return MessageBuilder(content: messageBuffer.toString(), allowedMentions: AllowedMentions.users([targetUser.id]));
   }
 
-  String? getAdditionalMessageData(AuditLogEntry auditLogEntry) {
+  String? getAdditionalMessageData(AuditLogEntry auditLogEntry, String eventTypeName) {
     final extraData = _getExtraData(auditLogEntry);
-    return _buildExtraDataLine(extraData);
+
+    return _buildExtraDataLine(auditLogEntry.actionType, extraData);
   }
 
   bool isMemberTimeoutEntry(AuditLogEntry auditLogEntry, AuditLogChange? auditLogChange) =>
       auditLogEntry.actionType == AuditLogEvent.memberUpdate && auditLogChange?.key == 'communication_disabled_until';
 
-  String? _buildExtraDataLine(String actionType, Map<String, dynamic>? data) {
+  String? _buildExtraDataLine(AuditLogEvent actionType, Map<String, dynamic>? data) {
     if (data == null) {
       return null;
     }
 
-    if (actionType == AuditLogEvent.memberUpdate.name && data['timeout_until'] != null) {
+    if (actionType == AuditLogEvent.memberUpdate && data['timeout_until'] != null) {
       final timeoutUntil = DateTime.parse(data['timeout_until'] as String);
       return "Until: ${timeoutUntil.format(TimestampStyle.relativeTime)}";
     }
 
-    if (actionType == AuditLogEvent.memberPrune.name && data['pruned_count'] != null) {
+    if (actionType == AuditLogEvent.memberPrune && data['pruned_count'] != null) {
       return "Pruned count: ${data['pruned_count']}";
     }
 
@@ -192,11 +197,13 @@ class ModLogsModule implements RequiresInitialization {
   }
 
   MessageBuilder _prepareMessageFromEntry(ModLogEntry entry, User targetUser, User modUser) {
-    final eventTypeName = _eventTypeNameFromString(entry.actionType);
-    final messageBuffer = StringBuffer('$eventTypeName | ${entry.createdAt.format(TimestampStyle.longDateTime)}')
-      ..writeln('\nUser: ${targetUser.username} (${targetUser.mention})');
+    final actionType = AuditLogEvent(entry.actionType);
 
-    final extraLine = _buildExtraDataLine(entry.actionType, entry.additionalData);
+    final messageBuffer = StringBuffer(
+      '${getEventTypeName(actionType)} | ${entry.createdAt.format(TimestampStyle.longDateTime)}',
+    )..writeln('\nUser: ${targetUser.username} (${targetUser.mention})');
+
+    final extraLine = _buildExtraDataLine(actionType, entry.additionalData);
     if (extraLine != null) {
       messageBuffer.writeln(extraLine);
     }
@@ -208,16 +215,6 @@ class ModLogsModule implements RequiresInitialization {
     messageBuffer.writeln('Moderator: ${modUser.username} (${modUser.mention})');
 
     return MessageBuilder(content: messageBuffer.toString(), allowedMentions: AllowedMentions.users([targetUser.id]));
-  }
-
-  String _eventTypeNameFromString(String actionType) {
-    return switch (actionType) {
-      'memberKick' => 'Kick',
-      'memberBanAdd' => 'Ban',
-      'memberUpdate' => 'Timeout Added',
-      'memberPrune' => 'Members Pruned',
-      _ => actionType,
-    };
   }
 
   Future<TextChannel?> _getChannelIfFeatureEnabled(Snowflake guildId) async {

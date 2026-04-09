@@ -220,7 +220,7 @@ class DatabaseService implements RequiresInitialization {
           id SERIAL PRIMARY KEY,
           guild_id VARCHAR NOT NULL,
           message_id VARCHAR NOT NULL,
-          action_type VARCHAR NOT NULL,
+          action_type INT NOT NULL,
           target_user_id VARCHAR NOT NULL,
           moderator_user_id VARCHAR NOT NULL,
           reason TEXT NULL,
