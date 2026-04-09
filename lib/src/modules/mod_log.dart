@@ -2,7 +2,9 @@ import 'package:injector/injector.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/src/models/feature_settings.dart';
+import 'package:running_on_dart/src/models/mod_log.dart';
 import 'package:running_on_dart/src/repository/feature_settings.dart';
+import 'package:running_on_dart/src/repository/mod_logs.dart';
 import 'package:running_on_dart/src/modules/feature_settings.dart';
 import 'package:running_on_dart/src/init.dart';
 import 'package:running_on_dart/src/settings.dart';
@@ -11,6 +13,7 @@ class ModLogsModule implements RequiresInitialization {
   final NyxxGateway _client = Injector.appInstance.get();
   final FeatureSettingsRepository _featureSettingsRepository = Injector.appInstance.get();
   final FeatureSettingsModule _featureSettingsService = Injector.appInstance.get();
+  final ModLogsRepository _modLogsRepository = Injector.appInstance.get();
   final Logger _logger = Logger('ROD.ModLogs');
 
   Map<AuditLogEvent, List<String>> handledEventTypes = {
@@ -53,7 +56,68 @@ class ModLogsModule implements RequiresInitialization {
     final modUser = await _client.users.get(event.entry.userId!);
 
     final messageBuilder = _prepareMessage(entry, targetUser, modUser);
-    channel.sendMessage(messageBuilder);
+    final message = await channel.sendMessage(messageBuilder);
+
+    final extraData = _getExtraData(entry);
+
+    await _modLogsRepository.save(
+      ModLogEntry(
+        id: 0,
+        guildId: event.guildId,
+        messageId: message.id,
+        actionType: entry.actionType.name,
+        targetUserId: targetUser.id,
+        moderatorUserId: modUser.id,
+        reason: entry.reason,
+        createdAt: message.timestamp,
+        updatedAt: null,
+        updatedBy: null,
+        additionalData: extraData,
+      ),
+    );
+  }
+
+  Future<bool> updateLatestLogReason(Snowflake guildId, String reason, Snowflake updatedBy) async {
+    final channel = await _getChannelIfFeatureEnabled(guildId);
+    if (channel == null) {
+      return false;
+    }
+
+    final latestEntry = await _modLogsRepository.findLatestForGuild(guildId);
+    if (latestEntry == null) {
+      return false;
+    }
+
+    try {
+      final message = await channel.messages.get(latestEntry.messageId);
+      final updatedEntry = ModLogEntry(
+        id: latestEntry.id,
+        guildId: latestEntry.guildId,
+        messageId: latestEntry.messageId,
+        actionType: latestEntry.actionType,
+        targetUserId: latestEntry.targetUserId,
+        moderatorUserId: latestEntry.moderatorUserId,
+        reason: reason,
+        createdAt: latestEntry.createdAt,
+        updatedAt: DateTime.now().toUtc(),
+        updatedBy: updatedBy,
+        additionalData: latestEntry.additionalData,
+      );
+
+      final targetUser = await _client.users.get(updatedEntry.targetUserId);
+      final modUser = await _client.users.get(updatedEntry.moderatorUserId);
+      final updatedMessage = _prepareMessageFromEntry(updatedEntry, targetUser, modUser);
+
+      await message.update(
+        MessageUpdateBuilder(content: updatedMessage.content, allowedMentions: updatedMessage.allowedMentions),
+      );
+
+      await _modLogsRepository.updateReason(updatedEntry.id, reason, updatedBy);
+      return true;
+    } catch (error) {
+      _logger.warning('Failed to update latest mod log entry reason', error);
+      return false;
+    }
   }
 
   MessageBuilder _prepareMessage(AuditLogEntry auditLogEntry, User targetUser, User modUser) {
@@ -83,24 +147,99 @@ class ModLogsModule implements RequiresInitialization {
   }
 
   String? getAdditionalMessageData(AuditLogEntry auditLogEntry) {
-    final auditLogChange = auditLogEntry.changes?.first;
-    if (isMemberTimeoutEntry(auditLogEntry, auditLogChange)) {
-      final timeoutUntil = DateTime.parse(auditLogChange!.newValue as String);
+    final extraData = _getExtraData(auditLogEntry);
+    return _buildExtraDataLine(extraData);
+  }
 
+  bool isMemberTimeoutEntry(AuditLogEntry auditLogEntry, AuditLogChange? auditLogChange) =>
+      auditLogEntry.actionType == AuditLogEvent.memberUpdate && auditLogChange?.key == 'communication_disabled_until';
+
+  String? _buildExtraDataLine(String actionType, Map<String, dynamic>? data) {
+    if (data == null) {
+      return null;
+    }
+
+    if (actionType == AuditLogEvent.memberUpdate.name && data['timeout_until'] != null) {
+      final timeoutUntil = DateTime.parse(data['timeout_until'] as String);
       return "Until: ${timeoutUntil.format(TimestampStyle.relativeTime)}";
     }
 
-    if (auditLogEntry.actionType == AuditLogEvent.memberPrune) {
-      final membersRemoved = auditLogEntry.options?.membersRemoved ?? '???';
-
-      return "Pruned count: $membersRemoved";
+    if (actionType == AuditLogEvent.memberPrune.name && data['pruned_count'] != null) {
+      return "Pruned count: ${data['pruned_count']}";
     }
 
     return null;
   }
 
-  bool isMemberTimeoutEntry(AuditLogEntry auditLogEntry, AuditLogChange? auditLogChange) =>
-      auditLogEntry.actionType == AuditLogEvent.memberUpdate && auditLogChange?.key == 'communication_disabled_until';
+  Map<String, dynamic>? _getExtraData(AuditLogEntry auditLogEntry) {
+    final auditLogChange = auditLogEntry.changes?.first;
+    if (isMemberTimeoutEntry(auditLogEntry, auditLogChange)) {
+      final timeoutUntil = DateTime.parse(auditLogChange!.newValue as String);
+      return {'timeout_until': timeoutUntil.toUtc().toIso8601String()};
+    }
+
+    if (auditLogEntry.actionType == AuditLogEvent.memberPrune) {
+      final membersRemoved = auditLogEntry.options?.membersRemoved;
+      final prunedCount = membersRemoved == null ? null : int.tryParse(membersRemoved.toString());
+      if (prunedCount == null) {
+        return null;
+      }
+
+      return {'pruned_count': prunedCount};
+    }
+
+    return null;
+  }
+
+  MessageBuilder _prepareMessageFromEntry(ModLogEntry entry, User targetUser, User modUser) {
+    final eventTypeName = _eventTypeNameFromString(entry.actionType);
+    final messageBuffer = StringBuffer('$eventTypeName | ${entry.createdAt.format(TimestampStyle.longDateTime)}')
+      ..writeln('\nUser: ${targetUser.username} (${targetUser.mention})');
+
+    final extraLine = _buildExtraDataLine(entry.actionType, entry.additionalData);
+    if (extraLine != null) {
+      messageBuffer.writeln(extraLine);
+    }
+
+    if (entry.reason != null) {
+      messageBuffer.writeln('Reason: ${entry.reason}');
+    }
+
+    messageBuffer.writeln('Moderator: ${modUser.username} (${modUser.mention})');
+
+    return MessageBuilder(content: messageBuffer.toString(), allowedMentions: AllowedMentions.users([targetUser.id]));
+  }
+
+  String _eventTypeNameFromString(String actionType) {
+    return switch (actionType) {
+      'memberKick' => 'Kick',
+      'memberBanAdd' => 'Ban',
+      'memberUpdate' => 'Timeout Added',
+      'memberPrune' => 'Members Pruned',
+      _ => actionType,
+    };
+  }
+
+  Future<TextChannel?> _getChannelIfFeatureEnabled(Snowflake guildId) async {
+    final isEnabled = await _isEnabledForGuild(guildId);
+    if (!isEnabled) {
+      return null;
+    }
+
+    final setting = await _featureSettingsRepository.fetchSetting(Setting.modLogs, guildId);
+    if (setting == null) {
+      return null;
+    }
+
+    final channelId = setting.parseData<GenericSnowflakeData>()!.value;
+    final channel = await _client.channels.get(channelId);
+    if (channel is! TextChannel) {
+      _logger.warning('Channel $channelId is not a text channel.');
+      return null;
+    }
+
+    return channel;
+  }
 
   Future<bool> _isEnabledForGuild(Snowflake guildId) async {
     if (!intentFeaturesEnabled) {

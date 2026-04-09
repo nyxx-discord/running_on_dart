@@ -5,6 +5,7 @@ import 'package:nyxx_commands/nyxx_commands.dart';
 import 'package:nyxx_extensions/nyxx_extensions.dart';
 import 'package:running_on_dart/src/checks.dart';
 import 'package:running_on_dart/src/modules/poop_name.dart';
+import 'package:running_on_dart/src/modules/mod_log.dart';
 import 'package:running_on_dart/src/init.dart';
 import 'package:running_on_dart/src/util/util.dart';
 import 'package:running_on_dart/src/services/db.dart';
@@ -65,6 +66,22 @@ final admin = ChatGroup(
         await context.respond(MessageBuilder(content: 'Successfully deleted messages!'));
       }),
       checks: [PermissionsCheck(Permissions.manageMessages)],
+      options: CommandsOptions(defaultResponseLevel: ResponseLevel.private),
+    ),
+    ChatCommand(
+      'reason',
+      'Update latest mod log entry with reason',
+      id('admin-reason', (ChatContext context, @Description('Reason to set in latest mod log entry') String reason) async {
+        final modLogsModule = Injector.appInstance.get<ModLogsModule>();
+        final updated = await modLogsModule.updateLatestLogReason(context.guild!.id, reason, context.user.id);
+
+        final response = updated
+            ? 'Updated latest mod log entry with reason.'
+            : 'Cannot update mod log entry. Ensure mod logs are enabled and a recent entry exists.';
+
+        await context.respond(MessageBuilder(content: response), level: ResponseLevel.private);
+      }),
+      checks: [GuildCheck.all(), PermissionsCheck(Permissions.manageGuild)],
       options: CommandsOptions(defaultResponseLevel: ResponseLevel.private),
     ),
     ChatCommand(
