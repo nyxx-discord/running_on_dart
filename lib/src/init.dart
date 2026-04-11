@@ -17,6 +17,7 @@ import 'package:running_on_dart/src/repository/feature_settings.dart';
 import 'package:running_on_dart/src/repository/jellyfin_config.dart';
 import 'package:running_on_dart/src/repository/join_logs.dart';
 import 'package:running_on_dart/src/repository/kavita.dart';
+import 'package:running_on_dart/src/repository/mod_logs.dart';
 import 'package:running_on_dart/src/repository/reminder.dart';
 import 'package:running_on_dart/src/repository/tag.dart';
 import 'package:running_on_dart/src/services/bot_info.dart';
@@ -47,6 +48,7 @@ Future<void> setupContainer(NyxxGateway client) async {
     ..registerSingleton(() => TagRepository())
     ..registerSingleton(() => KavitaRepository())
     ..registerSingleton(() => JoinLogsRepository())
+    ..registerSingleton(() => ModLogsRepository())
     ..registerSingleton(() => FeatureSettingsModule())
     ..registerSingleton(() => BotStartDuration())
     ..registerSingleton(() => PoopNameModule())
