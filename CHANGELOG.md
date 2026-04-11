@@ -1,3 +1,8 @@
+## 4.21.0
+- Mod Logs database backend (#53)
+- Fix web server error handling
+- Fix "User" formatting
+
 ## 4.20.3
 - Fix reminder execution
 
