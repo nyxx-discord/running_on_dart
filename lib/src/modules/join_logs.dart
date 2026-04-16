@@ -35,38 +35,32 @@ class JoinLogsModule implements RequiresInitialization {
     }
 
     _logger.fine('Sending join message for member ${event.member.id} in channel ${channel.id}');
+    final flags = _buildJoinFlags(event.member.user, event.member.id.timestamp);
+    final username = event.member.user?.username ?? event.member.user?.globalName ?? 'Unknown';
 
-    final descriptionBuffer = StringBuffer('**Member joined**');
-    if (DateTime.now().difference(event.member.id.timestamp).inDays < 30) {
-      descriptionBuffer.write(" (New user)");
-    }
-
-    if (event.member.user != null && _isSuspiciousName(event.member.user!)) {
-      descriptionBuffer.write(" (Suspicious)");
-    }
-
-    final embed = EmbedBuilder(
-      description: descriptionBuffer.toString(),
-      author: EmbedAuthorBuilder(name: event.member.user!.username, iconUrl: event.member.user!.avatar.url),
-      fields: [
-        EmbedFieldBuilder(name: idFieldName, value: userMention(event.member.id), isInline: true),
-        EmbedFieldBuilder(name: 'Joined At', value: _formatDateTimeString(event.member.joinedAt), isInline: true),
-        EmbedFieldBuilder(
-          name: 'Account created at',
-          value: _formatDateTimeString(event.member.id.timestamp),
-          isInline: true,
-        ),
-      ],
+    final joinLogEntry = JoinLogEntry(
+      id: 0,
+      userId: event.member.id,
+      username: username,
+      guildId: event.guildId,
+      messageId: null,
+      createdAt: event.member.joinedAt.toUtc(),
+      leftAt: null,
+      flags: flags,
     );
 
-    final message = await channel.sendMessage(MessageBuilder(embeds: [embed]));
+    final message = await channel.sendMessage(MessageBuilder(embeds: [_buildJoinLogEmbed(joinLogEntry)]));
 
-    _joinLogsRepository.save(
+    await _joinLogsRepository.save(
       JoinLogEntry(
-        userId: event.member.id,
-        guildId: event.guildId,
+        id: 0,
+        userId: joinLogEntry.userId,
+        username: joinLogEntry.username,
+        guildId: joinLogEntry.guildId,
         messageId: message.id,
-        createdAt: message.timestamp,
+        createdAt: joinLogEntry.createdAt,
+        leftAt: joinLogEntry.leftAt,
+        flags: joinLogEntry.flags,
       ),
     );
   }
@@ -88,19 +82,32 @@ class JoinLogsModule implements RequiresInitialization {
       return;
     }
 
+    final leftAt = DateTime.now().toUtc();
+    final updatedEntry = JoinLogEntry(
+      id: joinLogEntry.id,
+      userId: joinLogEntry.userId,
+      username: joinLogEntry.username,
+      guildId: joinLogEntry.guildId,
+      messageId: joinLogEntry.messageId,
+      createdAt: joinLogEntry.createdAt,
+      leftAt: leftAt,
+      flags: joinLogEntry.flags,
+    );
+
+    await _joinLogsRepository.updateLeftAtAndFlags(updatedEntry.id, leftAt, updatedEntry.flags);
+
     try {
-      final message = await channel.messages.get(joinLogEntry.messageId);
-
-      _logger.fine('Found message to update: ${message.id} in channel ${channel.id}');
-
-      final embed = message.embeds.first.toEmbedBuilder();
-      if (embed.description?.contains("(Left") ?? true) {
+      if (updatedEntry.messageId == null) {
+        _logger.warning('Join log entry ${updatedEntry.id} has no messageId for guild ${event.guildId}');
         return;
       }
 
-      embed.description = "${embed.description} (Left)";
+      final message = await channel.messages.get(updatedEntry.messageId!);
 
-      message.update(MessageUpdateBuilder(embeds: [embed]));
+      _logger.fine('Found message to update: ${message.id} in channel ${channel.id}');
+
+      final updatedEmbed = _buildJoinLogEmbed(updatedEntry);
+      await message.update(MessageUpdateBuilder(embeds: [updatedEmbed]));
     } on Error {
       _logger.fine("Cannot obtain or update message");
     }
@@ -131,6 +138,62 @@ class JoinLogsModule implements RequiresInitialization {
 
   String _formatDateTimeString(DateTime dateTime) =>
       '${dateTime.format(TimestampStyle.shortDate)} (${dateTime.format(TimestampStyle.relativeTime)})';
+
+  EmbedBuilder _buildJoinLogEmbed(JoinLogEntry entry) {
+    final descriptionBuffer = StringBuffer('**Member joined**');
+    final tags = _buildFlagLabels(entry);
+    if (tags.isNotEmpty) {
+      descriptionBuffer.write(' (${tags.join(', ')})');
+    }
+
+    return EmbedBuilder(
+      description: descriptionBuffer.toString(),
+      author: EmbedAuthorBuilder(name: entry.username),
+      fields: [
+        EmbedFieldBuilder(name: idFieldName, value: userMention(entry.userId), isInline: true),
+        EmbedFieldBuilder(name: 'Joined At', value: _formatDateTimeString(entry.createdAt), isInline: true),
+        EmbedFieldBuilder(
+          name: 'Account created at',
+          value: _formatDateTimeString(entry.userId.timestamp),
+          isInline: true,
+        ),
+        if (entry.leftAt != null)
+          EmbedFieldBuilder(name: 'Left At', value: _formatDateTimeString(entry.leftAt!), isInline: true),
+      ],
+    );
+  }
+
+  int _buildJoinFlags(User? user, DateTime accountCreatedAt) {
+    var flags = JoinLogFlags.none;
+
+    if (DateTime.now().difference(accountCreatedAt).inDays < 30) {
+      flags |= JoinLogFlags.newUser;
+    }
+
+    if (user != null && _isSuspiciousName(user)) {
+      flags |= JoinLogFlags.suspicious;
+    }
+
+    return flags;
+  }
+
+  List<String> _buildFlagLabels(JoinLogEntry entry) {
+    final labels = <String>[];
+
+    if (entry.hasFlag(JoinLogFlags.newUser)) {
+      labels.add('New user');
+    }
+
+    if (entry.hasFlag(JoinLogFlags.suspicious)) {
+      labels.add('Suspicious');
+    }
+
+    if (entry.leftAt != null) {
+      labels.add('Left');
+    }
+
+    return labels;
+  }
 
   bool _isSuspiciousName(User user) {
     if (user.globalName != null && suspiciousNameRegex.hasMatch(user.globalName!)) {

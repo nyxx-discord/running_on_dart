@@ -11,18 +11,31 @@ class JoinLogsRepository {
   Future<void> save(JoinLogEntry joinLogEntry) async {
     final query = InsertQuery('join_logs')
       ..addNamedInsert('user_id')
+      ..addNamedInsert('username')
       ..addNamedInsert('guild_id')
       ..addNamedInsert('message_id')
-      ..addNamedInsert('created_at');
+      ..addNamedInsert('created_at')
+      ..addNamedInsert('left_at')
+      ..addNamedInsert('flags');
 
     await _database.executeQuery(
       query,
       parameters: {
         'user_id': joinLogEntry.userId.toString(),
+        'username': joinLogEntry.username,
         'guild_id': joinLogEntry.guildId.toString(),
-        'message_id': joinLogEntry.messageId.toString(),
+        'message_id': joinLogEntry.messageId?.toString(),
         'created_at': joinLogEntry.createdAt.toUtc(),
+        'left_at': joinLogEntry.leftAt?.toUtc(),
+        'flags': joinLogEntry.flags,
       },
+    );
+  }
+
+  Future<void> updateLeftAtAndFlags(int id, DateTime leftAt, int flags) async {
+    await _database.getConnection().execute(
+      Sql.named('UPDATE join_logs SET left_at = @leftAt, flags = @flags WHERE id = @id'),
+      parameters: {'id': id, 'leftAt': leftAt.toUtc(), 'flags': flags},
     );
   }
 

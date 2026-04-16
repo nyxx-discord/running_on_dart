@@ -231,6 +231,13 @@ class DatabaseService implements RequiresInitialization {
         );
         CREATE INDEX idx_mod_logs_guild_created ON mod_logs(guild_id, created_at DESC);
         CREATE UNIQUE INDEX idx_mod_logs_unique_message ON mod_logs(message_id);
+      """)
+          ..enqueueMigration("2.22", """
+        TRUNCATE TABLE join_logs;
+        ALTER TABLE join_logs ADD COLUMN IF NOT EXISTS username VARCHAR NOT NULL DEFAULT '';
+        ALTER TABLE join_logs ADD COLUMN IF NOT EXISTS left_at TIMESTAMP NULL;
+        ALTER TABLE join_logs ADD COLUMN IF NOT EXISTS flags INT NOT NULL DEFAULT 0;
+        ALTER TABLE join_logs ALTER COLUMN message_id DROP NOT NULL;
       """);
 
     await migrator.runMigrations();
