@@ -1,3 +1,6 @@
+## 4.22.0
+- Implement join logs database backend
+
 ## 4.21.0
 - Mod Logs database backend (#53)
 - Fix web server error handling
