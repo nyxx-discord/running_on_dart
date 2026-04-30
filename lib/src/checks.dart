@@ -8,6 +8,7 @@ import 'package:running_on_dart/src/modules/feature_settings.dart';
 import 'package:running_on_dart/src/settings.dart';
 
 const jellyfinFeatureEnabledCheckName = 'jellyfinFeatureEnabledCheck';
+const minecraftFeatureEnabledCheckName = 'minecraftFeatureEnabledCheck';
 
 final administratorCheck = UserCheck.anyId(adminIds, name: 'Administrator check');
 final administratorGuildCheck = GuildCheck.id(adminGuildId, name: 'Administrator Guild check');
@@ -17,7 +18,7 @@ FutureOr<bool> _checkForSetting(Setting setting, CommandContext context) {
     return true;
   }
 
-  return Injector.appInstance.get<FeatureSettingsModule>().isEnabled(Setting.jellyfin, context.guild!.id);
+  return Injector.appInstance.get<FeatureSettingsModule>().isEnabled(setting, context.guild!.id);
 }
 
 final kavitaJellyfinCheck = Check(
@@ -28,6 +29,11 @@ final kavitaJellyfinCheck = Check(
 final jellyfinFeatureEnabledCheck = Check(
   (CommandContext context) => _checkForSetting(Setting.jellyfin, context),
   name: jellyfinFeatureEnabledCheckName,
+);
+
+final minecraftFeatureEnabledCheck = Check(
+  (CommandContext context) => _checkForSetting(Setting.minecraft, context),
+  name: minecraftFeatureEnabledCheckName,
 );
 
 Future<(bool?, FeatureSetting?)> fetchAndCheckSetting(CommandContext context, Setting settingToCheck) async {

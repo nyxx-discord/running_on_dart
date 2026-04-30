@@ -3,8 +3,6 @@ import 'dart:convert';
 import 'package:nyxx/nyxx.dart';
 import 'package:running_on_dart/src/util/util.dart';
 
-enum DataType { channelMention, json, string }
-
 abstract class SettingData {
   Map<String, dynamic> toJson();
 }
@@ -102,6 +100,55 @@ class BanRelayData implements SettingData {
   }
 }
 
+/// Minecraft server configuration data
+/// Example: {"host":"localhost", "port":25575, "password":"secret", "admin_users":["123456789","987654321"]}
+class MinecraftData implements SettingData {
+  final String host;
+  final int port;
+  final String password;
+  final List<Snowflake> adminUsers;
+
+  MinecraftData({required this.host, required this.port, required this.password, required this.adminUsers});
+
+  factory MinecraftData.fromJson(Map<String, dynamic> raw) {
+    return MinecraftData(
+      host: raw['host'] as String,
+      port: raw['port'] as int,
+      password: raw['password'] as String,
+      adminUsers: (raw['admin_users'] as Iterable).map((e) => Snowflake.parse(e)).toList(),
+    );
+  }
+
+  factory MinecraftData.fromConfiguration(Map<String, dynamic> raw) {
+    return MinecraftData(
+      host: raw['host'] as String,
+      port: int.parse(raw['port']),
+      password: raw['password'] as String,
+      adminUsers: (raw['admin_users'] as String)
+          .split(',')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .map((s) => Snowflake.parse(s))
+          .toList(),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'host': host,
+      'port': port,
+      'password': password,
+      'admin_users': adminUsers.map((e) => e.toString()).toList(),
+    };
+  }
+
+  /// Check if a user is an admin for this Minecraft server
+  bool isAdmin(Snowflake userId) {
+    return adminUsers.contains(userId);
+  }
+}
+
 enum Setting<T extends SettingData> {
   poopName<NoData>(
     'poop_name',
@@ -114,7 +161,8 @@ enum Setting<T extends SettingData> {
   mentions<NoData>('mentions', 'Monitors messages for mention abuse', false),
   kavita<GenericInstanceData>('kavita', 'Allows usage of jellyfin command', true),
   emojiReact<EmojiReactData>('emoji_react', 'React to predefined words with emojis', true),
-  banRelay<BanRelayData>('ban_relay', 'Relay ban from other guilds to this', true);
+  banRelay<BanRelayData>('ban_relay', 'Relay ban from other guilds to this', true),
+  minecraft<MinecraftData>('minecraft', 'Minecraft server RCON integration', true);
 
   /// name of setting
   final String name;
@@ -137,6 +185,7 @@ enum Setting<T extends SettingData> {
           const (GenericInstanceData) => GenericInstanceData.fromJson(raw),
           const (EmojiReactData) => EmojiReactData.fromJson(raw),
           const (BanRelayData) => BanRelayData.fromJson(raw),
+          const (MinecraftData) => MinecraftData.fromJson(raw),
           _ => null,
         }
         as T?;
@@ -150,6 +199,7 @@ enum Setting<T extends SettingData> {
     return switch (T) {
           const (GenericSnowflakeData) || const (GenericInstanceData) || const (EmojiReactData) => parseData(raw),
           const (BanRelayData) => BanRelayData.fromConfiguration(raw),
+          const (MinecraftData) => MinecraftData.fromConfiguration(raw),
           _ => null,
         }
         as T?;
@@ -186,6 +236,20 @@ enum Setting<T extends SettingData> {
           customId: 'unban',
           style: TextInputStyle.short,
           label: "Also unban when unbanned from target guild (yes/no)",
+        ),
+      ],
+      const (MinecraftData) => [
+        TextInputBuilder(
+          customId: 'host',
+          style: TextInputStyle.short,
+          label: "Minecraft server host (e.g., localhost or example.com)",
+        ),
+        TextInputBuilder(customId: 'port', style: TextInputStyle.short, label: "RCON port (default: 25575)"),
+        TextInputBuilder(customId: 'password', style: TextInputStyle.short, label: "RCON password"),
+        TextInputBuilder(
+          customId: 'admin_users',
+          style: TextInputStyle.paragraph,
+          label: "Admin Discord user IDs (comma separated)",
         ),
       ],
       _ => throw Error(),
