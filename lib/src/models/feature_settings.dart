@@ -235,14 +235,14 @@ enum Setting<T extends SettingData> {
         TextInputBuilder(
           customId: 'unban',
           style: TextInputStyle.short,
-          label: "Also unban when unbanned from target guild (yes/no)",
+          label: "Also unban when unbanned (yes/no)",
         ),
       ],
       const (MinecraftData) => [
         TextInputBuilder(
           customId: 'host',
           style: TextInputStyle.short,
-          label: "Minecraft server host (e.g., localhost or example.com)",
+          label: "Server host (e.g., localhost or example.com)",
         ),
         TextInputBuilder(customId: 'port', style: TextInputStyle.short, label: "RCON port (default: 25575)"),
         TextInputBuilder(customId: 'password', style: TextInputStyle.short, label: "RCON password"),
