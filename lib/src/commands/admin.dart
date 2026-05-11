@@ -127,6 +127,68 @@ final admin = ChatGroup(
       }),
       checks: [GuildCheck.all(), PermissionsCheck(Permissions.manageNicknames)],
     ),
+    ChatCommand(
+      'ban',
+      'Ban a user from the guild',
+      id('admin-ban', (
+        ChatContext context,
+        @Description('The user to ban') User user,
+        @Description('The reason for the ban') String reason,
+      ) async {
+        if (context.guild == null) {
+          return context.respond(
+            MessageBuilder(content: 'This command can only be used in a guild.'),
+            level: ResponseLevel.private,
+          );
+        }
+
+        try {
+          await context.guild!.createBan(user.id, auditLogReason: reason);
+          await context.respond(
+            MessageBuilder(content: 'Successfully banned ${user.mention} for: $reason'),
+            level: ResponseLevel.private,
+          );
+        } catch (e) {
+          await context.respond(
+            MessageBuilder(content: 'Failed to ban user: $e'),
+            level: ResponseLevel.private,
+          );
+        }
+      }),
+      checks: [GuildCheck.all(), PermissionsCheck(Permissions.banMembers)],
+      options: CommandsOptions(defaultResponseLevel: ResponseLevel.private),
+    ),
+    ChatCommand(
+      'kick',
+      'Kick a user from the guild',
+      id('admin-kick', (
+        ChatContext context,
+        @Description('The user to kick') User user,
+        @Description('The reason for the kick') String reason,
+      ) async {
+        if (context.guild == null) {
+          return context.respond(
+            MessageBuilder(content: 'This command can only be used in a guild.'),
+            level: ResponseLevel.private,
+          );
+        }
+
+        try {
+          await context.guild!.members.delete(user.id, auditLogReason: reason);
+          await context.respond(
+            MessageBuilder(content: 'Successfully kicked ${user.mention} for: $reason'),
+            level: ResponseLevel.private,
+          );
+        } catch (e) {
+          await context.respond(
+            MessageBuilder(content: 'Failed to kick user: $e'),
+            level: ResponseLevel.private,
+          );
+        }
+      }),
+      checks: [GuildCheck.all(), PermissionsCheck(Permissions.kickMembers)],
+      options: CommandsOptions(defaultResponseLevel: ResponseLevel.private),
+    ),
     ChatGroup(
       "system",
       "System administration commands",
