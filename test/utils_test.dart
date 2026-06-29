@@ -16,14 +16,58 @@ void main() {
   });
 
   group("FormatShortDurationExtension", () {
-    test("Minutes and second", () {
-      final duration = Duration(minutes: 2, seconds: 56);
-      expect(duration.formatShort(), '00:02:56');
+    group("formatShort", () {
+      test("Minutes and second", () {
+        final duration = Duration(minutes: 2, seconds: 56);
+        expect(duration.formatShort(), '00:02:56');
+      });
+
+      test("Hours, minutes and second", () {
+        final duration = Duration(hours: 10, minutes: 2, seconds: 56);
+        expect(duration.formatShort(), '10:02:56');
+      });
     });
 
-    test("Hours, minutes and second", () {
-      final duration = Duration(hours: 10, minutes: 2, seconds: 56);
-      expect(duration.formatShort(), '10:02:56');
+    group("formatShort", () {
+      test('should return empty string for zero duration', () {
+        const duration = Duration.zero;
+        expect(duration.formatReadable(), equals(''));
+      });
+
+      test('should format minutes only (less than an hour)', () {
+        const duration = Duration(minutes: 45);
+        expect(duration.formatReadable(), equals('45 mins'));
+      });
+
+      test('should format hours only when minutes and days are zero', () {
+        const duration = Duration(hours: 5);
+        expect(duration.formatReadable(), equals('5 hours'));
+      });
+
+      test('should format hours and minutes together', () {
+        const duration = Duration(hours: 3, minutes: 15);
+        expect(duration.formatReadable(), equals('3 hours, 15 mins'));
+      });
+
+      test('should include exactly 1 day correctly', () {
+        const duration = Duration(days: 1);
+        expect(duration.formatReadable(), equals('1 days'));
+      });
+
+      test('should properly split days, hours, and minutes', () {
+        const duration = Duration(days: 3, hours: 4, minutes: 20);
+        expect(duration.formatReadable(), equals('3 days, 4 hours, 20 mins'));
+      });
+
+      test('should omit hours if they are 0 but days and minutes exist', () {
+        const duration = Duration(days: 2, minutes: 30);
+        expect(duration.formatReadable(), equals('2 days, 30 mins'));
+      });
+
+      test('should omit minutes if they are 0 but days and hours exist', () {
+        const duration = Duration(days: 2, hours: 5);
+        expect(duration.formatReadable(), equals('2 days, 5 hours'));
+      });
     });
   });
 

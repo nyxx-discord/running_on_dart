@@ -10,6 +10,7 @@ import 'package:running_on_dart/src/modules/feature_settings.dart';
 import 'package:running_on_dart/src/repository/join_logs.dart';
 import 'package:running_on_dart/src/settings.dart';
 import 'package:running_on_dart/src/init.dart';
+import 'package:running_on_dart/src/util/util.dart';
 
 const idFieldName = 'ID';
 final RegExp suspiciousNameRegex = RegExp(r'^[A-Za-z]+[\._][A-Za-z]+_\d+_\d+$');
@@ -146,20 +147,29 @@ class JoinLogsModule implements RequiresInitialization {
       descriptionBuffer.write(' (${tags.join(', ')})');
     }
 
+    final fields = [
+      EmbedFieldBuilder(name: idFieldName, value: userMention(entry.userId), isInline: true),
+      EmbedFieldBuilder(name: 'Joined At', value: _formatDateTimeString(entry.createdAt), isInline: true),
+      EmbedFieldBuilder(
+        name: 'Account created at',
+        value: _formatDateTimeString(entry.userId.timestamp),
+        isInline: true,
+      ),
+    ];
+
+    if (entry.leftAt != null) {
+      fields.add(EmbedFieldBuilder(name: 'Left At', value: _formatDateTimeString(entry.leftAt!), isInline: true));
+
+      final onServerDuration = entry.createdAt.difference(entry.leftAt!);
+      if (onServerDuration.inDays < 7) {
+        fields.add(EmbedFieldBuilder(name: 'On server for', value: onServerDuration.formatReadable(), isInline: true));
+      }
+    }
+
     return EmbedBuilder(
       description: descriptionBuffer.toString(),
       author: EmbedAuthorBuilder(name: entry.username),
-      fields: [
-        EmbedFieldBuilder(name: idFieldName, value: userMention(entry.userId), isInline: true),
-        EmbedFieldBuilder(name: 'Joined At', value: _formatDateTimeString(entry.createdAt), isInline: true),
-        EmbedFieldBuilder(
-          name: 'Account created at',
-          value: _formatDateTimeString(entry.userId.timestamp),
-          isInline: true,
-        ),
-        if (entry.leftAt != null)
-          EmbedFieldBuilder(name: 'Left At', value: _formatDateTimeString(entry.leftAt!), isInline: true),
-      ],
+      fields: fields,
     );
   }
 

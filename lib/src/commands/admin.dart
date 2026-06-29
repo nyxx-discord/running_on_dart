@@ -133,11 +133,14 @@ final admin = ChatGroup(
       id('admin-ban', (
         ChatContext context,
         @Description('The user to ban') User user,
-        @Description('The reason for the ban') String reason,
-        [@Description('Remove messages from x days. Default 3. 0 disables') int deleteMessagesDays = 3]
-      ) async {
+        @Description('The reason for the ban') String reason, [
+        @Description('Remove messages from x days. Default 3. 0 disables') int deleteMessagesDays = 3,
+      ]) async {
         if (deleteMessagesDays > 7 || deleteMessagesDays < 0) {
-          await context.respond(MessageBuilder(content: 'deleteMessagesDays must be between 1 and 7 days. 0 disables feature.'), level: ResponseLevel.private);
+          await context.respond(
+            MessageBuilder(content: 'deleteMessagesDays must be between 1 and 7 days. 0 disables feature.'),
+            level: ResponseLevel.private,
+          );
           return;
         }
 
@@ -153,10 +156,7 @@ final admin = ChatGroup(
             level: ResponseLevel.private,
           );
         } catch (e) {
-          await context.respond(
-            MessageBuilder(content: 'Failed to ban user: $e'),
-            level: ResponseLevel.private,
-          );
+          await context.respond(MessageBuilder(content: 'Failed to ban user: $e'), level: ResponseLevel.private);
         }
       }),
       checks: [GuildCheck.all(), PermissionsCheck(Permissions.banMembers)],
@@ -177,10 +177,7 @@ final admin = ChatGroup(
             level: ResponseLevel.private,
           );
         } catch (e) {
-          await context.respond(
-            MessageBuilder(content: 'Failed to kick user: $e'),
-            level: ResponseLevel.private,
-          );
+          await context.respond(MessageBuilder(content: 'Failed to kick user: $e'), level: ResponseLevel.private);
         }
       }),
       checks: [GuildCheck.all(), PermissionsCheck(Permissions.kickMembers)],

@@ -25,6 +25,19 @@ String getDartPlatform() => Platform.version.split('(').first.trim();
 
 extension FormatShortDurationExtension on Duration {
   String formatShort() => toString().split('.').first.padLeft(8, "0");
+
+  String formatReadable() {
+    final hours = inHours.remainder(24);
+    final minutes = inMinutes.remainder(60);
+
+    final parts = <String>[
+      if (inDays >= 1) '$inDays days',
+      if (hours > 0) '$hours hours',
+      if (minutes > 0) '$minutes mins',
+    ];
+
+    return parts.join(", ");
+  }
 }
 
 extension ToMapExtension<K, V> on Iterable<MapEntry<K, V>> {
