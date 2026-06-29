@@ -134,16 +134,20 @@ final admin = ChatGroup(
         ChatContext context,
         @Description('The user to ban') User user,
         @Description('The reason for the ban') String reason,
+        [@Description('Remove messages from x days. Default 3. 0 disables') int deleteMessagesDays = 3]
       ) async {
-        if (context.guild == null) {
-          return context.respond(
-            MessageBuilder(content: 'This command can only be used in a guild.'),
-            level: ResponseLevel.private,
-          );
+        if (deleteMessagesDays > 7 || deleteMessagesDays < 0) {
+          await context.respond(MessageBuilder(content: 'deleteMessagesDays must be between 1 and 7 days. 0 disables feature.'), level: ResponseLevel.private);
+          return;
+        }
+
+        Duration? deleteMessages;
+        if (deleteMessagesDays > 0) {
+          deleteMessages = Duration(days: deleteMessagesDays);
         }
 
         try {
-          await context.guild!.createBan(user.id, auditLogReason: reason);
+          await context.guild!.createBan(user.id, deleteMessages: deleteMessages, auditLogReason: reason);
           await context.respond(
             MessageBuilder(content: 'Successfully banned ${user.mention} for: $reason'),
             level: ResponseLevel.private,
@@ -166,13 +170,6 @@ final admin = ChatGroup(
         @Description('The user to kick') User user,
         @Description('The reason for the kick') String reason,
       ) async {
-        if (context.guild == null) {
-          return context.respond(
-            MessageBuilder(content: 'This command can only be used in a guild.'),
-            level: ResponseLevel.private,
-          );
-        }
-
         try {
           await context.guild!.members.delete(user.id, auditLogReason: reason);
           await context.respond(
