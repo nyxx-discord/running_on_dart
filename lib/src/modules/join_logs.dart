@@ -12,7 +12,6 @@ import 'package:running_on_dart/src/settings.dart';
 import 'package:running_on_dart/src/init.dart';
 import 'package:running_on_dart/src/util/util.dart';
 
-const idFieldName = 'ID';
 final RegExp suspiciousNameRegex = RegExp(r'^[A-Za-z]+[\._][A-Za-z]+_\d+_\d+$');
 
 class JoinLogsModule implements RequiresInitialization {
@@ -50,7 +49,9 @@ class JoinLogsModule implements RequiresInitialization {
       flags: flags,
     );
 
-    final message = await channel.sendMessage(MessageBuilder(embeds: [_buildJoinLogEmbed(joinLogEntry)]));
+    final message = await channel.sendMessage(
+      MessageBuilder(embeds: [_buildJoinLogEmbed(joinLogEntry, event.member.user)]),
+    );
 
     await _joinLogsRepository.save(
       JoinLogEntry(
@@ -107,7 +108,7 @@ class JoinLogsModule implements RequiresInitialization {
 
       _logger.fine('Found message to update: ${message.id} in channel ${channel.id}');
 
-      final updatedEmbed = _buildJoinLogEmbed(updatedEntry);
+      final updatedEmbed = _buildJoinLogEmbed(updatedEntry, event.user);
       await message.update(MessageUpdateBuilder(embeds: [updatedEmbed]));
     } on Error {
       _logger.fine("Cannot obtain or update message");
@@ -137,10 +138,7 @@ class JoinLogsModule implements RequiresInitialization {
     return channel;
   }
 
-  String _formatDateTimeString(DateTime dateTime) =>
-      '${dateTime.format(TimestampStyle.shortDate)} (${dateTime.format(TimestampStyle.relativeTime)})';
-
-  EmbedBuilder _buildJoinLogEmbed(JoinLogEntry entry) {
+  EmbedBuilder _buildJoinLogEmbed(JoinLogEntry entry, User? user) {
     final descriptionBuffer = StringBuffer('**Member joined**');
     final tags = _buildFlagLabels(entry);
     if (tags.isNotEmpty) {
@@ -149,16 +147,16 @@ class JoinLogsModule implements RequiresInitialization {
 
     final fields = [
       EmbedFieldBuilder(name: idFieldName, value: userMention(entry.userId), isInline: true),
-      EmbedFieldBuilder(name: 'Joined At', value: _formatDateTimeString(entry.createdAt), isInline: true),
+      EmbedFieldBuilder(name: 'Joined At', value: formatDateTimeString(entry.createdAt), isInline: true),
       EmbedFieldBuilder(
         name: 'Account created at',
-        value: _formatDateTimeString(entry.userId.timestamp),
+        value: formatDateTimeString(entry.userId.timestamp),
         isInline: true,
       ),
     ];
 
     if (entry.leftAt != null) {
-      fields.add(EmbedFieldBuilder(name: 'Left At', value: _formatDateTimeString(entry.leftAt!), isInline: true));
+      fields.add(EmbedFieldBuilder(name: 'Left At', value: formatDateTimeString(entry.leftAt!), isInline: true));
 
       final onServerDuration = entry.createdAt.difference(entry.leftAt!);
       if (onServerDuration.inDays < 7) {
@@ -168,7 +166,7 @@ class JoinLogsModule implements RequiresInitialization {
 
     return EmbedBuilder(
       description: descriptionBuffer.toString(),
-      author: EmbedAuthorBuilder(name: entry.username),
+      author: EmbedAuthorBuilder(name: entry.username, iconUrl: user?.avatar.url),
       fields: fields,
     );
   }

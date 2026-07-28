@@ -8,6 +8,7 @@ import 'package:running_on_dart/src/repository/mod_logs.dart';
 import 'package:running_on_dart/src/modules/feature_settings.dart';
 import 'package:running_on_dart/src/init.dart';
 import 'package:running_on_dart/src/settings.dart';
+import 'package:running_on_dart/src/util/util.dart';
 
 String getEventTypeName(AuditLogEvent actionType) {
   return switch (actionType) {
@@ -65,10 +66,17 @@ class ModLogsModule implements RequiresInitialization {
     final targetUser = await _client.users.get(event.entry.targetId!);
     final modUser = await _client.users.get(event.entry.userId!);
 
-    final messageBuilder = _prepareMessage(entry, targetUser, modUser);
-    final message = await channel.sendMessage(messageBuilder);
-
     final extraData = _getExtraData(entry);
+
+    final embed = _buildModLogEmbed(
+      actionType: entry.actionType,
+      createdAt: DateTime.now().toUtc(),
+      reason: entry.reason,
+      additionalData: extraData,
+      targetUser: targetUser,
+      modUser: modUser,
+    );
+    final message = await channel.sendMessage(MessageBuilder(embeds: [embed]));
 
     await _modLogsRepository.save(
       ModLogEntry(
@@ -116,11 +124,16 @@ class ModLogsModule implements RequiresInitialization {
 
       final targetUser = await _client.users.get(updatedEntry.targetUserId);
       final modUser = await _client.users.get(updatedEntry.moderatorUserId);
-      final updatedMessage = _prepareMessageFromEntry(updatedEntry, targetUser, modUser);
-
-      await message.update(
-        MessageUpdateBuilder(content: updatedMessage.content, allowedMentions: updatedMessage.allowedMentions),
+      final updatedEmbed = _buildModLogEmbed(
+        actionType: AuditLogEvent(updatedEntry.actionType),
+        createdAt: updatedEntry.createdAt,
+        reason: updatedEntry.reason,
+        additionalData: updatedEntry.additionalData,
+        targetUser: targetUser,
+        modUser: modUser,
       );
+
+      await message.update(MessageUpdateBuilder(embeds: [updatedEmbed]));
 
       await _modLogsRepository.updateReason(updatedEntry.id, reason, updatedBy);
       return true;
@@ -130,47 +143,49 @@ class ModLogsModule implements RequiresInitialization {
     }
   }
 
-  MessageBuilder _prepareMessage(AuditLogEntry auditLogEntry, User targetUser, User modUser) {
-    final eventTypeName = getEventTypeName(auditLogEntry.actionType);
+  EmbedBuilder _buildModLogEmbed({
+    required AuditLogEvent actionType,
+    required DateTime createdAt,
+    required String? reason,
+    required Map<String, dynamic>? additionalData,
+    required User targetUser,
+    required User modUser,
+  }) {
+    final fields = [
+      EmbedFieldBuilder(name: idFieldName, value: userMention(targetUser.id), isInline: true),
+      EmbedFieldBuilder(name: 'Moderator', value: userMention(modUser.id), isInline: true),
+      EmbedFieldBuilder(name: 'At', value: formatDateTimeString(createdAt), isInline: true),
+    ];
 
-    final messageBuffer = StringBuffer('$eventTypeName | ${DateTime.now().format(TimestampStyle.longDateTime)}')
-      ..writeln('\nUser: ${targetUser.username} (${targetUser.mention})');
-
-    final additionalMessageData = getAdditionalMessageData(auditLogEntry, eventTypeName);
-    if (additionalMessageData != null) {
-      messageBuffer.writeln(additionalMessageData);
+    final extraDataField = _buildExtraDataField(actionType, additionalData);
+    if (extraDataField != null) {
+      fields.add(extraDataField);
     }
 
-    if (auditLogEntry.reason != null) {
-      messageBuffer.writeln('Reason: ${auditLogEntry.reason}');
-    }
+    fields.add(EmbedFieldBuilder(name: 'Reason', value: reason ?? 'No reason provided', isInline: false));
 
-    messageBuffer.writeln('Moderator: ${modUser.username} (${modUser.mention})');
-
-    return MessageBuilder(content: messageBuffer.toString(), allowedMentions: AllowedMentions.users([targetUser.id]));
-  }
-
-  String? getAdditionalMessageData(AuditLogEntry auditLogEntry, String eventTypeName) {
-    final extraData = _getExtraData(auditLogEntry);
-
-    return _buildExtraDataLine(auditLogEntry.actionType, extraData);
+    return EmbedBuilder(
+      description: '**${getEventTypeName(actionType)}**',
+      author: EmbedAuthorBuilder(name: targetUser.username, iconUrl: targetUser.avatar.url),
+      fields: fields,
+    );
   }
 
   bool isMemberTimeoutEntry(AuditLogEntry auditLogEntry, AuditLogChange? auditLogChange) =>
       auditLogEntry.actionType == AuditLogEvent.memberUpdate && auditLogChange?.key == 'communication_disabled_until';
 
-  String? _buildExtraDataLine(AuditLogEvent actionType, Map<String, dynamic>? data) {
+  EmbedFieldBuilder? _buildExtraDataField(AuditLogEvent actionType, Map<String, dynamic>? data) {
     if (data == null) {
       return null;
     }
 
     if (actionType == AuditLogEvent.memberUpdate && data['timeout_until'] != null) {
       final timeoutUntil = DateTime.parse(data['timeout_until'] as String);
-      return "Until: ${timeoutUntil.format(TimestampStyle.relativeTime)}";
+      return EmbedFieldBuilder(name: 'Until', value: timeoutUntil.format(TimestampStyle.relativeTime), isInline: true);
     }
 
     if (actionType == AuditLogEvent.memberPrune && data['pruned_count'] != null) {
-      return "Pruned count: ${data['pruned_count']}";
+      return EmbedFieldBuilder(name: 'Pruned count', value: data['pruned_count'].toString(), isInline: true);
     }
 
     return null;
@@ -194,27 +209,6 @@ class ModLogsModule implements RequiresInitialization {
     }
 
     return null;
-  }
-
-  MessageBuilder _prepareMessageFromEntry(ModLogEntry entry, User targetUser, User modUser) {
-    final actionType = AuditLogEvent(entry.actionType);
-
-    final messageBuffer = StringBuffer(
-      '${getEventTypeName(actionType)} | ${entry.createdAt.format(TimestampStyle.longDateTime)}',
-    )..writeln('\nUser: ${targetUser.username} (${targetUser.mention})');
-
-    final extraLine = _buildExtraDataLine(actionType, entry.additionalData);
-    if (extraLine != null) {
-      messageBuffer.writeln(extraLine);
-    }
-
-    if (entry.reason != null) {
-      messageBuffer.writeln('Reason: ${entry.reason}');
-    }
-
-    messageBuffer.writeln('Moderator: ${modUser.username} (${modUser.mention})');
-
-    return MessageBuilder(content: messageBuffer.toString(), allowedMentions: AllowedMentions.users([targetUser.id]));
   }
 
   Future<TextChannel?> _getChannelIfFeatureEnabled(Snowflake guildId) async {

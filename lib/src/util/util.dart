@@ -5,8 +5,15 @@ import 'package:collection/collection.dart';
 import 'package:human_duration_parser/human_duration_parser.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
+import 'package:nyxx_extensions/nyxx_extensions.dart';
 
 final nonAsciiRegex = RegExp(r'[^\x00-\x7F]');
+
+/// Name of the embed field containing the mention of the user a log entry is about.
+const idFieldName = 'ID';
+
+String formatDateTimeString(DateTime dateTime) =>
+    '${dateTime.format(TimestampStyle.shortDate)} (${dateTime.format(TimestampStyle.relativeTime)})';
 
 final random = Random();
 const _chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
