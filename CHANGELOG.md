@@ -1,3 +1,8 @@
+# 4.23.0
+- Migrate mod logs to embeds
+- Add JoinLog field for duration that user was on server
+- Implement kick and ban commands
+
 ## 4.22.0
 - Implement join logs database backend
 
