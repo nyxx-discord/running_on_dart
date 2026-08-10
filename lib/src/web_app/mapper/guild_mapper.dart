@@ -99,7 +99,7 @@ Future<JsonApiResponse> mapGuildToDetailsData(Guild guild, int channelsLimit, in
                 "name": r.name.toString(),
                 "position": r.position,
                 "isHoisted": r.isHoisted,
-                "color": r.color.toHexString(),
+                "color": r.colors.primary.toHexString(),
                 "icon": r.iconHash,
                 "flags": r.flags.value,
                 "permission": r.permissions.value,

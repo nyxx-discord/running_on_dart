@@ -414,7 +414,7 @@ class JellyfinModuleV2 implements RequiresInitialization {
   @override
   Future<void> init() async {
     final buttonInteractions = _client.onMessageComponentInteraction.where(
-      (event) => event.interaction.data.type == MessageComponentType.button,
+      (event) => event.interaction.data.type == ComponentType.button,
     );
 
     buttonInteractions.listen(_handleButtonInteractionForWizarrRedeemInvitation);
@@ -432,7 +432,8 @@ class JellyfinModuleV2 implements RequiresInitialization {
 
     final currentUserId = event.interaction.user?.id ?? event.interaction.member?.id;
     if (customId.userId != currentUserId) {
-      return event.interaction.respond(MessageBuilder(content: "Invalid interaction"));
+      await event.interaction.respond(MessageBuilder(content: "Invalid interaction"));
+      return;
     }
 
     final config = await getJellyfinConfig(customId.configName, customId.parentId);
@@ -452,14 +453,15 @@ class JellyfinModuleV2 implements RequiresInitialization {
     }
 
     if (customId.userId != event.interaction.user?.id) {
-      return event.interaction.respond(MessageBuilder(content: "Invalid interaction"));
+      await event.interaction.respond(MessageBuilder(content: "Invalid interaction"));
+      return;
     }
 
     final modalComponents = event.interaction.data.components
         .cast<ActionRowComponent>()
         .map((row) => row.components)
         .flattened
-        .cast<TextInputComponent>();
+        .cast<SubmittedTextInputComponent>();
 
     final usernameComponent = modalComponents.firstWhere((component) => component.customId == 'username');
     final passwordComponent = modalComponents.firstWhere((component) => component.customId == 'password');
@@ -500,7 +502,8 @@ class JellyfinModuleV2 implements RequiresInitialization {
 
     final currentUserId = event.interaction.user?.id ?? event.interaction.member?.id;
     if (customId.userId != currentUserId) {
-      return event.interaction.respond(MessageBuilder(content: "Invalid interaction"));
+      await event.interaction.respond(MessageBuilder(content: "Invalid interaction"));
+      return;
     }
 
     final config = await getJellyfinConfig(customId.configName, customId.parentId);
@@ -558,7 +561,8 @@ class JellyfinModuleV2 implements RequiresInitialization {
     }
 
     if (customId.userId != event.interaction.user?.id) {
-      return event.interaction.respond(MessageBuilder(content: "Invalid interaction"));
+      await event.interaction.respond(MessageBuilder(content: "Invalid interaction"));
+      return;
     }
 
     event.interaction.respondModal(
@@ -599,10 +603,13 @@ class JellyfinModuleV2 implements RequiresInitialization {
     final loginResult = await Injector.appInstance.get<JellyfinModuleV2>().login(config, loginCallResult, userId);
 
     if (loginResult) {
-      return interaction.respond(MessageBuilder(content: "Logged in successfully!"), isEphemeral: true);
+      await interaction.respond(MessageBuilder(content: "Logged in successfully!", flags: MessageFlags.ephemeral));
+      return;
     }
 
-    return interaction.respond(MessageBuilder(content: "Cannot login. Contact with bot admin!"), isEphemeral: true);
+    await interaction.respond(
+      MessageBuilder(content: "Cannot login. Contact with bot admin!", flags: MessageFlags.ephemeral),
+    );
   }
 
   Future<void> _handleLoginQuickConnect(
@@ -615,8 +622,10 @@ class JellyfinModuleV2 implements RequiresInitialization {
     final initiationResult = await client.initiateLoginByQuickConnect();
 
     await interaction.respond(
-      MessageBuilder(content: "Quick Connect code: `${initiationResult.code}`. Waiting for confirmation..."),
-      isEphemeral: true,
+      MessageBuilder(
+        content: "Quick Connect code: `${initiationResult.code}`. Waiting for confirmation...",
+        flags: MessageFlags.ephemeral,
+      ),
     );
     Timer.periodic(Duration(seconds: 2), (Timer timer) async {
       if (timer.tick > 30) {

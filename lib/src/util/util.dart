@@ -86,13 +86,13 @@ Duration? getDurationFromStringOrDefault(String? durationString, [Duration? defa
   return parseStringToDuration(durationString) ?? defaultDuration;
 }
 
-Map<String, String?> getModalDataIndexed(List<MessageComponent> components) {
+Map<String, String?> getModalDataIndexed(List<Component> components) {
   return Map.fromEntries(
     components
         .cast<ActionRowComponent>()
         .map((row) => row.components)
         .flattened
-        .cast<TextInputComponent>()
+        .cast<SubmittedTextInputComponent>()
         .map((textInputComponent) => MapEntry<String, String?>(textInputComponent.customId, textInputComponent.value)),
   );
 }
@@ -124,8 +124,10 @@ String boolToString(bool boolValue) => boolValue ? 'true' : 'false';
 extension ModalDataAsMap on ModalContext {
   Map<String, String?> asMap() {
     return interaction.data.components
-        .expand((component) => component is ActionRowComponent ? component.components : [component])
-        .whereType<TextInputComponent>()
+        .expand(
+          (component) => component is ActionRowComponent ? (component as ActionRowComponent).components : [component],
+        )
+        .whereType<SubmittedTextInputComponent>()
         .map((c) => MapEntry(c.customId, c.value))
         .toMap();
   }

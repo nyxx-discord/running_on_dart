@@ -1,3 +1,6 @@
+# 4.24.0
+- Upgrade nyxx
+
 # 4.23.0
 - Migrate mod logs to embeds
 - Add JoinLog field for duration that user was on server

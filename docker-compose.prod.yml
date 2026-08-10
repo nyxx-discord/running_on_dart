@@ -1,7 +1,7 @@
 version: '3.9'
 services:
   running_on_dart:
-    image: ghcr.io/nyxx-discord/running_on_dart:4.23.0
+    image: ghcr.io/nyxx-discord/running_on_dart:4.24.0
     container_name: running_on_dart
     restart: unless-stopped
     ports:

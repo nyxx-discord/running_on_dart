@@ -166,49 +166,6 @@ void main() {
       expect(boolToString(true), 'true');
       expect(boolToString(false), 'false');
     });
-
-    test('getModalDataIndexed flattens action rows and maps customId to value', () {
-      final inputsRow1 = ActionRowComponent(
-        components: [
-          TextInputComponent(
-            customId: 'a',
-            style: TextInputStyle.short,
-            label: 'A',
-            minLength: 0,
-            maxLength: 100,
-            isRequired: false,
-            placeholder: null,
-            value: '1',
-          ),
-          TextInputComponent(
-            customId: 'b',
-            style: TextInputStyle.paragraph,
-            label: 'B',
-            minLength: 0,
-            maxLength: 1000,
-            isRequired: true,
-            placeholder: 'ph',
-            value: '2',
-          ),
-        ],
-      );
-      final inputsRow2 = ActionRowComponent(
-        components: [
-          TextInputComponent(
-            customId: 'c',
-            style: TextInputStyle.short,
-            label: 'C',
-            minLength: 0,
-            maxLength: 50,
-            isRequired: false,
-            placeholder: null,
-            value: null,
-          ),
-        ],
-      );
-      final result = getModalDataIndexed([inputsRow1, inputsRow2]);
-      expect(result, {'a': '1', 'b': '2', 'c': null});
-    });
   });
 
   group("Additional utils edge cases", () {

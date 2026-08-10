@@ -70,7 +70,7 @@ class ReminderModule implements RequiresInitialization {
     Timer.periodic(const Duration(seconds: 1), (t) => _executeScheduled());
 
     _client.onMessageComponentInteraction
-        .where((event) => event.interaction.data.type == MessageComponentType.button)
+        .where((event) => event.interaction.data.type == ComponentType.button)
         .listen(_listenForReminderButtonEvent);
   }
 
@@ -163,14 +163,17 @@ class ReminderModule implements RequiresInitialization {
     final targetUserId = event.interaction.member?.id ?? event.interaction.user?.id;
 
     if (targetUserId == null) {
-      return event.interaction.respond(
-        MessageBuilder(content: "Invalid interaction. Missing user id!"),
-        isEphemeral: true,
+      await event.interaction.respond(
+        MessageBuilder(content: "Invalid interaction. Missing user id!", flags: MessageFlags.ephemeral),
       );
+      return;
     }
 
     if (targetUserId != customId.userId) {
-      return event.interaction.respond(MessageBuilder(content: "You cannot use this button!"), isEphemeral: true);
+      await event.interaction.respond(
+        MessageBuilder(content: "You cannot use this button!", flags: MessageFlags.ephemeral),
+      );
+      return;
     }
 
     event.interaction.message?.update(MessageUpdateBuilder(components: []));
@@ -183,32 +186,36 @@ class ReminderModule implements RequiresInitialization {
     final targetUserId = event.interaction.member?.id ?? event.interaction.user?.id;
 
     if (targetUserId == null) {
-      return event.interaction.respond(
-        MessageBuilder(content: "Invalid interaction. Missing user id!"),
-        isEphemeral: true,
+      await event.interaction.respond(
+        MessageBuilder(content: "Invalid interaction. Missing user id!", flags: MessageFlags.ephemeral),
       );
+      return;
     }
 
     if (targetUserId != customId.userId) {
-      return event.interaction.respond(MessageBuilder(content: "You cannot use this button!"), isEphemeral: true);
+      await event.interaction.respond(
+        MessageBuilder(content: "You cannot use this button!", flags: MessageFlags.ephemeral),
+      );
+      return;
     }
 
     final reminder = await _reminderRepository.fetchReminder(customId.reminderId);
     if (reminder == null) {
-      return event.interaction.respond(
-        MessageBuilder(content: "Given reminder is missing. Cannot extend reminder!"),
-        isEphemeral: true,
+      await event.interaction.respond(
+        MessageBuilder(content: "Given reminder is missing. Cannot extend reminder!", flags: MessageFlags.ephemeral),
       );
+
+      return;
     }
 
     final newReminder = await addReminder(Reminder.fromOther(reminder, DateTime.now().add(customId.duration)));
 
-    return event.interaction.respond(
+    await event.interaction.respond(
       MessageBuilder(
         content:
             "Reminder extended ${customId.duration.inMinutes} minutes. Will trigger at: ${newReminder.triggerAt.format(TimestampStyle.longDateTime)}.",
+        flags: MessageFlags.ephemeral,
       ),
-      isEphemeral: true,
     );
   }
 

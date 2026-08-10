@@ -2,3 +2,7 @@ include: package:lints/recommended.yaml
 
 analyzer:
   exclude: [build/**]
+
+linter:
+  rules:
+    implementation_imports: false
