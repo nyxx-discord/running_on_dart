@@ -18,7 +18,7 @@ dependencies:
   migent:
     git: https://github.com/nyxx-discord/migent.git
   nyxx: ^6.9.1
-  nyxx_commands: ^6.0.3
+  nyxx_commands: ^6.1.0
   nyxx_extensions: ^4.1.0
   postgres: ^3.4.0
   fuzzy: ^0.5.1
