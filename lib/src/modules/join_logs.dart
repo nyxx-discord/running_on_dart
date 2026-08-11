@@ -158,7 +158,7 @@ class JoinLogsModule implements RequiresInitialization {
     if (entry.leftAt != null) {
       fields.add(EmbedFieldBuilder(name: 'Left At', value: formatDateTimeString(entry.leftAt!), isInline: true));
 
-      final onServerDuration = entry.createdAt.difference(entry.leftAt!);
+      final onServerDuration = entry.leftAt!.difference(entry.createdAt);
       if (onServerDuration.inDays < 7) {
         fields.add(EmbedFieldBuilder(name: 'On server for', value: onServerDuration.formatReadable(), isInline: true));
       }

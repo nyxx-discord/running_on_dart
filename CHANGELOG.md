@@ -1,3 +1,6 @@
+# 4.24.1
+- Fix member on server duration calculation
+
 # 4.24.0
 - Upgrade nyxx
 
