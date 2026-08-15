@@ -13,8 +13,12 @@ class ReminderRepository {
       Sql.named('SELECT * FROM reminders WHERE id = @id'),
       parameters: {'id': id},
     );
-    if (result.isEmpty || result.length > 1) {
-      throw Exception("Empty or multiple reminder with same id");
+    if (result.isEmpty) {
+      return null;
+    }
+
+    if (result.length > 1) {
+      throw Exception("Multiple reminders with same id");
     }
 
     return Reminder.fromRow(result.first.toColumnMap());
@@ -43,6 +47,10 @@ class ReminderRepository {
       Sql.named('DELETE FROM reminders WHERE user_id = @user_id'),
       parameters: {'user_id': userId},
     );
+  }
+
+  Future<void> deleteOldReminders() async {
+    await _database.getConnection().execute("DELETE FROM reminders WHERE trigger_date < now() - interval '1 day'");
   }
 
   /// Add a reminder to the database.

@@ -86,8 +86,8 @@ class ReminderModule implements RequiresInitialization {
 
     reminders.removeWhere((r) => dueReminders.contains(r));
 
-    Future.wait(dueReminders.map(_reminderRepository.deleteReminder));
     Future.wait(dueReminders.map(_executeClaimed));
+    _cleanupOldReminders();
   }
 
   Future<void> _executeClaimed(Reminder reminder) async {
@@ -208,6 +208,8 @@ class ReminderModule implements RequiresInitialization {
       return;
     }
 
+    await _reminderRepository.deleteReminder(reminder);
+
     final newReminder = await addReminder(Reminder.fromOther(reminder, DateTime.now().add(customId.duration)));
 
     await event.interaction.respond(
@@ -254,6 +256,10 @@ class ReminderModule implements RequiresInitialization {
     final guildChannelIds = guild.cachedChannels.map((c) => c.id);
 
     return reminders.where((reminder) => guildChannelIds.contains(reminder.channelId));
+  }
+
+  void _cleanupOldReminders() {
+    _reminderRepository.deleteOldReminders();
   }
 
   /// Search reminders for a specific user

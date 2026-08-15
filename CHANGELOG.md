@@ -1,3 +1,6 @@
+# 4.24.3
+- Fix reminder rescheduling handling
+
 # 4.24.2
 - Fix member on server duration calculation
 
