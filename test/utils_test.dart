@@ -29,9 +29,9 @@ void main() {
     });
 
     group("formatShort", () {
-      test('should return empty string for zero duration', () {
+      test('should return fallback for zero duration', () {
         const duration = Duration.zero;
-        expect(duration.formatReadable(), equals(''));
+        expect(duration.formatReadable(), equals('Less than a minute'));
       });
 
       test('should format minutes only (less than an hour)', () {

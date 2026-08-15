@@ -43,7 +43,7 @@ extension FormatShortDurationExtension on Duration {
       if (minutes > 0) '$minutes mins',
     ];
 
-    return parts.join(", ");
+    return parts.isEmpty ? 'Less than a minute' : parts.join(", ");
   }
 }
 
