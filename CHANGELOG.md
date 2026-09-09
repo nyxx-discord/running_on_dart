@@ -1,3 +1,7 @@
+# 4.25.0
+- Add `/admin join-logs` command for join log statistics
+- Track kicked and banned users in join logs
+
 # 4.24.3
 - Fix reminder rescheduling handling
 
