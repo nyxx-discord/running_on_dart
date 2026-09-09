@@ -4,6 +4,8 @@ class JoinLogFlags {
   static const int none = 0;
   static const int newUser = 1 << 0;
   static const int suspicious = 1 << 1;
+  static const int kicked = 1 << 2;
+  static const int banned = 1 << 3;
 }
 
 class JoinLogEntry {
@@ -41,6 +43,35 @@ class JoinLogEntry {
   }
 
   bool hasFlag(int flag) => (flags & flag) != 0;
+}
+
+class JoinLogStats {
+  final int total;
+  final int left;
+  final int newUser;
+  final int suspicious;
+  final int kicked;
+  final int banned;
+
+  const JoinLogStats({
+    required this.total,
+    required this.left,
+    required this.newUser,
+    required this.suspicious,
+    required this.kicked,
+    required this.banned,
+  });
+
+  factory JoinLogStats.fromDatabaseRow(Map<String, dynamic> row) {
+    return JoinLogStats(
+      total: row['total'] as int,
+      left: row['left_count'] as int,
+      newUser: row['new_user_count'] as int,
+      suspicious: row['suspicious_count'] as int,
+      kicked: row['kicked_count'] as int,
+      banned: row['banned_count'] as int,
+    );
+  }
 }
 
 class JellyfinConfigUserData {

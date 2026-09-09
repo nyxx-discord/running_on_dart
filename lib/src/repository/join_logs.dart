@@ -52,9 +52,24 @@ class JoinLogsRepository {
     return JoinLogEntry.fromDatabaseRow(result.first.toColumnMap());
   }
 
-  Future<void> removeOldLogs() async {
-    await _database.getConnection().execute(
-      Sql.named("DELETE FROM join_logs WHERE created_at < NOW() - INTERVAL '7 days'"),
+  Future<JoinLogStats> fetchStats(Snowflake guildId, {int? days}) async {
+    final windowClause = days == null ? '' : ' AND created_at >= NOW() - make_interval(days => @days)';
+
+    final result = await _database.getConnection().execute(
+      Sql.named('''
+        SELECT
+          COUNT(*) AS total,
+          COUNT(*) FILTER (WHERE left_at IS NOT NULL) AS left_count,
+          COUNT(*) FILTER (WHERE flags & 1 != 0) AS new_user_count,
+          COUNT(*) FILTER (WHERE flags & 2 != 0) AS suspicious_count,
+          COUNT(*) FILTER (WHERE flags & 4 != 0) AS kicked_count,
+          COUNT(*) FILTER (WHERE flags & 8 != 0) AS banned_count
+        FROM join_logs
+        WHERE guild_id = @guildId$windowClause
+      '''),
+      parameters: {'guildId': guildId.toString(), if (days != null) 'days': days},
     );
+
+    return JoinLogStats.fromDatabaseRow(result.first.toColumnMap());
   }
 }

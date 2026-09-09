@@ -26,6 +26,8 @@ class JoinLogsModule implements RequiresInitialization {
   Future<void> init() async {
     _client.onGuildMemberAdd.listen(_handleMemberAdd);
     _client.onGuildMemberRemove.listen(_handleMemberRemove);
+    _client.onGuildBanAdd.listen(_handleBanAdd);
+    _client.onGuildAuditLogCreate.listen(_handleAuditLogAdd);
   }
 
   Future<void> _handleMemberAdd(GuildMemberAddEvent event) async {
@@ -68,53 +70,78 @@ class JoinLogsModule implements RequiresInitialization {
   }
 
   Future<void> _handleMemberRemove(GuildMemberRemoveEvent event) async {
-    final channel = await _getChannelIfFeatureEnabled(event.guildId);
-    if (channel == null) {
-      return;
-    }
-
     if (event.removedMember != null && DateTime.now().difference(event.removedMember!.joinedAt).inDays > 7) {
       return;
     }
-
-    _logger.fine('Trying to update join log message for user ${event.user.id} in channel ${channel.id}');
 
     final joinLogEntry = await _joinLogsRepository.findJoinLog(event.user.id, event.guildId);
     if (joinLogEntry == null) {
       return;
     }
 
-    final leftAt = DateTime.now().toUtc();
-    final updatedEntry = JoinLogEntry(
-      id: joinLogEntry.id,
-      userId: joinLogEntry.userId,
-      username: joinLogEntry.username,
-      guildId: joinLogEntry.guildId,
-      messageId: joinLogEntry.messageId,
-      createdAt: joinLogEntry.createdAt,
-      leftAt: leftAt,
-      flags: joinLogEntry.flags,
-    );
+    await _finalizeLeave(joinLogEntry);
+  }
 
-    await _joinLogsRepository.updateLeftAtAndFlags(updatedEntry.id, leftAt, updatedEntry.flags);
+  Future<void> _handleBanAdd(GuildBanAddEvent event) async {
+    final joinLogEntry = await _joinLogsRepository.findJoinLog(event.user.id, event.guildId);
+    if (joinLogEntry == null) {
+      return;
+    }
+
+    await _finalizeLeave(joinLogEntry, extraFlag: JoinLogFlags.banned);
+  }
+
+  Future<void> _handleAuditLogAdd(GuildAuditLogCreateEvent event) async {
+    if (event.entry.actionType != AuditLogEvent.memberKick) {
+      return;
+    }
+    final targetId = event.entry.targetId;
+    if (targetId == null) {
+      return;
+    }
+
+    final joinLogEntry = await _joinLogsRepository.findJoinLog(targetId, event.guildId);
+    if (joinLogEntry == null) {
+      return;
+    }
+
+    await _finalizeLeave(joinLogEntry, extraFlag: JoinLogFlags.kicked);
+  }
+
+  Future<void> _finalizeLeave(JoinLogEntry entry, {int extraFlag = JoinLogFlags.none}) async {
+    final channel = await _getChannelIfFeatureEnabled(entry.guildId);
+    if (channel == null) {
+      return;
+    }
+
+    final leftAt = entry.leftAt ?? DateTime.now().toUtc();
+    final flags = entry.flags | extraFlag;
+
+    _logger.fine('Finalizing join log ${entry.id} for user ${entry.userId} in channel ${channel.id}');
+
+    await _joinLogsRepository.updateLeftAtAndFlags(entry.id, leftAt, flags);
+
+    if (entry.messageId == null) {
+      _logger.warning('Join log entry ${entry.id} has no messageId for guild ${entry.guildId}');
+      return;
+    }
 
     try {
-      if (updatedEntry.messageId == null) {
-        _logger.warning('Join log entry ${updatedEntry.id} has no messageId for guild ${event.guildId}');
-        return;
-      }
-
-      final message = await channel.messages.get(updatedEntry.messageId!);
-
-      _logger.fine('Found message to update: ${message.id} in channel ${channel.id}');
-
-      final updatedEmbed = _buildJoinLogEmbed(updatedEntry, event.user);
-      await message.update(MessageUpdateBuilder(embeds: [updatedEmbed]));
+      final message = await channel.messages.get(entry.messageId!);
+      final updatedEntry = JoinLogEntry(
+        id: entry.id,
+        userId: entry.userId,
+        username: entry.username,
+        guildId: entry.guildId,
+        messageId: entry.messageId,
+        createdAt: entry.createdAt,
+        leftAt: leftAt,
+        flags: flags,
+      );
+      await message.update(MessageUpdateBuilder(embeds: [_buildJoinLogEmbed(updatedEntry, null)]));
     } on Error {
       _logger.fine("Cannot obtain or update message");
     }
-
-    scheduleMicrotask(() => _joinLogsRepository.removeOldLogs());
   }
 
   Future<TextChannel?> _getChannelIfFeatureEnabled(Snowflake guildId) async {
@@ -194,6 +221,14 @@ class JoinLogsModule implements RequiresInitialization {
 
     if (entry.hasFlag(JoinLogFlags.suspicious)) {
       labels.add('Suspicious');
+    }
+
+    if (entry.hasFlag(JoinLogFlags.kicked)) {
+      labels.add('Kicked');
+    }
+
+    if (entry.hasFlag(JoinLogFlags.banned)) {
+      labels.add('Banned');
     }
 
     if (entry.leftAt != null) {

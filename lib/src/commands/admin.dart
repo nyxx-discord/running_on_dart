@@ -7,6 +7,7 @@ import 'package:running_on_dart/src/checks.dart';
 import 'package:running_on_dart/src/modules/poop_name.dart';
 import 'package:running_on_dart/src/modules/mod_log.dart';
 import 'package:running_on_dart/src/init.dart';
+import 'package:running_on_dart/src/repository/join_logs.dart';
 import 'package:running_on_dart/src/util/util.dart';
 import 'package:running_on_dart/src/services/db.dart';
 import 'package:running_on_dart/src/util/sql_result_formatter.dart';
@@ -83,6 +84,45 @@ final admin = ChatGroup(
             : 'Cannot update mod log entry. Ensure mod logs are enabled and a recent entry exists.';
 
         await context.respond(MessageBuilder(content: response), level: ResponseLevel.private);
+      }),
+      checks: [GuildCheck.all(), PermissionsCheck(Permissions.manageGuild)],
+      options: CommandsOptions(defaultResponseLevel: ResponseLevel.private),
+    ),
+    ChatCommand(
+      'join-logs',
+      'Show join log statistics for this guild',
+      id('admin-join-logs', (
+        ChatContext context, [
+        @Choices({'7 days': 7, '14 days': 14, '30 days': 30})
+        @Description('Time window in days. Omit for all time.')
+        int? days,
+      ]) async {
+        final stats = await Injector.appInstance.get<JoinLogsRepository>().fetchStats(context.guild!.id, days: days);
+
+        if (stats.total == 0) {
+          return context.respond(
+            MessageBuilder(
+              content: days == null
+                  ? 'No join logs recorded for this guild yet.'
+                  : 'No join logs recorded for this guild in the last $days days.',
+            ),
+          );
+        }
+
+        String pct(int n) => '${(n * 100 / stats.total).toStringAsFixed(1)}%';
+
+        final scope = days == null ? 'this guild' : 'this guild (last $days days)';
+        final summary = StringBuffer()
+          ..writeln('**Join logs for $scope**')
+          ..writeln('Joined total: ${stats.total}')
+          ..writeln('Left: ${stats.left} (${pct(stats.left)})')
+          ..writeln()
+          ..writeln('New users: ${stats.newUser} (${pct(stats.newUser)})')
+          ..writeln('Suspicious: ${stats.suspicious} (${pct(stats.suspicious)})')
+          ..writeln('Kicked: ${stats.kicked} (${pct(stats.kicked)})')
+          ..writeln('Banned: ${stats.banned} (${pct(stats.banned)})');
+
+        await context.respond(MessageBuilder(content: summary.toString()));
       }),
       checks: [GuildCheck.all(), PermissionsCheck(Permissions.manageGuild)],
       options: CommandsOptions(defaultResponseLevel: ResponseLevel.private),
